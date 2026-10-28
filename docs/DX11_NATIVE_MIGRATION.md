@@ -24,7 +24,7 @@ remain open; no migration gate is waived by those measurements.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; VS identities, selected real-capture meshes and native UI exports tested on three adapters; full parity matrix pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS jobs, sessions, UI and VS index overrides are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad traces complete on three adapters; fragment qualification, full typed-format/precision coverage, public PS sessions and source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS and explicit private-primitive PS jobs, sessions and UI are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad jobs complete on three adapters; original fragment qualification, full typed-format/precision coverage, unscoped PS selection and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -1153,3 +1153,18 @@ nine real CLI jobs pass independent validation, with 90 corrupted results reject
 See `research/DX11_NATIVE_DRAW_HISTORY_JOBS.md` for exact scope, measured time and
 peak memory, module-snapshot limits and reproduction. Complete fragment/debugger
 parity, GUI cutover and P1/P7/P8 acceptance remain open.
+
+## Private primitive PS debug jobs and sessions continuation
+
+`analyze debug-pixel --debug-scope private-primitive` now exports a reversible
+quad journal from measured before-primitive inputs, with mutable resource copies
+isolated from subsequent history observations. Verified native sessions and the
+`Native execution` panel accept this explicit scope and preserve unknown original
+fragment eligibility. The dispatcher also restores required before-work state
+preparation for existing VS/CS jobs. Seven affected suites pass 214 Qt checks;
+18 owned jobs and nine real jobs pass independent validation, with 189 corrupted
+results rejected and all 27 archives successfully reloaded and re-exported.
+See `research/DX11_NATIVE_PIXEL_DEBUG_JOBS.md` for retained failures, expensive
+large-journal audits, performance measurements and reproduction. This does not
+close original fragment selection, complete history/debugger parity, GPA engine
+recovery or P7/P8 dependency-removal acceptance.

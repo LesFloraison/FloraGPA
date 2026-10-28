@@ -1,0 +1,3189 @@
+{
+  "schema": 1,
+  "scope": "explicit_private_primitive_pixel_debug_jobs_and_sessions",
+  "implementation_commit": "417f747263aa6f17cfca13db753505f6f6dff031",
+  "original_fragment_debugging_complete": false,
+  "renderdoc_removed": false,
+  "standalone_release_accepted": false,
+  "qt_checks": 214,
+  "suites": [
+    {
+      "name": "FloraNativePixelDebugTests",
+      "passed": 22,
+      "elapsed_ms": 19694,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativePixelDebugTests.txt",
+        "bytes": 1523,
+        "sha256": "2134dd878e5905483c1f0174836cd937fba2c87dcac20cf93dcd20ad7366bce3"
+      }
+    },
+    {
+      "name": "FloraNativeDebugSessionTests",
+      "passed": 50,
+      "elapsed_ms": 1191,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDebugSessionTests.txt",
+        "bytes": 3496,
+        "sha256": "67cf2e8f0e359c231cc91a56e3df890a47771f58c3cba74f8fb494b95f7cb881"
+      }
+    },
+    {
+      "name": "FloraDxbcPixelTraceTests",
+      "passed": 24,
+      "elapsed_ms": 388,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-verified-FloraDxbcPixelTraceTests.txt",
+        "bytes": 1527,
+        "sha256": "7f00298a8d87e2aee39ea5d8571e1e957a9c7e838ce4c085ab2b18202ab4e913"
+      }
+    },
+    {
+      "name": "FloraNativeAnalysisTests",
+      "passed": 46,
+      "elapsed_ms": 17497,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeAnalysisTests.txt",
+        "bytes": 2952,
+        "sha256": "ad1c77a5b8f41f71aa741c64dc0d97a4ec8d08119eb45b90904c64d178dc0d69"
+      }
+    },
+    {
+      "name": "FloraNativeDrawHistoryJobsTests",
+      "passed": 20,
+      "elapsed_ms": 13525,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDrawHistoryJobsTests.txt",
+        "bytes": 1556,
+        "sha256": "3e403ae3daf7a9e9ccaab244ed84e277e7a09148dc01d692d66c8289e4bb6aac"
+      }
+    },
+    {
+      "name": "FloraNativeExecutionDebugUiTests",
+      "passed": 17,
+      "elapsed_ms": 24644,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeExecutionDebugUiTests.txt",
+        "bytes": 1678,
+        "sha256": "f46d79ba32b7a2afa1afa002c8dc218881de6615b8aeee964d2f6277ede1de76"
+      }
+    },
+    {
+      "name": "FloraNativeReplayMeshUiTests",
+      "passed": 35,
+      "elapsed_ms": 7103,
+      "log": {
+        "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeReplayMeshUiTests.txt",
+        "bytes": 2772,
+        "sha256": "810c2cd098dab2bef859a2d40f2af7b0d81c1592efcfdc15d65b3330d7f836fd"
+      }
+    }
+  ],
+  "owned_jobs": 18,
+  "real_jobs": 9,
+  "cpp_metadata_negative_controls": 108,
+  "python_negative_controls": 189,
+  "archives_reloaded": 27,
+  "module_audit_scope": "worker_loaded_modules_at_completion",
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/make-pixel-debug-ledger.py",
+      "bytes": 4192,
+      "sha256": "df9697dedf0592973c2a7087beb4d21f0c64f564f13b2543b1c8b4d3814ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-archives-final.txt",
+      "bytes": 425,
+      "sha256": "728c72a05323a254e0b5f6e031ee36e16c1bfc9db7095c72b94698c99bb4f2d0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-archives-first.txt",
+      "bytes": 423,
+      "sha256": "2aa07f6a405bf14d5ab5ad574e0007f8fa704150116565dc9303b03be788755a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraDxbcPixelTraceTests.exe",
+      "bytes": 1347584,
+      "sha256": "885055e3c5226b471c75c8ae5485133de1f081982c0425af74d4440e2d67db3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 927232,
+      "sha256": "56e1eec928653a515acb1b1ee28b34d899b0bfbb8c8a5aab520cccc3e8570bf2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraGPA.Cli.exe",
+      "bytes": 6014976,
+      "sha256": "acb53af949a58e622623de1a07c970895124f0242d03fba56d96c0eca26d4368"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraGPA.exe",
+      "bytes": 5127168,
+      "sha256": "74ea4b4f85a05046df43b68a3fa9599b85ec7a34ead7c20ec6c4b32515818029"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraGPA.Worker.exe",
+      "bytes": 6014976,
+      "sha256": "acb53af949a58e622623de1a07c970895124f0242d03fba56d96c0eca26d4368"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1517568,
+      "sha256": "daa6fa35fe5d7e34ba49d3debdb8f5e8f3b88d2fe0e72e48920013ed7a9f9cbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativeDebugSessionProbe.exe",
+      "bytes": 1157632,
+      "sha256": "3b50a0b2012cce9c12bafb1be658d9bb9b5e68a625e142c80b5d7f7d0bdd262c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativeDebugSessionTests.exe",
+      "bytes": 5517312,
+      "sha256": "e9de1a05b52c78dd80bc8be9eac142ea50912a49aae96c6834046d8c8c6b18d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativeDrawHistoryJobsTests.exe",
+      "bytes": 1231872,
+      "sha256": "553f23a58edace0d5fba8ca4ec8c8632692fa1a21bd5b61a0fc545fdb1b4b3fb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativeExecutionDebugUiTests.exe",
+      "bytes": 5565440,
+      "sha256": "028e1a6a163a4868bd84f7f1fc1456660c4834badfc62ec2df9286dd19320563"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-binaries/FloraNativePixelDebugTests.exe",
+      "bytes": 1976832,
+      "sha256": "33e69359d96820eb976c98c178522697554d6034d9e159e1e8d106c06d1dab27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-drivers.json",
+      "bytes": 362,
+      "sha256": "0d773077810c4fdabbb094a8e99a8dec28bfde039fcbc37b70b68119b6a40b66"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeExecutionDebugUiTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeExecutionDebugUiTests.txt",
+      "bytes": 1678,
+      "sha256": "f46d79ba32b7a2afa1afa002c8dc218881de6615b8aeee964d2f6277ede1de76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeReplayMeshUiTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-FloraNativeReplayMeshUiTests.txt",
+      "bytes": 2772,
+      "sha256": "810c2cd098dab2bef859a2d40f2af7b0d81c1592efcfdc15d65b3330d7f836fd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-ui-binaries/FloraGPA.exe",
+      "bytes": 5127168,
+      "sha256": "e92826fb98740185221d5a9642016c688260a50725c04aa3d5303a326f210030"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-ui-binaries/FloraNativeExecutionDebugUiTests.exe",
+      "bytes": 5567488,
+      "sha256": "c9be72ea5d146b0ce8f2c9c400a786fe215e0cddb00ee50b381b3d95c9f0c0a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-final-ui-binaries/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5223424,
+      "sha256": "7cdb69568446ffdd0e2db199b379aabe1e51677196c52ce3d2ebc5f51b46e88a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/debug.json",
+      "bytes": 100811,
+      "sha256": "f9bae544247c02391a46987dcb516f269c8869dc9ad1f37b80edac1de0041512"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/job.json",
+      "bytes": 849,
+      "sha256": "e86d4b99efd6c0f571ae0d08a81d092118225772cb252bfaa8642dbfc05be3f0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/result.json",
+      "bytes": 114406,
+      "sha256": "a9836d3a4e740175bbf48d08f9c4796b8a43bac29a868ddca28608a17bc1edd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/trace.jsonl",
+      "bytes": 98838,
+      "sha256": "6a7c13123ec3a8d7077b3574e699946c7853a3afde3fbe46c4f942e73a541f12"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/debug.json",
+      "bytes": 134387,
+      "sha256": "82779673d42685ffbb50b290d90b0ef83fc157e5a5bc3d264c35b487192e65d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/job.json",
+      "bytes": 849,
+      "sha256": "b86bc9f26b826012149d5a879b550a420d9295d39c4bdf6eec2bdaaf7fc8bb6c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/result.json",
+      "bytes": 149638,
+      "sha256": "3fda70683d0c67183bd930a12603fe8a0aff418297cdcba0be694d1f2dd4d616"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/trace.jsonl",
+      "bytes": 106151,
+      "sha256": "fee668d53dcb7676f3a6056caa939fa22f56e7f3c6edd35a47250aa1f133d042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/debug.json",
+      "bytes": 100805,
+      "sha256": "e18301d11b8c9f71700371b1fc54ba4f254175bb638b00a219d8ee1a9eaca920"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/job.json",
+      "bytes": 849,
+      "sha256": "eb683aa9f2278caf5a529f90d072c74d7c293927304582f475253230e0a6dc20"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/result.json",
+      "bytes": 114484,
+      "sha256": "1b0b09a397032e5b4aabe37712f05d6303df8b31d70554a5144a9ecf7c369007"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/trace.jsonl",
+      "bytes": 103608,
+      "sha256": "3476ecded68373b4974c11b9aaebce15683cafda110fbf7b8ae2fa9de309a4a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/debug.json",
+      "bytes": 134348,
+      "sha256": "71a2924970507fb3882b618c616b0b600e1d036d0f6249cf6e414db6f219f794"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/job.json",
+      "bytes": 866,
+      "sha256": "aff466074ee6caa3fb0a31679b1bdbd7dd13b39519bc7220892f6f7c456955da"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/result.json",
+      "bytes": 149699,
+      "sha256": "6838928d6fc0112228c40855c93aa661c51cf43542a830900dbe1fce1df0d97e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/trace.jsonl",
+      "bytes": 106113,
+      "sha256": "fb8427569663f9a386a6fb7b681b5bdd6dfea3d4705d0003facbc8f1b9f42a5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/debug.json",
+      "bytes": 100812,
+      "sha256": "21f10669ac880162c023c334ad11c95fea42a262524a54cb961ad610a11e0196"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/job.json",
+      "bytes": 849,
+      "sha256": "8f4ff06b0ce3ef3e9eb2c8c3cb5f000a15bc24d3a35abe71ef972fa823eca9c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/result.json",
+      "bytes": 130154,
+      "sha256": "349c5afc50bf16f9756c376447603e7d1fa8ed014378f465af78c73668289834"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "e520dbfbd52886b03d6abcc93b26747ccba6dd5ac0f89e37452a84359bb0a814"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/trace.jsonl",
+      "bytes": 104570,
+      "sha256": "7959fe2ae9f11b13cd46d66838a0d9cd2d0a00121bebbc252e694eb1fb6acd61"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/debug.json",
+      "bytes": 100815,
+      "sha256": "a8ae9d14ea2f8a866142c29c0f69e185b439c6f8508ffff79fc222cc08975ee6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/job.json",
+      "bytes": 849,
+      "sha256": "f6de87a072a1fdcd01b71b263c58e4682d819c6f82c6463e00bd6d0dc9f49b57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/result.json",
+      "bytes": 114783,
+      "sha256": "a3e4fdadc5bf79fe7d434c83b71515774dd9f20901d18ad50697b99887a7604a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/trace.jsonl",
+      "bytes": 101113,
+      "sha256": "8c5f7cfccec3a6e21dbcd96f78b9a51bab642ad96fbd16216244d8e673c8086f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/0-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/debug.json",
+      "bytes": 100856,
+      "sha256": "f7c447306a3749cfde009a2a685496ba20615afcef59e72709889a79ce1c42dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/job.json",
+      "bytes": 856,
+      "sha256": "b48f82fecf5bd4cc289d35afb9169c596ec09cda465215181b15f50cd253defd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/result.json",
+      "bytes": 114866,
+      "sha256": "b6e5d6a1d2e289ae0185c723513c3e5e4acc178129f7cedd347a2366cc8c05b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/trace.jsonl",
+      "bytes": 98849,
+      "sha256": "dee23e4a6617c6004715dcaffc8fc5a40395b85ab0d1f85b08d4a06b83ba74d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/debug.json",
+      "bytes": 134448,
+      "sha256": "f667207180ef624ca004f4a9938abe62e66b7ed4c4247d33b3b4a1a6dcb72f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/job.json",
+      "bytes": 856,
+      "sha256": "83870e3050fcdadf7340f0163023ba8be198fee2a0e152ac4cdcdb2ee1544dfe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/result.json",
+      "bytes": 150115,
+      "sha256": "de32f0ef488bf6b0ad107d881d5f40aa1afe8849d906cadb37320adb2a25b1bd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/trace.jsonl",
+      "bytes": 106166,
+      "sha256": "64a6616d671ab1e8665138f1a433c29a1e94f74438dab0fa1d0dc2d00f452ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/debug.json",
+      "bytes": 100850,
+      "sha256": "2f927c665fda2b828daf2ef0e98aa646fc19a635e7b09e40e0a4325ba1ae7c32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/job.json",
+      "bytes": 856,
+      "sha256": "eea223d371f2aee92a5ff07bb23546401b9519f66cfa800f3a58cc20b5c6e2e7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/result.json",
+      "bytes": 114944,
+      "sha256": "6dbf2e8e8d6038ec0bcef40fedf8e6872ca146cb463cc0583683fa3febf1c355"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/trace.jsonl",
+      "bytes": 103619,
+      "sha256": "0c926df321781a6c1c83c3312d96d706d3317e773e17123331f997752a3f325e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/debug.json",
+      "bytes": 134416,
+      "sha256": "745da562529eea347e55e7b8eb81bb514ce74584355f6de24ea55b300df150c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/job.json",
+      "bytes": 873,
+      "sha256": "cf5479a57cfb101c4f062d195a51de6fb7a73610b551b2f5179ab739dcc1a94c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/result.json",
+      "bytes": 150183,
+      "sha256": "31c1dd0fd5fa800f052983014a57cf901f73121e680814f54ca43b03447d5edf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/trace.jsonl",
+      "bytes": 106129,
+      "sha256": "a6f974b6e5da3c7f359960c1f9775daaebe99f44a0010282a6cbb3f0dc87ea1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/debug.json",
+      "bytes": 100857,
+      "sha256": "e1f9f0351fa340aff6bd119e52739a1f89cd9e9d64d118499f19cc2ce76e7ad2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/job.json",
+      "bytes": 856,
+      "sha256": "145e5d88b021ea2cbbf5de75a00ea26ea61dabea969aeb30a5c8793bf8a9f103"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/result.json",
+      "bytes": 130614,
+      "sha256": "afb2880cf563d959fe39955785be22c54305df221a63a3a91e5779efabe85bc0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "6528d105f54000fe547fc90c739bf47128af0fd39cc3c00a22df8d00639da2f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/trace.jsonl",
+      "bytes": 104581,
+      "sha256": "6027c5a509e708296b5a9e870f1442eb3a8b574e777e08f85e20ac6eb149cb7a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/debug.json",
+      "bytes": 100860,
+      "sha256": "524a4174cb27e2f6054284787091cbf0d43a2c45165c720cd737789cf5586b2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/job.json",
+      "bytes": 856,
+      "sha256": "0d6f37e7aa835ed7f19b97fa18a6290c27cdf7e29f0af3c3299fd1925bea3b57"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/result.json",
+      "bytes": 115243,
+      "sha256": "19e2f303d6018c1ba2f7b6ef5dd8ed3d549310ba97211742391c83931440e7d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/trace.jsonl",
+      "bytes": 101124,
+      "sha256": "21f90ce0e1cabde9fdb2c3587ebf09ebdbc0328874b40f83b1d21318a99250a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/32902-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/debug.json",
+      "bytes": 100843,
+      "sha256": "f33958a317cfaccf7cf8d784b1465218e0b1c6575dccb022daafb3892bf7dd5f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/job.json",
+      "bytes": 855,
+      "sha256": "848f60a72116b982e9f7624cfbf117d752132c82d4a117a8e9cd9c2a59e9f0c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/result.json",
+      "bytes": 115195,
+      "sha256": "961f2a59124a0b1007ae1f90ad81afc6aa0a9073329f4564b7ba0ec346d43745"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/trace.jsonl",
+      "bytes": 98846,
+      "sha256": "9cb858b80521976ff4c020863fbbf546b33d712105c0be45229fffca0557dcf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/debug.json",
+      "bytes": 134431,
+      "sha256": "14faa9e8584c25f91dd8918a3b3d3d12873a27507d4d7906ed64cca5c9e53a3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/job.json",
+      "bytes": 855,
+      "sha256": "f0c84f6adf9f9fc4164660b459bc3cc7b03c4043565580985e87c0c1d9f3dd7f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/result.json",
+      "bytes": 150440,
+      "sha256": "4d45c8851a62c524f4e9ec041368a96f4411947a4f6a44b12910b030d5313bd5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/trace.jsonl",
+      "bytes": 106162,
+      "sha256": "9486508b4d7c1f843cc3cebfcaca3967aa4ce0260ba74d6de8922ea028b2b1cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/debug.json",
+      "bytes": 100837,
+      "sha256": "f62cb734838982e3a9fd4d4ba0603898c24ead30809803c5b9a0c41df221de6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/job.json",
+      "bytes": 855,
+      "sha256": "5019baf257b3ca92c3d76d49203dee786496684d862572ea8bc8a588fceef293"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/result.json",
+      "bytes": 115273,
+      "sha256": "503bf936e246c4d94d2c0836c7172b5bd03b832aad643e18c9d5a83f17f8833e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/trace.jsonl",
+      "bytes": 103616,
+      "sha256": "4629bfd993b5708c17251f99e896066532f81fe88112861883b8f24a5431269b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/debug.json",
+      "bytes": 134400,
+      "sha256": "7570e123c319b2beb741a7b4855208fc5fce313e59583602177dce8dc43300f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/job.json",
+      "bytes": 872,
+      "sha256": "2fa505f3ef28c59ee9d34b2b8252b0b9de466538f4c2d7d6030e87d1a204f634"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/result.json",
+      "bytes": 150509,
+      "sha256": "01cf1e2929f28ebf32cd3a00165fce1c9bc0a1a7c2435aa356233d77c4e7bf6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/trace.jsonl",
+      "bytes": 106125,
+      "sha256": "064994e0137e4f62857b79f5b467b7ee35d40116471537aa139eb0bacb0687ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/debug.json",
+      "bytes": 100844,
+      "sha256": "2b19062c5c49bcb5c522a1a35fb76f643280da48b0df026413ce8b32e9df81f6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/job.json",
+      "bytes": 855,
+      "sha256": "dfcdb5ac52015bb24cd9b6a03dc30177a6c00008eae54b2229c9315c14539174"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/result.json",
+      "bytes": 130943,
+      "sha256": "8353808f91f8f832aad28c28d1d5ddd757aa13bbda27b4dd9f3b15a36d851613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "96e6d40b7554aeac117ba6da712775d1268102e218c312e307ef8309956df6bf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/trace.jsonl",
+      "bytes": 104578,
+      "sha256": "d9844d7e37dc2d467796ef13d34d7b7b9410e9ddb13e406c6677ec77f195b54d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/debug.json",
+      "bytes": 100847,
+      "sha256": "aef14c21278c2b75e199320830f37ce54e019712daf9746ca155aaaf009b1739"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/job.json",
+      "bytes": 855,
+      "sha256": "2bffce75cd90230e3847f13154d5d83561260cd1fe5d1954a2f9c123400ce91a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/result.json",
+      "bytes": 115572,
+      "sha256": "4742acc96197a19a1b2d01f94430d36fffb31f02aa141ce6aeeda8ebc74b5208"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/trace.jsonl",
+      "bytes": 101121,
+      "sha256": "dc46ca5af19a56430f740f88b54b993e2250981bd1b70d8cab2413b2a06c336a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance/4318-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-acceptance.txt",
+      "bytes": 1523,
+      "sha256": "035b0269d26921f0e484a3d64d833e03c3a5f06b2e36db135909370edc55f8de"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-boundary-build.txt",
+      "bytes": 12500,
+      "sha256": "e6de7d849f49fa7e38def0589cb7467cef9bb99a5de60ecb88ddfd84244e44eb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-build.txt",
+      "bytes": 9941,
+      "sha256": "e57ea9802b21d27eff066251e544f337f5182befc6eec0e3e365f20abd224f3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-final-build.txt",
+      "bytes": 12692,
+      "sha256": "cc2cecf9f17a7352386e908b3015322b06bb2cbacfae3d70d9708b344466a481"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/debug.json",
+      "bytes": 100811,
+      "sha256": "f9bae544247c02391a46987dcb516f269c8869dc9ad1f37b80edac1de0041512"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/job.json",
+      "bytes": 849,
+      "sha256": "bc8dc6f0a7a3750b94f7d9084f6a6cad1d7ee5d59037061b719f287ebbda40b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/result.json",
+      "bytes": 114450,
+      "sha256": "63352639f93e224693dd161196b9711d0d9c53f5ec37f40b07b9705623ce088d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/trace.jsonl",
+      "bytes": 98838,
+      "sha256": "6a7c13123ec3a8d7077b3574e699946c7853a3afde3fbe46c4f942e73a541f12"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/debug.json",
+      "bytes": 134387,
+      "sha256": "82779673d42685ffbb50b290d90b0ef83fc157e5a5bc3d264c35b487192e65d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/job.json",
+      "bytes": 849,
+      "sha256": "7f3a51a737666bdfe0c5a224e48311cb833e1a585671cf956a438a64ff42622f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/result.json",
+      "bytes": 149638,
+      "sha256": "e6a70ce7d6ef19375d6e4ece779e82f03c209bb9755e49eeaeb08fa2b5c2d2c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/trace.jsonl",
+      "bytes": 106151,
+      "sha256": "fee668d53dcb7676f3a6056caa939fa22f56e7f3c6edd35a47250aa1f133d042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/debug.json",
+      "bytes": 100805,
+      "sha256": "e18301d11b8c9f71700371b1fc54ba4f254175bb638b00a219d8ee1a9eaca920"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/job.json",
+      "bytes": 849,
+      "sha256": "80b0d0f4e35c8a7ffe4cb30b38f4bd3bfc3dc826e9f488b4909b57600defffbb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/result.json",
+      "bytes": 114484,
+      "sha256": "a894c37dacfd9ade730dcb8ac202f216136e25c992884c13a0ca28daf727853a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/trace.jsonl",
+      "bytes": 103608,
+      "sha256": "3476ecded68373b4974c11b9aaebce15683cafda110fbf7b8ae2fa9de309a4a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/debug.json",
+      "bytes": 134348,
+      "sha256": "71a2924970507fb3882b618c616b0b600e1d036d0f6249cf6e414db6f219f794"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/job.json",
+      "bytes": 866,
+      "sha256": "b5e5a20bb7a812b072ba83002ff80ac369a0ef7fed8dca4593cce467cf5c1a0e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/result.json",
+      "bytes": 149699,
+      "sha256": "893d089cbb10f1515034ee1db3e4e444a010142f46a43e66c7721237c131c075"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/trace.jsonl",
+      "bytes": 106113,
+      "sha256": "fb8427569663f9a386a6fb7b681b5bdd6dfea3d4705d0003facbc8f1b9f42a5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/debug.json",
+      "bytes": 100812,
+      "sha256": "a85358338a37ece43055457329bc42bbf1b2563b54051e80f1b7b06457f1a4fe"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/job.json",
+      "bytes": 849,
+      "sha256": "56ae3eb2b16c7d85f1c30995c0612ed14cbf5bee8466e424f4bfbeeccf053c94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/result.json",
+      "bytes": 130154,
+      "sha256": "4c8aac57f59fe847cb217d1d965625ccaa9b95d68dc330b477adf27111cd8884"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "df318d6ec4be56ae453e6ff4f05bb6ebc22ac7263f9c1eec16acf9e69462697e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/trace.jsonl",
+      "bytes": 104570,
+      "sha256": "25f69ad96b2396710e365d1f58639b2b71f7cb6c14473a4bef34ba6d27f5ec3c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/0-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/debug.json",
+      "bytes": 100856,
+      "sha256": "f7c447306a3749cfde009a2a685496ba20615afcef59e72709889a79ce1c42dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/job.json",
+      "bytes": 856,
+      "sha256": "251fb631c33053addac56a3e61a564de21186decd628d5123ece0f3704185051"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/result.json",
+      "bytes": 114866,
+      "sha256": "3feb104375f59a02ccabe05d64c64df45009d34f961e5423cec5b99f164af9ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/trace.jsonl",
+      "bytes": 98849,
+      "sha256": "dee23e4a6617c6004715dcaffc8fc5a40395b85ab0d1f85b08d4a06b83ba74d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/debug.json",
+      "bytes": 134448,
+      "sha256": "f667207180ef624ca004f4a9938abe62e66b7ed4c4247d33b3b4a1a6dcb72f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/job.json",
+      "bytes": 856,
+      "sha256": "65ea93b73422df0586d3b94dde26e3f6581225fbf8e05b1c8b618848a7d8ee32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/result.json",
+      "bytes": 150115,
+      "sha256": "00a58c0e85da0ff1c114e943b6b1b44f25401e3b5c82e764416d26b55019f6fc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/trace.jsonl",
+      "bytes": 106166,
+      "sha256": "64a6616d671ab1e8665138f1a433c29a1e94f74438dab0fa1d0dc2d00f452ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/debug.json",
+      "bytes": 100850,
+      "sha256": "2f927c665fda2b828daf2ef0e98aa646fc19a635e7b09e40e0a4325ba1ae7c32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/job.json",
+      "bytes": 856,
+      "sha256": "0853752051b47014619a3cf3dab742b8bdbf550dda55a61afc728b1a476091ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/result.json",
+      "bytes": 114944,
+      "sha256": "b665b92180c36fa59ccaab27eac0311897683ec032509858e99e3c8a4d2c7d37"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/trace.jsonl",
+      "bytes": 103619,
+      "sha256": "0c926df321781a6c1c83c3312d96d706d3317e773e17123331f997752a3f325e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/debug.json",
+      "bytes": 134416,
+      "sha256": "745da562529eea347e55e7b8eb81bb514ce74584355f6de24ea55b300df150c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/job.json",
+      "bytes": 873,
+      "sha256": "576bb06e1eb9379d428c0ef381a5e8a02e83b1194da820e0820abc3fdc0ef6f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/result.json",
+      "bytes": 150184,
+      "sha256": "4570484c87157e5abd193f4c09ebbff165bdc89ff69c40764741bcbb60b7d4ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/trace.jsonl",
+      "bytes": 106129,
+      "sha256": "a6f974b6e5da3c7f359960c1f9775daaebe99f44a0010282a6cbb3f0dc87ea1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/debug.json",
+      "bytes": 100857,
+      "sha256": "350b73549f8736887513a1accaf1aeb6db0e3f12248286fac81356d9fc210613"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/job.json",
+      "bytes": 856,
+      "sha256": "487d64d5b45adb6322676c67f90746e65b32ae77da6c8c31378608be0775d1f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/result.json",
+      "bytes": 130614,
+      "sha256": "2914cd34a2a614346a182e52dea46229a4abf0fb5cf02610109dd0c8480f5ee8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "4956a2cf8971a60db06429b49be6085643a462deee23158da8f542d93b466aa9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/trace.jsonl",
+      "bytes": 104581,
+      "sha256": "022ace2b12fc54e0386b5766ddbead45f69de9e13699bf6c29acb17c6c770007"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/32902-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/debug.json",
+      "bytes": 100843,
+      "sha256": "f33958a317cfaccf7cf8d784b1465218e0b1c6575dccb022daafb3892bf7dd5f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/job.json",
+      "bytes": 855,
+      "sha256": "f51dc92cc9a79b0a4ae259eac7b14fea1a2c4f883ae798cfb8fd13233c3058d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/result.json",
+      "bytes": 115195,
+      "sha256": "f2d74efff12226a28b37aa7931bc6a178c23dcdf00a4a6eadb1bd3fa76b66e56"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/trace.jsonl",
+      "bytes": 98846,
+      "sha256": "9cb858b80521976ff4c020863fbbf546b33d712105c0be45229fffca0557dcf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/debug.json",
+      "bytes": 134431,
+      "sha256": "14faa9e8584c25f91dd8918a3b3d3d12873a27507d4d7906ed64cca5c9e53a3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/job.json",
+      "bytes": 855,
+      "sha256": "35489df709adf4c519b19cc3fe11b8d26c0d8ef4a97da92323e42ac057e1de9b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/result.json",
+      "bytes": 150440,
+      "sha256": "47a6d1f6fac31af0d36b2208c42ea869907d2ee9e948bfcec67a66e8cd03ce65"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/trace.jsonl",
+      "bytes": 106162,
+      "sha256": "9486508b4d7c1f843cc3cebfcaca3967aa4ce0260ba74d6de8922ea028b2b1cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/debug.json",
+      "bytes": 100837,
+      "sha256": "f62cb734838982e3a9fd4d4ba0603898c24ead30809803c5b9a0c41df221de6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/job.json",
+      "bytes": 855,
+      "sha256": "9ff006196430e7e11e55251c5aee4a35ba88ee170139397aac3a67247a59b8b9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/result.json",
+      "bytes": 115273,
+      "sha256": "49eca9c2f1baa274cbde73c169fb47c3edd169de871354532ec9cc08864a6fdb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/trace.jsonl",
+      "bytes": 103616,
+      "sha256": "4629bfd993b5708c17251f99e896066532f81fe88112861883b8f24a5431269b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/debug.json",
+      "bytes": 134400,
+      "sha256": "7570e123c319b2beb741a7b4855208fc5fce313e59583602177dce8dc43300f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/job.json",
+      "bytes": 872,
+      "sha256": "64e398c2474baced8d07731c7d22e2db9cbd8d85b3e4eb43cc21e305e8d25d5f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/result.json",
+      "bytes": 150509,
+      "sha256": "e54cb651a98b773ea0157cedaa67c98f028da0d67af69038915d9adaaa872fc6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/trace.jsonl",
+      "bytes": 106125,
+      "sha256": "064994e0137e4f62857b79f5b467b7ee35d40116471537aa139eb0bacb0687ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/debug.json",
+      "bytes": 100844,
+      "sha256": "bbe2d5522a0f99cbd776517ef35167caae060908b10fc8e4e2dc0245b37037a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/job.json",
+      "bytes": 855,
+      "sha256": "d9b91e906af7bcd3abe9236c20d3aa588732d783be9c2b3370c728825f0380b5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/result.json",
+      "bytes": 130943,
+      "sha256": "a0091d23e0ef373873e4a5b968d749b9d6397408c11449e9a47b89b68b39037c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "8692635784657f64c2cb1332aab1c16fdb4f7ac487f7d4d1d3c4c8affb4d19b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/trace.jsonl",
+      "bytes": 104578,
+      "sha256": "1fe2053d6941ca9582dabce4b1ca4cfa9ae53f78801babfe6bce80990fa92e3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned/4318-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned-console.txt",
+      "bytes": 984,
+      "sha256": "6cbba8ceeea8f6e454e563b9981bfce38f2400c9b22402820e75c85c5df1e3cd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-owned.txt",
+      "bytes": 1421,
+      "sha256": "200a888b1717f0a7e0054f8b2b4dc1ba86c23623455ee72f50fd0003b2d0e129"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/debug.json",
+      "bytes": 736414,
+      "sha256": "4db5692196241b26235fefc3a0205d34cbf9e5ca755f6057bf2f935ffa971399"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/job.json",
+      "bytes": 727,
+      "sha256": "408624c2686d4be54ec0b0e0d24c9b29b0aa15077f35fe69298caa3c32d7924b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/result.json",
+      "bytes": 782350,
+      "sha256": "15470d259729f0090556c4a1394b5f522c04645c2d3ba3e44b0a23cef761eb21"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/shader.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/trace.jsonl",
+      "bytes": 7457037,
+      "sha256": "72a8fc15355f58fd15f25935f68191efa354aed5a3d9f253563e4bfb2bd5576a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-0/worker.log",
+      "bytes": 6404,
+      "sha256": "0a174d9986f1d70ca6b4835a539bb642ddf8b8ce60c30afc433b2851b57c7f28"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/debug.json",
+      "bytes": 736632,
+      "sha256": "ebcaaf4b1845814fe369284ffb99e61faab3c339527751ae084417c0439d9f6d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/job.json",
+      "bytes": 738,
+      "sha256": "6efd2e31f248b2c90f2bc622ef72cccea4c4a53c22f273dcc98d30f2ffd169a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/result.json",
+      "bytes": 782983,
+      "sha256": "322f87595bc2a798634b8f61ccda04c4c5761a0d77cea6cdc5df5deb5f42fe52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/shader.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/trace.jsonl",
+      "bytes": 7457043,
+      "sha256": "9cbdb7752aa5ec212b03bee5ba671dfb31e73c7544d9f28c79245713cf2955ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-32902/worker.log",
+      "bytes": 6404,
+      "sha256": "0a174d9986f1d70ca6b4835a539bb642ddf8b8ce60c30afc433b2851b57c7f28"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/debug.json",
+      "bytes": 736640,
+      "sha256": "4e91a5e5d443c22e6349576fe8733f7e39e4cfe4faed191a1a515adb5a9356ac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/job.json",
+      "bytes": 736,
+      "sha256": "e0cd37a35cb3713964f510e699b79ddf41c6db2a68ad3806f43bb607beae17f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/result.json",
+      "bytes": 783333,
+      "sha256": "93f75f7738aee91a25cb1ee328890fb26a501a0be8d8ffa15004f4f913a00c38"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/shader.dxbc",
+      "bytes": 7724,
+      "sha256": "9deced192d942752e2cc9f771efcc939ece142c420036551c10a6e699f718909"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/trace.jsonl",
+      "bytes": 7457041,
+      "sha256": "dc2208b3565017068cddbb11e0df9278c8824508fc9d789e7cf5f30115a5a75f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/bf1-4318/worker.log",
+      "bytes": 6404,
+      "sha256": "0a174d9986f1d70ca6b4835a539bb642ddf8b8ce60c30afc433b2851b57c7f28"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/debug.json",
+      "bytes": 105026,
+      "sha256": "99c193bdead87a3e5a72f16f3587b54d34a29f2cd8c9e5a571951c65743a514a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/job.json",
+      "bytes": 730,
+      "sha256": "b1b8624327d7274cb52107a080233d5768fd4833f40b47a29f9f560a59f73f39"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/result.json",
+      "bytes": 115760,
+      "sha256": "48fb2f14e2b9c331c3733a6857d68272d23b0f1c15bcc4511fe75421ae25b217"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/shader.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/trace.jsonl",
+      "bytes": 252037,
+      "sha256": "3b1a4b16df1fb160f80aeed6ba96b8dc2e2c7e460b4dc13b5330940ba379c69b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-0/worker.log",
+      "bytes": 902,
+      "sha256": "66439b65c35e1a01a1d4c6fa32ee1520d7f253d2eaf8cb7aff91ac2f01feb751"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/debug.json",
+      "bytes": 105073,
+      "sha256": "1c2d5f5b479c59f62b78e6cebee200c4bde500ce75318a462f4ae0dcc1f32b83"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/job.json",
+      "bytes": 741,
+      "sha256": "41f91a430c42227980f5d8932136c80d21d94108a2d9be190ce341117dd91b48"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/result.json",
+      "bytes": 116222,
+      "sha256": "500bec8c53dcd6833bf9792a332082448bc29d96ac43d567eeca835ce6b0ffb4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/shader.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/trace.jsonl",
+      "bytes": 252056,
+      "sha256": "d4f59e204c408fd8c05ecfa247a183f0b4cb769c95783f9e4aef5f2539d8f117"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-32902/worker.log",
+      "bytes": 902,
+      "sha256": "66439b65c35e1a01a1d4c6fa32ee1520d7f253d2eaf8cb7aff91ac2f01feb751"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/debug.json",
+      "bytes": 105061,
+      "sha256": "322c77f68549e24e6edb90b412c2e66af2314ced9722f824427c6cdc9c232270"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/job.json",
+      "bytes": 739,
+      "sha256": "3d86e6d5083b14cfdf4e92dd87f903a04bc41dffeed0320a0b8e7520820ae3c1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/result.json",
+      "bytes": 116552,
+      "sha256": "b7c37fb735dabadd370244746af1706d847e135a6a0e285b2415aba78621aa94"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/shader.dxbc",
+      "bytes": 1184,
+      "sha256": "3f9be2e84b3d59ddfbf8ab7eb0330acec36c9134f876a3c17fddbba7689fc21b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/trace.jsonl",
+      "bytes": 252051,
+      "sha256": "442412de124d7963f284bf14cd58535ec4109ec528afb27e0967bc5784c6099b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/gf2-4318/worker.log",
+      "bytes": 902,
+      "sha256": "66439b65c35e1a01a1d4c6fa32ee1520d7f253d2eaf8cb7aff91ac2f01feb751"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/debug.json",
+      "bytes": 130145,
+      "sha256": "35a445cc203e1a6817d4440b3c30c3a4798083a105a296d7edce2b6ae98eebad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/job.json",
+      "bytes": 737,
+      "sha256": "9e2049b3eaed215d0ce77a9b5f1443dd562394b932540c28e05be442dace0200"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/result.json",
+      "bytes": 142201,
+      "sha256": "f57ea79cc02b730d84a879390d52011c4afa8eeb12e5ce6773292abf35dabf46"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/shader.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/trace.jsonl",
+      "bytes": 260297249,
+      "sha256": "0a2b01d6e2892918b275f61c5a3f18d4a3701d725bac6d0ebed398d4c29d3d3a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-0/worker.log",
+      "bytes": 1245,
+      "sha256": "e530a9e0cd72c707ebc538dffb0a904b40cd078dcaf57f8c6a014eb7644e48ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/debug.json",
+      "bytes": 130203,
+      "sha256": "9c4d8fc96d0922330cf67bc12d540daa07e491f5846714cdfa00159e0e094d2a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/job.json",
+      "bytes": 748,
+      "sha256": "ae9978089bd7d15830cb4742342299baa426a06f177c1e90aa85b8c410601760"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/result.json",
+      "bytes": 142674,
+      "sha256": "b6b0e7eea447c42eed0773552df3f2f59dff6383c51be080c135728eaf7bd657"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/shader.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/trace.jsonl",
+      "bytes": 260297268,
+      "sha256": "cfe28ef58879bd1eb90a2145ad46476e528b8dca5f033851503f13d9ae8c8112"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-32902/worker.log",
+      "bytes": 1245,
+      "sha256": "e530a9e0cd72c707ebc538dffb0a904b40cd078dcaf57f8c6a014eb7644e48ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/debug.json",
+      "bytes": 130185,
+      "sha256": "05faa5a0ce11b707d09b2bea9e73ea6018707508f9b8cb956ddc0e824e9649ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/job.json",
+      "bytes": 746,
+      "sha256": "6b345843b6384ea43b24870ee850c4383f087eeac7b09763947cb100e0905069"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/result.json",
+      "bytes": 142998,
+      "sha256": "925ee6443ea3ccc2caf1d498126b22d6d67b42e884ea96ace4721d29fff7bb75"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/shader.dxbc",
+      "bytes": 26408,
+      "sha256": "450cf86f57e981f98f2c5fbaa949ecf31121b8f17a56036b4636ea9bb973ad74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/trace.jsonl",
+      "bytes": 260297180,
+      "sha256": "0cf328007a7c6ed1beac7d01bf9a6f236f6facd5661af374e7db4d1e12bba177"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-real/helldivers-4318/worker.log",
+      "bytes": 1245,
+      "sha256": "e530a9e0cd72c707ebc538dffb0a904b40cd078dcaf57f8c6a014eb7644e48ea"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/debug.json",
+      "bytes": 100811,
+      "sha256": "f9bae544247c02391a46987dcb516f269c8869dc9ad1f37b80edac1de0041512"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/job.json",
+      "bytes": 849,
+      "sha256": "540f8c66b1333479bb1080da6c5b8695e0a7179d10ae7856a4cf1bd054c11660"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/result.json",
+      "bytes": 114406,
+      "sha256": "b11c52822b9fe0f5554587d170ba9ba417be33eb12b9b3242e6cc40c011a02b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/trace.jsonl",
+      "bytes": 98838,
+      "sha256": "6a7c13123ec3a8d7077b3574e699946c7853a3afde3fbe46c4f942e73a541f12"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/debug.json",
+      "bytes": 134387,
+      "sha256": "82779673d42685ffbb50b290d90b0ef83fc157e5a5bc3d264c35b487192e65d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/job.json",
+      "bytes": 849,
+      "sha256": "99b80bde099a70ee12f9bac2e4cf4cf878d66b07a61ddf07857571561cbb0064"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/result.json",
+      "bytes": 149638,
+      "sha256": "63564a66e5fc1de8ff67fae6bac3e15a2b23b537e719f74c7de63217a194e402"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/trace.jsonl",
+      "bytes": 106151,
+      "sha256": "fee668d53dcb7676f3a6056caa939fa22f56e7f3c6edd35a47250aa1f133d042"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/debug.json",
+      "bytes": 100805,
+      "sha256": "e18301d11b8c9f71700371b1fc54ba4f254175bb638b00a219d8ee1a9eaca920"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/job.json",
+      "bytes": 849,
+      "sha256": "fb159751b187d70ff411394d59e57d8b6ab00b4d595dbc5b6da3080e96698754"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/result.json",
+      "bytes": 114484,
+      "sha256": "b362bfd5a78036f52bf83fc217e4061fef6fd63aa6af0b56b39a249dfe68c653"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/trace.jsonl",
+      "bytes": 103608,
+      "sha256": "3476ecded68373b4974c11b9aaebce15683cafda110fbf7b8ae2fa9de309a4a4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/debug.json",
+      "bytes": 134348,
+      "sha256": "71a2924970507fb3882b618c616b0b600e1d036d0f6249cf6e414db6f219f794"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/job.json",
+      "bytes": 866,
+      "sha256": "10026d4062505c64af616bd1d89673b7303e68c4c476a8ff0fd8f1688ea6160f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/result.json",
+      "bytes": 149699,
+      "sha256": "c2a14ead7650a04d7c4e74f8a848ab0093d739ce7bf669288c454034deb99432"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/trace.jsonl",
+      "bytes": 106113,
+      "sha256": "fb8427569663f9a386a6fb7b681b5bdd6dfea3d4705d0003facbc8f1b9f42a5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/debug.json",
+      "bytes": 100812,
+      "sha256": "8de63eca30f2d423ae1576be436e6c4ad7ae5a16d06642a58458aefb4ee18771"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/job.json",
+      "bytes": 849,
+      "sha256": "cfd9170493f92a85448c3c8e7f765778c6eec1c0e7c9bcad620a75665cde2681"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/result.json",
+      "bytes": 130154,
+      "sha256": "75b37702829d0ddb242c841a76c28769d746645d83f7f3c623250a6f768c8a62"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "51b0292572dfafc03a43787c6bf26ef52fa23d5d70611aa13b76d7fcc53b9126"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/trace.jsonl",
+      "bytes": 104570,
+      "sha256": "d36f1559bb2ee36fa8180eab82003468d662c70903015fe1845ac1d8a03e10f1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/debug.json",
+      "bytes": 100815,
+      "sha256": "a8ae9d14ea2f8a866142c29c0f69e185b439c6f8508ffff79fc222cc08975ee6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/job.json",
+      "bytes": 849,
+      "sha256": "cc5bb1881ae84caee75a6e4929cb628ff175166ad2157642fac06dd56476c1f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/result.json",
+      "bytes": 114783,
+      "sha256": "fb1ab6fb6745cc5148f8d4f321dc9f010fa0be177b598ec0f1d63487f7c06f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/trace.jsonl",
+      "bytes": 101113,
+      "sha256": "8c5f7cfccec3a6e21dbcd96f78b9a51bab642ad96fbd16216244d8e673c8086f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/0-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/debug.json",
+      "bytes": 100856,
+      "sha256": "f7c447306a3749cfde009a2a685496ba20615afcef59e72709889a79ce1c42dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/job.json",
+      "bytes": 856,
+      "sha256": "6c897445d8ca9ba77cc10eaa39a51b28cf3b28555472588dc3e923ad0eb20bbf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/result.json",
+      "bytes": 114866,
+      "sha256": "64e1434ca1f6687b5ee68e6ca283e328468511e7724c824bb95687e564b33323"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/trace.jsonl",
+      "bytes": 98849,
+      "sha256": "dee23e4a6617c6004715dcaffc8fc5a40395b85ab0d1f85b08d4a06b83ba74d4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/debug.json",
+      "bytes": 134448,
+      "sha256": "f667207180ef624ca004f4a9938abe62e66b7ed4c4247d33b3b4a1a6dcb72f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/job.json",
+      "bytes": 856,
+      "sha256": "315449adaa8959cdbc1cf3d700ad4de0a81126e7e3c9360e556e010a6d8e721d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/result.json",
+      "bytes": 150115,
+      "sha256": "25e6aee6d7ccbac548012d7c8919b60d84e0721a316c6d413e799143861c6a32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/trace.jsonl",
+      "bytes": 106166,
+      "sha256": "64a6616d671ab1e8665138f1a433c29a1e94f74438dab0fa1d0dc2d00f452ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/debug.json",
+      "bytes": 100850,
+      "sha256": "2f927c665fda2b828daf2ef0e98aa646fc19a635e7b09e40e0a4325ba1ae7c32"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/job.json",
+      "bytes": 856,
+      "sha256": "b26bbb5b44fe13f0e725486109920dc8b733b8c9f8a0f0a9c3bcf80ff4d73115"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/result.json",
+      "bytes": 114944,
+      "sha256": "39fc8ed52f576d684331aaa909ed2e3a585f21c9a412ea77ee16bd3d4687e843"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/trace.jsonl",
+      "bytes": 103619,
+      "sha256": "0c926df321781a6c1c83c3312d96d706d3317e773e17123331f997752a3f325e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/debug.json",
+      "bytes": 134416,
+      "sha256": "745da562529eea347e55e7b8eb81bb514ce74584355f6de24ea55b300df150c9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/job.json",
+      "bytes": 873,
+      "sha256": "9524196f987fa4c65abd02e43edd50795e6c21105a0f42b6d5295d91e6418138"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/result.json",
+      "bytes": 150183,
+      "sha256": "4acf17e91e3bfc3736419199a272f103e1805b1a9119a443f008adcecc772d4c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/trace.jsonl",
+      "bytes": 106129,
+      "sha256": "a6f974b6e5da3c7f359960c1f9775daaebe99f44a0010282a6cbb3f0dc87ea1f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/debug.json",
+      "bytes": 100857,
+      "sha256": "0ec399af6c163cffe97a26c6ed8bfb87e42bb41bc6e4a65f41dc14041cd9b10a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/job.json",
+      "bytes": 856,
+      "sha256": "612d7c28582cd1def7e32c64f4ec7e577157da90d8e595be920083074bb044d3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/result.json",
+      "bytes": 130614,
+      "sha256": "fe7a5996adbf8d53ef334c4009c42a1baca7be8d6b32bb3306af2d1a04646a90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "118a3eca9888dfa27483fa9c688d7afc9e3e09255edec670e78a82fc625c1112"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/trace.jsonl",
+      "bytes": 104581,
+      "sha256": "dfdbe7915172a858dfec26af215df166abfd3c61672cb8fe98cff626c8bc3d43"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/debug.json",
+      "bytes": 100860,
+      "sha256": "524a4174cb27e2f6054284787091cbf0d43a2c45165c720cd737789cf5586b2e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/job.json",
+      "bytes": 856,
+      "sha256": "e7a5392a7d482a7406cf18fa988e651cdddedbd22e9e6b5a926894be7a5f8371"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/result.json",
+      "bytes": 115243,
+      "sha256": "b742429c99447230b9ababc54f6a26d4493d21d244c70d334df8ec073cc17c5f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/trace.jsonl",
+      "bytes": 101124,
+      "sha256": "21f90ce0e1cabde9fdb2c3587ebf09ebdbc0328874b40f83b1d21318a99250a3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/32902-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/debug.json",
+      "bytes": 100843,
+      "sha256": "f33958a317cfaccf7cf8d784b1465218e0b1c6575dccb022daafb3892bf7dd5f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/job.json",
+      "bytes": 855,
+      "sha256": "580b4c02c325aeff762b4b3fd29c262cd907eb321585e9202feb0142d43d6130"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/result.json",
+      "bytes": 115195,
+      "sha256": "60073f3e310844b9320666c1a28d67da088bce437f9183baef709ae086c0c4e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/shader.dxbc",
+      "bytes": 576,
+      "sha256": "a33426e62112f881fe7c992449ca681645a45009c84050cef610f41fae96d4be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/trace.jsonl",
+      "bytes": 98846,
+      "sha256": "9cb858b80521976ff4c020863fbbf546b33d712105c0be45229fffca0557dcf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-constant/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/debug.json",
+      "bytes": 134431,
+      "sha256": "14faa9e8584c25f91dd8918a3b3d3d12873a27507d4d7906ed64cca5c9e53a3e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/job.json",
+      "bytes": 855,
+      "sha256": "8c24556260bcf1955d7a50a98c554f112f9ec2d97393f15b62b1b84131ec3d82"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/result.json",
+      "bytes": 150440,
+      "sha256": "4b986aa0d1a5d18de106819f42342dd20f22e8447ca66b80d1b968c441f083b6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/shader.dxbc",
+      "bytes": 612,
+      "sha256": "86e59a593b5853a6a52d25bc69f121c23c1b9076e110ab218b9cb02de94ff2c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/trace.jsonl",
+      "bytes": 106162,
+      "sha256": "9486508b4d7c1f843cc3cebfcaca3967aa4ce0260ba74d6de8922ea028b2b1cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-derivative/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/debug.json",
+      "bytes": 100837,
+      "sha256": "f62cb734838982e3a9fd4d4ba0603898c24ead30809803c5b9a0c41df221de6b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/job.json",
+      "bytes": 855,
+      "sha256": "967a58eb7cfb5d98b3c79977eac81f55d6f2a9789abe53134475a95c05e36195"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/result.json",
+      "bytes": 115273,
+      "sha256": "8a145bcf90250d7adc3f3fd7a5ea009936deb7bb9da4db7a0126ca7fd469f90f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/shader.dxbc",
+      "bytes": 624,
+      "sha256": "b8049fb8694ded4ded1a757b2c47c75892c4944a69190487f644bb11d2a3154c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/trace.jsonl",
+      "bytes": 103616,
+      "sha256": "4629bfd993b5708c17251f99e896066532f81fe88112861883b8f24a5431269b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-discard/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/debug.json",
+      "bytes": 134400,
+      "sha256": "7570e123c319b2beb741a7b4855208fc5fce313e59583602177dce8dc43300f3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/job.json",
+      "bytes": 872,
+      "sha256": "a6fb4a89e7f27c6dc5da82bb695fdc816cce04403e60d80e804f7361060ba1b2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/result.json",
+      "bytes": 150509,
+      "sha256": "9e4091ee9c4f5a6677f0348d90ab70c9ea40d872a0fee43aa45d6345a37d8c41"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/shader.dxbc",
+      "bytes": 652,
+      "sha256": "612720b1c450cfdea61843af5d0b2c49adf8a21798bc8e2eb214cdf855bb61cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/trace.jsonl",
+      "bytes": 106125,
+      "sha256": "064994e0137e4f62857b79f5b467b7ee35d40116471537aa139eb0bacb0687ae"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-sample/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/debug.json",
+      "bytes": 100844,
+      "sha256": "aaf3a85ca12934a9d85f76c18d06bf794be03a58a75fe3a6c4b4bc85098ef934"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/job.json",
+      "bytes": 855,
+      "sha256": "4f04c20879a969a51915178ddd9b8ea0f67de3df65ac249616d89c5c9db9d701"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/result.json",
+      "bytes": 130943,
+      "sha256": "35e4abb1899f8e75b022ad8ab7cfb58f95291ed4dbe80e85c5a86ff6317cbc27"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/shader.dxbc",
+      "bytes": 12384,
+      "sha256": "f8d94132efe4ed407f9ccd856d728b1174a6a39f15ed84faef9f9510639f451b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/trace.jsonl",
+      "bytes": 104578,
+      "sha256": "576622c7f43e2107c99b5007c05fe2d0b763ecc82f3a999944497b5850a7fc52"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-source/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/debug.json",
+      "bytes": 100847,
+      "sha256": "aef14c21278c2b75e199320830f37ce54e019712daf9746ca155aaaf009b1739"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/job.json",
+      "bytes": 855,
+      "sha256": "8496b265af2feb3aa4573602c8f7d17a563b0a75eb5cfb8ccbe1fdf63c79a4aa"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/result.json",
+      "bytes": 115572,
+      "sha256": "3f522b0eab42a18e7780a859edf92a9743bf4b7a151732d5b8cf03c84eeb42d7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/shader.dxbc",
+      "bytes": 788,
+      "sha256": "0befda431506cefebd8d94b2e758b4bdbd57054ca1a2916d5502ca532e48ab72"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/trace.jsonl",
+      "bytes": 101121,
+      "sha256": "dc46ca5af19a56430f740f88b54b993e2250981bd1b70d8cab2413b2a06c336a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-jobs-verified/4318-uav/worker.log",
+      "bytes": 759,
+      "sha256": "b96ba67fc69e864827d86ad52b611aa2c78cdcda56ff851fe89d84de7a5b06f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-mainwindow-build.txt",
+      "bytes": 5572,
+      "sha256": "7d7484393b354989bae5d1b9e17d76ecff8b6a11f229abdab807183b3682ad67"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-owned-validation.json",
+      "bytes": 288170,
+      "sha256": "ab90bbc8be2f29416da9cf4d06de1eee965209c7a392c8ebef5d0599736b505c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.archive.json",
+      "bytes": 934,
+      "sha256": "9ffbc2c70c2d2e546d33737aa357979a52009cb1b03a689b03db181d43b1541f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.reader.json",
+      "bytes": 12190,
+      "sha256": "5ab4a8246dc843e7b2b767e86bc79e31c1c1b5b0ec99c565ecbbf6014e195033"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.reader.txt",
+      "bytes": 57,
+      "sha256": "029962768f7433e0eaefab386ed15ecda6d7d8cd57caa7394727e014f7838fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.session.json",
+      "bytes": 405,
+      "sha256": "9ce248e64053f5cc6cd9971747489d4be6e5573015b1a2e22fe6d892666d44b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.session.txt",
+      "bytes": 341,
+      "sha256": "9a18570badc0eb98f65204d03ddd4364e96fa3545c55e3da069424f0c0460011"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-constant.session.zip",
+      "bytes": 332530,
+      "sha256": "c258e59edf4369e8c6df00bd89cff4e155474a76e1fb21e384190f4ece236c68"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.archive.json",
+      "bytes": 934,
+      "sha256": "633f59c0549419ad34c40ab259da636486c06d5224f620362924663194023441"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.reader.json",
+      "bytes": 19531,
+      "sha256": "f875cb4e33c7116741d07e60fd6af1dcf34dc22090eee9a1ffe77f0d1def127c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.reader.txt",
+      "bytes": 57,
+      "sha256": "4afb73941e39856d72df7badaa17cba58f7e87b49ca7a633f07c644b30cdeecc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.session.json",
+      "bytes": 405,
+      "sha256": "7fee075269c5726e1ce8de086c7079c0ab8d2f9e05b100b0ca7322cf5668f9e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.session.txt",
+      "bytes": 341,
+      "sha256": "6a06ab35413d50ba72f17e52a38bd705573460a06e630439515a52658ad72dab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-derivative.session.zip",
+      "bytes": 417052,
+      "sha256": "60849d949706fe47ea549b2e630437d5529cbe4832fc26cb286ebad5686430ad"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.archive.json",
+      "bytes": 934,
+      "sha256": "082d1cb9d83a4d7a91eecd98328892979ebd51f5cbe882a5f84f2c35812287ba"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.reader.json",
+      "bytes": 12487,
+      "sha256": "31be5fe237943c862065a5bd3e1c0eba4f547931dad0a017fdfb359f01261116"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.reader.txt",
+      "bytes": 57,
+      "sha256": "455dc90b47fb4c566c21108bc175c958b68bb8331cb17a0b7010283af278b7d2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.session.json",
+      "bytes": 405,
+      "sha256": "17091b8459a4be4849377719ea1330bf86047f8874e7e777c45575a19362a979"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.session.txt",
+      "bytes": 341,
+      "sha256": "d86d86bb06381d7d5091eeb9c964e8e2fbed3bb4a937700aeba4a11d3c0e4f02"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-discard.session.zip",
+      "bytes": 338077,
+      "sha256": "18d5d5be49867bc02612425fef32432cf69ae395c4ac5358ba59439bfcd50343"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.archive.json",
+      "bytes": 934,
+      "sha256": "bdd0366519d1d69c07d2cd7d1c5fdbd43d45aa22f9fa34c5b7b223b9dc9b20b0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.reader.json",
+      "bytes": 19526,
+      "sha256": "77a9dd7005a31b409c9c2df2a21a7084b92387c8dfa43fd8135c15fcc283da5c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.reader.txt",
+      "bytes": 57,
+      "sha256": "9bd562a651efa284dfa8b93fb41dea64420c9c09dab68da9908205f965cc2bda"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.session.json",
+      "bytes": 405,
+      "sha256": "d1965701c215b93685f22e49e3c5e129f4554729f590e71e68915efb707c457a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.session.txt",
+      "bytes": 341,
+      "sha256": "e1a0cfe48c42398c8584aa41f115dc7bcf210a49f58c9890115fb99e0fbc877c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-sample.session.zip",
+      "bytes": 417173,
+      "sha256": "ae6fea12e8518b2f5e281a19bf374fd95e783fbf8c5e95690734b61b00d2b139"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.archive.json",
+      "bytes": 934,
+      "sha256": "243d1936636b990575b137a3cbec321f4bc24dffefb6a398d0f58b2b970b8350"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.reader.json",
+      "bytes": 12337,
+      "sha256": "169fc54c8c77d09a1d824c1415e29286951a0da6360525b6e49089cbaec008f7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.reader.txt",
+      "bytes": 57,
+      "sha256": "19001b18687368e8556913ace462814fc1bd1d29d05eb9fc2dc1168d25eb1627"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.session.json",
+      "bytes": 405,
+      "sha256": "5dfd4d47d429780408d4d5d1f02e402bea2eeb71fcb0f6ad3f72f0c2894cc9ab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.session.txt",
+      "bytes": 341,
+      "sha256": "ef368249fa6afdd81cbbbf7d3ac4600f4e8dab6148a96a809772d9d5c6a19d9e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-source.session.zip",
+      "bytes": 381268,
+      "sha256": "a04676d17218c606dbd4d39dc16ea81978e1f1f82e2b6ce68d8d46773bb2b101"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.archive.json",
+      "bytes": 934,
+      "sha256": "39f6209cf2a8203d3055b06daa4663fab50badf84cf5e92102468654dc8808c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.reader.json",
+      "bytes": 12886,
+      "sha256": "16770130a0892714d61810da141c4e3aaf69d0f1b01a06383e7aca8d75dfbe16"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.reader.txt",
+      "bytes": 57,
+      "sha256": "6e5a76736cf9c3874815448fa39c898a989085b446cb639bd1746731fb190c2d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.session.json",
+      "bytes": 405,
+      "sha256": "59f872efd548cb543fe2c69bc14696976d704337f73d02b0a78d236fc2f0a9a8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.session.txt",
+      "bytes": 341,
+      "sha256": "9fce031e51843b90c3e77dfb37d96baa6c806b3df77bf619e8c6d522cf2377d9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/0-uav.session.zip",
+      "bytes": 336087,
+      "sha256": "e0ef3ba05ed02d21bde51353c2128731b7206a61d3fcc937ec11f030f0bc3403"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.archive.json",
+      "bytes": 934,
+      "sha256": "dfbb9d55cd38d0a85e698ddc65d1077d3fb1dd3e112be49483515362ca292153"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.reader.json",
+      "bytes": 12201,
+      "sha256": "0559664c2faa1682c1615a56d0aff2ab7c71fb44428b19f23d9c792ba09b37b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.reader.txt",
+      "bytes": 57,
+      "sha256": "cd194868a40f57aec46f87ec29019cdab012e109986797365e64f08c9e25e582"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.session.json",
+      "bytes": 405,
+      "sha256": "9f09ba32730bd4f682fa9210d8c4b9b173255e9a41902f4fed4bba4b7663c19e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.session.txt",
+      "bytes": 341,
+      "sha256": "89c9eb2a55407307f3bb67524cab6b1a2bd3ec7100c6bb6e651d379ada75aefb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-constant.session.zip",
+      "bytes": 333060,
+      "sha256": "beb0934b033ad3a3161ff5957a70124b8becf9bd58f9b68b22468f09ef58bcf3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.archive.json",
+      "bytes": 934,
+      "sha256": "6bd915c2915514871ae1985583bfb123513ceaac672e404fa250ddc86e16c805"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.reader.json",
+      "bytes": 19546,
+      "sha256": "af8b2d58526718f159f9711dded324ad5e7483c8eb09803c27086f795b32402f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.reader.txt",
+      "bytes": 57,
+      "sha256": "98861d68cf3d29a8c02a2d793e04683a5da2252988053adb490990b7feb2647c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.session.json",
+      "bytes": 405,
+      "sha256": "b4b5c59aa7c052a4f5ef81cde7373436b8f16c80b4f2aae588bcfadb7f2ce767"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.session.txt",
+      "bytes": 341,
+      "sha256": "15f94a9c7900a98aaa0fdfbdb651d84fe5a7e32ec1ae5d87f9a0300f3b056992"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-derivative.session.zip",
+      "bytes": 417623,
+      "sha256": "3f7a7a3a0405b5c25b67747d7673e279fd3b55d4416a9577987961f090c1c941"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.archive.json",
+      "bytes": 934,
+      "sha256": "95f91d647090deda51e1375123b3643dac5fe70fff68ab2167335c5043c59b38"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.reader.json",
+      "bytes": 12498,
+      "sha256": "52b417f254a52193f7d2dec05b88c348fa4fa58983b37d6c78ba97f9a8bf14ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.reader.txt",
+      "bytes": 57,
+      "sha256": "9a2dc9413e2683b4dc95b5169b4dac4976f243bc5e948cfd814ce6e8970cf448"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.session.json",
+      "bytes": 405,
+      "sha256": "4534af1aac681dc417b6d3d3b41b2e43a5dcbac68f02405ee40a0dde8a53b5cb"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.session.txt",
+      "bytes": 341,
+      "sha256": "f308f10a56c349e3c4c2b79155fef825e51a456451d484bdb903393c8355bfab"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-discard.session.zip",
+      "bytes": 338607,
+      "sha256": "77c79c167ac95233b9764e68d1ee17b50b5fa9c9ac7d54277ea5467e20d3ada5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.archive.json",
+      "bytes": 934,
+      "sha256": "4ad3bf0d67c483b4d0a3337b1e5af6f2e3f45fb6082c220e36823851778e68ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.reader.json",
+      "bytes": 19542,
+      "sha256": "9bfef44cae20b7438c671d3d27702494299e42509e487a5b3876a5478463b891"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.reader.txt",
+      "bytes": 57,
+      "sha256": "cbefeeaf3cc2c7d1523a79fd3e6b1f6c877e9c68bf24560e6545ff3782da3d2f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.session.json",
+      "bytes": 405,
+      "sha256": "7904d982c56640058b45aa304c1c7300124b58430196524a6dd8f839ca78819d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.session.txt",
+      "bytes": 341,
+      "sha256": "26dbea56fac567656f458f9597d35bd681eba0ca082ff9e00176aced61b6d8f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-sample.session.zip",
+      "bytes": 417760,
+      "sha256": "e81de784c1e5d4a41c0bc8a1d8b1570c8601bf83e4026e50118a3d8f3081ca91"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.archive.json",
+      "bytes": 934,
+      "sha256": "cdbbd6c927a14be4f3cb88fad4ca9dd29f386b0acee475a9464140cc046776bc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.reader.json",
+      "bytes": 12348,
+      "sha256": "b2482b1a924228d6ba1dfeaec5260b8e2d379f8c81df8a5d646477e2e22d2467"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.reader.txt",
+      "bytes": 57,
+      "sha256": "19001b18687368e8556913ace462814fc1bd1d29d05eb9fc2dc1168d25eb1627"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.session.json",
+      "bytes": 405,
+      "sha256": "6a8a7c6754115803bdb252431b7ef7f98f8f8c45d57ec89c15bb7b47f2bde7f5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.session.txt",
+      "bytes": 341,
+      "sha256": "f82ed12b07fc2de1c270ffda236ea2ba17968b7d14caa823b7fbaeb24529d3ce"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-source.session.zip",
+      "bytes": 381798,
+      "sha256": "dd16b98bd1c4abd75c35f175d166652c7cdc64e18d1edbe5a68063a4dba8a6ee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.archive.json",
+      "bytes": 934,
+      "sha256": "4c643e70263608c52762865330c01f2e5e3ce83c2977a88ab18fd9c4ef923d45"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.reader.json",
+      "bytes": 12897,
+      "sha256": "9d6be85e0bc483f7c7651ba0301770c0ee8b3d40fb44b742f85642b8d7fd5b64"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.reader.txt",
+      "bytes": 57,
+      "sha256": "57e8997d1c86674495c160bbc00005e77c54992eae60cc23ebdaa05f8ab48f49"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.session.json",
+      "bytes": 405,
+      "sha256": "5d2eb52d595e99db2834fe15c86d7840d19733ebc120aa0f19d931405a37ab3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.session.txt",
+      "bytes": 341,
+      "sha256": "4ca209d935135d75c3ee1a8867e4aef171bddefda1f61cfa6ac160709f851c16"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/32902-uav.session.zip",
+      "bytes": 336617,
+      "sha256": "75e8d45e5fbb257220360bfe12f7db4b550dc07e69ecc1062571df4cbd997710"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.archive.json",
+      "bytes": 934,
+      "sha256": "c9d3b378c68ed1397ae4103c25fd79ec646d055043b132d6bd11f62052ab656f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.reader.json",
+      "bytes": 12198,
+      "sha256": "244bf439e3fda42153ce1f6e3c629361ebdea06e11d68e2fa1c461fd31839e15"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.reader.txt",
+      "bytes": 57,
+      "sha256": "9724c8b6c057869b79d3ddee8601632fc39625d1697e2e5276c70fe6515f60a1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.session.json",
+      "bytes": 405,
+      "sha256": "9e5c81a24eaedb02c4e6457cbd1a8670d4cba83cafb730bb2fe76f4c1fd2d56b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.session.txt",
+      "bytes": 341,
+      "sha256": "67c402ca042c041333ceabc9d8c694d3b9de774921284d349cf32a5441e8f680"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-constant.session.zip",
+      "bytes": 333370,
+      "sha256": "1c02254c02a01380f26590b29928942acaa431594440782b62ed2b6e75d65b90"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.archive.json",
+      "bytes": 934,
+      "sha256": "eda4ad45394d5da0b9b53626ba22daf47d52232d142f6cacabe207c8b56d2440"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.reader.json",
+      "bytes": 19542,
+      "sha256": "dd6a1652488f32cf627b1b7d993953ee239debb6f6a4b05c2511100c8cdd58ca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.reader.txt",
+      "bytes": 57,
+      "sha256": "84a4647921bd0bfdfb64e047a3dbc3568ede77c36f4f45748023db1f1d0f151b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.session.json",
+      "bytes": 405,
+      "sha256": "63d3745be58c9d9b6c0fe10a477ec4db3ba08bb02a08d6d56a2bcc383d5c19c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.session.txt",
+      "bytes": 341,
+      "sha256": "cedd40d48f70dc8a8f315038bb523f6469270594f3411b116c3cecc8390a723c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-derivative.session.zip",
+      "bytes": 417923,
+      "sha256": "9232a75a21c3b15ab1aeca79769e8d56830848fdf703d5d459d12e4089fceeef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.archive.json",
+      "bytes": 934,
+      "sha256": "6913a936898d1f2fa904f3a1b98a44c18ccc4ef3e79c88f47378a16592744d76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.reader.json",
+      "bytes": 12495,
+      "sha256": "b8d635f47825e5b8ffcd5bf9c47bcec79194da0eb952131650f57019e1d47031"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.reader.txt",
+      "bytes": 57,
+      "sha256": "e4c666fd664610dbd41042e441384e630d4d50d2950f6c02f14eee404a668f77"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.session.json",
+      "bytes": 405,
+      "sha256": "f2c6947055102c0b9415c420a4563ecf99f89714b5c744d14e3821dd7ba2ab86"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.session.txt",
+      "bytes": 341,
+      "sha256": "19d2d77e9503f60820cac59045b79ec4faf9593e58dc51fb94ed267fd7186f07"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-discard.session.zip",
+      "bytes": 338917,
+      "sha256": "513622d7974b61990a048d4cec61e629374ebf7443cf1558348b25fd5279acee"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.archive.json",
+      "bytes": 934,
+      "sha256": "3af7d889856ee46a54bd12b1a6bef5c799e508e997900f1a28916948c719243b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.reader.json",
+      "bytes": 19538,
+      "sha256": "2e07d74c19b921dbaab5c8724abd56b4637b62267b9286c107a830f3be9e0337"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.reader.txt",
+      "bytes": 57,
+      "sha256": "6d4773e8075f5b609fbc4be2543bf4e497edf125b1dff20caeab416f44639416"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.session.json",
+      "bytes": 405,
+      "sha256": "6e240807ce2e9a60cfc18e99c3ce0d57eaaac2eeb20109296861efceeea61ca9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.session.txt",
+      "bytes": 341,
+      "sha256": "93b6ffe6f5ecd06a4caa36313427828dc2437edc004c1e1eb0a32d14cd60626b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-sample.session.zip",
+      "bytes": 418062,
+      "sha256": "fbee6afe977415fb70c44c003a731516697dc713db21fa67240158b6304b1af0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.archive.json",
+      "bytes": 934,
+      "sha256": "7dd2f38b98a81a2a2c6f2b2320f95c6bdce2b5a9c6de8b2e662a5e06f6952e23"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.reader.json",
+      "bytes": 12345,
+      "sha256": "463b1ac94915b631debeaf5d0ff54c77855275b04bd7e3c748529e69cbf7eb62"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.reader.txt",
+      "bytes": 57,
+      "sha256": "a910aa8f9404b1524f8e25611b5aea7174c356b459e10e888ed6b07aabf027b7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.session.json",
+      "bytes": 405,
+      "sha256": "1995a20536b0a89afdba72706108b695de6aa944493acfd91241bc48fdf3a5a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.session.txt",
+      "bytes": 341,
+      "sha256": "f1083850a4e0a6ecc7c6deea31f55eb60609b83ea2df12291035a24a428a4315"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-source.session.zip",
+      "bytes": 382108,
+      "sha256": "8c3feb872d33aae54fb891326902d92fb85f34771bfa8140d0d2f2b9d8f60854"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.archive.json",
+      "bytes": 934,
+      "sha256": "eecab4112ea062ee988eb294e846fa7c1b797b159b6fcbce1762da83160c5667"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.reader.json",
+      "bytes": 12894,
+      "sha256": "45a6e30c1c88d056e0ddfb176c534845ef3be330e3948b97169921a8ea027f98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.reader.txt",
+      "bytes": 57,
+      "sha256": "4afb73941e39856d72df7badaa17cba58f7e87b49ca7a633f07c644b30cdeecc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.session.json",
+      "bytes": 405,
+      "sha256": "b10e37d62fd10e9b7a9cd928fa5af6de6e5d9ebc6236a1caf2f126a7d425e45e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.session.txt",
+      "bytes": 341,
+      "sha256": "9a09f56702f35de90c5a7c09c4eef8677f3d3667184c664ed0a6a73855dc9225"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/4318-uav.session.zip",
+      "bytes": 336927,
+      "sha256": "137d1b915cdbcedaefe31a5ffd96ca4fdeda7a43ca135d453258355f36ef7a0a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.archive.json",
+      "bytes": 939,
+      "sha256": "8ff618d512b6dd88dc206ff0a51d68618adf956eeae644581e5b9601f1362ed9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.reader.json",
+      "bytes": 63053,
+      "sha256": "d7b172083455058eb0869e852d1bbd8a89418a7b27e87d6f403aa657b4fe31be"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.reader.txt",
+      "bytes": 62,
+      "sha256": "1c0b55e22572be3015e9a9cfed6797d7072f63313a8b06ab2ce20d4435c232f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.session.json",
+      "bytes": 410,
+      "sha256": "bc257e89466b3fcb36e5a68b3f3a982f1320ea566c1217ce24660c2e01a7f886"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.session.txt",
+      "bytes": 346,
+      "sha256": "61857445be945e4ebbd74f245c090ced51f308984a5ca0d18990bfaf8cf3b2a6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-0.session.zip",
+      "bytes": 9101766,
+      "sha256": "ffd6bbf45ced24dbe99732f08aefe892134ac50b2fadae84a59893fef288feb7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.archive.json",
+      "bytes": 939,
+      "sha256": "10668e2d1a0201ef6fb51afa17ff7d51125e4904080eed4ee2dbb143bbba20ef"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.reader.json",
+      "bytes": 63076,
+      "sha256": "b9dec8fd0ebafe1141052941cf2057aca40188a0b91ec1eaf267f43bf0616414"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.reader.txt",
+      "bytes": 62,
+      "sha256": "5d448df7bbcbe7a2cc81baaaac9def38a456137b71adbb3ce5ccfbea9b60a6f2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.session.json",
+      "bytes": 410,
+      "sha256": "6e4171c647e40eb2aa4dd08043ac730e551b4adea6f89d0c44b6a6f087184a74"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.session.txt",
+      "bytes": 346,
+      "sha256": "a0ede3e9b9092b906557e300f658441f91e448f72996522d0af458aab4fec34e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-32902.session.zip",
+      "bytes": 9102653,
+      "sha256": "a63399561ec67448c91a336d5b44fb3b5618b93515045974b04ae077f6ebc37d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.archive.json",
+      "bytes": 939,
+      "sha256": "f88d7e0472221ed53cad28ead8dbe15cb1699d34ac10a0e812753a34cd5d141f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.reader.json",
+      "bytes": 63070,
+      "sha256": "014c556bf00f934da4cdcdd2601042460c431d092ed6b9b13da2ad4af0099007"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.reader.txt",
+      "bytes": 62,
+      "sha256": "ee5071f60a1df6fc856538b99be53c0f859628daa5d568484af0a7ef7be046d5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.session.json",
+      "bytes": 410,
+      "sha256": "2907348c71df03a7c31c7f779f077d4e9697c98208b03e723be4a0814e13a6cf"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.session.txt",
+      "bytes": 346,
+      "sha256": "7cc77f3381c490c4acceff2b270958b182f44e08ef2ffaf90580f8e450133416"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/bf1-4318.session.zip",
+      "bytes": 9103002,
+      "sha256": "d932b7af6f4877852208bddf4b4d4d766ffc43cfb7c94c974046bfe442b30d03"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.archive.json",
+      "bytes": 936,
+      "sha256": "c48328c564d4dd4e04e5adf977964c9db1287f9582e7cf05b31698eb573f04c8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.reader.json",
+      "bytes": 35906,
+      "sha256": "e25a73bdd3a79878c49ae6e77572d0f4a1bb97bddabcf0fc9a76008af5956e35"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.reader.txt",
+      "bytes": 60,
+      "sha256": "665625a9ea9d892133a49320737524de62b524498f5cf2127c2d83655ea260a2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.session.json",
+      "bytes": 407,
+      "sha256": "420201c545f22de761ab8c3dd91c6d371fb3b2a302eff44fbfd74b41e423bf12"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.session.txt",
+      "bytes": 343,
+      "sha256": "de28bd13b2989a996150dc25e53d59f58fe05ad6298103aca67c882a0b08a035"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-0.session.zip",
+      "bytes": 532925,
+      "sha256": "a9a8b55a5a9f4d8859b8ee8f4a4323fc747a69b7789faa9320696cc5096c954f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.archive.json",
+      "bytes": 936,
+      "sha256": "55b0c6ce86fe02d02c3a0b443b8efe1e78c4b5d334b8911a7569e1a99f9cca98"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.reader.json",
+      "bytes": 35925,
+      "sha256": "023902c268f22c23dafc4288dd58886246462e469945b526e92b0c321121bee9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.reader.txt",
+      "bytes": 60,
+      "sha256": "cff5e6289c22e71efa286d3d77d1222295de6199a8a3270daca9fbc76d91b730"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.session.json",
+      "bytes": 407,
+      "sha256": "8009cf997b7939b546243c3560c69de413a30d6df10788cc106619ecd3f214f8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.session.txt",
+      "bytes": 343,
+      "sha256": "99a2719fee1e20a62afefce61bf8ee4ae079d60cec96c7a058a3ca90af248816"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-32902.session.zip",
+      "bytes": 533479,
+      "sha256": "082fe55fdeb132aaf6220226f65102a669acef71c621514b187b4b50f22ba069"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.archive.json",
+      "bytes": 936,
+      "sha256": "c968bd6aba535a6ebd34e653586e3e213e35387ac32a4c00512ca070924fac25"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.reader.json",
+      "bytes": 35920,
+      "sha256": "c0b853fd59c776bb189fc34c52a746cf564e87619e1db9b898869c4e07ffd75c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.reader.txt",
+      "bytes": 60,
+      "sha256": "63049d56c00f7349dd78278786ec0f47bb59cb533fe09e6c89a49658ed36f963"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.session.json",
+      "bytes": 407,
+      "sha256": "1cf4d270d917b11867b8f3b45b473f632a7f3eecaf99221eb190abbba5f43ae7"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.session.txt",
+      "bytes": 343,
+      "sha256": "89b577599b139c966bf7983141f87a8c686a73ed5ead8f2bde86cbadb1a69fb4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/gf2-4318.session.zip",
+      "bytes": 533786,
+      "sha256": "de174a94f78a77b3bcbba2d57e730f79066c0174d209af3d1af397f8a0794e50"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.archive.json",
+      "bytes": 942,
+      "sha256": "06d954fca42b0217d0ef71d27eb794e5f4dc3efb99a598fed70da49f67af225d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.reader.json",
+      "bytes": 93114,
+      "sha256": "2eac51f64cec93d97f42c2915825e5e32cdd26205fe3a7e571a7e6eef91232a0"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.reader.txt",
+      "bytes": 65,
+      "sha256": "e108f34792eda8ba1d0aefc5233ca3a0046b51cff2b50048f57dd68a9f40184d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.session.json",
+      "bytes": 413,
+      "sha256": "724a40158ffcd823a172cc9487a9a18976b5a5aae619fcf84ea0a8885da17584"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.session.txt",
+      "bytes": 349,
+      "sha256": "079abda01a5648fe0a04ae9af3f3910d8bb5a2d5dc0617a62e11fdd7bc83e17c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-0.session.zip",
+      "bytes": 260800667,
+      "sha256": "7e91bcc793e3fb4bfdbd791c91b1c59a2f19c939151aa4fe149277c212e4e812"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.archive.json",
+      "bytes": 942,
+      "sha256": "4be983440364c3441c7eb2f5b4d31f6f821e0985cb36e9ea633d8f95039107db"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.reader.json",
+      "bytes": 93137,
+      "sha256": "43d3f261879a7e85bd9a6106c5e1bec59ab24c0e49803061f132e9e30a438195"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.reader.txt",
+      "bytes": 65,
+      "sha256": "884566d1ae387e4a8487511bdf2e970b95ff1e4018aaf0e0d6b3b7b0ee42a16e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.session.json",
+      "bytes": 413,
+      "sha256": "9424fb56e8aaae1d0d4643e28318acb8f219e322470e3708f818fffef2399f70"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.session.txt",
+      "bytes": 349,
+      "sha256": "d57305523e60bd3acbbc62be1ff72f6a09462cac78481c59feeb1ebe1e39c564"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-32902.session.zip",
+      "bytes": 260801247,
+      "sha256": "7ad577e39601ab89ae290e1a47e4bbb3137f267528d26ccd86fe90d36cff06c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.archive.json",
+      "bytes": 942,
+      "sha256": "6b924e5f1bece66556619ab57aab3e8eed6c3b744929faf3f749343d5511474f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.reader.json",
+      "bytes": 93131,
+      "sha256": "c294582254aa031e5ac9026dbe395595754e3b8cb30fcbef61c68ebd70f0c155"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.reader.txt",
+      "bytes": 65,
+      "sha256": "9939f667a17f3f05d20953abc035d94d66fb1939df76a757c6eff0664b3606b4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.session.json",
+      "bytes": 413,
+      "sha256": "a5e6033242650dd6edc0e2fb3250d574a2634474d2844b926d3d5d9a360332f9"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.session.txt",
+      "bytes": 349,
+      "sha256": "431b146138f39d78a2cdc3b61a0135208640d1aa92e556df18739992957b5fca"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-readers/helldivers-4318.session.zip",
+      "bytes": 260801458,
+      "sha256": "4fc30b642ab40a19ea868335b3140a698a764e86c6943b550462e417db9f2f76"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-bf1-0-console.txt",
+      "bytes": 87,
+      "sha256": "e81f51ffe8f8fefab615cc93ed761f4c699ab895c4755a9f0d75315c5471af4c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-bf1-32902-console.txt",
+      "bytes": 91,
+      "sha256": "c48d6aa8de030ee174bfc148e639eb3246a9b0f3b109766e86a76f9e6798552e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-bf1-4318-console.txt",
+      "bytes": 90,
+      "sha256": "8f1e4b6171b35cf3391d95ed66910fcec35767470e7d277f157aeb2b3110f901"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-gf2-0-console.txt",
+      "bytes": 87,
+      "sha256": "7a9b55c3146483ac0d17a26cfb0c5aab1f047f07b65451519786b8a93671e1d6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-gf2-32902-console.txt",
+      "bytes": 91,
+      "sha256": "b24842bed7059a9f29202581e46f2777afeb235a89e5e8fbd5be1afb072a71d8"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-gf2-4318-console.txt",
+      "bytes": 90,
+      "sha256": "4c9a912ce691ff5a7c8baa3d57430aaadbf4c012eb48ef7591034f7b651f7576"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-helldivers-0-console.txt",
+      "bytes": 94,
+      "sha256": "703896e3a3160112231eca962f8e211d13f3536fb69c0c4990c6f8f48ec58dcd"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-helldivers-32902-console.txt",
+      "bytes": 98,
+      "sha256": "39abe6cdd4c2d4acb8861c7b228259b425f63fe780fbf7cd119e1404a73ecb18"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-helldivers-4318-console.txt",
+      "bytes": 97,
+      "sha256": "a291b89b6fdb8be9fbeac2425b8905a926a8b9abe788e616438bbcdd461a490b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-real-timing.json",
+      "bytes": 728,
+      "sha256": "1874f60db888451ca900e25b8c7ee8239aef63734a2f77aa50f20c6ee78febf1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraDxbcPixelTraceTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraDxbcPixelTraceTests.txt",
+      "bytes": 1527,
+      "sha256": "e58c232f97ebef5caa9cd2391cfd18a113a0491196524b9b52fa559866185232"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeAnalysisTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeAnalysisTests.txt",
+      "bytes": 2952,
+      "sha256": "33d05dd093b3a5515d558597aa8cf48e3a4b71cb44f1bb17f85f91ac32aa9ea6"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeDebugSessionTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeDebugSessionTests.txt",
+      "bytes": 3496,
+      "sha256": "3e57aaf7e5a0a1d663a8fe98e49403a9d9d42062f03a6a1393dd66d9980433a5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeDrawHistoryJobsTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeDrawHistoryJobsTests.txt",
+      "bytes": 1556,
+      "sha256": "e8196b8c9dac8f54a898dec5b9e5091d0d368a33f3db7d7911f20cca0e2b2b7e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeExecutionDebugUiTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-regression-FloraNativeExecutionDebugUiTests.txt",
+      "bytes": 2736,
+      "sha256": "f901688c962f132ab5a570ba28371c0b9eb2f3c77f9adc3e5348a82fa04175e5"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-validation-console.txt",
+      "bytes": 78,
+      "sha256": "6371e84cfd020a7d69489a3db6f05742491bb2280a7241044cec769d42a90799"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-validation.json",
+      "bytes": 677869,
+      "sha256": "2ac5f9faa221cbb5a12d695b4e9dec01728967a6d024f44ffd2f9e03b13a3794"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraDxbcPixelTraceTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraDxbcPixelTraceTests.txt",
+      "bytes": 1527,
+      "sha256": "7f00298a8d87e2aee39ea5d8571e1e957a9c7e838ce4c085ab2b18202ab4e913"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeAnalysisTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeAnalysisTests.txt",
+      "bytes": 2952,
+      "sha256": "ad1c77a5b8f41f71aa741c64dc0d97a4ec8d08119eb45b90904c64d178dc0d69"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDebugSessionTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDebugSessionTests.txt",
+      "bytes": 3496,
+      "sha256": "67cf2e8f0e359c231cc91a56e3df890a47771f58c3cba74f8fb494b95f7cb881"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDrawHistoryJobsTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeDrawHistoryJobsTests.txt",
+      "bytes": 1556,
+      "sha256": "3e403ae3daf7a9e9ccaab244ed84e277e7a09148dc01d692d66c8289e4bb6aac"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeExecutionDebugUiTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativeExecutionDebugUiTests.txt",
+      "bytes": 1489,
+      "sha256": "59d292fa5f94fab97e9eccdd8a16bdd46d70a47ba9200515f9a9a84dfd9cf4c4"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativePixelDebugTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-debug-verified-FloraNativePixelDebugTests.txt",
+      "bytes": 1523,
+      "sha256": "2134dd878e5905483c1f0174836cd937fba2c87dcac20cf93dcd20ad7366bce3"
+    },
+    {
+      "path": "artifacts/dx11-native/run-pixel-debug-readers.ps1",
+      "bytes": 1189,
+      "sha256": "364ff1e07b29fd7a7ded5ebb908608cc90a28d40abd9b95a5b66cb255c9ab19f"
+    },
+    {
+      "path": "artifacts/dx11-native/run-pixel-debug-real.ps1",
+      "bytes": 1589,
+      "sha256": "32c8ed05f7d2e1557f5cc8acd4b75de14b7f44b9cbff635357d4152b8ea15891"
+    },
+    {
+      "path": "artifacts/dx11-native/validate-pixel-debug-archives.py",
+      "bytes": 932,
+      "sha256": "c6c51c0657f1c8fde82d20a5fe6fee5bc9aec72c5debfe530f86583ef21a0b52"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 130739,
+      "sha256": "eb1011f92b1f69527c4240ba26814b19ebbaf8532a54f19d5aabc9e390095449"
+    },
+    {
+      "path": "docs/NATIVE_PRIVATE_PIXEL_DEBUG.md",
+      "bytes": 3478,
+      "sha256": "57919c5482191e2890534e7eac0e7e3fb96af9a9bbc8b13ea0412fd10e401328"
+    },
+    {
+      "path": "docs/research/DX11_NATIVE_PIXEL_DEBUG_JOBS.md",
+      "bytes": 8686,
+      "sha256": "ddd91fe83209f4d3391c1c7f82ca32b0952740d5e742e2cf8b29e44b8e6216e6"
+    },
+    {
+      "path": "src/app/MainWindow.cpp",
+      "bytes": 218924,
+      "sha256": "e9c2924670c101fc89f12d82ebdbf51ad1bd49210ece6fe6c03560d4ce28d010"
+    },
+    {
+      "path": "src/app/NativeAnalysisController.cpp",
+      "bytes": 7194,
+      "sha256": "e69fb4a56992da331eaa7d93ff7f7cedd763aed7c8c5f22f9ebdccf117ad8e13"
+    },
+    {
+      "path": "src/app/NativeExecutionDebugView.cpp",
+      "bytes": 24841,
+      "sha256": "4d017291ef099db62132bf0b9323e3da9b4f034d6a2b315d3466b19e614c932f"
+    },
+    {
+      "path": "src/app/NativeExecutionDebugView.h",
+      "bytes": 2376,
+      "sha256": "fe7582da6b91fff5d2cca20240d421ec7bf7219f751827adf254aa8f6f79b7fe"
+    },
+    {
+      "path": "src/application/NativeAnalysis.cpp",
+      "bytes": 26930,
+      "sha256": "51f845ae3e1dd0355e14d8ced430d1df24b2acb039856235369cbb3d1e204e7d"
+    },
+    {
+      "path": "src/application/NativeDebugSession.cpp",
+      "bytes": 17101,
+      "sha256": "2604465b359e605f8783731a23502c15467c2364271ff0fc1362f356027daa4d"
+    },
+    {
+      "path": "src/application/NativeDebugSession.h",
+      "bytes": 1303,
+      "sha256": "cafc5445e973d22c0dd17ab9b596405795ee89f40dcf5c267d491d746a86ca61"
+    },
+    {
+      "path": "src/application/NativePixelDebug.cpp",
+      "bytes": 5683,
+      "sha256": "d7c36dbbef08a5f14f3ca22f28c94f583faf8e2808f59b0cbd85f0061d32be9e"
+    },
+    {
+      "path": "src/application/NativePixelDebug.h",
+      "bytes": 719,
+      "sha256": "4b4a4d5edc3fd402d0a7dba61d0710a69f594ad9ea91acc0e1b4350a617a729a"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.cpp",
+      "bytes": 37104,
+      "sha256": "821478c4ee0d115e7a0bc43ef6cbae15c04614050d0427067eb84b5f20a40193"
+    },
+    {
+      "path": "src/application/NativePixelDrawHistory.h",
+      "bytes": 1891,
+      "sha256": "612c5663bd04769e9c703ac874880ada0f827b69c45cf7fccaa08be9e35b8b4a"
+    },
+    {
+      "path": "src/cli/NativeAnalyzeCli.cpp",
+      "bytes": 6281,
+      "sha256": "26f5ccf4431806bc8cb88c6db6c97c183bd08917697b60b128424bee18f75eb1"
+    },
+    {
+      "path": "tests/NativeExecutionDebugUiTests.cpp",
+      "bytes": 18744,
+      "sha256": "30b1e58d8b62e9848cf729ab4f782479b53aa1b28009f39852b424805006466c"
+    },
+    {
+      "path": "tests/NativePixelDebugTests.cpp",
+      "bytes": 13014,
+      "sha256": "7f54ea439047714e0222adf85af5f16b5c9009ff5851d69f2b21590644a550e7"
+    },
+    {
+      "path": "tools/probe_dxbc_trace_reader.cpp",
+      "bytes": 6797,
+      "sha256": "d6e87a061c198ad3f1446d1fd927615aae245cad9a25669e2315b715eae4dcfa"
+    },
+    {
+      "path": "tools/probe_native_debug_session.cpp",
+      "bytes": 3637,
+      "sha256": "4d6a986e5d40d93d19fffe00f495f9ef17aa38de72c83a55e1767ce15ab83f5a"
+    },
+    {
+      "path": "tools/validate_dxbc_execution_trace.py",
+      "bytes": 22070,
+      "sha256": "f2070fe24743d4ef07ad8baf5757df4fca0b50730ed3f6699d4bcd8813f21c0e"
+    },
+    {
+      "path": "tools/validate_native_debug_session.py",
+      "bytes": 5143,
+      "sha256": "cd37fd2c79dbd9b4c5a67573c49fee4539c4e88293a947ef8beac93c695c4f0b"
+    },
+    {
+      "path": "tools/validate_native_draw_history_jobs.py",
+      "bytes": 8494,
+      "sha256": "420e32ca4e24fa6aaefa8b263092eba13b546eaa60c1d67c819c76e723fb05c9"
+    },
+    {
+      "path": "tools/validate_native_original_draw.py",
+      "bytes": 10000,
+      "sha256": "7c536cb23127c94383ba3a2f93d0281e7d90cfa54d88f7604d33e62f85631c1f"
+    },
+    {
+      "path": "tools/validate_native_pixel_debug.py",
+      "bytes": 9787,
+      "sha256": "718f8a1fdea7bf641b722c2658754d48ad430b54d0de2177e7e13d7c6196da6f"
+    },
+    {
+      "path": "tools/validate_native_pixel_draw_history.py",
+      "bytes": 11953,
+      "sha256": "5dcd637062638254df63b59e0e9d48683ed002b2c4d4294e3a0b8d0b25678b6c"
+    },
+    {
+      "path": "tools/validate_native_pixel_geometry_replay.py",
+      "bytes": 9168,
+      "sha256": "f603c03d48c2c2cc7516b7ab708d346ccd4016f6e99dbb7d0b351aee55e6b1c5"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_merger.py",
+      "bytes": 13478,
+      "sha256": "fec02a10c389dcb2915d8b2509ef904da665d3036986f3c9a48d95f46c33836a"
+    },
+    {
+      "path": "tools/validate_native_pixel_history_shader.py",
+      "bytes": 11373,
+      "sha256": "b65e3d6e33ef9bca39fd122801b339a434ee3c8f5c919f821ded91c903b3ae9a"
+    },
+    {
+      "path": "tools/validate_native_pixel_identity.py",
+      "bytes": 13241,
+      "sha256": "a6a16151a90646bfdabce0e7f7017d19ac4afb009b07dc5a1b7c65e59a58f1da"
+    },
+    {
+      "path": "tools/validate_native_pixel_outputs.py",
+      "bytes": 9285,
+      "sha256": "213b5a58674ec38aa69a703ee71d12287230dbf03a0f8341f0ad4bbcaf608da6"
+    }
+  ]
+}
