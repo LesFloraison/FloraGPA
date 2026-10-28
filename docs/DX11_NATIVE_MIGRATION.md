@@ -1113,3 +1113,16 @@ See `research/DX11_NATIVE_PIXEL_COMPLETION.md` for reproduction, original logs,
 independent controls and scope limits. A diagnostic marker does not establish
 original fragment identity or ordering, and the helper does not yet qualify
 public pixel history/debugging. P1, remaining parity and P7/P8 gates stay open.
+
+## Original PS primitive predicate continuation
+
+Complete original PS draws can now return an RGB predicate on their actual
+`SV_PrimitiveID` without extra UAV slots or discarding nonmatching primitives.
+The implementation preserves alpha and original work, and checks GS output/input
+hardware locations when adding a system input. Three suites pass 416 Qt checks;
+918 owned predicates and nine real selections validate. Three validators reject
+8,082 corruptions. Raw typed storage changes are not treated as decoded identity
+matches, and system IDs are not promoted into primitive ordinals or instances.
+See `research/DX11_NATIVE_PIXEL_PRIMITIVE_PREDICATES.md` for retained failures,
+reproduction and evidence. Original quad/fragment association, full history and
+debugger parity, P1 engine recovery and P7/P8 acceptance remain open.
