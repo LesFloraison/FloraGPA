@@ -11,6 +11,11 @@ VS/PS/CS debugger or fragment history implementation.
 
 ## Stage gates
 
+The latest [per-sample merger test evidence](research/DX11_NATIVE_PIXEL_MERGER_TESTS.md)
+adds independent depth, stencil, alpha and combined late-test observations to
+private history joins. Original fragment qualification and public PS selection
+remain open; no migration gate is waived by those measurements.
+
 | Stage | Gate | Current evidence |
 | --- | --- | --- |
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
