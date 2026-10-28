@@ -1431,3 +1431,17 @@ exact active component comparisons. Point-mip and null-sampler outputs remain
 adapter observations, separate from the 7,104 linear-mip cases. Original sampling
 assertions remain unchanged. Integer formats, minimum precision, game workflows
 and all full debugger, history, dependency-removal and release gates remain open.
+
+### Expanded captured compute workflow qualification
+
+Six additional BF1/Helldivers native compute CLI jobs complete on NVIDIA, and
+their 72,139 group steps pass independent reversible-journal validation. All six
+session archives reload and re-export their saved state. BF1 event 325 additionally
+matches an independent original single-group GPU dispatch byte-for-byte across
+three observed resources on WARP, NVIDIA and Intel. The validator rejects 35
+corruptions. See [captured compute evidence](research/DX11_NATIVE_COMPUTE_CAPTURES.md)
+for exact selection, provenance, performance measurements and scope.
+
+These checks do not establish original multi-group scheduling, source-level or
+full debugger parity. NVIDIA assist cost and large-capture working sets remain
+performance work, and all P1/P5/P7/P8 completion gates remain open.

@@ -1,0 +1,2037 @@
+{
+  "schema": 1,
+  "passed": true,
+  "full_parity": false,
+  "jobs": [
+    {
+      "event": 279,
+      "shader": 268,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "8a4edbb1d95211bcbc678a52dc670859e4eec2e786a1290388db8be8cca70059",
+        "trace_bytes": 14257430,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 16,
+              "slot": 0
+            },
+            {
+              "elements": 0,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+          "gpa_event": 279,
+          "gpa_shader": 268,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            16,
+            16,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "caa58cebf00077a96e82dad2e73c2bff9d5f56c97546ccd50899f59699168c71",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 16640,
+        "selected_steps": 65,
+        "texture_writes": 512,
+        "texture_write_bytes": 4096,
+        "storage_bytes": 1064960,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "a625cfb22d59403d0afb38d18a041d812e6ba4d46d23c7461f147b05e5d72dd1",
+        "context_id": "f6a40d813b0979c8bdd967a94c8afb9f28b7f04bf1c2dd24fcde2353bdf885dd",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "f6a40d813b0979c8bdd967a94c8afb9f28b7f04bf1c2dd24fcde2353bdf885dd",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 1716,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 65,
+          "terminal": {
+            "global_step": 16640,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 3030,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 7779,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1760186368
+      }
+    },
+    {
+      "event": 325,
+      "shader": 318,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "eeb0db3ad527ac0f4952faa94d41839b1588ec7cde3de11ee4067eb6810eba6a",
+        "trace_bytes": 17474255,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 16,
+              "slot": 0
+            },
+            {
+              "elements": 0,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+          "gpa_event": 325,
+          "gpa_shader": 318,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            16,
+            16,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "175c8eeae7c90bfaf29b3a57bf8d33570573bf6499c7fef954a214b947b70822",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 22272,
+        "selected_steps": 87,
+        "texture_writes": 512,
+        "texture_write_bytes": 4096,
+        "storage_bytes": 1064960,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "fe50ce28714ef01d95ce2c1b9095746249a8adc99a1beca344d45797f0d5ef89",
+        "context_id": "bdcdc441d6046b0873a0c59b318e5c84cd1ea2bba84c3066c66aff57d7cb13b4",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "bdcdc441d6046b0873a0c59b318e5c84cd1ea2bba84c3066c66aff57d7cb13b4",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 2128,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 87,
+          "terminal": {
+            "global_step": 22272,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 3761,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 13883,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1760653312
+      }
+    },
+    {
+      "event": 370,
+      "shader": 268,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "0c0e9c42a0d7789f0fb5b9ada00a7717c55ce96e1bafcc9e801bd88b6ef8be3f",
+        "trace_bytes": 14224466,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 16,
+              "slot": 0
+            },
+            {
+              "elements": 0,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+          "gpa_event": 370,
+          "gpa_shader": 268,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            16,
+            16,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "caa58cebf00077a96e82dad2e73c2bff9d5f56c97546ccd50899f59699168c71",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 16640,
+        "selected_steps": 65,
+        "texture_writes": 512,
+        "texture_write_bytes": 4096,
+        "storage_bytes": 1064960,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "d6162c58042b33fa5d241ce4ce4eebe7168d6424bca9d9fa26f61682ae434701",
+        "context_id": "6dcf8f97035fe8b2a66727394f8bf784376ba1a4688eecc3aeee7b8fd9269a91",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "6dcf8f97035fe8b2a66727394f8bf784376ba1a4688eecc3aeee7b8fd9269a91",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 1509,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 65,
+          "terminal": {
+            "global_step": 16640,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 2714,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 7754,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1755947008
+      }
+    },
+    {
+      "event": 904,
+      "shader": 899,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "fcdd90aad816ededbef05ced23319c9134b2ad2d497bb882c81c8b1cf302b24d",
+        "trace_bytes": 4253473,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 49,
+              "slot": 0
+            },
+            {
+              "elements": 0,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+          "gpa_event": 904,
+          "gpa_shader": 899,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            8,
+            8,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "409ed601115d5f5ae20b96225053cae5e4a67cf88d7ce68e2e1895f087bf1ad2",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 1675,
+        "selected_steps": 37,
+        "texture_writes": 1,
+        "texture_write_bytes": 4,
+        "storage_bytes": 787476,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "773f3f5ba8c7f9efbc67b959d139c04865a4f02ba1dfeaafa555337c20b4648f",
+        "context_id": "3faa74fd0c09ef859f3850ebc67325039bda52e7e31a9874cd9de425d8f6fb80",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "3faa74fd0c09ef859f3850ebc67325039bda52e7e31a9874cd9de425d8f6fb80",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 256,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 37,
+          "terminal": {
+            "global_step": 1675,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 398,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 1802,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1751838720
+      }
+    },
+    {
+      "event": 2595,
+      "shader": 2585,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "d940f3b521d3c992177c14a013834abcf31810c87853443559a004613f66a027",
+        "trace_bytes": 56853336,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 49,
+              "slot": 0
+            },
+            {
+              "elements": 5,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+          "gpa_event": 2595,
+          "gpa_shader": 2585,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            8,
+            8,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "5e9c59c861742f17b08d57790afe800186b3d59b3c5ae28af0c727d2ba4ab8f7",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 3008,
+        "selected_steps": 47,
+        "texture_writes": 64,
+        "texture_write_bytes": 512,
+        "storage_bytes": 13632352,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "f93d5ba7049a194f19e0bcc0794feed9cd8bda12b433e18e227b63ebfbab38ba",
+        "context_id": "241d33a5b5250d310c10382511031b7fd972e8bdfa463607a9727230fbb0fb30",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "241d33a5b5250d310c10382511031b7fd972e8bdfa463607a9727230fbb0fb30",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 1757,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 47,
+          "terminal": {
+            "global_step": 3008,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 2117,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 2782,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1806430208
+      }
+    },
+    {
+      "event": 2699,
+      "shader": 2655,
+      "journal": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "6663d2a32361b1dc331356c9993a1387e6d722c3c1c09fe47b27bc7b4512bb01",
+        "trace_bytes": 16736589,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 49,
+              "slot": 0
+            },
+            {
+              "elements": 20,
+              "slot": 1
+            },
+            {
+              "elements": 1,
+              "slot": 2
+            },
+            {
+              "elements": 2,
+              "slot": 3
+            },
+            {
+              "elements": 1,
+              "slot": 4
+            },
+            {
+              "elements": 10,
+              "slot": 5
+            },
+            {
+              "elements": 6,
+              "slot": 6
+            },
+            {
+              "elements": 5,
+              "slot": 7
+            },
+            {
+              "elements": 1,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+          "gpa_event": 2699,
+          "gpa_shader": 2655,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            8,
+            8,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "89374e99643573e5d771420f55cb93c295579dcfc04448fe75364c2a6e106905",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 11904,
+        "selected_steps": 186,
+        "texture_writes": 128,
+        "texture_write_bytes": 640,
+        "storage_bytes": 2368424,
+        "rewound": true
+      },
+      "archive": {
+        "schema": 1,
+        "passed": true,
+        "complete_release_acceptance": false,
+        "archive_sha256": "1aefa6892ed58215f21b0d6d0b14028ab128a470e63cc696b1ac94a188848feb",
+        "context_id": "bc6acab6857269adbbacc6b34203bdd4c4a8e898aee2b9c9a2ede747c77ec3ed",
+        "entries": [
+          "debug.json",
+          "job.json",
+          "result.json",
+          "shader.dxbc",
+          "state.json",
+          "trace.jsonl"
+        ],
+        "original_artifacts_compared": true,
+        "position": 0,
+        "watches": [],
+        "reload": {
+          "context_id": "bc6acab6857269adbbacc6b34203bdd4c4a8e898aee2b9c9a2ede747c77ec3ed",
+          "format": "flora.native-debug-session-probe",
+          "load_ms": 1348,
+          "mapped_steps": 0,
+          "passed": true,
+          "register_round_trip": true,
+          "resumed": true,
+          "selected_steps": 186,
+          "terminal": {
+            "global_step": 11904,
+            "instruction": null,
+            "state_boundary": "terminal_group"
+          },
+          "total_ms": 2197,
+          "version": 1
+        }
+      },
+      "execution": {
+        "elapsed_ms": 1570,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll"
+        ],
+        "peak_working_set_bytes": 1753911296
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "vendor": 4318,
+      "adapter_luid": 69256,
+      "resources": [
+        {
+          "bytes": 1048576,
+          "equal": true,
+          "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "resource": 35
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+          "native_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+          "resource": 193
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+          "native_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+          "resource": 273
+        }
+      ],
+      "execution_ms": 11534,
+      "comparison_ms": 92
+    },
+    {
+      "vendor": 0,
+      "adapter_luid": 74655,
+      "resources": [
+        {
+          "bytes": 1048576,
+          "equal": true,
+          "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "resource": 35
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+          "native_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+          "resource": 193
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+          "native_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+          "resource": 273
+        }
+      ],
+      "execution_ms": 256,
+      "comparison_ms": 55
+    },
+    {
+      "vendor": 32902,
+      "adapter_luid": 74756,
+      "resources": [
+        {
+          "bytes": 1048576,
+          "equal": true,
+          "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+          "resource": 35
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+          "native_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+          "resource": 193
+        },
+        {
+          "bytes": 8192,
+          "equal": true,
+          "expected_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+          "native_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+          "resource": 273
+        }
+      ],
+      "execution_ms": 1297,
+      "comparison_ms": 97
+    }
+  ],
+  "rejected_corruptions": 35,
+  "files": [
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/debug.json",
+      "sha256": "9ba35810bfafb1d5916d538ac741be407da4e03a1478ac93b296d10180ec0a3b",
+      "bytes": 1561
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/job.json",
+      "sha256": "4ac92a6cf40980987560bab34c999c57f5f2aa593accdb795f4df41f6a606dfe",
+      "bytes": 675
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/result.json",
+      "sha256": "276dea79f0b9b4e0bd232dedf9c5baa49eae2c88d3881f5092a153a0d3e8a667",
+      "bytes": 6839
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/shader.dxbc",
+      "sha256": "caa58cebf00077a96e82dad2e73c2bff9d5f56c97546ccd50899f59699168c71",
+      "bytes": 3164
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/trace.jsonl",
+      "sha256": "8a4edbb1d95211bcbc678a52dc670859e4eec2e786a1290388db8be8cca70059",
+      "bytes": 14257430
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/0.stdout",
+      "sha256": "6080614589389a88ffa938002b011b1ed4e4f5fd6679749e84ce9043e9b43ad2",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/debug.json",
+      "sha256": "605f96253f0ba52af96d4934efa504ec37c07fcb9e3060f7a26e436891fa8450",
+      "bytes": 1561
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/job.json",
+      "sha256": "0330d45b43e51ce958f4e5eb24984ed9bbc0edc4371c3487cbd1d12b13999a37",
+      "bytes": 675
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/result.json",
+      "sha256": "cad6c66ce14c141944099a6975e8dc30cd27cfe32f1df35cf65b9e11de0a2ec3",
+      "bytes": 6840
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/shader.dxbc",
+      "sha256": "175c8eeae7c90bfaf29b3a57bf8d33570573bf6499c7fef954a214b947b70822",
+      "bytes": 4048
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/trace.jsonl",
+      "sha256": "eeb0db3ad527ac0f4952faa94d41839b1588ec7cde3de11ee4067eb6810eba6a",
+      "bytes": 17474255
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/1.stdout",
+      "sha256": "4d6055ed0ea7efd0c5990a952f6d6472f82348837ba5bc1841e6be88b82b9cf0",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/debug.json",
+      "sha256": "2ed48d090b593ea9061b3cd5be88c4a2a0a073f01c41d368661fd7d339ee3dd3",
+      "bytes": 1561
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/job.json",
+      "sha256": "31ed03669dd006cb482d188637fbf12a39a4d5cf274d4b77f1b5b1b7abda6032",
+      "bytes": 675
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/result.json",
+      "sha256": "88c99d50e574ab5eec8d1bcca928dd1a6a1f17b4ebec89a471c618b5a2112a92",
+      "bytes": 6839
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/shader.dxbc",
+      "sha256": "caa58cebf00077a96e82dad2e73c2bff9d5f56c97546ccd50899f59699168c71",
+      "bytes": 3164
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/trace.jsonl",
+      "sha256": "0c0e9c42a0d7789f0fb5b9ada00a7717c55ce96e1bafcc9e801bd88b6ef8be3f",
+      "bytes": 14224466
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/2.stdout",
+      "sha256": "6c030132c8d8604a984c95f7afe2746add8fdd657ccff4da131704be1ca82c1e",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/debug.json",
+      "sha256": "b00c3dd6d77255ceb94a27bad8093af265c5e5671bd0e39fb8ffc07ddc7a4d03",
+      "bytes": 1557
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/job.json",
+      "sha256": "c1b9477514ded351aa8304a46e963c35fc955381ce361e32e02f11c80e153b02",
+      "bytes": 683
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/result.json",
+      "sha256": "ada5960e063e9f62e3607812e067c4c22a584f78b387a56504b7822e0422dd70",
+      "bytes": 6842
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/shader.dxbc",
+      "sha256": "409ed601115d5f5ae20b96225053cae5e4a67cf88d7ce68e2e1895f087bf1ad2",
+      "bytes": 3620
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/trace.jsonl",
+      "sha256": "fcdd90aad816ededbef05ced23319c9134b2ad2d497bb882c81c8b1cf302b24d",
+      "bytes": 4253473
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/3.stdout",
+      "sha256": "2210de08190dd9b70bba5406a00c054a0f89aa79ee0af1241949b3341d8bb297",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/debug.json",
+      "sha256": "a9c21927e795f3b56bd0379d3486234b2661ef746c209fb44e8ace1f2c68e7df",
+      "bytes": 1560
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/job.json",
+      "sha256": "bdeedf89b2aa9bed9e0dc999c8bb0f97b8f863dd88f59d3cc48ed295862af200",
+      "bytes": 684
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/result.json",
+      "sha256": "2f13e8a03ff7293d947305374fe94343509002e72bde9cb8dbfbc9bcdb75075c",
+      "bytes": 6847
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/shader.dxbc",
+      "sha256": "5e9c59c861742f17b08d57790afe800186b3d59b3c5ae28af0c727d2ba4ab8f7",
+      "bytes": 4884
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/trace.jsonl",
+      "sha256": "d940f3b521d3c992177c14a013834abcf31810c87853443559a004613f66a027",
+      "bytes": 56853336
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/4.stdout",
+      "sha256": "61da88721e8ad3b806d8c718396eb661c504670600e8ebfab28f2c29181d2c62",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/debug.json",
+      "sha256": "6343e9877adb9f392d0cb82db3582f0515017e28e1a43f5ed8d8b3962cb9c9f7",
+      "bytes": 1561
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/job.json",
+      "sha256": "4d61c73ef5c3f807c85da918caf11bd55c529361d2d53d0cb12160af1d124c28",
+      "bytes": 684
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/result.json",
+      "sha256": "a9add4b225ddfd5c10bdb994037c922d83faad39118d52358603767b28aaafec",
+      "bytes": 6798
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/shader.dxbc",
+      "sha256": "89374e99643573e5d771420f55cb93c295579dcfc04448fe75364c2a6e106905",
+      "bytes": 34248
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/trace.jsonl",
+      "sha256": "6663d2a32361b1dc331356c9993a1387e6d722c3c1c09fe47b27bc7b4512bb01",
+      "bytes": 16736589
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5/worker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/5.stdout",
+      "sha256": "4d222095638cd9cc8ad42d5f99d2fd0d725540b5ed0b7d7b549bb196a5982113",
+      "bytes": 87
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-intel-reference.json",
+      "sha256": "a330e7636599348124f31f21aa699fad97fe164c2419609f84052f00dd538993",
+      "bytes": 9947
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-intel-reference.log",
+      "sha256": "1af0a5fc9ab29a84a36d6eb62cf198f81971fed9e3429d5eb2abeafe12e59758",
+      "bytes": 27
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-reference.json",
+      "sha256": "3f7b1081818f602ed46cda39f1e980d02fde6c8329c86e91eb972ce970e82f8e",
+      "bytes": 9946
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-reference.log",
+      "sha256": "6d0a991c121cf62e7ecee2171be42de41326cca74f4efc1cc735369d57d673c2",
+      "bytes": 28
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-warp-reference.json",
+      "sha256": "99073e16b4199a2fc1884803da34ef79f704d3a06ac62f09a3ffa9fbb6b227da",
+      "bytes": 9935
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/bf1-325-warp-reference.log",
+      "sha256": "24c6d6ce2b04b8fc87182f1ea94a98de432820f004df87d32fb5cb98f3281a62",
+      "bytes": 27
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-expansion/matrix.json",
+      "sha256": "08f15c4f6b2705ea80e52754fd2e64488b1020123319f8d15fa345951807cdce",
+      "bytes": 55903
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.reader.json",
+      "sha256": "ddd086972c5cd2e4683e488369347e394bc9056dcfa1ba40faa4c510f8b0b530",
+      "bytes": 14943
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.reader.stdout",
+      "sha256": "ecfecb4db97e85b101966fce1b39f4191505319d718b54f6220215b97204e11d",
+      "bytes": 63
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.session.json",
+      "sha256": "aaa01755d201baa852399a8954698f6be565c0c0b1cdbb5a34dfcddabc0761b8",
+      "bytes": 414
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.session.stdout",
+      "sha256": "c63ebd583dd38512c1a04ec34694e0ddeef36b552f32b9227675eae3e8d36dca",
+      "bytes": 350
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/0.zip",
+      "sha256": "a625cfb22d59403d0afb38d18a041d812e6ba4d46d23c7461f147b05e5d72dd1",
+      "bytes": 14303658
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.reader.json",
+      "sha256": "24fefdbd4de3bd2a0d5eed6b02514bd8c182b026decfefabd88c73675bfcdc89",
+      "bytes": 18294
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.reader.stdout",
+      "sha256": "7ae3f001b0ad6f6523a303ec9f1d57607396d21ab1846546278cb3067543ed6f",
+      "bytes": 63
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.session.json",
+      "sha256": "680a27eda2511a010e31645dee6d56bf2999c6dcd8dbe20979614f43cd883e5c",
+      "bytes": 414
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.session.stdout",
+      "sha256": "45c4c1fb7c8443c094ba7f31b99cc8dd7e8aa84b9a042d34aee30589068671fd",
+      "bytes": 350
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/1.zip",
+      "sha256": "fe50ce28714ef01d95ce2c1b9095746249a8adc99a1beca344d45797f0d5ef89",
+      "bytes": 17527947
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.reader.json",
+      "sha256": "1ff85e9863c321e830d05e08b6b9bec3456f8c0830909a939eb9eb568dcb9ef9",
+      "bytes": 14943
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.reader.stdout",
+      "sha256": "03213151b2629253bae4b6d2d5bb4c0b310ab366389d95a3562f8fb5a88c03d3",
+      "bytes": 63
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.session.json",
+      "sha256": "e2e17e4907742555c616a17fa30a0f88cd2216906f68ecbd09feab41df6971f7",
+      "bytes": 414
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.session.stdout",
+      "sha256": "4eef905eb76bfc3822da20e743db4f3a2d3cda818b382a09bfe2a677defc9e8b",
+      "bytes": 350
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/2.zip",
+      "sha256": "d6162c58042b33fa5d241ce4ce4eebe7168d6424bca9d9fa26f61682ae434701",
+      "bytes": 14270589
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.reader.json",
+      "sha256": "ec8c3fa037d19b940362c2a349e364a148961d808e709c0dc295c8e50ae60d8c",
+      "bytes": 11748
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.reader.stdout",
+      "sha256": "b6967a080c5ca569ce295ace0bfd83825fa48888039c475e496655e52c09b120",
+      "bytes": 62
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.session.json",
+      "sha256": "39b2a02dde8eb22de61cbf26055971fe3209bf9e287b5a08e3b58a2348807cc0",
+      "bytes": 411
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.session.stdout",
+      "sha256": "6a0d596e43ffbc9942b516bf4015e6b5adce2226231d5958c59528d1ca73d6b8",
+      "bytes": 347
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/3.zip",
+      "sha256": "773f3f5ba8c7f9efbc67b959d139c04865a4f02ba1dfeaafa555337c20b4648f",
+      "bytes": 4302704
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.reader.json",
+      "sha256": "5600ef9d0e11fdf108ddf764f7f9dd42942402bdfc50089e62ef7e4bb83c5b48",
+      "bytes": 13285
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.reader.stdout",
+      "sha256": "7cdda51738316813ba6b19bc3689a1b6ada5a6946571cb5551ec36696567e242",
+      "bytes": 63
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.session.json",
+      "sha256": "12e100d50163e445ce8bf3e56b2894679bcc826adc40e07ea460e13f41bd4fcd",
+      "bytes": 413
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.session.stdout",
+      "sha256": "0d4a44711f95e44d35a848dfab3a4ae4672e03e2322f7a2a81067912894640fc",
+      "bytes": 349
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/4.zip",
+      "sha256": "f93d5ba7049a194f19e0bcc0794feed9cd8bda12b433e18e227b63ebfbab38ba",
+      "bytes": 56910798
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.reader.json",
+      "sha256": "a88e4112a0cf8c8f6c182407891e32ae13135ee63d99ae5199fc1a7ccab8b982",
+      "bytes": 41509
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.reader.stdout",
+      "sha256": "d51f850ceacb12e0b3982bf5a051512b32b6729a76507d19a1e762a13ad8a378",
+      "bytes": 65
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.session.json",
+      "sha256": "5161a9c8a2dbc1d71f8624d8679aa15568068cde58fdbc131c30d7eeca573162",
+      "bytes": 415
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.session.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.session.stdout",
+      "sha256": "af0a553a09795c784ab2a07b05ae064425058af721347082bee40a29cf38dd08",
+      "bytes": 351
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/5.zip",
+      "sha256": "1aefa6892ed58215f21b0d6d0b14028ab128a470e63cc696b1ac94a188848feb",
+      "bytes": 17051389
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-sessions/matrix.json",
+      "sha256": "104e32e096ad2c743f5706dbe2c3727f64edd9e97acb95ff97a274e4b5f25412",
+      "bytes": 8262
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_compute_captures.py",
+      "sha256": "37ab6731a79434b9d000dd331f412a3de38dbf3a509a2b2fa51d7a7ba246170e",
+      "bytes": 10198
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-binaries/FloraGPA.Worker.exe",
+      "sha256": "0d006c97ce197d61ba29b091fa79e2a3cdb7109f073064543a4bb5d0e7e8ae0b",
+      "bytes": 6095872
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-binaries/FloraNativeDebugSessionProbe.exe",
+      "sha256": "da742ad718a59f7165f3c89922b69a8baed4234111affa0515110bb3e3affe50",
+      "bytes": 1175552
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-binaries/FloraGPA.Cli.exe",
+      "sha256": "345955e8c4f9405d013dae75f55e1881d214c63af8aa82702c8979120147eaa9",
+      "bytes": 6095872
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-binaries/FloraDxbcInputProbe.exe",
+      "sha256": "ec77979d773ac8bb9313bafc2dd0a08b6abdb0fb0d9c045296b72d4464766a04",
+      "bytes": 1854464
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-binaries/FloraDxbcTraceReaderProbe.exe",
+      "sha256": "811efb31238798078a869e54977c3d873cabad2d7b602058c11c5b6a87eb4b1e",
+      "bytes": 945152
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/compute-capture-probes-build.log",
+      "sha256": "2214759364938c59900d8f234896d713c574359a13ebfe5c2a1a0b797ac8a8bd",
+      "bytes": 2997
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_dxbc_inputs.cpp",
+      "sha256": "cbe74bd413ca0ef5f2c265537261d456d62569f5a5a5ab661c46a2ae23deac27",
+      "bytes": 27496
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_dxbc_trace_reader.cpp",
+      "sha256": "d6e87a061c198ad3f1446d1fd927615aae245cad9a25669e2315b715eae4dcfa",
+      "bytes": 6797
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_native_debug_session.cpp",
+      "sha256": "4d6a986e5d40d93d19fffe00f495f9ef17aa38de72c83a55e1767ce15ab83f5a",
+      "bytes": 3637
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_native_compute_captures.py",
+      "sha256": "99a8f4e2b816b2f736ad4c3d0dfe31a86b9be99d10bb57b087d617ca4a0d6756",
+      "bytes": 3803
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/probe_native_compute_sessions.py",
+      "sha256": "3b1bd99095ed239649eb17c2d79dedef4d0bd3d99a951d0264f029f8550140c3",
+      "bytes": 3184
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_compute_debug.py",
+      "sha256": "f942d26b9b1dd7b4236a06b9d590744459faf05e0cd108ef5b656cc05f147307",
+      "bytes": 10347
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_dxbc_execution_trace.py",
+      "sha256": "f2070fe24743d4ef07ad8baf5757df4fca0b50730ed3f6699d4bcd8813f21c0e",
+      "bytes": 22070
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_native_debug_session.py",
+      "sha256": "cd37fd2c79dbd9b4c5a67573c49fee4539c4e88293a947ef8beac93c695c4f0b",
+      "bytes": 5143
+    }
+  ]
+}
