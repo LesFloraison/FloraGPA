@@ -54,7 +54,8 @@ class NativePixelGeometryReplay {
         : r(replay), id(event), request(selection), planner(plan), observer(observe), cancelled(cancel),
           deadline(std::chrono::steady_clock::now() + std::chrono::milliseconds(selection.timeoutMs)) {}
     Json original(const std::function<void(Replay &, bool)> &observe,
-                  std::optional<uint32_t> completionTarget = {}) {
+                  std::optional<uint32_t> completionTarget = {},
+                  std::optional<PixelPrimitiveMask> primitiveMask = {}) {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
             throw std::runtime_error("Private original draw requires a completed before-event replay");
@@ -115,9 +116,34 @@ class NativePixelGeometryReplay {
                         const auto target = *completionTarget;
                         if (!state.stages[4].shader)
                             throw std::runtime_error("Private pixel completion requires a pixel shader");
-                        const auto marked = instrumentPixelCompletion(shader(state.stages[4].shader), target,
-                                                                      {0x3f800000, 0x40000000, 0x40400000},
-                                                                      request.maxBytes - cloneBytes, scoped);
+                        std::optional<PixelPrimitiveInput> producer;
+                        if (primitiveMask && state.stages[3].shader) {
+                            uint32_t stream = 0;
+                            if (const auto so = shaderStreamOutput(r.frame_, state.stages[3].shader))
+                                stream = readStreamOutputDeclaration(r.frame_, so).rasterizedStream;
+                            const auto layout = postTransformLayout(shader(state.stages[3].shader), stream);
+                            for (const auto &attribute : layout.at("attributes")) {
+                                if (attribute.at("system_value") != 7)
+                                    continue;
+                                if (producer || attribute.at("component_type") != 1 ||
+                                    attribute.at("register_components").size() != 1 ||
+                                    attribute.value("minimum_precision", 0u))
+                                    throw std::runtime_error("Bound GS primitive identity is ambiguous");
+                                producer = PixelPrimitiveInput{
+                                    attribute.at("register").get<uint32_t>(),
+                                    attribute.at("register_components")[0].get<uint32_t>()};
+                            }
+                            if (!producer)
+                                throw std::runtime_error("Bound GS does not provide a primitive identity");
+                        }
+                        const auto marked =
+                            primitiveMask
+                                ? instrumentPixelPrimitiveMask(shader(state.stages[4].shader), target,
+                                                               *primitiveMask, request.maxBytes - cloneBytes,
+                                                               scoped, producer)
+                                : instrumentPixelCompletion(shader(state.stages[4].shader), target,
+                                                            {0x3f800000, 0x40000000, 0x40400000},
+                                                            request.maxBytes - cloneBytes, scoped);
                         if (marked.bytecode.size() > request.maxBytes - cloneBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
                         auto *context = r.context_.Get();
@@ -181,6 +207,15 @@ class NativePixelGeometryReplay {
                         report["scope"] = "original_ps_body_on_private_completion_target";
                         report["diagnostic_shader_replacements"] = true;
                         report["completion_shader"] = marked.identity;
+                        if (primitiveMask) {
+                            report["kind"] = "native_pixel_primitive_mask_observation";
+                            report["backend"] = "native-pixel-primitive-mask-observation/1";
+                            report["scope"] = "original_ps_body_with_private_primitive_predicate";
+                            report["primitive_id_source"] =
+                                state.stages[3].shader ? "bound_geometry_shader" : "rasterizer";
+                            report["primitive_ordinal"] = nullptr;
+                            report["instance"] = nullptr;
+                        }
                         report["completion_target"] = {
                             {"slot", target},
                             {"format", uint32_t(desc.Format)},
@@ -450,6 +485,13 @@ Json replayNativePixelCompletion(Replay &r, Id event, uint32_t target,
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
         .original(observe, target);
+}
+Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
+                                    const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                    uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, target, selection);
 }
 Json replayNativePixelGeometry(Replay &r, Id event, const NativePixelGeometryRange &range,
                                const std::function<void(Replay &, uint64_t)> &observe,

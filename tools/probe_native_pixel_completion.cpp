@@ -10,9 +10,9 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     try {
         const auto args = app.arguments();
-        if (args.size() != 9)
-            throw std::runtime_error(
-                "Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE VENDOR NEW_DIRECTORY");
+        if (args.size() != 9 && args.size() != 11)
+            throw std::runtime_error("Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
+                                     "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE]");
         auto number = [&](int i) {
             bool ok = false;
             const auto value = args[i].toULongLong(&ok, 0);
@@ -23,6 +23,9 @@ int main(int argc, char **argv) {
         const Id event = number(2);
         const auto slot = uint32_t(number(3)), x = uint32_t(number(4)), y = uint32_t(number(5));
         const auto sample = uint32_t(number(6)), vendor = uint32_t(number(7));
+        const std::optional<PixelPrimitiveMask> primitive =
+            args.size() == 11 ? std::optional<PixelPrimitiveMask>{{uint32_t(number(9)), uint32_t(number(10))}}
+                              : std::nullopt;
         if (slot >= 8 || sample)
             throw std::runtime_error("Completion probe currently selects non-MSAA sample zero");
         QDir directory(args[8]);
@@ -86,9 +89,11 @@ int main(int argc, char **argv) {
         };
         const auto before = pixel(replay);
         std::vector<uint8_t> cleared, marked, original;
-        auto report = replayNativePixelCompletion(
-            replay, event, slot, [&](Replay &r, bool after) { (after ? marked : cleared) = pixel(r); },
-            256ull * 1024 * 1024, 60000, cancel);
+        const auto observer = [&](Replay &r, bool after) { (after ? marked : cleared) = pixel(r); };
+        auto report = primitive ? replayNativePixelPrimitiveMask(replay, event, slot, *primitive, observer,
+                                                                 256ull * 1024 * 1024, 60000, cancel)
+                                : replayNativePixelCompletion(replay, event, slot, observer,
+                                                              256ull * 1024 * 1024, 60000, cancel);
         const auto restored = pixel(replay);
         auto originalReport = replayNativeOriginalDraw(
             replay, event,
@@ -106,7 +111,15 @@ int main(int argc, char **argv) {
                              report.at("passing_samples") == originalReport.at("passing_samples") &&
                              report.at("passing_samples") == reference.measurementResult()->occlusion;
         const auto source = frame.shader(frame.resource(shader).data);
-        const auto rewritten = instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
+        std::optional<PixelPrimitiveInput> producer;
+        if (primitive && report.at("primitive_id_source") == "bound_geometry_shader")
+            producer =
+                PixelPrimitiveInput{report.at("completion_shader").at("input_register").get<uint32_t>(),
+                                    report.at("completion_shader").at("input_component").get<uint32_t>()};
+        const auto rewritten =
+            primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
+                                                     producer)
+                      : instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
         if (rewritten.identity != report.at("completion_shader"))
             throw std::runtime_error("Completion probe shader identity differs");
         save("original.dxbc", source);
@@ -126,6 +139,13 @@ int main(int argc, char **argv) {
                            {"marker_changed_storage", cleared != marked},
                            {"original_storage_restored", before == restored},
                            {"original_gpu_schedule", false}};
+        if (primitive) {
+            report["probe"].erase("marker_changed_storage");
+            report["probe"]["diagnostic_storage_changed"] = cleared != marked;
+            // Alpha can change even when the RGB predicate is false. This probe
+            // retains exact storage without inventing a typed predicate decode.
+            report["probe"]["primitive_predicate_matched"] = nullptr;
+        }
         const auto text = report.dump(2);
         save("report.json", Bytes(reinterpret_cast<const uint8_t *>(text.data()), text.size()));
         return matched ? 0 : 2;
