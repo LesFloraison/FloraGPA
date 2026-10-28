@@ -1,0 +1,3926 @@
+{
+  "schema": 1,
+  "scope": "captured_class_buffer_workflow",
+  "passed": true,
+  "cases": [
+    {
+      "case": "0-0-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "61415e43a18d8bd97c436c9ca95771eedacc2108313a76df768d2d1d2e25081a",
+      "edited_context": "1e73f086eb517a8a86a5eea75012a5c6b2c115c7502f5458e931ea42f61b9539"
+    },
+    {
+      "case": "0-0-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "0d243df25661cc30ad8ca7ba581ff74b0c7cdf1613c54b3a333cc5e47e32ed10",
+      "edited_context": "b7d76cd6df455b39c7d2e83ff47345748f5ce883958ab8f2e387a489547ae62b"
+    },
+    {
+      "case": "0-0-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "c19209233b18864462ec1f5d26b5fffcd3acb5a4fd2637ebde89c0ed976a5f76",
+      "edited_context": "8321c9281761dd7f1eab7f9638993ddcb617e01a2140a9d469d05b60cb2b6120"
+    },
+    {
+      "case": "0-1-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "252974b12448ecee91f49f75bf00167b78ae01f053b4bf5d0f71b9e506d39eea",
+      "edited_context": "de9d5f082b5a703be41391e282769c8018b92818efbc9754efff77a32a669eb2"
+    },
+    {
+      "case": "0-1-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "12003a4b369187a3e6a4746b0574cf4616de7950d35dec6cd6830da5d5f01fa7",
+      "edited_context": "6ecaa90b18fc0dd7d55ec5fe7ae303640f113d845f1670f0af1bf3793f36aed6"
+    },
+    {
+      "case": "0-1-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "6ef26574512836817fc776518ab978102711e59c4321055bff140d8176f3ce8f",
+      "edited_context": "a7af5166353f655b132ea7b0101524fdc50b24ebf2f076fa24faefcc83f00f50"
+    },
+    {
+      "case": "4318-0-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "510ee1fbc2a54d1d7239554327fdbd8093e4fc1ae661b07c44c6967ec4f9c0fb",
+      "edited_context": "367b9ca183c0df32f3697c97c88fd83c9b5c5b3a8287c4634a98a72d0a3cbc21"
+    },
+    {
+      "case": "4318-0-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "46981c9b88def064847a4c4f0c4f562c3617adf7c19e233e2826df3f72f5a379",
+      "edited_context": "6521fded5f388547dc39a06da43687ed0a07bbcb891ee9a99e873c807b7b95aa"
+    },
+    {
+      "case": "4318-0-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "72375107bd6752f17fd52dd26d02875fc3f957e9c6e86afd05024230b75abffc",
+      "edited_context": "85004b24570b80366dfbcb829b628bf9f40fcad5cad374d5c729d716ee12a3e6"
+    },
+    {
+      "case": "4318-1-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "b6c8e7de5a0c93c4f30c86cc2933a2fa8e5f2865f9f667244d201163189bcdb6",
+      "edited_context": "5b27796cec2e8f72023e8a3e548acdfc0beca6ee6023ef1d8827e8be6da21cec"
+    },
+    {
+      "case": "4318-1-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "9d89dbd5069d59e40d47470a528046f981163037703d9e55dcf62bcdb90ce2cc",
+      "edited_context": "c6aa6bb0031cb142a48d5c3472345557eebe17d01423ec450bd534c2952f755a"
+    },
+    {
+      "case": "4318-1-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "3c50e04f10333925f54389f477b913b4cfe681af9ff7a0b89eafe5045ccb2ed7",
+      "edited_context": "7a8d8d0695267c7cf11464f746f8180dcec6c428d0ccb69100be71c4caca7aa9"
+    },
+    {
+      "case": "32902-0-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "c5b515c3ffc4cd1db9a1ecc4e8ee6ba1ace98f10ec53d7870f53a55e865fdfed",
+      "edited_context": "4385b4faf5f0343090bea85c4bcdfe7fe2c63a7cfbb4164b0bfd03ad2f980465"
+    },
+    {
+      "case": "32902-0-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "9fe820875df20028d5b6026674efd929bc5c04091d0303e4d952da1454f7adbd",
+      "edited_context": "007b3c35acd3da7a3a50c9e4d9384880fc65fc3208ac2827a0e95ea4a88ec93b"
+    },
+    {
+      "case": "32902-0-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "b56c068ea743acd33d937c5cfa53f3879cfd1641f7ca7a7e1ee92e86f04bda34",
+      "edited_context": "23b4e3310b2092c9cfe54fb279168e53161937c3a14e2535a90353d64992e47e"
+    },
+    {
+      "case": "32902-1-0",
+      "base": 230,
+      "edited": 1230,
+      "context": "c0a17770cf13ea8c40ead1bbb03a8346c7e501bcca6c59c7b1ddb54bcce369a3",
+      "edited_context": "08acfee154b1bcf662537625954ff0a937a8407cde2b6fbf63219ef3454b49f9"
+    },
+    {
+      "case": "32902-1-1",
+      "base": 239,
+      "edited": 1239,
+      "context": "ec1fc5126389c967a63e91e1f3771f6413a958beff73362a5ae479793134f212",
+      "edited_context": "5607a75fd34d40d16b88078753b834085d344795ecee97858ade5319fa46c387"
+    },
+    {
+      "case": "32902-1-2",
+      "base": 209,
+      "edited": 1209,
+      "context": "df8ebe85d4c5b0dbed6f12aa7b199adacef38053769702eb1086a9f6681ff02d",
+      "edited_context": "b7ccd61b53ae0da9a806c9021a18fee0c87a3acd85c2f1867ddbf481018dc2b6"
+    }
+  ],
+  "indexed_pixel_sampling": [
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "indexed_sampling": true,
+      "opcode": 69,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 0
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "indexed_sampling": true,
+      "opcode": 70,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            1040187392,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1065353216,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_c",
+        "output": [
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          128,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_c-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 0
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140,
+        "warp": true
+      },
+      "indexed_sampling": true,
+      "opcode": 74,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_b",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_b-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 0
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 69,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 4318
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 70,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            1040187392,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1065353216,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_c",
+        "output": [
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          128,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_c-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 4318
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 74,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_b",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_b-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 4318
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 69,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 32902
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 70,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            1040187392,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1065353216,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_c",
+        "output": [
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            1065353216,
+            1065353216,
+            1065353216,
+            1065353216
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          128,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_c-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 32902
+    },
+    {
+      "coverage": [
+        15,
+        1
+      ],
+      "helper": {
+        "backend": "dxbc-gpu/25",
+        "completion_wait": "fence-event/1",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45056,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902,
+        "warp": false
+      },
+      "indexed_sampling": true,
+      "opcode": 74,
+      "reference": {
+        "comparison": 4,
+        "configuration": 0,
+        "coverage": 15,
+        "dataset": 0,
+        "diagnostics": [],
+        "discarded": 0,
+        "first_mip": 0,
+        "flow": "uniform",
+        "inputs": [
+          [
+            1052770304,
+            1052770304,
+            3221225472,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            3204448256,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1056964608,
+            0
+          ],
+          [
+            1052770304,
+            1052770304,
+            1073741824,
+            0
+          ]
+        ],
+        "mip_count": 4,
+        "name": "point",
+        "offset": 0,
+        "operation": "sample_b",
+        "output": [
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ],
+          [
+            1059848192,
+            1059848192,
+            1059848192,
+            1059848192
+          ]
+        ],
+        "patched_comparison_destination": false,
+        "resource_bound": true,
+        "resource_min_lod": 0.0,
+        "sampler_descriptor": [
+          0,
+          3,
+          3,
+          3,
+          0,
+          8,
+          4,
+          1052770304,
+          0,
+          0,
+          0,
+          4286578687,
+          2139095039
+        ],
+        "shader": "sample_b-uniform-0.dxbc",
+        "status": "observed"
+      },
+      "sampler_slot": 5,
+      "texture_slot": 3,
+      "vendor": 32902
+    }
+  ],
+  "original_class_dispatch_parity": false,
+  "source_debug_parity": false,
+  "files": [
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "b9f49a54fbb1536b2c405cd63981c23f8299b66ab6071a1b496e5509d8481ba3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/job.json",
+      "bytes": 665,
+      "sha256": "69ce96d836c1f20dd6d59856252d39fb1eaecb38898151ad948c2b4b2b19e695"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/result.json",
+      "bytes": 5603,
+      "sha256": "4143dd1f415335fbc84c04b82bf5e996f69e501cedfba89f86ada85534927f62"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/trace.jsonl",
+      "bytes": 96132,
+      "sha256": "974e2a85199fdb8651334e275b70debabd238ee5ec2a99cd6f271add33d29003"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "8d8ab628558669eedcc90b6f27caf886a75da08085e4f225cbd0edd13226f826"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/job.json",
+      "bytes": 757,
+      "sha256": "e1dd2378381f2a667eed9dbd1009f3d4d4f283fc1f769724d7d6f3d10da5456b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/result.json",
+      "bytes": 6034,
+      "sha256": "7c7bf39a76121d55d9bbfece4f8d6925b06ad9e0c5faa03d7e3dfd4484bbc59d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/trace.jsonl",
+      "bytes": 96143,
+      "sha256": "433c9a15d2dc111c9f0514eea297a160fff90327770b832fc48d5d711346eab5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "ddc541e5abe1feda0484da7b4ebac1af8c6c48cdb1e22175a7741bb4d3c3656f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/job.json",
+      "bytes": 815,
+      "sha256": "67ab2ed515752cb3b493ab3d997b57d142042258a065ee1db0bbc353eab37421"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/result.json",
+      "bytes": 6093,
+      "sha256": "7e7f9871a57ab3e39c723a22b095a52f49079c48d1ffeb4a3dbc847ea10236bb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/trace.jsonl",
+      "bytes": 96138,
+      "sha256": "951d632adb399775f01f7b53db029ad5d53402c302f866301cc407cb42026226"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/experiment.json",
+      "bytes": 557,
+      "sha256": "e8e9e0393d935ae148cb157ad061cc49fe1dcc63de4dc6dfd7b7a9fa73b3dcdd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/frame.gpa_frame",
+      "bytes": 49201,
+      "sha256": "cf2e8ac64af2caa3aa7fc72df5fe1eae850b7a0e291a9eca44c529d54e354e61"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/session.zip",
+      "bytes": 121556,
+      "sha256": "85a49548955399320e729d2666fb5f1f3918e72f0b9da138f4d7bd2d6f5f3a41"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-0/workflow.json",
+      "bytes": 3437,
+      "sha256": "5b8c9d8c6d38eebd35456aa849480b4bf40a2e5c4001c22e737fd7aec5b1eb13"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "45a74be2066ef778834f83af530b19576f98e2e069207b633e639b764e1517cf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/job.json",
+      "bytes": 665,
+      "sha256": "69630682c9ae29ff8da33b6f63148149419b4775b39de1f66eb51c566865a881"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/result.json",
+      "bytes": 5603,
+      "sha256": "07059ad32a7521a10bff5614252a6f116bdba30b338102e176eef846e4d4d5e8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/trace.jsonl",
+      "bytes": 96312,
+      "sha256": "962d677d523d7b7852b91e417e061ecac5aa3f81933a14cebb8ac1fb701d9631"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "c89bf331bdcf68daa0a8cc63cd70f65d9367641afec57ba25609766e15756b12"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/job.json",
+      "bytes": 757,
+      "sha256": "e4e014775609b00cddde1cfe99d8cf9c29d8d5d02d4bf26b7586950479d4e991"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/result.json",
+      "bytes": 6034,
+      "sha256": "90128c25610451394cb72ca0ff185464f3f0dd9e9842a47ebcb2b22d07b9bdf2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/trace.jsonl",
+      "bytes": 96323,
+      "sha256": "253dc12e0702e85598854453f4aed58a8b55f1d8afdcaebff2108adb1b4b14cd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "ddbd9c1cae9284a442ca9103d7c5f1b23bdee05774e90b3531108585234b1ef2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/job.json",
+      "bytes": 815,
+      "sha256": "80fec1c5ae2d047ea2c316669a74a1f87121fb860791a6f2c84aa57f19147eeb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/result.json",
+      "bytes": 6093,
+      "sha256": "36b545f7f8af4b9d5138f23a28af77ff752bf2f409cad87520322b0cf4ca839e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/trace.jsonl",
+      "bytes": 96318,
+      "sha256": "2ebebf538c27ebef22f1d6b9135d9b3670436b3340be55132d9c5759174ee265"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/experiment.json",
+      "bytes": 557,
+      "sha256": "06e5e21d253c35ea3d02f6b09b8ea69725a604bf679fa24e2269bc8754d9962f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/frame.gpa_frame",
+      "bytes": 49561,
+      "sha256": "21adcd07840dcdc5fd1b2cfbd79e3be920905c23ef7acd18b67bcf6f7edc1f87"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/session.zip",
+      "bytes": 123030,
+      "sha256": "1abf4ea943e727836573a9b5d41414f06caac53d65577367f3d0f4dcf40caad6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-1/workflow.json",
+      "bytes": 3437,
+      "sha256": "3184ac468f108a6633bcb66fb269d02a70b8bd1e3d5ea5fee6492c7c8d48ef3d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/debug.json",
+      "bytes": 1544,
+      "sha256": "ee21bcf59d70a7f2cb2362b9af9883fdefc897fb40db42ecad9a4f44e10942ad"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/job.json",
+      "bytes": 665,
+      "sha256": "9831172d10335ab67ffd3b4e4251ee6cdca6bed7dfa8cfdf4fbc9dac40b29f90"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/result.json",
+      "bytes": 5887,
+      "sha256": "8f764ba529cf0f8de3a71b8db09af022605d5b3f87c36bf76b426b2d07a41e6e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/trace.jsonl",
+      "bytes": 96345,
+      "sha256": "531cdc6c542524c14a4117449071cab1861efd3a566b68befdd8fed160c6f766"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/debug.json",
+      "bytes": 1544,
+      "sha256": "e37d72f309be836a3922ee0c626f47bf1138f0636bc2c49ff318f829733217bd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/job.json",
+      "bytes": 757,
+      "sha256": "4186942db5e8158163607a33629bb17e78921b41e7cae7d19200b5f16a8d0dee"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/result.json",
+      "bytes": 6318,
+      "sha256": "f7e8b54df8c42af6a831262cf69511333a42f6d93f3fa08f0cb2c4620f263165"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/trace.jsonl",
+      "bytes": 96356,
+      "sha256": "8de5102ab168aa2a26efc0a5efa6012e395f4a70217d0185dfaf864f66ee524e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/debug.json",
+      "bytes": 1544,
+      "sha256": "9626d7057d7cbf43219f82cfc9bdaee6327567f01f984a865e4419c4680248dd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/job.json",
+      "bytes": 815,
+      "sha256": "0ec83c595d821a2667be623547611dbb2e9622866e2912c7ae294a7a2de80c4d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/result.json",
+      "bytes": 6377,
+      "sha256": "b5fad0c3174b96ada14be99713dcd12cf07a0c915a009b847b1c14e758a9ab43"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/trace.jsonl",
+      "bytes": 96351,
+      "sha256": "ac2d678a43b7efc01a420ba60a22410f3fe962af9976af6c91e1f3654e014474"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/experiment.json",
+      "bytes": 557,
+      "sha256": "6161159f0592d56c4ac59375b631210bea340b1230cf9a6cfd81f12da72339ec"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/frame.gpa_frame",
+      "bytes": 49241,
+      "sha256": "6e85245f67048de5818da8bf36611370e1ee102a9c22c325d63cbcfe10502420"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/session.zip",
+      "bytes": 122486,
+      "sha256": "61d3572463d6f3496a2bdeba9ee1cf048e9e5e8ee56cdd647d3afd69bcb77b1a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-0-2/workflow.json",
+      "bytes": 3437,
+      "sha256": "2eb54864382da5ada805b384aabf8342708a777026ccdac823053584d5f18eff"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "59eca25ac25a4b8559dddae9cdd0caa510ce46c6472dfe801b8590e8494975bd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/job.json",
+      "bytes": 665,
+      "sha256": "2e473d1d7a84b9a5fd1c6fca4a3bf77e022d4b4f6ce4e45c0f639ae68ae3f522"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/result.json",
+      "bytes": 5603,
+      "sha256": "e676395a82956dd0aef32413dceb1fca62604fb07f547f4614be4236901a77f5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/trace.jsonl",
+      "bytes": 96129,
+      "sha256": "1aabc187306c124a9baf8c55cd405e69f9cf554a0243aa9228cfaa6121d07423"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "02391f636ad31e0813dba624c589edb1613ce2eef8d453c4148d962790046172"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/job.json",
+      "bytes": 757,
+      "sha256": "d031c2d0cbb88846913946ad74d90194eb6d05a3161f918a4612866af7b28d25"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/result.json",
+      "bytes": 6034,
+      "sha256": "07c553999fa1c6ba8208909eb941f1db7062142cd973eb599c395614fba86d96"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/trace.jsonl",
+      "bytes": 96140,
+      "sha256": "7856fe3b5f71aa1f1607bd9ba34b740cdd58dbdec1bea7c4b9b6ef6631ec7251"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "f38a499ea45086ae7f26536e850ca4cc9a58ede680b75af4085a087728bd4580"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/job.json",
+      "bytes": 815,
+      "sha256": "25e66c641081fb126f449359ca0401f3f1516f50493933c5b012dd68dca5c309"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/result.json",
+      "bytes": 6093,
+      "sha256": "7f217ecca1b640b8d2867244dce0fb8f3dbe10df7173d567860aad639f8a9230"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/trace.jsonl",
+      "bytes": 96135,
+      "sha256": "0e0c122e4240f90cf22e1be362c2dab4f5bb891a6b59c3a6f26cfd5a46674ea8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/experiment.json",
+      "bytes": 557,
+      "sha256": "64c170c6661a80880ebd80c582058b3ed567549f150d05c348560007d1908155"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/frame.gpa_frame",
+      "bytes": 49192,
+      "sha256": "9fdb39e6e89a508c17146650e3bad034cd1f9ecbc1abb4635dfdedf5e09d4abb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/session.zip",
+      "bytes": 121547,
+      "sha256": "6a32b04fe7746c4728e850715403490abe2669aef9c65f1d0559d101cd61d881"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-0/workflow.json",
+      "bytes": 3432,
+      "sha256": "eb7712d4482c77835054d8f5b8140614e4fb28361dd727d264df27268dfcc377"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "c404ad31a06e0f78e06db529ff55081997d02f9640eb0bb5b54ebd5ed71888d5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/job.json",
+      "bytes": 665,
+      "sha256": "6a6f34368fa95f19ab24a13829376efd06f9b0ac1400df2d6522e3b399d84c5c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/result.json",
+      "bytes": 5603,
+      "sha256": "4ca4110ffa3979a2db4a37d37e2645cdbcf75968d45d3dded7a0ace4b10be22b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/trace.jsonl",
+      "bytes": 96309,
+      "sha256": "6e3af080d9bd81911b7a77ed3f97f39d474818b8bbfa7eb0f99412c662b96c06"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "c14751c3a637357148809ef2898b7fb757092407142a8d9bbd87974b5eefc4ab"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/job.json",
+      "bytes": 757,
+      "sha256": "3faed7322c7beb6cd51b59edec12af5be126bdedff3b8f357049edf3578fdeca"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/result.json",
+      "bytes": 6034,
+      "sha256": "1ba7fc1c67a21e081d751ea86c9d1a9cadb0fb4654a1f9bae8fafcb507956e9f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/trace.jsonl",
+      "bytes": 96320,
+      "sha256": "4829d2b1c27c6af2340fd31b36685499103c6738905c813bc5b054d0d3787d4e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "fea201e1f8bcab08e2e018a3bed649512cb50c1ae4e904638ffb6ac10e9386b6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/job.json",
+      "bytes": 815,
+      "sha256": "7159755a6cd206098297a6f74cfb926d9a08bf1cd528b0e9f2008b42e1508e64"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/result.json",
+      "bytes": 6093,
+      "sha256": "16c145c641f31d33517b8e8738ce58d2a5ba80f43cb06d855696219de18f4ee6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/trace.jsonl",
+      "bytes": 96315,
+      "sha256": "0845980e2a20869faadc81569d5b99dbcbee2d52d0491160cc5042e9da59e9bb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/experiment.json",
+      "bytes": 557,
+      "sha256": "2ce17ddfa37c75cee33712e1ad0959bdb6f59845667540dd5243068afa4aecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/frame.gpa_frame",
+      "bytes": 49552,
+      "sha256": "0cb61988086289c8cfe3eed1d0cccb5f68696bbcd702c94e564049f6d0c2a260"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/session.zip",
+      "bytes": 123021,
+      "sha256": "07347e0d3548c94eba961f5ab1ecf86f5101d7bfab968bcda40f5d32f9cef69a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-1/workflow.json",
+      "bytes": 3432,
+      "sha256": "0a55487bf70afcfa21652805c9fc30109766b62ef72c26bf5c3c3498fb0d8584"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/debug.json",
+      "bytes": 1544,
+      "sha256": "414ef29fb3b7cc6dd62bcd01e9154624c522d8129e0b0a9cba8833008f1b8903"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/job.json",
+      "bytes": 665,
+      "sha256": "0ee2e173e150185be795de618aba5bbb6fd364aa7c91e8492840bac50b4379ce"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/result.json",
+      "bytes": 5887,
+      "sha256": "56ca05a47bb0f6a9679151ea03232894ea8f8de3500b9eb70f78123a2ee61614"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/trace.jsonl",
+      "bytes": 96342,
+      "sha256": "28dce38d9e5783608563681e42cd69dbb2b0cd3f9e5f3e97f7eef38a0b062fd8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/debug.json",
+      "bytes": 1544,
+      "sha256": "16da478e506ac3787bf33acf5416826414e8391fc1306ad7142f2325427bb075"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/job.json",
+      "bytes": 757,
+      "sha256": "b7ba1bb4f7c94aa6285818d715363ba2faeee74c6c4930a6868fd0938fedc673"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/result.json",
+      "bytes": 6318,
+      "sha256": "e54bc90184ee30c779de98d9880c5b5a03dad775a5cb1129416561076dab6862"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/trace.jsonl",
+      "bytes": 96353,
+      "sha256": "e3b1cef5f164825574d6ad7ebe73e5e8997037a3deef4633c10adeef299bfb21"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/debug.json",
+      "bytes": 1544,
+      "sha256": "5fb396a933fe0543d3b6bdc69f3230d9ae8e2d3bddad9bc1ed042a60bd2582bc"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/job.json",
+      "bytes": 815,
+      "sha256": "466cdd2c702c2a1e15871239cf01178ac830302d74826a6e7a010d39e8012d3d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/result.json",
+      "bytes": 6377,
+      "sha256": "83361889cf62629a235d93f3424477ebb6deba81e7bacc89a36ad39e16678816"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/trace.jsonl",
+      "bytes": 96348,
+      "sha256": "58a572166f7ffd02802f780df8eabc32c7948d4139718ccf9100fc996dbb364b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/experiment.json",
+      "bytes": 557,
+      "sha256": "655f6a3facfd87a31ac6906b43b35b43b9ed92a2293f2f2c56aa7741d8c6fc73"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/frame.gpa_frame",
+      "bytes": 49232,
+      "sha256": "f50c1337038912f64fa9c68ddbb75fc0c47a3a7222667d19aed68e011f26db36"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/session.zip",
+      "bytes": 122477,
+      "sha256": "194eb3380fee8d8ad0949fdb5183651f257169ad534516a39c50fb6821f4fb05"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/0-1-2/workflow.json",
+      "bytes": 3432,
+      "sha256": "172d988c0c1ae29bd23e957680018e8ae8e67f69c455ae5e2b947dd0371ecefa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "d8b17611a88992c7bb92920c79af33eb1d1be86af646ff47ce0439e611121099"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/job.json",
+      "bytes": 680,
+      "sha256": "8ec483e3d8bbf23fb26ccb81d7dbf89599bd485bc7904cb976c5e0b385d4c035"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/result.json",
+      "bytes": 6019,
+      "sha256": "8117d7ffe4daf976963d87fcc259234d0d521ce6390a2ef7580b5b91c6465641"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/trace.jsonl",
+      "bytes": 96135,
+      "sha256": "185cb8fec685275dc5d6192848cac4f76c9f5e94b57eb73d9d41cccf8a48f8bf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "581196e37e8728b77540fdf3cc268569082d7586e8f8b2b6588c6ebcd270bc2b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/job.json",
+      "bytes": 776,
+      "sha256": "02496073311411574fdd43ab9bd5d171df1a877cd45341d59dd987e0029eed73"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/result.json",
+      "bytes": 6450,
+      "sha256": "69cb76040da52742d339c9c865e8c39d8f52903558cd733864462e1941fb6d4d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/trace.jsonl",
+      "bytes": 96146,
+      "sha256": "d4df23b991b1f4e16b0e09c433d2788ca80bae49ad24bdc5563d114dba89b102"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "5ab6d2558f7dd08571783fe2ca5adf00bf3234d2122c7a830814899232d6b574"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/job.json",
+      "bytes": 834,
+      "sha256": "acc24d360f4d948c45e02953d17c46b11612ad1fc1ff3a40e20ba5d3c268ded7"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/result.json",
+      "bytes": 6509,
+      "sha256": "5324c986b21508945b5b728a12487662c2be3a040a7d789b37912f845e24befb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/trace.jsonl",
+      "bytes": 96141,
+      "sha256": "778e50d90d529b31a06c2fc4e11f40c3f8d31c747f4d0a6114e87cbafe67b1ec"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/experiment.json",
+      "bytes": 557,
+      "sha256": "e8e9e0393d935ae148cb157ad061cc49fe1dcc63de4dc6dfd7b7a9fa73b3dcdd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/frame.gpa_frame",
+      "bytes": 49201,
+      "sha256": "cf2e8ac64af2caa3aa7fc72df5fe1eae850b7a0e291a9eca44c529d54e354e61"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/session.zip",
+      "bytes": 121993,
+      "sha256": "92a960dd8c7e3b99d843f702d84c32100f653a01482ce2ec53a5c2fae9fc7d34"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-0/workflow.json",
+      "bytes": 3457,
+      "sha256": "d79548008b992305dc96385b522b4a0495fb4244cabf8f43bb6ebd7a9bab8d9d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "3e8e00f84b4967d4b8fbbb32dc07a590d26422a21f6e5ad01563bf1b6d5b26b9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/job.json",
+      "bytes": 680,
+      "sha256": "892fe6f826e1bc1739059cc387f1c0a9167d307d9b36653228ade2600ab2da34"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/result.json",
+      "bytes": 6019,
+      "sha256": "733efdbf30265fa865d76015bf2aece1b2ded97ed5a894b87966bb9a4f64dc54"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/trace.jsonl",
+      "bytes": 96315,
+      "sha256": "c4b7667df80b568e5a228587d8830f47ba004aac9799acb5b4bcd21c00829331"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "22a3da7dd52bd0a969f4f1d11d515c61b88ce34763260994c6da49bc73d88c54"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/job.json",
+      "bytes": 776,
+      "sha256": "ad46b8e551619f148164dec4d5cc3aed56ef0704e2083708674d14950071f641"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/result.json",
+      "bytes": 6450,
+      "sha256": "41c37a577af8ea6edf5487d93bcc8efbf1d00010ff8f44cad053fb703e5e9b69"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/trace.jsonl",
+      "bytes": 96326,
+      "sha256": "f0d58d9835d6ab5e7936711298fb95e09850d9000d19776d8f12b0a912b5ebaf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "58b7bcfa091a5cb1fc232e0396552384ca7ce55deb34a66ba4a509e628daf531"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/job.json",
+      "bytes": 834,
+      "sha256": "9d3824d7affa5a777dfd88622d845deff15d6548f5c285096f658cc8d601ec8b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/result.json",
+      "bytes": 6509,
+      "sha256": "20fa3969befce41b6aa48e553763938abfe2b6ac1208871eedbac660284bef3c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/trace.jsonl",
+      "bytes": 96321,
+      "sha256": "48981f76e90340722bda01d846878e6ff2b38c1fc199ec01760806a649a7deb3"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/experiment.json",
+      "bytes": 557,
+      "sha256": "06e5e21d253c35ea3d02f6b09b8ea69725a604bf679fa24e2269bc8754d9962f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/frame.gpa_frame",
+      "bytes": 49561,
+      "sha256": "21adcd07840dcdc5fd1b2cfbd79e3be920905c23ef7acd18b67bcf6f7edc1f87"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/session.zip",
+      "bytes": 123467,
+      "sha256": "9cf98b37cb788053c0a9335d79e709747b2afe8a9d13c76545bf7c4997fed19c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-1/workflow.json",
+      "bytes": 3457,
+      "sha256": "194a8b01d25df91809602a485e2b2918a2bd1479392cd549ab94cae0076816c0"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/debug.json",
+      "bytes": 1548,
+      "sha256": "c0a3d837c0dc0517c4dd5bb7213dd17827293e057bb42b2e3ad65f8c7e059bed"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/job.json",
+      "bytes": 680,
+      "sha256": "806a7ff170032df3c6cddcf1b4c54d5a2d7194cda62baca6f6a5e8735337e203"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/result.json",
+      "bytes": 6307,
+      "sha256": "fb699905cec58c6cd8f1dc7cd88b140d80df5ecfbab3d4185b886b5dc7be19a2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/trace.jsonl",
+      "bytes": 96352,
+      "sha256": "d94f33a143fb9f85f9a937d95c50cd0539b9695f8a2a748e4cb3b87c87bb7e98"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/debug.json",
+      "bytes": 1548,
+      "sha256": "69a46a62401abfe1c8a254390b1c053f6d66d6da3bbd64b67a1fea39d04ee509"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/job.json",
+      "bytes": 776,
+      "sha256": "190a350a8b01603dc624f1b08b76656722d724f4fc5268e9ba7094e0b6c4c3f4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/result.json",
+      "bytes": 6738,
+      "sha256": "51d358602debf1491ffdf83a8f5eb718e42ea6da8a9b042ed5af43052a8bb0c2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/trace.jsonl",
+      "bytes": 96363,
+      "sha256": "3b3920d81ef6a50638655f2991213698e1808b7b89b0ae5510e1ef5899f5c960"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/debug.json",
+      "bytes": 1548,
+      "sha256": "34e761dc11f5a7f2c776fafb4c502a24f431c0b291d28e368295362078766a71"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/job.json",
+      "bytes": 834,
+      "sha256": "4e76b4b925be19b0f85ae204d81a40aa56b3e3fb95b3109ce6f543f727f38242"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/result.json",
+      "bytes": 6797,
+      "sha256": "7a7b5653527ae6d3677f772d828f6f7b9fdd96ab771fbd3a396ac3d614508aa1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/trace.jsonl",
+      "bytes": 96358,
+      "sha256": "96046181abe8cc0d90ebbd48a749b8dd38c49c2c251e54624e922c2529f51446"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/experiment.json",
+      "bytes": 557,
+      "sha256": "6161159f0592d56c4ac59375b631210bea340b1230cf9a6cfd81f12da72339ec"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/frame.gpa_frame",
+      "bytes": 49241,
+      "sha256": "6e85245f67048de5818da8bf36611370e1ee102a9c22c325d63cbcfe10502420"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/session.zip",
+      "bytes": 122935,
+      "sha256": "21a6eac741b0f622afaa003423078721aeb5d57fc88362c650d0758644ecbb55"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-0-2/workflow.json",
+      "bytes": 3457,
+      "sha256": "2e7ee03242f8142b754ccd9549fbc0b575cf6714590b18be8cc7c1d5a6a2fb11"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "e9d25cb8bd14168659b37c7246d191a6a0ef89a53eabe2f1be2caed5c162ba0c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/job.json",
+      "bytes": 680,
+      "sha256": "a9e3109bae8a452f37ca67314187e7dc1c7940b9580eeedceef00e7162d2e4af"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/result.json",
+      "bytes": 6019,
+      "sha256": "f577db542402c937b86acc2a99c31764f087f4a34f03ed7591eda132af34e3fe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/trace.jsonl",
+      "bytes": 96132,
+      "sha256": "868cc0a26102adbabf4a31e7c839a41a41698f79c141138bc4ea776c052875fc"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "99faefff145ea98a92c2aa1766c3d94d19bf515c50661fcc07de9fe9d68bdf06"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/job.json",
+      "bytes": 776,
+      "sha256": "5a25ad923dc171409b8ed6b09c66132a4a9cedc41a6d557942d6d5da3a452f01"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/result.json",
+      "bytes": 6450,
+      "sha256": "1f49e49506534637915df777a286556c8fba1696fc790e814a715627b2acfdfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/trace.jsonl",
+      "bytes": 96143,
+      "sha256": "ea2ad727c2caf9c31f041b72d5b01eb7d599ea50e87a79b067b2626b45d074c9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "e947e91ccca6aae8a6e485b23896678e5abd955b799c42d6a874fd24a6e15809"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/job.json",
+      "bytes": 834,
+      "sha256": "0069d030f5db06666f24ca98df30b4d837d60771b8a76a10075bf04e5f0f9503"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/result.json",
+      "bytes": 6509,
+      "sha256": "0a167efb17565281b47ee6553e9acc60b4907d1dffe5ebaede9b2fb9794b3faa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/trace.jsonl",
+      "bytes": 96138,
+      "sha256": "1e449d4dc8925514e586b06c8b3f3cfc649f57993713c2c3de01ba64289611e5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/experiment.json",
+      "bytes": 557,
+      "sha256": "64c170c6661a80880ebd80c582058b3ed567549f150d05c348560007d1908155"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/frame.gpa_frame",
+      "bytes": 49192,
+      "sha256": "9fdb39e6e89a508c17146650e3bad034cd1f9ecbc1abb4635dfdedf5e09d4abb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/session.zip",
+      "bytes": 121984,
+      "sha256": "7653e4a44d37e5836a585964729dac5c27a02f83841c7590457b09c8d6c3973f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-0/workflow.json",
+      "bytes": 3452,
+      "sha256": "15f5c312d4ca3d14accb37f89557a347ba9406af15fcb40902b283854455c1b6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "cea60d1e6810e9d4c982d56eafcc36668993d6e514619b6f9f6a8eeaed78eb30"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/job.json",
+      "bytes": 680,
+      "sha256": "b9d98e5fa4fb0f06d7a3dbb39ff93e5af77dd773b97c32cdeb0d24ba8faf3ca4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/result.json",
+      "bytes": 6019,
+      "sha256": "13eb9f2f24e4fe72b575c46bfdbe064da10c7c420a1c62fafcc67dd606713a4c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/trace.jsonl",
+      "bytes": 96312,
+      "sha256": "dfd7e2c14e380a1a8ac4af7f230a0252c1dd1accac7f30bfdfedf5646ba6b4d8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "d899525809222efb4719a1b4d784b38a3b405767cff5eb57a5bb1404694d46a9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/job.json",
+      "bytes": 776,
+      "sha256": "cd18f83a713cf6e0e1ca5a5ea88de12708539f3b9ed449f37befbc204a41058b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/result.json",
+      "bytes": 6450,
+      "sha256": "f588cd293b60c06ac3863c1768ef007295240ab8a7abb5fa4c7a23aaa91b0807"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/trace.jsonl",
+      "bytes": 96323,
+      "sha256": "4fc5b8966b500ba043b10902b361b5bcf5f7025be3f29551e97db9226c0180c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "f36221e88cdf33b2c98e879c08f3303532197683cf397d0d52c89f8eda282fa6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/job.json",
+      "bytes": 834,
+      "sha256": "1eff63ea248abbf391998c5fb69c72db6c171fb0e757928154aef8b76456b024"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/result.json",
+      "bytes": 6509,
+      "sha256": "1e2bcc5f54774f6e8a16da56aac52242c14fa03ad7c1d023401706ae016f0ee9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/trace.jsonl",
+      "bytes": 96318,
+      "sha256": "b18e332ef41db2d314b4c56aee754adaacc5c1438346bd64b0f059fc78d7255b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/experiment.json",
+      "bytes": 557,
+      "sha256": "2ce17ddfa37c75cee33712e1ad0959bdb6f59845667540dd5243068afa4aecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/frame.gpa_frame",
+      "bytes": 49552,
+      "sha256": "0cb61988086289c8cfe3eed1d0cccb5f68696bbcd702c94e564049f6d0c2a260"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/session.zip",
+      "bytes": 123458,
+      "sha256": "0464134912933b8f8736b5f9ccf149178b7adf27c155fe25f6756bf99b3780e1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-1/workflow.json",
+      "bytes": 3452,
+      "sha256": "b9b26f7b924d139aa831d1066a4364c76c63c9eb9ad5cf59db74efb38238e6f1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/debug.json",
+      "bytes": 1548,
+      "sha256": "9bb15b1996adc779f2477ba88e43dbf43ef4444d41950b63268497b5deab5065"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/job.json",
+      "bytes": 680,
+      "sha256": "75cee95f35fd55ce5d6fc1e7da7310cae65c11ce15cf905a797047b239c82539"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/result.json",
+      "bytes": 6307,
+      "sha256": "b66df370df7070df0786115be2e030a59c7f3a351767528526f23b36c9d100d0"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/trace.jsonl",
+      "bytes": 96349,
+      "sha256": "06e822bcc85b5e5b1b6cf4857cc52c9f5eaf53191961a78aafa67f2b03b0fa42"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/debug.json",
+      "bytes": 1548,
+      "sha256": "ac6aed5b714ebda25c7289e4361df00c1b575f9820e779019bf6bc45d2970d74"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/job.json",
+      "bytes": 776,
+      "sha256": "3658d8370aa0a12e640bdc95bb686924ae200b72586cdb6edd3fb50cd8aba459"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/result.json",
+      "bytes": 6738,
+      "sha256": "b990574d6fbe70ac8e55fe5aff9c065338a3b6111e0195938559962fcce882de"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/trace.jsonl",
+      "bytes": 96360,
+      "sha256": "3cdfcc94515451e13c35743a9ec5f3900b393e86deea05709619ce7fb4c4e8fd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/debug.json",
+      "bytes": 1548,
+      "sha256": "a41823bcb8cf8c617f6ddcfe17a31e4e2f9747b67313e28e08e5c7a4ce74972c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/job.json",
+      "bytes": 834,
+      "sha256": "38bb67a8174455c8ffdc2c635316ff52e5d9e54b731b481e5318eb81621c0c3c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/result.json",
+      "bytes": 6797,
+      "sha256": "6aaf536d1aefadad3e199636917e8ee14a4c354d0687ca5122812cea5c12b09b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/trace.jsonl",
+      "bytes": 96355,
+      "sha256": "46ec5b27aa10798ee2011c961d3a9ffed7f5f3bf0a933dead242f2cf001937ae"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/experiment.json",
+      "bytes": 557,
+      "sha256": "655f6a3facfd87a31ac6906b43b35b43b9ed92a2293f2f2c56aa7741d8c6fc73"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/frame.gpa_frame",
+      "bytes": 49232,
+      "sha256": "f50c1337038912f64fa9c68ddbb75fc0c47a3a7222667d19aed68e011f26db36"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/session.zip",
+      "bytes": 122926,
+      "sha256": "a8d4257b7f55d041ab983f3fd33ef4e6bffbf685fe01d72bb58165bb98f734b5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/32902-1-2/workflow.json",
+      "bytes": 3452,
+      "sha256": "5ec4996cd33a078c4bc436f171acc2f3a02f0132245e62672bc4f053c5cbd0b9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "5205dcf9da82543645bba29cbf1649ceb823aa67e4ca6e2fde0058bff46ff1f6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/job.json",
+      "bytes": 677,
+      "sha256": "2302951e12769accf3483059165a2957bab43f63330dd3d8926ed124d9c9dbe5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/result.json",
+      "bytes": 6405,
+      "sha256": "8588285bc5fdb28099bb97058633be1adeb4f7e8ee9c6fbf166b2fe407d48858"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/trace.jsonl",
+      "bytes": 96134,
+      "sha256": "ee71330d55bfa547b1ef127b95574b020a4ad5cb5091869a412b247f950b1f91"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "3d08b2b3ff57cf13f100a1f19cd187c631123137d30cb70dfdd57a1647377bb4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/job.json",
+      "bytes": 772,
+      "sha256": "d51ce4aea7944849e27ae9e7127656ff53ec950b5a1f0ea4d5a1e79fac254ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/result.json",
+      "bytes": 6836,
+      "sha256": "b05f5583732fb3642f960eb10144f1aef7f1a43def63802fc62969d7aa6d9d12"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/trace.jsonl",
+      "bytes": 96145,
+      "sha256": "a5ddc21beed280989b6f977cf3a50ea7cdf29a471d35f2ffc944019f294cb44a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "a712f04db165264d2b2e4bf47038bf897df7d36ca0f1ca0b18263de9e94ceaa9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/job.json",
+      "bytes": 830,
+      "sha256": "ded066dc6cdfeead2912e08aea108f66fe8db5b9556a842e1b8640bd280105c8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/result.json",
+      "bytes": 6895,
+      "sha256": "fd866d676fc2c7d5e9d3f02bb361a3979c097837ac71f2b9e658eb8bc7c71fe1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/trace.jsonl",
+      "bytes": 96140,
+      "sha256": "8f4768ca5cc1079e7bf696d300e6d3565aaf53002908e65c4939d58313220b98"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/experiment.json",
+      "bytes": 557,
+      "sha256": "e8e9e0393d935ae148cb157ad061cc49fe1dcc63de4dc6dfd7b7a9fa73b3dcdd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/frame.gpa_frame",
+      "bytes": 49201,
+      "sha256": "cf2e8ac64af2caa3aa7fc72df5fe1eae850b7a0e291a9eca44c529d54e354e61"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/session.zip",
+      "bytes": 122374,
+      "sha256": "9096a90426c7892606bc031a40c967c0b8df342cd6eea92096045b682654e355"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-0/workflow.json",
+      "bytes": 3490,
+      "sha256": "156bd215fa5a0a92e876c4cfee69e00b529c539dabafe3b9c314e579705a2279"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "d08cdf735e642bf628c555cad812ff889ce515babb807cec998dece338071ad6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/job.json",
+      "bytes": 677,
+      "sha256": "3538f0d3589c953a51348adb9faa97135a78365ec5102fed3223d412d5ca1758"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/result.json",
+      "bytes": 6405,
+      "sha256": "5643b0897e2f801525f54d8b937492ae769ab51b65db28d53a50f067a35ed0c8"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/trace.jsonl",
+      "bytes": 96314,
+      "sha256": "713bff6ecaee349156ae2fcaed25ccb14b20a7c2f34dabd94aa29433e27ce4a1"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "10b0961ef13083503ec5ee8d73534fa2bac7c4748b4d8d71548f7f0a9f5ac79c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/job.json",
+      "bytes": 772,
+      "sha256": "0863103e69fb1febe6f7bc7dacd9523ca90d17824bf6ed3fdbb95dfb7424a5b2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/result.json",
+      "bytes": 6836,
+      "sha256": "7b7a5be70cb9f99d5b697a93376b479c934a4e074fcfb1f9100742d25fa040fe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/trace.jsonl",
+      "bytes": 96325,
+      "sha256": "3eec8cc2113fc2b9119e92e4e486d66208e526a675105c1434dbcf9ecd837adc"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "8d28ef6cc9ecd207c8ed3b9805b3aaa09528f1ccca3174aceaefecc88dba9aae"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/job.json",
+      "bytes": 830,
+      "sha256": "5c24ba10d99600c9e7e3f3a5048f70fec1f4b731ef2d878134fef80e75de1e40"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/result.json",
+      "bytes": 6895,
+      "sha256": "9a6ef7f343a7c4801e8f60f73c2469d7df53cf083c554e00c01a10b6c28ed7ab"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/trace.jsonl",
+      "bytes": 96320,
+      "sha256": "7f32168a8826c5d8ad5d842c7c8138d51f03db43ac8df19c27b4f0cf00ac7d13"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/experiment.json",
+      "bytes": 557,
+      "sha256": "06e5e21d253c35ea3d02f6b09b8ea69725a604bf679fa24e2269bc8754d9962f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/frame.gpa_frame",
+      "bytes": 49561,
+      "sha256": "21adcd07840dcdc5fd1b2cfbd79e3be920905c23ef7acd18b67bcf6f7edc1f87"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/session.zip",
+      "bytes": 123848,
+      "sha256": "88a3da33d22735840ca1b4a88befdd3a634d2516b9f5b2504cf4800f4dc2aebf"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-1/workflow.json",
+      "bytes": 3490,
+      "sha256": "edd705bf021446e3bfc583c2e820621a134e3089c2ed922c0da631923fd73f24"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/debug.json",
+      "bytes": 1547,
+      "sha256": "6978f42ee0fc6864bd24ed02b6111883d5e490aa1e4fefaffae65433f77006de"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/job.json",
+      "bytes": 677,
+      "sha256": "d64032536760ecc6bcae1f4344b273f33f414ffd3c9d05cd7949c42193d15d93"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/result.json",
+      "bytes": 6692,
+      "sha256": "03e6376e9ff2aa9db7a3198067e05c91cf44aa7194cc35c10fcff60ef023d5ad"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/trace.jsonl",
+      "bytes": 96350,
+      "sha256": "f5bd750d2d9e100980198800fb1c6bfe8e822057155f200c39b8f08a803b3450"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/debug.json",
+      "bytes": 1547,
+      "sha256": "96a39bf8be924c4520f2ea42bab8276ae3233e08f66f5e73b0c25ca599211baa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/job.json",
+      "bytes": 772,
+      "sha256": "4934299ca5a8da9d1b19b035902a53c4ce46d9e5742837dd2171898a04f3418e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/result.json",
+      "bytes": 7123,
+      "sha256": "4d803ecd50dd0bfeff0ff65d0850a57a2c563479db9523233e40e7bc1f733a0c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/trace.jsonl",
+      "bytes": 96361,
+      "sha256": "2d489a882d7eec4524c72929170be7abd009bbf64381ef4fb5776cfdec1285d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/debug.json",
+      "bytes": 1547,
+      "sha256": "31711c0acc27078a4c17fa7ebc730fb1e207e22277fad311dc736e624aed9a2e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/job.json",
+      "bytes": 830,
+      "sha256": "62ed56c1beb4ed5ee9f68561e9b3b33b3412cbb421c9f1a5b4a50656b142e355"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/result.json",
+      "bytes": 7182,
+      "sha256": "c966688684804a8fd0ff742926f8639458e4bd032c1568d140c3ac86a78dc802"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/trace.jsonl",
+      "bytes": 96356,
+      "sha256": "a32bb031967d9ce1deb44cc2899972990d98a974327b5c1e450dc2050c965860"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/experiment.json",
+      "bytes": 557,
+      "sha256": "6161159f0592d56c4ac59375b631210bea340b1230cf9a6cfd81f12da72339ec"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/frame.gpa_frame",
+      "bytes": 49241,
+      "sha256": "6e85245f67048de5818da8bf36611370e1ee102a9c22c325d63cbcfe10502420"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/session.zip",
+      "bytes": 123313,
+      "sha256": "73185481cdba6949d3685a656df454db985d546f25f584fb0a81008c81c0829d"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-0-2/workflow.json",
+      "bytes": 3490,
+      "sha256": "6f2e3786699e643c42ce4f108edfe0752a4b72b20e143e9df2f8bcb34d8d4ea5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/debug.json",
+      "bytes": 1280,
+      "sha256": "981c841d12eede027d738bbb03129a28af8ee2a7a72141972f5d6fe679683349"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/job.json",
+      "bytes": 677,
+      "sha256": "c8d3a95cfd5830a58c44d32e18da9eed11dd63c844f0452c4c88040fb9f83763"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/result.json",
+      "bytes": 6405,
+      "sha256": "1ab372c63aa31f509a183e018eb9f10c2a3e90d1bd9d9a25d8fffae5b1dde308"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/trace.jsonl",
+      "bytes": 96131,
+      "sha256": "c469072190c0757edc23f6657feb2aa2d44434e64c6ce9200c4faaae8c51fdc5"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "da177a83c30f8a08f5b65f6751469d72b2d3b3a77c037a6e4a9897b878e56824"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/job.json",
+      "bytes": 772,
+      "sha256": "5512b30856281061e8f2b7e2919214264e42ddb91fd9293ee701b2529870c1e4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/result.json",
+      "bytes": 6836,
+      "sha256": "43d3c08a3366982fffb499c8468e75dc27e741eca4b507d4fbb5a11a52f45468"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/trace.jsonl",
+      "bytes": 96142,
+      "sha256": "4964e882b3f99356c44520579ef8d2e4108515e3747a1a528b8b9957ad8b439f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "dbd80658fcffddbab8f2af1f115b67e3e7f60c20a8c600fd12e06a39c3c85ada"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/job.json",
+      "bytes": 830,
+      "sha256": "855b3fc062343e37081d76b59ddda42755b450d670556d4a4ba824574d836078"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/result.json",
+      "bytes": 6895,
+      "sha256": "b76f32195dbb817efc211aa962fd59f521bfec1b7962b003b358d4dfb0191b18"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/shader.dxbc",
+      "bytes": 1548,
+      "sha256": "1712cf84d7ec2a7d47061f00506c2967abbdb22a6ec6ffc35b04422f5edca0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/trace.jsonl",
+      "bytes": 96137,
+      "sha256": "67c65033459b49c9804412b97c6bc8531709f999c9f02e29781de616ad0dcf9a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/experiment.json",
+      "bytes": 557,
+      "sha256": "64c170c6661a80880ebd80c582058b3ed567549f150d05c348560007d1908155"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/frame.gpa_frame",
+      "bytes": 49192,
+      "sha256": "9fdb39e6e89a508c17146650e3bad034cd1f9ecbc1abb4635dfdedf5e09d4abb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/session.zip",
+      "bytes": 122365,
+      "sha256": "5158fbd1bf4378ed9b1e403fad863112806573692c5f017ffc7884a112648dbe"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-0/workflow.json",
+      "bytes": 3485,
+      "sha256": "de7b209f2fc7ac8eb2df2a2db61aae12f0f1d169628ef814426c70240ee6044b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/debug.json",
+      "bytes": 1280,
+      "sha256": "0adecb41d414148b826c42ee4f343e2a7f98dc64cd09a51d6198c6d06d66dbad"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/job.json",
+      "bytes": 677,
+      "sha256": "5578de45ff0ddb2f2bf46eaa9c292bbdfef0461709afbc82674cbe2e6882ec98"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/result.json",
+      "bytes": 6405,
+      "sha256": "9849acd575e910a478213e7c1ab8f54cd4fd476dcd36d7ee6f62546e9cbafb36"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/trace.jsonl",
+      "bytes": 96311,
+      "sha256": "83cda70a19c70f1924c4e4b1e3022193d958153cb80c617a36793b49e9edb08b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/debug.json",
+      "bytes": 1280,
+      "sha256": "63d075d091abc82488cacb02217254225471f2e227ca976b876df55aa3b231be"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/job.json",
+      "bytes": 772,
+      "sha256": "7e028685c812d71591862c62420cd1ddb8d927c93c8f49875b08edf8f9657434"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/result.json",
+      "bytes": 6836,
+      "sha256": "78d162d4c17ff1c0612ad12acc0897b31d7c72345fe1869cba936217f3262688"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/trace.jsonl",
+      "bytes": 96322,
+      "sha256": "503e20bc815919f0a0ffe16f9beff1dc5c83faf5a76efa3358445bbfd1765507"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/debug.json",
+      "bytes": 1280,
+      "sha256": "5aa7b4aefd6fd3eb5dc614ed23cc302e4b0218f126151a789597e4dcb96435ce"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/job.json",
+      "bytes": 830,
+      "sha256": "3bb1f571c27b6fced21d3342e4f31262b1a6227b7aaa7e1ae53f3b7a379b05bb"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/result.json",
+      "bytes": 6895,
+      "sha256": "0f240cccc8882a8906f7cef3f3d530bc83fa998e6380bdc48e00cf6d5c8eac17"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/shader.dxbc",
+      "bytes": 1908,
+      "sha256": "921f2569ff44ba580a27416722940139e4d7d57423589b7dac8ba23b8d6996c6"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/trace.jsonl",
+      "bytes": 96317,
+      "sha256": "93997f670240c88e06f9b4900e16e60a2fed5dc443915a8b2f94ac77a0764f14"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/experiment.json",
+      "bytes": 557,
+      "sha256": "2ce17ddfa37c75cee33712e1ad0959bdb6f59845667540dd5243068afa4aecc4"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/frame.gpa_frame",
+      "bytes": 49552,
+      "sha256": "0cb61988086289c8cfe3eed1d0cccb5f68696bbcd702c94e564049f6d0c2a260"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/session.zip",
+      "bytes": 123839,
+      "sha256": "36e6f335c1412bcfc5737040bc8aaa9a9139f97cfa52a4aabbf5970ea47a3f77"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-1/workflow.json",
+      "bytes": 3485,
+      "sha256": "d56c87b8b899217a3250fec57eb48048f3de5e553323649af066afad03fb582b"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/debug.json",
+      "bytes": 1547,
+      "sha256": "c4940884483b4d992a8cb6aaea2aaceb0b27e7222324b0b5e760a40bd66b63de"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/job.json",
+      "bytes": 677,
+      "sha256": "9b8ffd261dd124cdda2d1c6134a84341bd7a73c236cf26976f16e96d08e04ef2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/result.json",
+      "bytes": 6692,
+      "sha256": "26a876638392b253eb64300f609d2c72447b021c704e70ad938ff3e1acae1484"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/trace.jsonl",
+      "bytes": 96347,
+      "sha256": "b2af5d3edee921bb505184d10733444b4cb41059979071e04727788b23e95bf9"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/base/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/debug.json",
+      "bytes": 1547,
+      "sha256": "7673e8e83f796d0f2c3e90dbfb8271b5c9a2538ed7b4b9d2e4e3bd41bf69a25e"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/job.json",
+      "bytes": 772,
+      "sha256": "6279485692d8ad77cf44a1c4affa7d9ac9a152983da0e8d515d202935c56ce7c"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/result.json",
+      "bytes": 7123,
+      "sha256": "dee86c7dd9f13ac456d10285ebf154aaca332d4adc738b47f9d18b70f28b3684"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/trace.jsonl",
+      "bytes": 96358,
+      "sha256": "71317503cfd2bf9481e9c177fdb1bbd5b80925fbe0e6c0f8a4744ff03dcd4d15"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/debug.json",
+      "bytes": 1547,
+      "sha256": "84db4f51069a2178e1865c3860aa9e62b0c7972cb59bbabebfb99092eedd56f2"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/job.json",
+      "bytes": 830,
+      "sha256": "aa1861dadb61659220f77876fcf9ca1b379e5f0cad9d562d53c1857fc9aae404"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/result.json",
+      "bytes": 7182,
+      "sha256": "a59614d35e757f31a4d38b2430d5d6f3058bf015ed5e810a06113eec6805a712"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/shader.dxbc",
+      "bytes": 1588,
+      "sha256": "c829f569990af25a5d24571912f9caf41dc44316d7a8339a07822185137dfbfa"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/trace.jsonl",
+      "bytes": 96353,
+      "sha256": "aba50c3875a9e5b3ec46a183a970c9a71c9543df53ecf97469a7aad9cadb5259"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/edited/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/experiment.json",
+      "bytes": 557,
+      "sha256": "655f6a3facfd87a31ac6906b43b35b43b9ed92a2293f2f2c56aa7741d8c6fc73"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/frame.gpa_frame",
+      "bytes": 49232,
+      "sha256": "f50c1337038912f64fa9c68ddbb75fc0c47a3a7222667d19aed68e011f26db36"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/session.zip",
+      "bytes": 123304,
+      "sha256": "702d29cc7b4b65df4df22dc023f19176af18b7a16a4569bf5ef3e6a7af460cfd"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final/4318-1-2/workflow.json",
+      "bytes": 3485,
+      "sha256": "57e18c6a46ed8b30d36ebb8e7d71e4ff7bd07b1a1c00a3c576ae04d0678b2f60"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final.txt",
+      "bytes": 1410,
+      "sha256": "d85c54353a60b1eea94fe5d196fe1b979d8bab82e5d4e210d431dfc80f28e369"
+    },
+    {
+      "path": "tools/validate_native_class_workflow.py",
+      "bytes": 10226,
+      "sha256": "b36d94d70fda81f162af16d6b0bc311b22a9fc592c4ebf84fef938d79f68e3d5"
+    },
+    {
+      "path": "tools/validate_native_debug_session.py",
+      "bytes": 5143,
+      "sha256": "cd37fd2c79dbd9b4c5a67573c49fee4539c4e88293a947ef8beac93c695c4f0b"
+    },
+    {
+      "path": "tests/NativeClassResourceTests.cpp",
+      "bytes": 12056,
+      "sha256": "427b6de20fa85f1f5cee1aed1a53d8f6813c0129fc778c74043225ba7ab53c93"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-binaries/FloraGPA.Cli.exe",
+      "bytes": 6093824,
+      "sha256": "f8df7d7e2e4afac6d82870a7741b63727d640aad9e179b362fa03c76eabbf36a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-binaries/FloraNativeClassResourceTests.exe",
+      "bytes": 2419200,
+      "sha256": "11ccce4210b7bc4fc4ff3e811f734c33288479eb0766f27b3720cfe73315a253"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-binaries/FloraDxbcPixelSamplingTests.exe",
+      "bytes": 643584,
+      "sha256": "fdc242315bd5f69e48b184d7ba1a0257b02b6d5a9a8730bd5bd56b9da9d11b2f"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-final-ctest.log",
+      "bytes": 323,
+      "sha256": "f29080d2b7016d1624e641ed5d932dc181aa4b25d24a83820422d3073b32119a"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-gui-build.log",
+      "bytes": 1588,
+      "sha256": "b2d1e134f32530e4f65ef66f2fa06ea0bbe8448293af34291e45153ed254a8ff"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-build.log",
+      "bytes": 2806,
+      "sha256": "c7fa1b470a8d40836165444f3afe013c82f5df0e1a0bc2c25c3befd927537110"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-run1.txt",
+      "bytes": 6891,
+      "sha256": "39b29eb8ff11bff36b4eb656684e3b34b84fba041e48a99c682e2cc4539ec94f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-run1/0/results.json",
+      "bytes": 5130927,
+      "sha256": "58b0f3871bd5f16be1df24e6b3e776136ea9253b4b820659d22a425009c9bd57"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-run1/4318/results.json",
+      "bytes": 5135180,
+      "sha256": "567f929861adf9a78221b0b60f45c64d02f71885298d1babdd014f5d9dded802"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-run1/32902/results.json",
+      "bytes": 5130430,
+      "sha256": "ccba210295bde37752c878b74e1b74e66089a875db0813e6976bc151b6646606"
+    },
+    {
+      "path": "artifacts/dx11-native/class-workflow-binaries/FloraGPA.Worker.exe",
+      "bytes": 6093824,
+      "sha256": "f8df7d7e2e4afac6d82870a7741b63727d640aad9e179b362fa03c76eabbf36a"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-final.txt",
+      "bytes": 12087,
+      "sha256": "1ea4ad50e4c8519078e4586b9df511c41b2b0e6e2322bc6d2fa0c0caa13643e3"
+    },
+    {
+      "path": "tests/DxbcPixelSamplingTests.cpp",
+      "bytes": 26646,
+      "sha256": "db98442f3588b7467e86c40c624ec0a420e5f0da0071fa399585c1692c6c5560"
+    },
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 110850,
+      "sha256": "dfdd62adb806b49e7265dc7b3d93d8943709940fe1e56bbf28308c9cf2a01d7b"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 133702,
+      "sha256": "2aac22626449d7a19e311078ae66387ace9c8bbbcb906ac669e856054b179f09"
+    },
+    {
+      "path": "tools/native/pixel_sampling_probe.cpp",
+      "bytes": 27645,
+      "sha256": "802a61a65cfb51fc4a4320df3739418e3e0618defcb13f83a4291f23080a6c63"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/results.json",
+      "bytes": 5130927,
+      "sha256": "58b0f3871bd5f16be1df24e6b3e776136ea9253b4b820659d22a425009c9bd57"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/0/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/results.json",
+      "bytes": 5130430,
+      "sha256": "ccba210295bde37752c878b74e1b74e66089a875db0813e6976bc151b6646606"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/32902/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/results.json",
+      "bytes": 5135180,
+      "sha256": "567f929861adf9a78221b0b60f45c64d02f71885298d1babdd014f5d9dded802"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-discard-0.asm.txt",
+      "bytes": 1846,
+      "sha256": "ea4c407125c16b19694ba56c745bb5e3b98a4fcc5a1946be5c305cbe896b7521"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-discard-0.dxbc",
+      "bytes": 1192,
+      "sha256": "f1245cf83c952bec832940733e797e005857e50aaf0c7fe9d07a4d47619bce11"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-discard-1.asm.txt",
+      "bytes": 1863,
+      "sha256": "7fd5e64ba56e9e40d64d2479279ea00afdfe90b8a3b45207c503c0aedf22db3e"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-discard-1.dxbc",
+      "bytes": 1196,
+      "sha256": "5e6d6735c31016f81933aad39f4b02ab9ec31cf3f5b7a4da2a184fc0b293ff0c"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-loop-0.asm.txt",
+      "bytes": 1844,
+      "sha256": "47d34887548d8a91860068439b244220a284b00eb37cc1b0a590ad4512dc4211"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-loop-0.dxbc",
+      "bytes": 1160,
+      "sha256": "d7518f11f4d22cfb9ac750b400863c4d182b6c3b2a9f5554e33b51afb571a059"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-loop-1.asm.txt",
+      "bytes": 1861,
+      "sha256": "b23417a6ec59d66e4ff04e097ffc3f09184da52e756ab58c145c78396f17f0b2"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-loop-1.dxbc",
+      "bytes": 1164,
+      "sha256": "14ccaae1b4047d7010072fa6e067511caa8ce3e8e10bce10e9e9d28e9ce3a630"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-reconverge-0.asm.txt",
+      "bytes": 1853,
+      "sha256": "67e527ea04d04fec596e83da4ebc73ccc610c95d0cd8ed87b38584e660de3585"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-reconverge-0.dxbc",
+      "bytes": 1140,
+      "sha256": "bfbfe45c812c12f132d83d09b6634a1347ec969f8dbd1952e7c547277e3a4ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-reconverge-1.asm.txt",
+      "bytes": 1870,
+      "sha256": "802b740c3142eb02c1f3738b08a2004329a286d6ffbd52add8c5c321d505091d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-reconverge-1.dxbc",
+      "bytes": 1144,
+      "sha256": "93f89a83738334a6b06cfb73637274f68a00aefe2711f574111128e03a920c35"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-uniform-0.asm.txt",
+      "bytes": 1666,
+      "sha256": "7f72f653a07586a6443cc72d0ae1264165fbed3b98c8443118293bd3d8fec222"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-uniform-0.dxbc",
+      "bytes": 1004,
+      "sha256": "135e696d58ae12bb16bd3b1cc24650f36b0a5810d78a93b66703c71ca12802a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-uniform-1.asm.txt",
+      "bytes": 1683,
+      "sha256": "046fe551f4f5872692f8434c4f9406d73b9148d41e35ff3e0406bf67ed5177a3"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample-uniform-1.dxbc",
+      "bytes": 1008,
+      "sha256": "7e766a4d20d3ec41563b13886daa0e41dd82ea46494f71ae6b89c8f781b73910"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-discard-0.asm.txt",
+      "bytes": 1865,
+      "sha256": "92c009e33742a8bf849081b6dfde8f683c6e6019c12ad80471d496d095f01691"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "04a1b5fc00b8203a944876f4259170c3931fcddd518143fb3e477c906f9b1112"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-discard-1.asm.txt",
+      "bytes": 1882,
+      "sha256": "88e7b29ee5199286595d72e3950cab8e2aec99dc0b661fd5903a71cc27713812"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "c2e89d99a30a8175b7fa79d442358d87bd3794cb7a5443587d959d2692078f58"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-loop-0.asm.txt",
+      "bytes": 1863,
+      "sha256": "020a509472eca89713007388da3fc38a9c2454af441bab9959cb7a26fe51a4ed"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "69f14521725fa9a027f16264ae06bbff09b5342cab1b685a84fc575ceb8d4a2b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-loop-1.asm.txt",
+      "bytes": 1880,
+      "sha256": "d8dba64a0cc20c3760b757247494dc3c6ec67622e5038c7aebc0a26c6d237698"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "a2d110fc066642572adbf2e7d2fd94b0c11eede2a4fb76b1bd1f8a92ba5fa3c6"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-reconverge-0.asm.txt",
+      "bytes": 1872,
+      "sha256": "bbd164f95476a8f1154412e547ee4d309d5736d25f722297e2e6a2bb01734657"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "6b4d80c1c78561f05406dee99c4690067b79308f1db513e46c9fe9cf8aeefbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-reconverge-1.asm.txt",
+      "bytes": 1889,
+      "sha256": "6711ae83c905ac0b459f8022ab41b086a9e7de1685c27bd0e4e78583a4358f2f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "2e0dc5aea7b8490c9aa1b965670017088000772c884f5994bfe5b01aef747bc7"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-uniform-0.asm.txt",
+      "bytes": 1685,
+      "sha256": "07dd19472c7724b9f4536a5f4c5d96f3ee23577cfa825e0ed7707c616bec9106"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "e062a8e2f974793e30fcc84799c29a801064231c12d9bf6b2ea314060f7e4bc1"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-uniform-1.asm.txt",
+      "bytes": 1702,
+      "sha256": "1b1cbeeca9863fbbf9ece834906579dd66817ac100fe99b7282fdbb2032d0afc"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_b-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "cdd13a52f32831114c7418d73ba6da955d983cf6083225e5169bdc3ade7989df"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-discard-0.asm.txt",
+      "bytes": 1868,
+      "sha256": "b201f4e700ab87c490066c9555764cf9df6a20a25bef61529e8a80cb0929506b"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-discard-0.dxbc",
+      "bytes": 1208,
+      "sha256": "cff460d479cde59a1311f4add6d60cea68e2d569abf3ae4704252510811fc46f"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-discard-1.asm.txt",
+      "bytes": 1885,
+      "sha256": "71ec49f37aa50273145ec6d0b13e4b2e2f130076c0b3b0f48983527a042043cd"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-discard-1.dxbc",
+      "bytes": 1212,
+      "sha256": "5913155eac86306701d5a2074c0293fce18741fc7f9d1a40cca04480c06b4873"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-loop-0.asm.txt",
+      "bytes": 1866,
+      "sha256": "31a6c885a01fdc0f190d69522419c71929d07c90cf2cd3a6b0441a90ca9479b0"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-loop-0.dxbc",
+      "bytes": 1176,
+      "sha256": "0e1211c58000f0d3c760b5d19b5e122707753626b2fd964df368f6f33ba02fbe"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-loop-1.asm.txt",
+      "bytes": 1883,
+      "sha256": "93521db24bf43b23a543d5a12b13d587ea55d3c6d57108d3ed3bddb1e060e4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-loop-1.dxbc",
+      "bytes": 1180,
+      "sha256": "55387ad70154721653bf82c1a24c21f6ef8e116ea557e9e566b775052af1b577"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-reconverge-0.asm.txt",
+      "bytes": 1875,
+      "sha256": "778a8916debbbbca806c83d71fa1ef783b3bfd435b8511503990c9a7161f16fa"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-reconverge-0.dxbc",
+      "bytes": 1156,
+      "sha256": "c05ebe31f1aad6eb4c01969c15c96e49fa4cd203a16bf6958be92213533fa556"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-reconverge-1.asm.txt",
+      "bytes": 1892,
+      "sha256": "44efcbdd2634ef8c2bcab5dc106d970450b8256cd4cec8e89e08d4dc2cc72b6a"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-reconverge-1.dxbc",
+      "bytes": 1160,
+      "sha256": "a4dc80cf95a7be8a3f73a53c2fe9fe4c41ce52189bcb8ed9760cfa276b0debf4"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-uniform-0.asm.txt",
+      "bytes": 1688,
+      "sha256": "d6834be3fced5f3dc577ded75c13cd545e98cddc46f9153b37f218454509164d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-uniform-0.dxbc",
+      "bytes": 1020,
+      "sha256": "73485ca1c704296ff4e6df403b5843d44de76d61dae9ecb16ffdd921ae33bf3d"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-uniform-1.asm.txt",
+      "bytes": 1705,
+      "sha256": "7767a76a1b915922af231ca047ba1b50aaf663a037bf74ab089ebf55baa6ce68"
+    },
+    {
+      "path": "artifacts/dx11-native/indexed-pixel-original-final/4318/sample_c-uniform-1.dxbc",
+      "bytes": 1024,
+      "sha256": "d700d7b47326c93e3dddd79eab679d3202d5f15e6542f1a9134735eecbd782f2"
+    }
+  ]
+}
