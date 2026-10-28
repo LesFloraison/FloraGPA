@@ -1126,3 +1126,15 @@ matches, and system IDs are not promoted into primitive ordinals or instances.
 See `research/DX11_NATIVE_PIXEL_PRIMITIVE_PREDICATES.md` for retained failures,
 reproduction and evidence. Original quad/fragment association, full history and
 debugger parity, P1 engine recovery and P7/P8 acceptance remain open.
+
+## Typed pixel identity association continuation
+
+Private history can now decode actual typed RGB predicates and associate a
+verified conditional system ID with all matching geometry candidates. Duplicate
+GS IDs remain ambiguous. Three suites pass 420 Qt checks; 39 owned and nine real
+selections validate through complete storage and merger joins. Four validators
+reject 8,934 corrupted reports. Cancellation, retry, zero sample coverage and
+deliberate equality-readback failure retain unknown or unverified results where
+appropriate. See `research/DX11_NATIVE_PIXEL_IDENTITY_JOINS.md` for exact scope,
+performance, reproduction and evidence. Original invocation qualification,
+complete history/debugger parity and P1/P7/P8 gates remain open.
