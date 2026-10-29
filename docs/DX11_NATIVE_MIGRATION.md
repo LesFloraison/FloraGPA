@@ -1461,3 +1461,17 @@ instruction journal remain unchanged. The public job/session workflow passes
 and 38 corrupted observations are rejected. Timing improvements are observations
 with an Intel reversal in the second round; this does not close the remaining
 performance, full debugger, history, dependency-removal or release gates.
+
+### Original host resource reconstruction route
+
+Ghidra and independent original-code probes now identify the request `+0x58`
+host route through resource lookup, texture/sampler reconstruction and serialized
+output. Thirty-six guarded lookup/dispatch cases and eight successful resource
+reconstructions pass; twenty corruptions are rejected. The actual bound callback
+updates a `legacy::Player +0xc` resource-ID counter, not host `+0x3c0`.
+See [resource-route evidence](research/DX11_DEBUGGER_HOST_RESOURCE_ROUTE.md).
+
+This closes specific resource lookup/output contracts and prevents conflating a
+resource-number callback with the debugger engine. It does not recover that engine
+or qualify original pixel invocations. Product behavior is unchanged and all
+remaining debugger, history, dependency-removal and release gates still apply.

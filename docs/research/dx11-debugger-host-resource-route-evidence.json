@@ -1,0 +1,391 @@
+{
+  "schema": 1,
+  "passed": true,
+  "engine_recovered": false,
+  "full_release_acceptance": false,
+  "cases": 36,
+  "reconstruction_cases": 8,
+  "negative_checks": 20,
+  "elapsed_ms": 78,
+  "reconstruction_elapsed_ms": 78,
+  "edges": {
+    "request": [
+      "0xabade MOV RCX,qword ptr [RCX + 0x58]",
+      "0xabae5 ADD RCX,0x1d8",
+      "0xabaf4 CALL 0x1800865a0",
+      "0xabb0e CALL 0x180085f40",
+      "0xabb19 ADD RCX,0x48",
+      "0xabb22 CALL 0x18009b350",
+      "0xabb2c MOV R8,qword ptr [RCX + 0x18]",
+      "0xabb33 CALL R8",
+      "0xabb39 MOV qword ptr [RBX + 0x60],RCX",
+      "0xabc2b LEA RDX,[RBX + 0x78]",
+      "0xabc60 ADD RBX,0x90"
+    ],
+    "helpers": [
+      "0x865b9 MOV R8,qword ptr [RCX + 0x188]",
+      "0x85f97 LEA RAX,[RCX + 0x20]",
+      "0x9b371 MOV R8,qword ptr [RCX + 0x78]",
+      "0x9b3a9 LEA RAX,[RCX + 0x28]",
+      "0xaa808 MOV dword ptr [RBX + 0x70],EAX",
+      "0xaafd7 LEA R9,[0x180200458]",
+      "0xab175 LEA R9,[0x180200538]",
+      "0xab359 LEA R9,[0x180200618]"
+    ],
+    "writers": [
+      "0xb264a MOV qword ptr [RCX],RAX",
+      "0xa3c5d CALL 0x1800a6230",
+      "0xa3cd6 CALL 0x1800a5ff0",
+      "0xa3c56 LEA RCX,[RSI + 0x90]",
+      "0xa3cd2 LEA RCX,[RSI + 0x78]"
+    ],
+    "constructors": [
+      "0xb26fa MOV qword ptr [RCX],RAX",
+      "0xb272a MOV qword ptr [RCX],RAX",
+      "0xb275a MOV qword ptr [RCX],RAX"
+    ],
+    "callbacks": [
+      "0xb1510 MOV RAX,qword ptr [RCX + 0x8]",
+      "0xb1514 MOV RCX,qword ptr [RCX + 0x10]",
+      "0xb1518 JMP RAX",
+      "0xab6b0 INC EAX",
+      "0xab6b2 MOV dword ptr [RCX + 0xc],EAX",
+      "0xab6bb CALL 0x180087bb0",
+      "0xab6c0 BTS EAX,0x1f",
+      "0x8653e MOV EAX,dword ptr [RAX + 0x1c]"
+    ]
+  },
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/bound-callback.log",
+      "bytes": 3779,
+      "sha256": "fe0edacf20edb004ebef5fa465bae7a28f4f1ac4e11d39e6a579f914c4838aec"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/bound-callback.txt",
+      "bytes": 670,
+      "sha256": "17174749c8772706033ebcf7fedd67e9f032bd8e7386e72487c5d30995a68aab"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/callback-table.log",
+      "bytes": 3778,
+      "sha256": "0550f7c1176ea8fa891c997923e9eb57743516ba009829fed2d59393de82c1fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/callback-table.txt",
+      "bytes": 2342,
+      "sha256": "7efaed3a4935bab75084daa329daabfc12310bf1ecab45a8738547fa4bd77071"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/constructors.log",
+      "bytes": 3817,
+      "sha256": "d41e8ef7196e2b204e01b9c3d9ec4ad7658ca7fb487b8e96a4dd41f7138f866d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/constructors.txt",
+      "bytes": 8074,
+      "sha256": "09e46a44dda9921288668ed2cb65bae642a3e114edd022dc3c4cd322a2e3b256"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/file-id.log",
+      "bytes": 3772,
+      "sha256": "4c85409a3e325db99569fb95166cbf2f3532124112b2f1e897c4580beee28c02"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/file-id.txt",
+      "bytes": 2831,
+      "sha256": "6fa58def03a12b6b5b44302bbb7b4f586f3c198cf337ef3cf2ce984819bf91ec"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/helpers.log",
+      "bytes": 4037,
+      "sha256": "b03ad41cc31cfbcf31830872c92f7c57efc500ca2a504ff325e9c38a7b4a3cc6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/helpers.txt",
+      "bytes": 57376,
+      "sha256": "95545de8525c1fc7ebe28c6c915e3cb2b8077d157ea3e8664e5cb2aac1a4f5be"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/id-generator.log",
+      "bytes": 3777,
+      "sha256": "d3487b88c0d2e78b4b28382349fbbf842685226e61ccc397b651f3eca786fcaf"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/id-generator.txt",
+      "bytes": 1107,
+      "sha256": "39eccfb7934b8a9a04173422d5e34cbeec0d10ac367a8238e0c8279ab6bd251f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe/routes.json",
+      "bytes": 572333,
+      "sha256": "5a8133ac9587809872fd18fff0e3eaab8d3916237f52ee9c894c0ddecced6f62"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe/run.json",
+      "bytes": 507,
+      "sha256": "1a334aa119da590c8a65a8125980808e966e712ae3e1a2c50e774491198fe630"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe-final/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe-final/routes.json",
+      "bytes": 572333,
+      "sha256": "645fddf51c6edac6e46eb19c81f9fbad970767e5f2eb02c98cfc804c7b22f4f1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/probe-final/run.json",
+      "bytes": 513,
+      "sha256": "e2b3e38764abcf94abb037f42b95d66039d987d492fcaa0039f872d16049d749"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction/reconstruction.json",
+      "bytes": 149584,
+      "sha256": "f8e3aced56f17c0de9b5b42e09643b91930a2c7174c6e6123056bc82a2b5b826"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction/run.json",
+      "bytes": 520,
+      "sha256": "b11f8fe33022e61f7cf376ac86f00203ec4240cbb0dcef02621b532593cf3912"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction-original/child.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction-original/reconstruction.json",
+      "bytes": 156396,
+      "sha256": "5c1ebbead5f01752dbd21cc0d594329ea6ddc462630795756a1196d5c57f3e67"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/reconstruction-original/run.json",
+      "bytes": 529,
+      "sha256": "447e14a6fe928b23f2d6f4bb962180e13d0bbd4373e91ac596b4ab36b52e899d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/binary.json",
+      "bytes": 191,
+      "sha256": "be10ba34038a1aca2e90a76fea64170d7f708bfdea47263d918a7b9f2f93ac6a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/evidence-sha256.json",
+      "bytes": 1090,
+      "sha256": "ee6f4a1a22cc61db76276b70149fceb43027389481c9321b9a8b50998be04953"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/helpers.log",
+      "bytes": 3851,
+      "sha256": "a3e3701acdd386d7678dc4be2b742915e486d45567b959078fd88c0e9dab455b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/helpers.txt",
+      "bytes": 57376,
+      "sha256": "95545de8525c1fc7ebe28c6c915e3cb2b8077d157ea3e8664e5cb2aac1a4f5be"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/request.log",
+      "bytes": 3781,
+      "sha256": "7ea07df44ef6cd28dc780fa0989a4f87759ab1376e1f2d94074621bbfb015cfe"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/request.txt",
+      "bytes": 9079,
+      "sha256": "6a957d60c5160dcb9d76f9de3142ddfd5b40fdf929f10c81f050715921098ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/types.log",
+      "bytes": 3822,
+      "sha256": "c5ceb893ead111aeceaac186bee2bdc5c2a168e300c2cf8aa666bd8f8e1523ff"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/types.txt",
+      "bytes": 6454,
+      "sha256": "08a41404e891648dab3cc4a2be66e854d2aee8f2193121e20b6cc877acdb5e34"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/writers.log",
+      "bytes": 3861,
+      "sha256": "2c907443b89ae3750ba739a998eb464773646c5333d4c7101031c7afd3287240"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified/writers.txt",
+      "bytes": 56091,
+      "sha256": "547f05bffa256e9abe7324a032397d0036950c9063d3d85b757446842ef89d44"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/binary.json",
+      "bytes": 191,
+      "sha256": "25a62c6265625b8386262adf997a2c6333a7bd41ecd3a305dd353a564835799b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/callbacks.log",
+      "bytes": 3822,
+      "sha256": "683040a0b1bcf8ea5db46877a0629b699e91dc59ca1347245a37a6eaf8372fb7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/callbacks.txt",
+      "bytes": 4954,
+      "sha256": "55c8b948572b06b9cc81500daae04128e223fff68dc1f561e2d1dd1f2159a1ef"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/constructors.log",
+      "bytes": 3835,
+      "sha256": "31c40da1d3e2de82d5d2b151b158db52b9fa7f6c1d82163a8395e14a72465982"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/constructors.txt",
+      "bytes": 8074,
+      "sha256": "09e46a44dda9921288668ed2cb65bae642a3e114edd022dc3c4cd322a2e3b256"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/evidence-sha256.json",
+      "bytes": 1588,
+      "sha256": "f152271d0e856a94066aab77734e52fb2723dc080c1389c83d52a15c9bda7647"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/helpers.log",
+      "bytes": 3860,
+      "sha256": "4e6fab89acb29273b422ff4002644a3245f0665576b67bc44d28ccd68c715b9d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/helpers.txt",
+      "bytes": 57376,
+      "sha256": "95545de8525c1fc7ebe28c6c915e3cb2b8077d157ea3e8664e5cb2aac1a4f5be"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/request.log",
+      "bytes": 3800,
+      "sha256": "b76a032c45721c1b30bdd8993ee1f1b02600c7a1777e9608dc64e1989d2c6e4a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/request.txt",
+      "bytes": 28907,
+      "sha256": "c69cc63ab15db255e20143c012e7ce4e39378cbb4638b85bd8f986d4e437231c"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/types.log",
+      "bytes": 3875,
+      "sha256": "211c947a2d53d97859031ebdacd8de30842ad14f6b291d6b47cec471a3d2ba04"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/types.txt",
+      "bytes": 14556,
+      "sha256": "73766bfabbd34948eb392b1f36d6e07a37cb10189837195272688d50dc7c175f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/writers.log",
+      "bytes": 3870,
+      "sha256": "c5fffef89d25b13341ca639fa4ea2213e2da8ec1f33408ec07aa44075797e65f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-complete/writers.txt",
+      "bytes": 56091,
+      "sha256": "547f05bffa256e9abe7324a032397d0036950c9063d3d85b757446842ef89d44"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/binary.json",
+      "bytes": 191,
+      "sha256": "9de4b31df1fa3241c0cce598e58c220cabc36a75aedd619c9de90c7e8240b7de"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/constructors.log",
+      "bytes": 3832,
+      "sha256": "4a4e7d95743e63c288ce276a71c68c9618dc52320b1891410e95c76a6476518b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/constructors.txt",
+      "bytes": 8074,
+      "sha256": "09e46a44dda9921288668ed2cb65bae642a3e114edd022dc3c4cd322a2e3b256"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/evidence-sha256.json",
+      "bytes": 1342,
+      "sha256": "ab0fdb969a45dc01fd7052cdb47e2742685b9db6b13e24775a236416a89ce30c"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/helpers.log",
+      "bytes": 3857,
+      "sha256": "706b1fde6c212542b705ad19c241b878525b3b36a06fd5585c12c43bb1ba35df"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/helpers.txt",
+      "bytes": 57376,
+      "sha256": "95545de8525c1fc7ebe28c6c915e3cb2b8077d157ea3e8664e5cb2aac1a4f5be"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/request.log",
+      "bytes": 3787,
+      "sha256": "266c353bb305bde901aecd48d9017f96fda4a7efcfcaa12cd94e37bcbe8f41fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/request.txt",
+      "bytes": 9079,
+      "sha256": "6a957d60c5160dcb9d76f9de3142ddfd5b40fdf929f10c81f050715921098ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/types.log",
+      "bytes": 3861,
+      "sha256": "ca4bb10b41b8c6a11d86b43a808189775de6f16c5b2c14c778dcefa53041613d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/types.txt",
+      "bytes": 12338,
+      "sha256": "09ae71f7c57f9dc994f1bc3c69b8e5d531934ad5b37638b1df04e73082219902"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/writers.log",
+      "bytes": 3867,
+      "sha256": "0b2bf50bd0809940dcdba15c352701fbd2a07e61582464c7d6583ce30b2559df"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/verified-final/writers.txt",
+      "bytes": 56091,
+      "sha256": "547f05bffa256e9abe7324a032397d0036950c9063d3d85b757446842ef89d44"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/writers.log",
+      "bytes": 3852,
+      "sha256": "f50560d7e18db28ea86401400513bb519cd93720accb5cab7ec187025be7bb50"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-host-resource-route/writers.txt",
+      "bytes": 56091,
+      "sha256": "547f05bffa256e9abe7324a032397d0036950c9063d3d85b757446842ef89d44"
+    },
+    {
+      "path": "tools/probe_original_host_resource_route.py",
+      "bytes": 8199,
+      "sha256": "b07ac4c31edfd20cc15eed9b1e7c4f15cb8b92eec06b28124868d98e7976f0b4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/tools/validate_host_resource_research.py",
+      "bytes": 13075,
+      "sha256": "92083d4ea530cf61416405cf42080b369c52c1cbae36f46f594425b8d86ad696"
+    },
+    {
+      "path": "tools/probe_original_resource_reconstruction.py",
+      "bytes": 7622,
+      "sha256": "a6b5df9f4ae5265f48793fce62f02c18110cc45c77025a96b0be0558ee0aae71"
+    },
+    {
+      "path": "tools/ghidra/Invoke-HostResourceResearch.ps1",
+      "bytes": 3025,
+      "sha256": "d6431c39d00d9fdd9102820004e5373d953b68b1ca49170084cd4285bc59051c"
+    }
+  ]
+}
