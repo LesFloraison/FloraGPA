@@ -1562,3 +1562,17 @@ Intel. Existing MSAA and typed UAV matrices additionally compare feedback reads
 and original resource state. Clamp feedback, tiled mapping and complete debugger
 qualification remain open, as do the existing NVIDIA buffer oracle failures.
 RenderDoc removal and standalone release acceptance have not been completed.
+
+### Per-sample clamp feedback
+
+The [clamp feedback study](research/DX11_NATIVE_CLAMP_FEEDBACK.md) adds native
+per-sample LOD operands to pixel quads and compute gradient cohorts. Requests
+retain the selected adapter/device capability and preserve scalar immediate
+parameters. Analysis identity is `dx11-native/6`; the GPU helper is `dxbc-gpu/29`.
+
+The independent matrix includes 144 supported-device cases and 18 explicit
+unsupported-device rejection cases. Native output agrees with original shader
+execution, including a newly isolated Intel immediate-bias behavior. A separate
+clamp-effect assertion and verifier still fail for that behavior; it remains an
+open semantic acceptance gate. No vendor exception or weakened assertion is
+enabled. Full native parity and standalone release acceptance remain incomplete.
