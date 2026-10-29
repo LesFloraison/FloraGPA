@@ -163,8 +163,8 @@ class GeometryUavDependencyTests : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto mode : {"independent", "read", "ia-alias", "gs", "gs-read-uav", "gs-read-srv",
-                                    "gs-unbound", "gs-alias-uav", "gs-alias-srv"})
+            for (const auto mode : {"independent", "read", "ia-alias", "gs", "gs-empty", "gs-read-uav",
+                                    "gs-read-srv", "gs-unbound", "gs-alias-uav", "gs-alias-srv"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(mode))) << vendor << QString(mode);
     }
     void isolatedInstances() {
@@ -175,10 +175,10 @@ class GeometryUavDependencyTests : public QObject {
             const auto path = directory.filePath("hull.gpa_frame");
             const bool gs = mode.startsWith("gs"), unbound = mode == "gs-unbound";
             const bool rejectedCase = mode == "read" || mode.contains("alias");
-            auto fixture = mode == "read" ? testing::hullUavReadCapture()
-                           : mode == "gs" ? testing::geometryUavEmissionCapture()
-                                          : testing::hullCapture();
-            if (gs && mode != "gs")
+            auto fixture = mode == "read"                       ? testing::hullUavReadCapture()
+                           : mode == "gs" || mode == "gs-empty" ? testing::geometryUavEmissionCapture()
+                                                                : testing::hullCapture();
+            if (gs && mode != "gs" && mode != "gs-empty")
                 fixture = testing::geometryResourceReadCapture(
                     mode != "gs-read-srv" && mode != "gs-alias-srv", mode.contains("alias"), unbound);
             if (mode == "ia-alias") {
@@ -219,16 +219,30 @@ class GeometryUavDependencyTests : public QObject {
             options.warp = vendor == 0;
             if (vendor)
                 options.vendor = vendor;
+            if (mode == "gs-empty")
+                options.shaders[8000] = testing::compileClassProgram(
+                    "struct V{float4 p:SV_Position;};RWStructuredBuffer<uint> dst:register(u1);"
+                    "[maxvertexcount(6)]void main(point V v[1],inout TriangleStream<V> output){"
+                    "InterlockedAdd(dst[0],1);uint n=uint(v[0].p.y);"
+                    "for(uint j=0;j<n;++j){for(uint i=0;i<3;++i){V o;o.p=v[0].p;"
+                    "o.p.x=float(j*3+i);output.Append(o);}output.RestartStrip();}}",
+                    "gs_5_0");
             Replay replay(frame, options);
             replay.run();
             const auto before = replay.readBuffer(10);
-            const auto extraBefore =
-                mode == "ia-alias" || (gs && mode != "gs") ? replay.readBuffer(9000) : std::vector<uint8_t>{};
+            const auto extraBefore = mode == "ia-alias" || (gs && mode != "gs" && mode != "gs-empty")
+                                         ? replay.readBuffer(9000)
+                                         : std::vector<uint8_t>{};
             const auto counter = replay.readCounter(12);
             const auto commands = replay.counts;
             const auto full = inspectPostTransform(replay, 200);
+            const auto pixelGeometry = inspectPixelGeometry(replay, 200);
+            QCOMPARE(pixelGeometry.bytes, full.bytes);
+            const auto partition = validatedPixelGeometryInstances(pixelGeometry);
+            QCOMPARE(partition.resolved, !rejectedCase);
             if (!rejectedCase)
-                QCOMPARE(full.report.at("vertices"), nlohmann::json(gs ? (unbound ? 9 : 18) : 12));
+                QCOMPARE(full.report.at("vertices"),
+                         nlohmann::json(gs ? (unbound || mode == "gs-empty" ? 9 : 18) : 12));
             else
                 QVERIFY(full.report.at("vertices").get<unsigned>() > 0);
             nlohmann::json selections = nlohmann::json::array();
@@ -249,16 +263,20 @@ class GeometryUavDependencyTests : public QObject {
                     const auto selected = inspectPostTransform(replay, 200, inspect);
                     const auto &selection = selected.report.at("instance_selection");
                     QVERIFY(selection.at("uav_independence").at("input_aliases_excluded") == true);
-                    const auto first = unbound ? instance * 3
-                                       : gs    ? instance * (instance + 1) / 2 * 3
-                                               : instance * 6;
-                    const auto last = unbound ? (instance + 1) * 3
-                                      : gs    ? (instance + 1) * (instance + 2) / 2 * 3
-                                              : (instance + 1) * 6;
+                    const auto first = mode == "gs-empty" ? instance * (instance ? instance - 1 : 0) / 2 * 3
+                                       : unbound          ? instance * 3
+                                       : gs               ? instance * (instance + 1) / 2 * 3
+                                                          : instance * 6;
+                    const auto last = mode == "gs-empty" ? instance * (instance + 1) / 2 * 3
+                                      : unbound          ? (instance + 1) * 3
+                                      : gs               ? (instance + 1) * (instance + 2) / 2 * 3
+                                                         : (instance + 1) * 6;
                     QCOMPARE(selection.at("first_vertex"), nlohmann::json(first));
                     QCOMPARE(selected.bytes, std::vector<uint8_t>(full.bytes.begin() + first * 16,
                                                                   full.bytes.begin() + last * 16));
                     selections.push_back(selection);
+                    for (uint64_t ordinal = first / 3; ordinal < last / 3; ++ordinal)
+                        QCOMPARE(partition.instance(ordinal), std::optional<uint32_t>(instance));
                 }
                 QCOMPARE(replay.readBuffer(10), before);
                 if (!extraBefore.empty())
@@ -290,6 +308,7 @@ class GeometryUavDependencyTests : public QObject {
                                         {"mode", mode.toStdString()},
                                         {"frame_sha256", frame.sha256()},
                                         {"full", full.report},
+                                        {"pixel_geometry", pixelGeometry.report},
                                         {"selections", selections},
                                         {"before_sha256", sha256(before)},
                                         {"after_sha256", sha256(after)},

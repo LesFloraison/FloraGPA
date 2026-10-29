@@ -51,12 +51,17 @@ def validate(r, vendor):
     require(r['original_storage_restored'] is (True if r['before']['exact_storage_bits'] else None), 'restoration precision')
     require(r['unattributed_changes'] == [], 'accepted cases have no unexplained storage transitions')
     expected, referenced = {}, set()
+    from validate_pixel_geometry_instances import partition
+    instance_mapping = partition(replay['geometry'])
     for index, candidate in enumerate(r['candidate_passes']):
         require(candidate['geometry_metadata'] == replay['geometry'], 'same captured geometry')
         require(candidate['original_fragment_eligibility'] is None and candidate['order'] == 'unspecified', 'candidate scope')
         require(candidate['x'] == r['selection']['x'] and candidate['y'] == r['selection']['y'] and
                 candidate['layer'] == r['selection']['subresource']['relative_layer'], 'candidate location')
         for row in candidate['observations']:
+            if 'geometry_instances' in replay['geometry']:
+                require(row['geometry_instance'] == (instance_mapping(row['primitive_ordinal']) if instance_mapping else None),
+                        'Candidate geometry instance mapping')
             expected[(index, row['observation_index'])] = row
     ordinals = [row['primitive_ordinal'] for row in r['records']]
     require(ordinals == sorted({row['primitive_ordinal'] for row in expected.values()}), 'complete ordered candidate union')
@@ -65,6 +70,9 @@ def validate(r, vendor):
         require(row['event'] == r['event'] and row['record_kind'] == 'private_primitive_storage', 'record provenance')
         for key in ('instance', 'original_fragment_eligibility', 'write_executed', 'shader_output', 'failure_reasons'):
             require(row[key] is None, key)
+        if 'geometry_instances' in replay['geometry']:
+            require(row['geometry_instance'] == (instance_mapping(row['primitive_ordinal']) if instance_mapping else None),
+                    'History geometry instance mapping')
         require(any(b['first_primitive'] == row['primitive_ordinal'] and b['primitive_count'] == 1
                     for b in replay['batches']), 'isolated candidate checkpoint')
         require(same(previous, row['before']), 'prefix storage continuity')

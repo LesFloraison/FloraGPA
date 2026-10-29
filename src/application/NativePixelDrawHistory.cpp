@@ -267,6 +267,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                     if (entry.is_null())
                         entry = {{"primitive_ordinal", ordinal},
                                  {"original_primitive_id", row.at("original_primitive_id")},
+                                 {"geometry_instance", row.at("geometry_instance")},
                                  {"observations", Json::array()}};
                     if (candidates.size() > s.maxRecords)
                         throw std::runtime_error("Private pixel history primitive record limit exceeded");

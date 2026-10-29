@@ -10,6 +10,7 @@ struct PostTransformOptions {
     uint64_t maxBytes = 256ull * 1024 * 1024;
     std::optional<uint32_t> instance;
     bool hullDownstream = false;
+    CancelCheck cancelled;
 };
 struct PostTransformGeometry {
     nlohmann::json report;
@@ -35,11 +36,23 @@ PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &eve
 // Adds observed primitive IDs for pixel diagnostics. An original GS supplies
 // its own ID output; without a GS, a separate system-ID SO pass is used only
 // when pre-raster UAV declarations cannot make repeated geometry ambiguous.
+// Geometry instance partitions reuse the Mesh boundary proof; they do not
+// establish original PS invocations. Cancellation is polled during SO queries.
 PostTransformGeometry captureBoundPixelGeometry(Replay &, const Event &, const State &, uint32_t stream = 0,
-                                                uint64_t maxBytes = 256ull * 1024 * 1024);
+                                                uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                const CancelCheck &cancelled = {});
 PostTransformGeometry inspectPixelGeometry(Replay &, Id event, uint32_t stream = 0,
                                            uint64_t maxBytes = 256ull * 1024 * 1024);
 std::span<const uint32_t> validatedPixelPrimitiveIds(const PostTransformGeometry &);
+// A geometry-instance ordinal is not an original pixel invocation identity.
+struct PixelGeometryInstanceMap {
+    uint64_t primitives = 0;
+    bool resolved = false;
+    std::optional<uint64_t> perInstance;
+    std::vector<uint64_t> ends;
+    std::optional<uint32_t> instance(uint64_t primitive) const;
+};
+PixelGeometryInstanceMap validatedPixelGeometryInstances(const PostTransformGeometry &);
 nlohmann::json postTransformLayout(Bytes bytecode, uint32_t stream);
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory);
 nlohmann::json postTransformTables(const PostTransformGeometry &geometry);

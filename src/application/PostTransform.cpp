@@ -160,6 +160,9 @@ static std::vector<uint8_t> primitiveIdentityDomainShader(Bytes original) {
             linked.emplace_back(tag, bytes);
     return makeDxbc(linked);
 }
+struct InstanceBoundaryUnavailable : std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
 class PostTransformCapture {
     Replay &r;
     PostTransformOptions options;
@@ -232,14 +235,14 @@ class PostTransformCapture {
         parameters = std::move(resolved.parameters);
         indirect = std::move(resolved.indirect);
     }
-    void selectInstance(PostTransformGeometry &result, const Event &event, const State &state) {
+    Json instanceSelection(const Json &report, const Event &event, const State &state, uint32_t instance,
+                           std::map<uint32_t, Json> *cache = nullptr) {
         Event direct;
         Json parameters, indirect;
         drawParameters(event, direct, parameters, indirect);
-        const auto total = parameters.value("instance_count", 1u), instance = *options.instance;
+        const auto total = parameters.value("instance_count", 1u);
         if (instance >= total)
             throw std::runtime_error("Geometry instance is outside the draw instance range");
-        auto &report = result.report;
         const auto primitives = report.at("primitives").get<uint64_t>();
         Json full{
             {"vertices", report.at("vertices")}, {"primitives", primitives}, {"sha256", report.at("sha256")}},
@@ -265,7 +268,7 @@ class PostTransformCapture {
                 hasUav |= declaresUav(code(state.stages[indices.at(stage.get<std::string>())].shader));
             if (hasUav) {
                 const auto fail = [](const std::string &detail = {}) {
-                    throw std::runtime_error(
+                    throw InstanceBoundaryUnavailable(
                         std::string("Instance boundaries through HS/DS/GS with UAV access are not ") +
                         "verified; inspect all instances or select VS" +
                         (detail.empty() ? "" : ": " + detail));
@@ -343,6 +346,10 @@ class PostTransformCapture {
                     return 0;
                 if (count == total)
                     return primitives;
+                if (cache && cache->contains(count)) {
+                    queries.push_back(cache->at(count));
+                    return cache->at(count).at("primitives").get<uint64_t>();
+                }
                 auto selected = direct;
                 selected.args[1] = count;
                 auto sample = capture(selected, state, true);
@@ -350,6 +357,8 @@ class PostTransformCapture {
                 queries.push_back({{"instance_count", count},
                                    {"primitives", p},
                                    {"attempts", sample.report.at("attempts")}});
+                if (cache)
+                    (*cache)[count] = queries.back();
                 return p;
             };
             first = prefix(instance);
@@ -357,33 +366,119 @@ class PostTransformCapture {
         }
         if (first > last || last > primitives)
             throw std::runtime_error("Inconsistent native per-instance SO boundaries");
-        const auto factor = report.at("vertices_per_primitive").get<uint64_t>(),
-                   stride = report.at("stride").get<uint64_t>();
-        const auto begin = first * factor * stride, end = last * factor * stride;
+        const auto factor = report.at("vertices_per_primitive").get<uint64_t>();
+        return {{"instance", instance},
+                {"instance_count", total},
+                {"strategy", strategy},
+                {"first_vertex", first * factor},
+                {"vertex_count", (last - first) * factor},
+                {"original_parameters", parameters},
+                {"indirect_arguments", indirect},
+                {"full_capture", full},
+                {"prefix_queries", queries},
+                {"uav_independence", independence},
+                {"system_ids_rewritten", false},
+                {"input_offsets_rewritten", false}};
+    }
+    void selectInstance(PostTransformGeometry &result, const Event &event, const State &state) {
+        auto &report = result.report;
+        const auto selection = instanceSelection(report, event, state, *options.instance);
+        const auto stride = report.at("stride").get<uint64_t>();
+        const auto first = selection.at("first_vertex").get<uint64_t>();
+        const auto count = selection.at("vertex_count").get<uint64_t>();
+        const auto begin = first * stride, end = (first + count) * stride;
         if (end > result.bytes.size())
             throw std::runtime_error("Instance range exceeds captured SO storage");
         result.bytes = std::vector<uint8_t>(result.bytes.begin() + begin, result.bytes.begin() + end);
-        report["primitives"] = last - first;
-        report["vertices"] = (last - first) * factor;
+        report["primitives"] = count / report.at("vertices_per_primitive").get<uint64_t>();
+        report["vertices"] = count;
         report["sha256"] = sha256(result.bytes);
-        report["instance_selection"] = {{"instance", instance},
-                                        {"instance_count", total},
-                                        {"strategy", strategy},
-                                        {"first_vertex", first * factor},
-                                        {"vertex_count", (last - first) * factor},
-                                        {"original_parameters", parameters},
-                                        {"indirect_arguments", indirect},
-                                        {"full_capture", full},
-                                        {"prefix_queries", queries},
-                                        {"uav_independence", independence},
-                                        {"system_ids_rewritten", false},
-                                        {"input_offsets_rewritten", false}};
+        report["instance_selection"] = selection;
         auto &limits = report["limits"];
         limits.erase(limits.begin() + 1);
         limits.push_back(
             "Instance numbers are zero-based within the original draw, not StartInstanceLocation.");
         limits.push_back(
             "Selected bytes are sliced from the full capture; prefix queries determine only boundaries.");
+    }
+    void annotateInstances(PostTransformGeometry &result, const Event &event, const State &state) {
+        const auto resolved = resolveDrawParameters(r, event);
+        const auto total = resolved.parameters.value("instance_count", 1u);
+        const auto count = result.report.at("primitives").get<uint64_t>();
+        const auto factor = result.report.at("vertices_per_primitive").get<uint64_t>();
+        Json identity{{"schema", 1},
+                      {"status", "resolved"},
+                      {"domain", "zero_based_draw_instance"},
+                      {"scope", "captured_geometry_partition"},
+                      {"geometry_sha256", sha256(result.bytes)},
+                      {"primitive_count", count},
+                      {"instance_count", total},
+                      {"original_parameters", resolved.parameters},
+                      {"indirect_arguments", resolved.indirect},
+                      {"original_fragment_eligibility", nullptr},
+                      {"original_gpu_schedule", false},
+                      {"ranges", Json::array()},
+                      {"prefix_queries", Json::array()},
+                      {"uav_independence", nullptr}};
+        if (!total && count)
+            throw std::runtime_error("Nonempty geometry from an empty instance range");
+        const bool uniform =
+            total <= 1 || !count || result.report.at("executed_stages") == Json::array({"vs"});
+        if (uniform) {
+            if (total && count % total)
+                throw std::runtime_error("VS geometry does not divide into complete instance ranges");
+            identity["strategy"] = "uniform_geometry_output";
+            identity["primitives_per_instance"] = total ? count / total : 0;
+        } else {
+            identity["strategy"] = "native_prefix_statistics";
+            const auto previousCancel = options.cancelled;
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+            options.cancelled = [&] {
+                checkCancellation(previousCancel);
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error("Pixel geometry instance partition deadline");
+                return false;
+            };
+            try {
+                std::map<uint32_t, Json> cache;
+                uint64_t previous = 0, retained = 0;
+                for (uint32_t instance = 0; instance < total; ++instance) {
+                    checkCancellation(options.cancelled);
+                    const auto selection = instanceSelection(result.report, event, state, instance, &cache);
+                    const auto first = selection.at("first_vertex").get<uint64_t>() / factor;
+                    const auto length = selection.at("vertex_count").get<uint64_t>() / factor;
+                    if (first != previous || first > count || length > count - first)
+                        throw std::runtime_error("Noncontiguous geometry instance partition");
+                    Json range{
+                        {"instance", instance}, {"first_primitive", first}, {"primitive_count", length}};
+                    retained += range.dump().size() + selection.at("prefix_queries").dump().size();
+                    if (retained > options.maxBytes)
+                        throw std::runtime_error("Geometry instance metadata budget exceeded");
+                    identity["ranges"].push_back(std::move(range));
+                    identity["uav_independence"] = selection.at("uav_independence");
+                    previous = first + length;
+                }
+                if (previous != count)
+                    throw std::runtime_error("Incomplete geometry instance partition");
+                for (const auto &[index, query] : cache)
+                    identity["prefix_queries"].push_back(query);
+            } catch (const InstanceBoundaryUnavailable &error) {
+                identity["status"] = "unavailable";
+                identity["reason"] = error.what();
+                identity["ranges"] = Json::array();
+            } catch (...) {
+                options.cancelled = previousCancel;
+                throw;
+            }
+            options.cancelled = previousCancel;
+        }
+        const auto bytes = result.bytes.size() + result.primitiveIds.size() * sizeof(uint32_t);
+        if (bytes > options.maxBytes || identity.dump().size() > options.maxBytes - bytes)
+            throw std::runtime_error("Geometry instance metadata exceeds remaining payload budget");
+        result.report["limits"][1] = "Geometry instance partitions describe captured output ownership, not "
+                                     "original pixel invocations; "
+                                     "unavailable partitions retain an explicit reason.";
+        result.report["geometry_instances"] = std::move(identity);
     }
     PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false,
                                   Bytes overrideCode = {}, const std::function<void()> &configure = {},
@@ -487,6 +582,7 @@ class PostTransformCapture {
         std::vector<uint8_t> raw;
         bool finished = false;
         for (unsigned attempt = 0; attempt < 3; ++attempt) {
+            checkCancellation(options.cancelled);
             if (capacity > options.maxBytes || capacity > UINT32_MAX)
                 throw std::runtime_error("Post-transform output exceeds inspection byte limit");
             D3D11_BUFFER_DESC desc{UINT(capacity), D3D11_USAGE_DEFAULT, D3D11_BIND_STREAM_OUTPUT, 0, 0, 0};
@@ -519,6 +615,7 @@ class PostTransformCapture {
             D3D11_QUERY_DATA_SO_STATISTICS stats{};
             const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(20);
             for (;;) {
+                checkCancellation(options.cancelled);
                 auto hr = r.context_->GetData(query.Get(), &stats, sizeof stats, 0);
                 check(hr, "Read post-transform SO statistics");
                 if (hr == S_OK)
@@ -1392,7 +1489,13 @@ class PostTransformCapture {
         return capture(event, state);
     }
     PostTransformGeometry pixelGeometry(const Event &event, const State &state) {
+        checkCancellation(options.cancelled);
         auto result = bound(event, state);
+        const auto finish = [&] {
+            annotateInstances(result, event, state);
+            checkCancellation(options.cancelled);
+            return std::move(result);
+        };
         const auto count = result.report.at("primitives").get<uint64_t>();
         const auto factor = result.report.at("vertices_per_primitive").get<uint32_t>();
         const auto stride = result.report.at("stride").get<uint32_t>();
@@ -1417,7 +1520,7 @@ class PostTransformCapture {
                 }
             if (!field) {
                 identity["reason"] = "original_geometry_shader_does_not_emit_primitive_id";
-                return result;
+                return finish();
             }
             const auto offset = field->at("offset").get<uint32_t>();
             if (offset > stride || stride - offset < 4)
@@ -1439,7 +1542,7 @@ class PostTransformCapture {
                                     mutableInputs = true;
             if (options.stream || mutableInputs) {
                 identity["reason"] = "separate_identity_pass_requires_one_stream_without_pre_raster_uavs";
-                return result;
+                return finish();
             }
             uint32_t inputCount = factor;
             std::string primitive = factor == 1 ? "point" : factor == 2 ? "line" : "triangle";
@@ -1509,7 +1612,7 @@ class PostTransformCapture {
         identity["status"] = "observed";
         identity["ids_sha256"] = sha256(Bytes(reinterpret_cast<const uint8_t *>(result.primitiveIds.data()),
                                               result.primitiveIds.size() * sizeof(uint32_t)));
-        return result;
+        return finish();
     }
     PostTransformGeometry pixelGeometry(Id id) {
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
@@ -1629,10 +1732,12 @@ PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &eve
     return PostTransformCapture(replay, options).bound(event, state);
 }
 PostTransformGeometry captureBoundPixelGeometry(Replay &replay, const Event &event, const State &state,
-                                                uint32_t stream, uint64_t maxBytes) {
+                                                uint32_t stream, uint64_t maxBytes,
+                                                const CancelCheck &cancelled) {
     PostTransformOptions options;
     options.stream = stream;
     options.maxBytes = maxBytes;
+    options.cancelled = cancelled;
     return PostTransformCapture(replay, options).pixelGeometry(event, state);
 }
 PostTransformGeometry inspectPixelGeometry(Replay &replay, Id event, uint32_t stream, uint64_t maxBytes) {
@@ -1640,6 +1745,81 @@ PostTransformGeometry inspectPixelGeometry(Replay &replay, Id event, uint32_t st
     options.stream = stream;
     options.maxBytes = maxBytes;
     return PostTransformCapture(replay, options).pixelGeometry(event);
+}
+std::optional<uint32_t> PixelGeometryInstanceMap::instance(uint64_t primitive) const {
+    if (primitive >= primitives)
+        throw std::invalid_argument("Geometry instance lookup exceeds primitive bounds");
+    if (!resolved)
+        return {};
+    if (perInstance)
+        return uint32_t(primitive / *perInstance);
+    return uint32_t(std::upper_bound(ends.begin(), ends.end(), primitive) - ends.begin());
+}
+PixelGeometryInstanceMap validatedPixelGeometryInstances(const PostTransformGeometry &geometry) {
+    PixelGeometryInstanceMap result;
+    result.primitives = geometry.report.at("primitives").get<uint64_t>();
+    if (!geometry.report.contains("geometry_instances"))
+        return result;
+    const auto &identity = geometry.report.at("geometry_instances");
+    if (identity.at("schema") != 1 || identity.at("scope") != "captured_geometry_partition" ||
+        identity.at("domain") != "zero_based_draw_instance" ||
+        identity.at("geometry_sha256") != sha256(geometry.bytes) ||
+        identity.at("primitive_count") != result.primitives ||
+        identity.at("original_fragment_eligibility") != nullptr ||
+        identity.at("original_gpu_schedule") != false)
+        throw std::runtime_error("Geometry instance provenance mismatch");
+    const auto total = identity.at("instance_count").get<uint32_t>();
+    if (identity.at("original_parameters").value("instance_count", 1u) != total)
+        throw std::runtime_error("Geometry instance draw count mismatch");
+    if (identity.at("status") == "unavailable") {
+        if (!identity.at("ranges").empty() || !identity.contains("reason"))
+            throw std::runtime_error("Unavailable geometry instances contain ranges");
+        return result;
+    }
+    if (identity.at("status") != "resolved")
+        throw std::runtime_error("Unknown geometry instance status");
+    if (identity.at("strategy") == "uniform_geometry_output") {
+        const auto each = identity.at("primitives_per_instance").get<uint64_t>();
+        if ((!total && result.primitives) || (total && result.primitives % total) ||
+            each != (total ? result.primitives / total : 0) || !identity.at("ranges").empty() ||
+            !identity.at("prefix_queries").empty() ||
+            (total > 1 && result.primitives && geometry.report.at("executed_stages") != Json::array({"vs"})))
+            throw std::runtime_error("Unproved uniform geometry instance partition");
+        result.perInstance = each;
+    } else if (identity.at("strategy") == "native_prefix_statistics") {
+        if (!total || identity.at("ranges").size() != total ||
+            identity.at("prefix_queries").size() != total - 1)
+            throw std::runtime_error("Incomplete prefix geometry instance partition");
+        if (!geometry.report.at("pre_raster_uav_isolation").at("stages").empty()) {
+            const auto &proof = identity.at("uav_independence");
+            if (!proof.is_object() || proof.at("input_aliases_excluded") != true ||
+                proof.at("stages").size() != geometry.report.at("executed_stages").size())
+                throw std::runtime_error("Geometry instance partition lacks UAV independence");
+            for (const auto &stage : geometry.report.at("executed_stages"))
+                if (proof.at("stages").at(stage.get<std::string>()).at("proved") != true)
+                    throw std::runtime_error("Unproved geometry instance UAV dependency");
+        }
+        uint64_t previous = 0;
+        for (uint32_t i = 0; i < total; ++i) {
+            const auto &range = identity.at("ranges")[i];
+            const auto length = range.at("primitive_count").get<uint64_t>();
+            if (range.at("instance") != i || range.at("first_primitive") != previous ||
+                length > result.primitives - previous)
+                throw std::runtime_error("Invalid geometry instance range");
+            previous += length;
+            if (i + 1 < total) {
+                const auto &query = identity.at("prefix_queries")[i];
+                if (query.at("instance_count") != i + 1 || query.at("primitives") != previous)
+                    throw std::runtime_error("Geometry prefix query disagrees with its range");
+            }
+            result.ends.push_back(previous);
+        }
+        if (previous != result.primitives)
+            throw std::runtime_error("Incomplete geometry instance coverage");
+    } else
+        throw std::runtime_error("Unknown geometry instance strategy");
+    result.resolved = true;
+    return result;
 }
 std::span<const uint32_t> validatedPixelPrimitiveIds(const PostTransformGeometry &geometry) {
     const auto &meta = geometry.report;

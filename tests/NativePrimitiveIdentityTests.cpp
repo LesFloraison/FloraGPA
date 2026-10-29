@@ -166,9 +166,13 @@ class NativePrimitiveIdentityTests final : public QObject {
         const auto before = r.readTexture(20);
         const auto g = inspectPixelGeometry(r, 100);
         const auto ids = validatedPixelPrimitiveIds(g);
+        const auto mapping = validatedPixelGeometryInstances(g);
+        QVERIFY(mapping.resolved);
         QCOMPARE(ids.size(), size_t(count * instances));
-        for (uint32_t i = 0; i < ids.size(); ++i)
+        for (uint32_t i = 0; i < ids.size(); ++i) {
             QCOMPARE(ids[i], i % count);
+            QCOMPARE(mapping.instance(i), std::optional<uint32_t>(i / count));
+        }
         QCOMPARE(r.readTexture(20), before);
         QCOMPARE(inspectPixelGeometry(r, 100).primitiveIds, g.primitiveIds);
         debugErrors(r);
@@ -216,8 +220,11 @@ class NativePrimitiveIdentityTests final : public QObject {
             QVERIFY(position != SIZE_MAX);
             Json observations = Json::array();
             const auto ids = validatedPixelPrimitiveIds(g);
+            const auto mapping = validatedPixelGeometryInstances(g);
+            QVERIFY(mapping.resolved);
             QCOMPARE(ids.size(), size_t(draw == 0x37 || draw == 0x39 ? 4 : 8));
             for (size_t i = 0; i < ids.size(); ++i) {
+                QCOMPARE(mapping.instance(i), std::optional<uint32_t>(uint32_t(i / 4)));
                 float x = 0, y = 0;
                 for (size_t v = 0; v < 3; ++v) {
                     Reader input(Bytes(g.bytes).subspan((i * 3 + v) * stride + position, 16));
@@ -255,6 +262,21 @@ class NativePrimitiveIdentityTests final : public QObject {
                 captureNativePixelCandidates(r.nativeDevice(), !vendor, raster, g, candidateSelection);
             QCOMPARE(candidates.report.at("observations").size(), size_t(1));
             QCOMPARE(candidates.report.at("observations")[0].at("original_primitive_id"), Json(ids[0]));
+            QCOMPARE(candidates.report.at("observations")[0].at("geometry_instance"), Json(0));
+            candidateSelection.x = observations.back().at("x");
+            candidateSelection.y = observations.back().at("y");
+            const auto lastCandidates =
+                captureNativePixelCandidates(r.nativeDevice(), !vendor, raster, g, candidateSelection);
+            QCOMPARE(lastCandidates.report.at("observations").size(), size_t(1));
+            QCOMPARE(lastCandidates.report.at("observations")[0].at("geometry_instance"),
+                     Json(draw == 0x37 || draw == 0x39 ? 0 : 1));
+            for (const auto *key :
+                 {"geometry_sha256", "primitive_count", "domain", "original_gpu_schedule"}) {
+                auto corrupt = g;
+                corrupt.report["geometry_instances"][key] = "invalid";
+                QVERIFY_THROWS_EXCEPTION(std::exception, validatedPixelGeometryInstances(corrupt));
+            }
+            QVERIFY_THROWS_EXCEPTION(std::invalid_argument, mapping.instance(ids.size()));
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, pixelGeometryBridge(g, helper, 0, 123u));
             auto bad = g;
             bad.bytes[0] ^= 1;

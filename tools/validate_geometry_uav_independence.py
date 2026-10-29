@@ -33,15 +33,16 @@ def validate(name, result):
     if rejected and gs:
         require(9 <= full["vertices"] <= 27 and full["vertices"] == full["primitives"] * 3, "aliased geometry bounds")
     else:
-        require(full["vertices"] == (9 if unbound else 18 if gs else 12) and
-                full["primitives"] == (3 if unbound else 6 if gs else 4), "full geometry")
+        require(full["vertices"] == (9 if unbound or mode == "gs-empty" else 18 if gs else 12) and
+                full["primitives"] == (3 if unbound or mode == "gs-empty" else 6 if gs else 4), "full geometry")
     selections = result["selections"]
     if rejected:
         require(not selections, "unproved selection must be rejected")
         return
     require(len(selections) == (3 if gs else 2), "all instances")
     for i, selection in enumerate(selections):
-        first, count = (i * 3, 3) if unbound else (i * (i + 1) // 2 * 3, (i + 1) * 3) if gs else (i * 6, 6)
+        first, count = ((i * (i - 1) // 2 * 3, i * 3) if mode == "gs-empty" else
+                        (i * 3, 3) if unbound else (i * (i + 1) // 2 * 3, (i + 1) * 3) if gs else (i * 6, 6))
         require(selection["instance"] == i and selection["instance_count"] == len(selections), "instance")
         require(selection["first_vertex"] == first and selection["vertex_count"] == count, "slice bounds")
         require(selection["full_capture"] == {k: full[k] for k in ("vertices", "primitives", "sha256")},
@@ -54,7 +55,7 @@ def validate(name, result):
         require([q["instance_count"] for q in queries] == expected, "prefix sequence")
         for q in queries:
             n = q["instance_count"]
-            count = n if unbound else n * (n + 1) // 2 if gs else n * 2
+            count = n * (n - 1) // 2 if mode == "gs-empty" else n if unbound else n * (n + 1) // 2 if gs else n * 2
             require(q["primitives"] == count and q["attempts"][-1]["primitives_storage_needed"] == count,
                     "prefix query count")
         proof = selection["uav_independence"]
@@ -88,14 +89,19 @@ def main():
     parser.add_argument("--log", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--resource-reads", action="store_true", help="Require the expanded immutable-read matrix")
+    parser.add_argument("--empty-instance", action="store_true", help="Also require variable GS output with an empty first instance")
     args = parser.parse_args()
     paths = {p.stem: p for p in args.directory.glob("*.json")}
     expected = {f"{v}-{mode}" for v in (0, 4318, 32902) for mode in ("independent", "gs", "read", "ia-alias")}
     if args.resource_reads:
         expected |= {f"{v}-{mode}" for v in (0, 4318, 32902)
                      for mode in ("gs-read-uav", "gs-read-srv", "gs-unbound", "gs-alias-uav", "gs-alias-srv")}
+    if args.empty_instance:
+        expected |= {f"{v}-gs-empty" for v in (0, 4318, 32902)}
     require(paths.keys() == expected, "complete evidence matrix")
     passed = 53 if args.resource_reads else 31
+    if args.empty_instance:
+        passed += 3
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     controls = 0

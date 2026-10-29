@@ -31,6 +31,7 @@ NativePixelCandidates captureNativePixelCandidates(ID3D11Device *device, bool wa
     checkCancellation(cancelled);
     const auto &meta = geometry.report;
     const auto primitiveIds = validatedPixelPrimitiveIds(geometry);
+    const auto instances = validatedPixelGeometryInstances(geometry);
     const auto stride = meta.at("stride").get<uint32_t>();
     const auto factor = meta.at("vertices_per_primitive").get<uint32_t>();
     const auto count = meta.at("primitives").get<uint64_t>();
@@ -64,6 +65,7 @@ NativePixelCandidates captureNativePixelCandidates(ID3D11Device *device, bool wa
     // Tagged bytes are a different geometry object; original IDs stay in the
     // validated sidecar and are joined after reading candidate ordinals.
     tagged.report.erase("primitive_identity");
+    tagged.report.erase("geometry_instances");
     tagged.report["stride"] = stride + 8;
     tagged.report["vertices"] = vertices;
     tagged.report["primitives"] = selected;
@@ -106,6 +108,7 @@ NativePixelCandidates captureNativePixelCandidates(ID3D11Device *device, bool wa
         if (ordinal < first || ordinal - first >= selected)
             throw std::runtime_error("Native pixel candidate ordinal is outside the selected range");
         unique.insert(ordinal);
+        const auto instance = instances.instance(ordinal);
         rows.push_back({{"primitive_ordinal", ordinal},
                         {"observation_index", index},
                         {"selected_lane", lane},
@@ -113,6 +116,7 @@ NativePixelCandidates captureNativePixelCandidates(ID3D11Device *device, bool wa
                         {"original_primitive_id",
                          primitiveIds.empty() ? Json(nullptr) : Json(primitiveIds[size_t(ordinal)])},
                         {"instance", nullptr},
+                        {"geometry_instance", instance ? Json(*instance) : Json(nullptr)},
                         {"original_fragment_eligibility", nullptr}});
     }
     NativePixelCandidates result;

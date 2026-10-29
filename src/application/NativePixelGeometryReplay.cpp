@@ -605,7 +605,10 @@ class NativePixelGeometryReplay {
             if (cloneBytes >= request.maxBytes)
                 throw std::runtime_error("Native pixel private-output payload budget exceeded");
             const auto geometry =
-                captureBoundPixelGeometry(r, event, state, stream, request.maxBytes - cloneBytes);
+                captureBoundPixelGeometry(r, event, state, stream, request.maxBytes - cloneBytes, [&] {
+                    checkDeadline();
+                    return false;
+                });
             checkDeadline();
             const auto count = geometry.report.at("primitives").get<uint64_t>();
             const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
