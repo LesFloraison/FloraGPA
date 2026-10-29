@@ -1947,6 +1947,27 @@ Step Lane::step() {
                 } else if (op == 54) {
                     outputs[0].bits[i] = a;
                     outputs[0].mapping[i] = values[0].mapping[i];
+                } else if (op == 60) {
+                    outputs[0].bits[i] = a | b;
+                    const auto left = values[0].mapping[i], right = values[1].mapping[i];
+                    auto combined = MappingStatus::NotStatus;
+                    // The compiler aggregates feedback for composite resource
+                    // loads with OR. Its raw status bits remain opaque.
+                    if (left != MappingStatus::NotStatus && right != MappingStatus::NotStatus)
+                        combined = left == MappingStatus::Unmapped || right == MappingStatus::Unmapped
+                                       ? MappingStatus::Unmapped
+                                   : left == MappingStatus::Mapped && right == MappingStatus::Mapped
+                                       ? MappingStatus::Mapped
+                                       : MappingStatus::Unknown;
+                    else if (left != MappingStatus::NotStatus && (values[1].valid & (1u << i)) && !b)
+                        combined = left;
+                    else if (right != MappingStatus::NotStatus && (values[0].valid & (1u << i)) && !a)
+                        combined = right;
+                    outputs[0].mapping[i] = combined;
+                    if (combined != MappingStatus::NotStatus) {
+                        outputs[0].bits[i] = 0;
+                        valid = false;
+                    }
                 } else if (op == 38 || op == 81) {
                     const auto product = op == 38 ? uint64_t(int64_t(signedBits(a)) * int64_t(signedBits(b)))
                                                   : uint64_t(a) * b;

@@ -10,11 +10,13 @@
 #include <QFile>
 #include <QtTest>
 #include <bit>
+#include <chrono>
 #include <cmath>
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
 #include <dxgi.h>
 #include <immintrin.h>
+#include <thread>
 using namespace flora;
 using namespace flora::dxbc_exec;
 namespace {
@@ -107,7 +109,7 @@ std::vector<Step> execute(Lane &lane) {
 struct Device {
     Com<ID3D11Device> device;
     Com<ID3D11DeviceContext> context;
-    explicit Device(uint32_t vendor) {
+    explicit Device(uint32_t vendor, D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_0) {
         Com<IDXGIAdapter1> selected;
         if (vendor) {
             Com<IDXGIFactory1> factory;
@@ -128,7 +130,7 @@ struct Device {
             if (!selected)
                 throw std::runtime_error("Requested execution probe adapter is absent");
         }
-        const D3D_FEATURE_LEVEL levels[]{D3D_FEATURE_LEVEL_11_0};
+        const D3D_FEATURE_LEVEL levels[]{level};
         check(D3D11CreateDevice(selected.Get(), vendor ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_WARP,
                                 nullptr, D3D11_CREATE_DEVICE_DEBUG, levels, 1, D3D11_SDK_VERSION, &device,
                                 nullptr, &context),
@@ -206,6 +208,74 @@ struct Device {
         return result;
     }
 };
+std::array<uint32_t, 4> runStructuredFeedback(Device &probe, Bytes shader, Bytes bytes, uint32_t stride) {
+    auto device = probe.device.Get();
+    auto context = probe.context.Get();
+    context->ClearState();
+    Com<ID3D11ComputeShader> cs;
+    check(device->CreateComputeShader(shader.data(), shader.size(), nullptr, &cs),
+          "Create aggregate oracle CS");
+    D3D11_BUFFER_DESC desc{UINT(bytes.size()),
+                           D3D11_USAGE_DEFAULT,
+                           D3D11_BIND_SHADER_RESOURCE,
+                           0,
+                           D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+                           stride};
+    D3D11_SUBRESOURCE_DATA initial{bytes.data(), 0, 0};
+    Com<ID3D11Buffer> input, output, staging;
+    check(device->CreateBuffer(&desc, &initial, &input), "Create aggregate input");
+    const std::array<uint32_t, 4> seed{0xcdcdcdcd, 0xcdcdcdcd, 0xcdcdcdcd, 0xcdcdcdcd};
+    desc = {16, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0, D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+            16};
+    initial.pSysMem = seed.data();
+    check(device->CreateBuffer(&desc, &initial, &output), "Create aggregate output");
+    Com<ID3D11ShaderResourceView> srv;
+    Com<ID3D11UnorderedAccessView> uav;
+    check(device->CreateShaderResourceView(input.Get(), nullptr, &srv), "Create aggregate SRV");
+    check(device->CreateUnorderedAccessView(output.Get(), nullptr, &uav), "Create aggregate UAV");
+    auto *read = srv.Get();
+    auto *write = uav.Get();
+    context->CSSetShader(cs.Get(), nullptr, 0);
+    context->CSSetShaderResources(0, 1, &read);
+    context->CSSetUnorderedAccessViews(0, 1, &write, nullptr);
+    context->Dispatch(1, 1, 1);
+    context->ClearState();
+    desc = {16, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0, 0};
+    check(device->CreateBuffer(&desc, nullptr, &staging), "Create aggregate staging");
+    context->CopyResource(staging.Get(), output.Get());
+    Com<ID3D11Query> completed;
+    const D3D11_QUERY_DESC query{D3D11_QUERY_EVENT, 0};
+    check(device->CreateQuery(&query, &completed), "Create aggregate query");
+    context->End(completed.Get());
+    context->Flush();
+    const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+    while (true) {
+        const auto status = context->GetData(completed.Get(), nullptr, 0, 0);
+        check(status, "Wait for aggregate shader");
+        if (status == S_OK)
+            break;
+        if (std::chrono::steady_clock::now() >= deadline)
+            throw std::runtime_error("Aggregate GPU deadline");
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read aggregate output");
+    std::array<uint32_t, 4> result;
+    std::memcpy(result.data(), mapped.pData, 16);
+    context->Unmap(staging.Get(), 0);
+    Com<ID3D11InfoQueue> queue;
+    check(probe.device.As(&queue), "Read aggregate validation queue");
+    for (UINT64 i = 0; i < queue->GetNumStoredMessagesAllowedByRetrievalFilter(); ++i) {
+        SIZE_T length = 0;
+        check(queue->GetMessage(i, nullptr, &length), "Read aggregate validation size");
+        std::vector<uint8_t> storage(length);
+        auto *message = reinterpret_cast<D3D11_MESSAGE *>(storage.data());
+        check(queue->GetMessage(i, message, &length), "Read aggregate validation message");
+        if (message->Severity <= D3D11_MESSAGE_SEVERITY_ERROR)
+            throw std::runtime_error(message->pDescription);
+    }
+    return result;
+}
 struct Fixture {
     const char *name, *body;
     bool floating = false;
@@ -254,6 +324,217 @@ const Fixture fixtures[]{
 class DxbcExecutionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void compiledFeedbackAggregation_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("fields");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t fields : {2u, 3u, 4u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(fields))) << vendor << fields;
+    }
+    void compiledFeedbackAggregation() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, fields);
+            std::string source = "struct Element{";
+            for (uint32_t i = 0; i < fields; ++i)
+                source += "uint4 v" + std::to_string(i) + ";";
+            source += "};StructuredBuffer<Element> inputData:register(t0);"
+                      "RWStructuredBuffer<uint4> outputData:register(u0);"
+                      "[numthreads(1,1,1)]void main(){uint status;Element value=inputData.Load(1,status);"
+                      "uint4 sum=value.v0;";
+            for (uint32_t i = 1; i < fields; ++i)
+                source += "sum+=value.v" + std::to_string(i) + ";";
+            source += "outputData[0]=uint4(sum.xyz,CheckAccessFullyMapped(status));}";
+            const auto original = compileHlsl(source, "cs_5_0").bytecode;
+            auto parts = readDxbcParts(original);
+            std::vector<uint8_t> rewritten;
+            uint32_t checks = 0, rewrittenMerges = 0;
+            // This compiler emits per-access checks and Boolean AND. Exercise
+            // the specification's raw OR form by retaining feedback tokens
+            // until a single final check, with the original as a GPU control.
+            for (auto &[tag, data] : parts) {
+                if (tag != 0x58454853 && tag != 0x52444853)
+                    continue;
+                auto code = readDxbcProgram(data);
+                std::vector<Words> rows;
+                for (auto row : code.instructions) {
+                    const auto opcode = row[0] & 2047;
+                    if (opcode == 234) {
+                        row[0] = (row[0] & ~2047u) | 54u;
+                        ++checks;
+                    }
+                    const bool merge = opcode == 1 && row.size() == 7 && ((row[3] >> 12) & 255) == 0 &&
+                                       ((row[5] >> 12) & 255) == 0;
+                    if (merge) {
+                        row[0] = (row[0] & ~2047u) | 60u;
+                        ++rewrittenMerges;
+                    }
+                    rows.push_back(row);
+                    if (merge && rewrittenMerges == fields - 1) {
+                        const auto mask = (row[1] >> 4) & 15;
+                        QVERIFY(std::has_single_bit(mask));
+                        rows.push_back(
+                            op(234, {Words{row[1], row[2]},
+                                     Words{0x10000a | (uint32_t(std::countr_zero(mask)) << 4), row[2]}}));
+                    }
+                }
+                code.instructions = std::move(rows);
+                rewritten = writeDxbcProgram(code);
+                data = rewritten;
+            }
+            QCOMPARE(checks, fields);
+            QCOMPARE(rewrittenMerges, fields - 1);
+            const auto shader = makeDxbc(parts);
+            const Program program(shader);
+            uint32_t loads = 0, merges = 0;
+            for (const auto &instruction : program.instructions()) {
+                loads += instruction.opcode == 227;
+                merges += instruction.opcode == 60;
+            }
+            QCOMPARE(loads, fields);
+            QCOMPARE(merges, fields - 1);
+            const auto stride = fields * 16;
+            std::vector<uint8_t> bytes(stride * 2);
+            for (uint32_t i = 0; i < bytes.size() / 4; ++i) {
+                const uint32_t value = 100 + i;
+                std::memcpy(bytes.data() + i * 4, &value, 4);
+            }
+            std::array<uint32_t, 4> expected{0, 0, 0, 1};
+            for (unsigned c = 0; c < 3; ++c)
+                for (uint32_t i = 0; i < fields; ++i)
+                    expected[c] += 100 + fields * 4 + i * 4 + c;
+            Device device(vendor, D3D_FEATURE_LEVEL_11_1);
+            const auto control = runStructuredFeedback(device, original, bytes, stride);
+            const auto gpu = runStructuredFeedback(device, shader, bytes, stride);
+            QCOMPARE(control, expected);
+            QCOMPARE(gpu, expected);
+            nlohmann::json observations = nlohmann::json::array();
+            for (bool knownMapping : {false, true}) {
+                BufferView input{1, 0, bytes.size(), stride};
+                input.nonTiled = knownMapping;
+                Inputs inputs;
+                inputs.memory = std::make_shared<Memory>(
+                    std::map<uint64_t, Buffer>{{1, Buffer::known(bytes)},
+                                               {2, Buffer::known(std::vector<uint8_t>(16))}},
+                    std::map<Register, BufferView>{{{7, {0}}, input}, {{30, {0}}, {2, 0, 16, 16}}});
+                Lane lane(program, inputs);
+                const auto steps = execute(lane);
+                for (const auto &step : steps)
+                    for (const auto &change : step.changes)
+                        QVERIFY(change.after.wellFormed());
+                const auto &output = inputs.memory->buffers().at(2);
+                std::array<uint32_t, 4> words;
+                std::memcpy(words.data(), output.bytes.data(), 16);
+                for (unsigned c = 0; c < 3; ++c)
+                    QCOMPARE(words[c], expected[c]);
+                if (knownMapping)
+                    QCOMPARE(words, gpu);
+                for (unsigned i = 0; i < 16; ++i)
+                    QCOMPARE(output.valid[i], uint8_t(i < 12 || knownMapping));
+                QCOMPARE(inputs.memory->buffers().at(1).bytes, bytes);
+                observations.push_back({{"known_mapping", knownMapping},
+                                        {"words", words},
+                                        {"validity", output.valid},
+                                        {"steps", steps.size()}});
+            }
+            const auto root = qEnvironmentVariable("FLORA_FEEDBACK_AGGREGATE_EVIDENCE");
+            if (!root.isEmpty()) {
+                QDir directory(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag())));
+                QVERIFY(directory.mkpath("."));
+                QFile binaryFile(directory.filePath("shader.dxbc"));
+                QVERIFY(binaryFile.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                QCOMPARE(binaryFile.write(reinterpret_cast<const char *>(shader.data()), shader.size()),
+                         qint64(shader.size()));
+                QFile originalFile(directory.filePath("original.dxbc"));
+                QVERIFY(originalFile.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                QCOMPARE(originalFile.write(reinterpret_cast<const char *>(original.data()), original.size()),
+                         qint64(original.size()));
+                QFile reportFile(directory.filePath("report.json"));
+                QVERIFY(reportFile.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                const nlohmann::json report{{"fields", fields},
+                                            {"vendor", vendor},
+                                            {"loads", loads},
+                                            {"merges", merges},
+                                            {"shader_sha256", sha256(shader)},
+                                            {"original_sha256", sha256(original)},
+                                            {"control", control},
+                                            {"gpu", gpu},
+                                            {"expected", expected},
+                                            {"native", observations}};
+                const auto encoded = report.dump(2);
+                QCOMPARE(reportFile.write(encoded.data(), encoded.size()), qint64(encoded.size()));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void feedbackStatusAggregation() {
+        const auto inputsFor = [](bool leftKnown, bool rightKnown) {
+            Inputs inputs;
+            BufferView left{1, 0, 16}, right{2, 0, 16};
+            left.nonTiled = leftKnown;
+            right.nonTiled = rightKnown;
+            inputs.memory = std::make_shared<Memory>(
+                std::map<uint64_t, Buffer>{{1, Buffer::known(std::vector<uint8_t>(16))},
+                                           {2, Buffer::known(std::vector<uint8_t>(16))}},
+                std::map<Register, BufferView>{{{7, {0}}, left}, {{7, {1}}, right}});
+            return inputs;
+        };
+        const auto prefix = [] {
+            return std::vector<Words>{op(161, {dst(7, 0)}), op(161, {dst(7, 1)}),
+                                      op(226, {dst(0, 3), dst(0, 1, 1), literal(0), src(7, 0)}),
+                                      op(226, {dst(0, 3), dst(0, 2, 1), literal(0), src(7, 1)}),
+                                      op(54, {dst(0, 0), Words{0x100006, 1}})};
+        };
+        for (bool leftKnown : {false, true})
+            for (bool rightKnown : {false, true})
+                for (uint32_t mask : {5u, 15u}) {
+                    auto rows = prefix();
+                    rows.push_back(op(60, {dst(0, 0, mask), src(0, 0), Words{0x100006, 2}}));
+                    rows.push_back(op(234, {dst(2, 0, 1), Words{0x10000a, 0}}));
+                    rows.push_back(op(62));
+                    const Program program(binary(rows));
+                    Lane lane(program, inputsFor(leftKnown, rightKnown));
+                    const auto steps = execute(lane);
+                    const auto result = lane.value({0, {0}});
+                    const auto combined =
+                        leftKnown && rightKnown ? MappingStatus::Mapped : MappingStatus::Unknown;
+                    QVERIFY(result.wellFormed());
+                    QCOMPARE(result.valid, uint8_t(0));
+                    for (unsigned c = 0; c < 4; ++c) {
+                        QCOMPARE(result.bits[c], 0u);
+                        QCOMPARE(result.mapping[c], (mask & (1u << c)) ? combined
+                                                    : leftKnown        ? MappingStatus::Mapped
+                                                                       : MappingStatus::Unknown);
+                    }
+                    const auto checked = lane.value({2, {0}});
+                    QCOMPARE(checked.valid, uint8_t(leftKnown && rightKnown));
+                    QCOMPARE(checked.bits[0], leftKnown && rightKnown ? UINT32_MAX : 0u);
+                    auto restored = lane.registers();
+                    for (auto step = steps.rbegin(); step != steps.rend(); ++step)
+                        for (auto change = step->changes.rbegin(); change != step->changes.rend(); ++change)
+                            restored[change->destination] = change->before;
+                    QCOMPARE(restored.at({0, {0}}), Value{});
+                }
+        for (bool known : {false, true})
+            for (bool reverse : {false, true})
+                for (unsigned markerKind : {0u, 1u, 2u}) {
+                    auto rows = prefix();
+                    const auto marker = markerKind == 2 ? src(1, 0) : literal(markerKind == 1 ? 0u : 17u);
+                    const auto status = src(0, 0);
+                    rows.push_back(op(60, {dst(0, 0), reverse ? marker : status, reverse ? status : marker}));
+                    rows.push_back(op(62));
+                    const Program program(binary(rows));
+                    Lane lane(program, inputsFor(known, known));
+                    execute(lane);
+                    const auto result = lane.value({0, {0}});
+                    QVERIFY(result.wellFormed());
+                    QCOMPARE(result.valid, uint8_t(0));
+                    QCOMPARE(result.mapping[0], markerKind != 1 ? MappingStatus::NotStatus
+                                                : known         ? MappingStatus::Mapped
+                                                                : MappingStatus::Unknown);
+                }
+    }
     void feedbackStatusCopies() {
         const Words token{0x10000a, 2}, replicated{0x100006, 1};
         for (bool nonTiled : {false, true})
