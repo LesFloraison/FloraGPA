@@ -1,4 +1,5 @@
 #include "TextureOperationOracle.h"
+#include "application/DxbcCheckpointModel.h"
 #include "application/DxbcGpuOperations.h"
 #include "application/DxbcInspection.h"
 #include <QDir>
@@ -143,6 +144,170 @@ class DxbcClampFeedbackTests final : public QObject {
             }
         }
         QVERIFY(found);
+    }
+    void minimumPrecision_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<unsigned>("mode");
+        QTest::addColumn<unsigned>("precision");
+        for (const uint32_t vendor : {0u, 4318u, 32902u})
+            for (const unsigned mode : {0u, 1u, 3u})
+                for (const unsigned precision : {1u, 2u})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(mode).arg(precision)))
+                        << vendor << mode << precision;
+    }
+    void minimumPrecision() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(unsigned, mode);
+        QFETCH(unsigned, precision);
+        try {
+            const std::string reduced = precision == 1 ? "min16float" : "min10float";
+            std::string source = "Texture2D<" + reduced + "4> tex:register(t3);";
+            source +=
+                mode == 3 ? "SamplerComparisonState samp:register(s4);" : "SamplerState samp:register(s4);";
+            source += "cbuffer C:register(b2){uint4 parameters[4];}uint4 main():SV_Target{";
+            source +=
+                reduced + "2 uv=" + reduced + "2(asfloat(parameters[0].yz))*" + reduced + "2(1.0007,0.9991);";
+            source +=
+                reduced + " parameter=" + reduced + "(asfloat(parameters[0].w))*" + reduced + "(1.0007);";
+            source += "uint status;" + reduced + "4 sampled=tex.";
+            source += mode == 3   ? "SampleCmp(samp,uv,parameter"
+                      : mode == 1 ? "SampleBias(samp,uv,parameter"
+                                  : "Sample(samp,uv";
+            source += ",int2(-1,1),asfloat(parameters[0].x),status).xxxx;float4 widened=sampled*" + reduced +
+                      "(1.0007);";
+            source +=
+                "uint4 result=asuint(widened);result.w^=CheckAccessFullyMapped(status)?0:0xffffffff;return "
+                "result;}";
+            const auto code = compileHlsl(source, "ps_5_0").bytecode;
+            bool measuredPrecision = false;
+            for (const auto &[tag, bytes] : readDxbcParts(code)) {
+                if (tag != 0x58454853 && tag != 0x52444853)
+                    continue;
+                for (const auto &instruction : readDxbcProgram(bytes).instructions) {
+                    if ((instruction[0] & 2047) < 230 || (instruction[0] & 2047) > 233)
+                        continue;
+                    const auto operands = checkpoint::instructionOperands(instruction);
+                    for (const auto &[first, last] : operands.ranges)
+                        measuredPrecision |=
+                            (instruction[first] >> 31) && ((instruction.at(first + 1) >> 14) & 7) != 0;
+                }
+            }
+            QVERIFY(measuredPrecision);
+            auto native = device(vendor, D3D_FEATURE_LEVEL_11_1);
+            auto gpu = std::make_shared<GpuOperations>(native.Get(), !vendor);
+            auto textures = std::make_shared<TextureInputs>();
+            TextureInput input;
+            input.resource.id = 1;
+            input.resource.type = 0x85;
+            input.resource.desc = {4, 4, 3, 1, DXGI_FORMAT_R32_FLOAT, 1, 0, 0, D3D11_BIND_SHADER_RESOURCE,
+                                   0, 0};
+            input.subresources = textureSubresources(input.resource);
+            std::vector<uint8_t> storage(84);
+            for (const auto &sub : input.subresources)
+                for (size_t at = sub.offset; at < sub.offset + sub.size; at += 4) {
+                    const auto value = bits(.250123f + .17321f * sub.mip + .00437f * float(at / 4));
+                    std::memcpy(storage.data() + at, &value, 4);
+                }
+            input.storage = Buffer::known(storage);
+            textures->resources.emplace(1, input);
+            TextureInputView view;
+            view.resource = 1;
+            view.format = DXGI_FORMAT_R32_FLOAT;
+            view.dimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            view.mipCount = 3;
+            view.nonTiled = true;
+            D3D11_SHADER_RESOURCE_VIEW_DESC descriptor{};
+            descriptor.Format = DXGI_FORMAT_R32_FLOAT;
+            descriptor.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            descriptor.Texture2D = {0, 3};
+            view.nativeDescriptor.resize(sizeof descriptor / 4);
+            std::memcpy(view.nativeDescriptor.data(), &descriptor, sizeof descriptor);
+            textures->views.emplace(Register{7, {3}}, view);
+            D3D11_SAMPLER_DESC sd{};
+            sd.Filter =
+                mode == 3 ? D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR : D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            sd.AddressU = sd.AddressV = sd.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+            sd.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+            sd.MaxAnisotropy = 1;
+            sd.MaxLOD = D3D11_FLOAT32_MAX;
+            SamplerInput sampler;
+            sampler.descriptor.emplace();
+            std::memcpy(sampler.descriptor->data(), &sd, sizeof sd);
+            textures->samplers.emplace(Register{6, {4}}, sampler);
+            std::array<Inputs, 4> lanes;
+            std::array<std::array<uint32_t, 4>, 4> expected;
+            Json original = Json::array();
+            for (unsigned i = 0; i < 4; ++i) {
+                const std::array<uint32_t, 4> parameters{bits(float(i) * .75f), bits(.49981f), bits(.37513f),
+                                                         bits(.55037f)};
+                expected[i] = directTexture(native.Get(), code, 0, input, view, {parameters}, 0, &sampler);
+                original.push_back(expected[i]);
+                lanes[i].gpu = gpu;
+                lanes[i].textures = textures;
+                lanes[i].constantBuffers[2] = {Value::known(parameters)};
+            }
+            const auto evidence = qEnvironmentVariable("FLORA_MINIMUM_CLAMP_EVIDENCE");
+            QDir folder(QDir(evidence).filePath(QString::fromLatin1(QTest::currentDataTag())));
+            if (!evidence.isEmpty()) {
+                QVERIFY(folder.mkpath("."));
+                save(folder.filePath("shader.dxbc"), code);
+                const auto text = original.dump(2);
+                save(folder.filePath("original.json"),
+                     Bytes(reinterpret_cast<const uint8_t *>(text.data()), text.size()));
+            }
+            const Program program(code);
+            PixelQuad quad(program, lanes);
+            while (!quad.finished())
+                quad.step();
+            Json actual = Json::array();
+            for (unsigned i = 0; i < 4; ++i) {
+                const auto result = quad.lane(i).value({2, {0}});
+                QCOMPARE(result.valid, uint8_t(15));
+                QCOMPARE(result.bits, expected[i]);
+                actual.push_back(result.bits);
+            }
+            auto reversed = lanes;
+            for (unsigned i = 0; i < 4; ++i)
+                reversed[i].constantBuffers[2] = lanes[3 - i].constantBuffers.at(2);
+            PixelQuad repeat(program, reversed);
+            while (!repeat.finished())
+                repeat.step();
+            Json repeated = Json::array();
+            for (unsigned i = 0; i < 4; ++i) {
+                const auto result = repeat.lane(i).value({2, {0}});
+                QCOMPARE(result.valid, uint8_t(15));
+                QCOMPARE(result.bits, expected[3 - i]);
+                repeated.push_back(result.bits);
+            }
+            auto uncertain = lanes;
+            uncertain[1].constantBuffers[2][0].valid &= uint8_t(~1u);
+            PixelQuad unknown(program, uncertain);
+            while (!unknown.finished())
+                unknown.step();
+            Json validity = Json::array();
+            for (unsigned i = 0; i < 4; ++i) {
+                const auto result = unknown.lane(i).value({2, {0}});
+                QCOMPARE(result.valid, uint8_t(i == 1 ? 0 : 15));
+                if (i != 1)
+                    QCOMPARE(result.bits, expected[i]);
+                validity.push_back(result.valid);
+            }
+            if (!evidence.isEmpty()) {
+                const auto text = Json{
+                    {"adapter", gpu->identity()},
+                    {"mode", mode},
+                    {"precision", precision},
+                    {"original", original},
+                    {"native", actual},
+                    {"reversed_clamps", repeated},
+                    {"unknown_clamp_validity",
+                     validity}}.dump(2);
+                save(folder.filePath("report.json"),
+                     Bytes(reinterpret_cast<const uint8_t *>(text.data()), text.size()));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void execution_data() {
         QTest::addColumn<uint32_t>("vendor");

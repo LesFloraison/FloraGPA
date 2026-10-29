@@ -426,10 +426,19 @@ Program::Program(Bytes dxbc) {
                         fail("Invalid double DXBC source pair selection");
                 }
             }
-            const bool precisionSampling =
-                data->stage == 0 && (op == 69 || op == 70 || op == 74) && args[0].kind != 2 &&
-                args[2].precision == 0 && args[3].precision == 0 &&
-                std::all_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision <= 2; });
+            const bool precisionSampling = [&] {
+                const bool clamped = op == 230 || op == 231 || op == 233;
+                if (data->stage != 0 || (!clamped && op != 69 && op != 70 && op != 74) || args[0].kind == 2)
+                    return false;
+                // Feedback contributes a separate opaque status destination. The
+                // clamp stays float32; only the sampled value, coordinates and
+                // optional bias/comparison parameter use floating minimum precision.
+                const auto extra = clamped ? 1u : 0u;
+                return (!clamped || (!args[1].precision && !args.back().precision)) &&
+                       !args[2 + extra].precision && !args[3 + extra].precision &&
+                       std::all_of(args.begin(), args.end(),
+                                   [](const Operand &arg) { return arg.precision <= 2; });
+            }();
             const bool precisionLoad = [&] {
                 if ((op != 45 && !(op == 163 && data->stage == 5)) ||
                     (args[0].kind != 0 && args[0].kind != 3 && args[0].kind != 2) || args[2].precision ||

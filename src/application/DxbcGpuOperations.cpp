@@ -720,8 +720,6 @@ struct GpuOperations::State {
     pixelSamplingCode(uint32_t opcode, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
                       const std::array<int32_t, 3> &offset, const std::array<uint32_t, 3> &precision,
                       bool clamped, const std::optional<uint32_t> &literalParameter) {
-        if (clamped && std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; }))
-            throw std::runtime_error("Minimum-precision clamp assistance is not implemented");
         Words key{opcode,
                   dimension,
                   returns,
@@ -804,17 +802,22 @@ struct GpuOperations::State {
                 for (auto &instruction : program.instructions) {
                     if ((instruction[0] & 2047) == 88)
                         instruction.back() = returns;
-                    if ((instruction[0] & 2047) == opcode && reduced) {
+                    const auto sampleOpcode = clamped ? (opcode == 69   ? 230u
+                                                         : opcode == 74 ? 231u
+                                                                        : 233u)
+                                                      : opcode;
+                    if ((instruction[0] & 2047) == sampleOpcode && reduced) {
                         ++samples;
                         const auto operands = checkpoint::instructionOperands(instruction);
                         Words operation = operands.prefix, originalDestination;
                         for (size_t i = 0; i < operands.ranges.size(); ++i) {
                             const auto [begin, end] = operands.ranges[i];
                             Words arg(instruction.begin() + begin, instruction.begin() + end);
-                            const auto p = i == 0   ? precision[0]
-                                           : i == 1 ? precision[1]
-                                           : i == 4 ? precision[2]
-                                                    : 0u;
+                            const auto extra = clamped ? 1u : 0u;
+                            const auto p = i == 0           ? precision[0]
+                                           : i == 1 + extra ? precision[1]
+                                           : i == 4 + extra ? precision[2]
+                                                            : 0u;
                             if (i == 0) {
                                 originalDestination = arg;
                                 arg = dest(0, scratch, (arg[0] >> 4) & 15);
