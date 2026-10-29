@@ -4,10 +4,12 @@
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeHistory.h"
+#include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
 #include <d3d11sdklayers.h>
+#include <set>
 using namespace flora;
 using namespace flora::testing;
 using Json = nlohmann::json;
@@ -212,9 +214,9 @@ class NativeHistoryTests final : public QObject {
         s.x = 4;
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectNativeEventHistory(replay, s));
         s.x = 1;
-        s.maxReadbackBytes = 319;
+        s.maxReadbackBytes = 3;
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectNativeEventHistory(replay, s));
-        s.maxReadbackBytes = 320;
+        s.maxReadbackBytes = 4;
         s.maxRecords = 1;
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, collectNativeEventHistory(replay, s));
         s.maxRecords = 100;
@@ -505,6 +507,277 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(replay.readTexture(10), expected);
         QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
     }
+    void boundedOrdinarySnapshots_data() { devices(); }
+    void boundedOrdinarySnapshots() {
+        QFETCH(uint32_t, vendor);
+        QTemporaryDir directory;
+        const auto path = directory.filePath("bounded.gpa_frame");
+        commands().save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(vendor));
+        NativeHistorySelection s;
+        s.resource = 10;
+        s.mip = s.layer = s.x = 1;
+        s.maxReadbackBytes = 4;
+        const auto history = collectNativeEventHistory(replay, s);
+        QCOMPARE(history.at("records").size(), size_t(8));
+        QCOMPARE(history.at("readback_count"), Json(15));
+        QCOMPARE(history.at("point_readback_count"), Json(15));
+        QCOMPARE(history.at("readback_bytes"), Json(60));
+        QCOMPARE(row(history, 100).at("before").at("available"), Json(false));
+        QCOMPARE(row(history, 170).at("after").at("bytes"), Json("00ff00ff"));
+        QCOMPARE(row(history, 180).at("write_executed"), Json(true));
+        QCOMPARE(row(history, 180).at("pixel_storage_changed"), Json(false));
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+    }
+    void boundedCompressedSnapshots_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("format");
+        QTest::addColumn<bool>("cube");
+        for (const auto vendor : {0u, 0x10deu, 0x8086u})
+            for (uint32_t format = 70; format <= 99; ++format) {
+                if (format > 84 && format < 94)
+                    continue;
+                for (const auto cube : {false, true}) {
+                    if (cube && format != 71)
+                        continue;
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(format).arg(cube)))
+                        << vendor << format << cube;
+                }
+            }
+    }
+    void completeStorageBudget_data() { devices(); }
+    void completeStorageBudget() {
+        QFETCH(uint32_t, vendor);
+        QTemporaryDir directory;
+        for (const bool depth : {false, true}) {
+            Capture c;
+            c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+            const auto format = depth ? DXGI_FORMAT_D24_UNORM_S8_UINT : DXGI_FORMAT_R8G8B8A8_UNORM;
+            auto descriptor = statePack(Id(0), Id(0));
+            append(descriptor,
+                   D3D11_TEXTURE2D_DESC{7,
+                                        5,
+                                        1,
+                                        2,
+                                        format,
+                                        {depth ? 1u : 4u, 0},
+                                        D3D11_USAGE_DEFAULT,
+                                        UINT(depth ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET),
+                                        0,
+                                        0});
+            append(descriptor, Id(0));
+            c.add(10, 5, 0x85, descriptor);
+            auto view = statePack(Id(0), Id(0), Id(10));
+            if (depth) {
+                D3D11_DEPTH_STENCIL_VIEW_DESC d{};
+                d.Format = format;
+                d.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+                d.Texture2DArray = {0, 1, 1};
+                append(view, d);
+                c.add(12, 5, 0x8e, view);
+                c.add(100, 7, 0x31, statePack(Id(0), Id(1), Id(12), 3u, .5f, uint8_t(0x53)));
+            } else {
+                D3D11_RENDER_TARGET_VIEW_DESC d{};
+                d.Format = format;
+                d.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+                d.Texture2DMSArray = {1, 1};
+                append(view, d);
+                c.add(12, 5, 0x8d, view);
+                c.add(100, 7, 0x32, statePack(Id(0), Id(1), Id(12), uint8_t(1), 1.f, 0.f, 0.f, 1.f));
+            }
+            const auto path = directory.filePath(QString("complete-%1.gpa_frame").arg(depth));
+            c.save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(vendor));
+            NativeHistorySelection s;
+            s.resource = 10;
+            s.layer = 1;
+            s.x = 3;
+            s.y = 2;
+            s.maxReadbackBytes = 4;
+            try {
+                collectNativeEventHistory(replay, s);
+                QFAIL("A complete-storage readback must not exceed its budget");
+            } catch (const std::runtime_error &error) {
+                const auto message = QByteArray(error.what());
+                QVERIFY(message.startsWith("Event 100 ("));
+                QVERIFY(message.endsWith("Native history complete readback exceeds its storage budget"));
+            }
+            s.maxReadbackBytes = 280;
+            const auto history = collectNativeEventHistory(replay, s);
+            QCOMPARE(history.at("readback_count"), Json(1));
+            QCOMPARE(history.at("readback_bytes"), Json(280));
+            QCOMPARE(history.at("point_readback_count"), Json(0));
+            QCOMPARE(history.at("block_readback_count"), Json(0));
+            QCOMPARE(row(history, 100).at("after").at("readback_scope"), Json("complete_storage"));
+            Replay clean(frame, options(vendor));
+            clean.run();
+            if (depth)
+                QCOMPARE(replay.readTexture(10), clean.readTexture(10));
+            else
+                QCOMPARE(replay.readMsaa(10, 0, format).bytes, clean.readMsaa(10, 0, format).bytes);
+            QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+        }
+    }
+    void compressedPredicationAndCounters_data() { devices(); }
+    void compressedPredicationAndCounters() {
+        QFETCH(uint32_t, vendor);
+        QTemporaryDir directory;
+        for (const uint32_t value : {0u, 1u}) {
+            auto c = predicateCapture(true, value);
+            const auto dispatch = c.entries.back();
+            const auto dispatchBytes = std::vector<uint8_t>(
+                c.bytes.begin() + dispatch.offset, c.bytes.begin() + dispatch.offset + dispatch.size);
+            QCOMPARE(dispatch.id, Id(3000));
+            c.entries.pop_back();
+            for (const Id id : {9000u, 9001u}) {
+                c.add(id, 5, 0x85,
+                      statePack(Id(0), Id(0), 8u, 8u, 1u, 1u, 71u, 1u, 0u, 0u, 8u, 0u, 0u, id + 10));
+                auto data = statePack(32u);
+                data.resize(36, id == 9000 ? 0 : 0x5a);
+                c.add(id + 10, 9, 1, data);
+            }
+            for (const Id event : {4000u, 4100u})
+                c.add(event, 7, 0x3e, statePack(Id(0), Id(1), Id(9000), Id(9001)));
+            c.add(5000, 7, 0x35, dispatchBytes);
+            const auto path = directory.filePath(QString("predicated-block-%1.gpa_frame").arg(value));
+            c.save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(vendor));
+            NativeHistorySelection s;
+            s.resource = 9000;
+            s.x = s.y = 7;
+            s.maxReadbackBytes = 8;
+            s.maxRecords = 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, collectNativeEventHistory(replay, s));
+            s.maxRecords = 2;
+            const auto history = collectNativeEventHistory(replay, s);
+            QCOMPARE(history.at("block_readback_count"), Json(3));
+            QCOMPARE(history.at("readback_bytes"), Json(24));
+            const auto wanted = value ? "0000000000000000" : "5a5a5a5a5a5a5a5a";
+            for (const Id event : {4000u, 4100u}) {
+                QCOMPARE(row(history, event).at("after").at("bytes"), Json(wanted));
+                QVERIFY(row(history, event).at("write_executed").is_null());
+            }
+            QCOMPARE(row(history, 4100).at("storage_changed"), Json(false));
+            Replay clean(frame, options(vendor));
+            clean.run();
+            QCOMPARE(replay.readTexture(9000), clean.readTexture(9000));
+            QCOMPARE(replay.readTexture(20), clean.readTexture(20));
+            QCOMPARE(replay.readBuffer(7), clean.readBuffer(7));
+            QCOMPARE(replay.readCounter(12), clean.readCounter(12));
+            const auto a = replay.readPredicateResult(600), b = clean.readPredicateResult(600);
+            QCOMPARE(a.value, b.value);
+            QCOMPARE(a.bound, b.bound);
+            QCOMPARE(a.predicateValue, b.predicateValue);
+            QCOMPARE(replay.counts, clean.counts);
+            QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+        }
+    }
+    void boundedCompressedSnapshots() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, format);
+        QFETCH(bool, cube);
+        Resource resource;
+        resource.id = 10;
+        resource.type = 0x85;
+        resource.desc = {12, cube ? 12u : 20u, cube ? 4u : 5u, cube ? 6u : 2u, format, 1, 0, 0, 8,
+                         0,  cube ? 4u : 0u};
+        const auto subs = textureSubresources(resource);
+        const auto count = size_t(subs.back().offset + subs.back().size);
+        std::vector<uint8_t> expected(count);
+        for (size_t i = 0; i < count; ++i)
+            expected[i] = uint8_t(i * 53 + i / 256 * 31 + 19);
+        Capture c;
+        c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        for (const Id id : {10u, 11u, 12u}) {
+            auto descriptor = statePack(Id(0), Id(0));
+            for (const auto value : resource.desc)
+                append(descriptor, value);
+            append(descriptor, id + 20);
+            c.add(id, 5, 0x85, descriptor);
+            auto data = statePack(uint32_t(count));
+            if (id != 11)
+                data.resize(4 + count);
+            else
+                data.insert(data.end(), expected.begin(), expected.end());
+            c.add(id + 20, 9, 1, data);
+        }
+        // A copy away from the selection materializes its initial contents before
+        // the first target write, without introducing a target history record.
+        c.add(90, 7, 0x3e, statePack(Id(0), Id(1), Id(12), Id(10)));
+        for (const Id event : {100u, 110u})
+            c.add(event, 7, 0x3e, statePack(Id(0), Id(1), Id(10), Id(11)));
+        QTemporaryDir directory;
+        const auto path = directory.filePath("blocks.gpa_frame");
+        c.save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(vendor));
+        const auto blockBytes = pitches(1, 1, format).first;
+        Json observations = Json::array();
+        for (const auto &sub : subs) {
+            const std::set<std::pair<uint32_t, uint32_t>> points{
+                {0, 0}, {sub.width / 2, sub.height / 2}, {sub.width - 1, sub.height - 1}};
+            for (const auto &[x, y] : points) {
+                NativeHistorySelection s;
+                s.resource = 10;
+                s.x = x;
+                s.y = y;
+                s.mip = sub.mip;
+                s.layer = sub.layer;
+                s.maxReadbackBytes = blockBytes;
+                const auto history = collectNativeEventHistory(replay, s);
+                const auto offset =
+                    sub.offset + uint64_t(y / 4) * sub.rowPitch + uint64_t(x / 4) * blockBytes;
+                const auto wanted =
+                    QByteArray(reinterpret_cast<const char *>(expected.data() + offset), blockBytes)
+                        .toHex()
+                        .toStdString();
+                QCOMPARE(history.at("records").size(), size_t(2));
+                QCOMPARE(history.at("readback_count"), Json(4));
+                QCOMPARE(history.at("point_readback_count"), Json(0));
+                QCOMPARE(history.at("block_readback_count"), Json(4));
+                QCOMPARE(history.at("readback_bytes"), Json(4 * blockBytes));
+                QCOMPARE(row(history, 100).at("before").at("bytes"), Json(std::string(blockBytes * 2, '0')));
+                for (const Id event : {100u, 110u}) {
+                    const auto &record = row(history, event);
+                    QVERIFY2(record.at("after").at("bytes") == wanted,
+                             (history.at("selection").dump() + " expected=" + wanted + " actual=" +
+                              record.at("after").at("bytes").dump() + " errors=" + deviceErrors(replay))
+                                 .c_str());
+                    QCOMPARE(record.at("after").at("readback_scope"), Json("single_compressed_block"));
+                    QCOMPARE(record.at("after").at("exact_pixel_storage"), Json(false));
+                    QVERIFY(record.at("pixel_storage_changed").is_null());
+                    QVERIFY(record.at("write_executed").is_null());
+                    QVERIFY(record.at("fragment").is_null());
+                }
+                QCOMPARE(row(history, 100).at("storage_changed"), Json(true));
+                QCOMPARE(row(history, 110).at("storage_changed"), Json(false));
+                QCOMPARE(replay.readTexture(10), expected);
+                QCOMPARE(replay.readTexture(11), expected);
+                observations.push_back(history);
+            }
+        }
+        NativeHistorySelection invalid;
+        invalid.resource = 10;
+        invalid.maxReadbackBytes = blockBytes - 1;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectNativeEventHistory(replay, invalid));
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+        const auto evidence = qEnvironmentVariable("FLORA_NATIVE_HISTORY_BLOCK_EVIDENCE");
+        if (!evidence.isEmpty()) {
+            const auto folder = evidence + "/" + QTest::currentDataTag();
+            QVERIFY(QDir().mkpath(folder));
+            QVERIFY(QFile::copy(path, folder + "/source.gpa_frame"));
+            QFile output(folder + "/observations.json");
+            QVERIFY(output.open(QIODevice::WriteOnly));
+            const auto text =
+                Json{{"vendor", vendor}, {"format", format}, {"cube", cube}, {"observations", observations}}
+                    .dump(2) +
+                "\n";
+            QCOMPARE(output.write(text.data(), qint64(text.size())), qint64(text.size()));
+        }
+    }
     void groupedStorageRetainsBlockScope_data() { devices(); }
     void groupedStorageRetainsBlockScope() {
         QFETCH(uint32_t, vendor);
@@ -539,8 +812,8 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(replay.readTexture(10), (std::vector<uint8_t>(blank.begin() + 4, blank.end())));
         QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
         const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
-        Json selection{
-            {"resource", 10}, {"x", 7}, {"y", 7}, {"history_scope", "events"}, {"debug_device", true}};
+        Json selection{{"resource", 10},       {"x", 7},        {"y", 7}, {"history_scope", "events"},
+                       {"debug_device", true}, {"max_bytes", 8}};
         if (vendor)
             selection["gpu_vendor"] = vendor;
         else

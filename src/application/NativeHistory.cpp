@@ -5,6 +5,8 @@
 #include "core/Commands.h"
 #include "core/CopyCommands.h"
 #include "core/TextureStorage.h"
+#include "replay/InspectionCopyBindings.h"
+#include "replay/Unpredicated.h"
 #include <algorithm>
 #include <set>
 
@@ -65,6 +67,41 @@ std::string hex(Bytes bytes) {
         result += digits[b & 15];
     }
     return result;
+}
+std::optional<std::vector<uint8_t>> readCompressedBlock(Replay &replay, const Resource &resource,
+                                                        const NativeHistorySelection &s,
+                                                        ID3D11Resource *source,
+                                                        Com<ID3D11Texture2D> &staging) {
+    const auto info = textureInfo(resource);
+    const auto format = info.format;
+    if (info.dimension != 3 || info.samples != 1 ||
+        !((format >= 70 && format <= 84) || (format >= 94 && format <= 99)))
+        return std::nullopt;
+    // Apply the same resource LOD validation as the ordinary storage readers.
+    (void)replay.observeTextureMetadata(s.resource);
+    const auto left = s.x / 4 * 4, top = s.y / 4 * 4;
+    if (!staging) {
+        // Copy coordinates address complete physical blocks, including padding in
+        // small or non-aligned mips. The selected logical texel was validated above.
+        const D3D11_TEXTURE2D_DESC desc{
+            4, 4, 1, 1, DXGI_FORMAT(format), {1, 0}, D3D11_USAGE_STAGING, 0, D3D11_CPU_ACCESS_READ, 0};
+        check(replay.nativeDevice()->CreateTexture2D(&desc, nullptr, &staging),
+              "Create compressed history staging");
+    }
+    Com<ID3D11DeviceContext> context;
+    replay.nativeDevice()->GetImmediateContext(&context);
+    const D3D11_BOX box{left, top, 0, left + 4, top + 4, 1};
+    {
+        Unpredicated unpredicated(context.Get());
+        InspectionCopyBindings isolation(context.Get(), replay.options().warp);
+        context->CopySubresourceRegion(staging.Get(), 0, 0, 0, 0, source, s.mip + s.layer * info.mips, &box);
+    }
+    std::vector<uint8_t> bytes(pitches(1, 1, format).first);
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Map compressed history staging");
+    std::memcpy(bytes.data(), mapped.pData, bytes.size());
+    context->Unmap(staging.Get(), 0);
+    return bytes;
 }
 bool inRange(uint32_t value, uint32_t first, uint32_t count) {
     return value >= first && uint64_t(value) - first < count;
@@ -273,15 +310,17 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
         throw std::invalid_argument("Native history selection exceeds texture bounds");
     const auto subs = textureSubresources(resource);
     const auto storageSize = subs.back().offset + subs.back().size;
-    if (!s.maxReadbackBytes || storageSize > s.maxReadbackBytes)
-        throw std::invalid_argument("Native history readback exceeds its storage budget");
     const auto selected = cell(resource, s);
+    if (!s.maxReadbackBytes ||
+        selected.bytes + (selected.chroma ? selected.chroma->second : 0) > s.maxReadbackBytes)
+        throw std::invalid_argument("Native history cell exceeds its storage budget");
     if (s.typedFormat && !nativePixelFormatsCompatible(info.format, *s.typedFormat))
         throw std::invalid_argument("Native history typed format is incompatible with resource storage");
     const auto maps = auditMapRecords(replay.frame(), cancelled);
     NativePixelDecoder decoder(replay);
     Json records = Json::array(), pending = nullptr;
-    uint64_t reads = 0, bytesRead = 0, pointReads = 0;
+    uint64_t reads = 0, bytesRead = 0, pointReads = 0, blockReads = 0;
+    Com<ID3D11Texture2D> blockStaging;
     auto snapshot = [&](const auto &objects, const Json &footprint) -> Json {
         checkCancellation(cancelled);
         if (!objects.contains(s.resource))
@@ -290,7 +329,13 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
         std::vector<uint8_t> bytes;
         bool canonicalX = false;
         bool point = false;
+        bool block = false;
+        auto requireCompleteStorageBudget = [&] {
+            if (storageSize > s.maxReadbackBytes)
+                throw std::invalid_argument("Native history complete readback exceeds its storage budget");
+        };
         if (info.samples > 1) {
+            requireCompleteStorageBudget();
             auto data = replay.readMsaa(s.resource, s.sample,
                                         s.typedFormat.value_or(defaultTextureFormat(info.format)));
             bytes = std::move(data.bytes);
@@ -300,12 +345,22 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
             bytes = std::move(*narrow);
             point = true;
             ++pointReads;
-        } else
-            bytes = replay.readTexture(s.resource);
+        } else {
+            Com<ID3D11Resource> source;
+            check(objects.at(s.resource).As(&source), "Get compressed history source");
+            if (auto compressed = readCompressedBlock(replay, resource, s, source.Get(), blockStaging)) {
+                bytes = std::move(*compressed);
+                block = true;
+                ++blockReads;
+            } else {
+                requireCompleteStorageBudget();
+                bytes = replay.readTexture(s.resource);
+            }
+        }
         if (bytes.size() > s.maxReadbackBytes)
             throw std::runtime_error("Native history output exceeds its storage budget");
         auto location = cell(storageResource, s);
-        if (point)
+        if (point || block)
             location.offset = 0;
         if (location.offset > bytes.size() || location.bytes > bytes.size() - location.offset)
             throw std::runtime_error("Native history storage is incomplete");
@@ -342,7 +397,9 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
                 {"defined", nullptr},
                 {"format", textureInfo(storageResource).format},
                 {"encoding", location.encoding},
-                {"readback_scope", point ? "single_texel" : "complete_storage"},
+                {"readback_scope", point   ? "single_texel"
+                                   : block ? "single_compressed_block"
+                                           : "complete_storage"},
                 {"exact_pixel_storage", location.exactPixel},
                 {"bytes", value},
                 {"canonical_unused_x", canonicalX},
@@ -447,6 +504,7 @@ Json collectNativeEventHistory(Replay &replay, const NativeHistorySelection &s,
             {"replay_count", 1},
             {"readback_count", reads},
             {"point_readback_count", pointReads},
+            {"block_readback_count", blockReads},
             {"readback_bytes", bytesRead},
             {"fragment_history_available", false},
             {"notes",
