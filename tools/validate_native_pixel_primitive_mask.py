@@ -26,8 +26,11 @@ def signature(data, tag):
 
 
 def shader(r, source, marked):
+    complement = r.get('primitive_comparison', 'equal') == 'not_equal'
+    require(r.get('primitive_comparison', 'equal') in ('equal', 'not_equal'), 'Predicate comparison')
     require(r['schema'] == 1 and r['kind'] == 'native_pixel_primitive_mask_shader' and
-            r['backend'] == 'native-pixel-primitive-mask/1', 'Shader schema')
+            r['backend'] == ('native-pixel-primitive-mask/2' if complement else
+                             'native-pixel-primitive-mask/1'), 'Shader schema')
     require(r['source_sha256'] == hashlib.sha256(source).hexdigest() and
             r['shader_sha256'] == hashlib.sha256(marked).hexdigest(), 'Shader hashes')
     require(r['alpha_preserved'] is True and r['extra_uav_slots'] == 0 and r['extra_temps'] == 1 and
@@ -65,7 +68,7 @@ def shader(r, source, marked):
     temps = [row for row in original if row[0] & 2047 == 104]
     require(len(temps) <= 1 and temp == (temps[0][1] if temps else 0), 'Fresh temporary')
     and_row = [0x07000001, 0x00100012, temp, 0x0010100a | (component << 4), reg, 0x4001, mask]
-    eq_row = [0x07000020, 0x00100012, temp, 0x0010000a, temp, 0x4001, value]
+    eq_row = [0x07000027 if complement else 0x07000020, 0x00100012, temp, 0x0010000a, temp, 0x4001, value]
     select_row = [((13 + len(destination)) << 24) | 55, *destination,
                   0x0010000a, temp, 0x4002, *r['marker_bits'], 0, 0x4002, 0, 0, 0, 0]
     restored, index, returns, input_decls, temp_decls, main = [], 0, 0, 0, 0, True
@@ -127,7 +130,7 @@ def main():
         require(vendor in (0, 4318, 32902) and (vendor, mode) not in seen, 'Unique adapter/mode')
         seen.add((vendor, mode))
         expected = 7 if mode == 'duplicate-gs' else 0xfffffffe if mode.endswith('gs') else 1 if 'discard' in mode else 2
-        require(r['expected_system_primitive_id'] == expected and len(r['observations']) == 34,
+        require(r['expected_system_primitive_id'] == expected and len(r['observations']) in (34, 36),
                 'Authored expected identity and all predicates')
         source = Path(str(path) + '.original.dxbc').read_bytes()
         for index, row in enumerate(r['observations']):
@@ -135,10 +138,14 @@ def main():
             marked = Path(str(path) + f'.{index}.dxbc').read_bytes()
             shader(s, source, marked)
             mask = 1 << index if index < 32 else 0xffffffff
-            value = mask if index < 32 else expected if index == 32 else expected ^ 1
+            value = mask if index < 32 else expected ^ 1 if index == 33 else expected ^ 2 if index == 35 else expected
+            complement = index >= 34
+            require(s.get('primitive_comparison', 'equal') == ('not_equal' if complement else 'equal'),
+                    'Owned comparison mode')
             require(s['primitive_mask'] == mask and s['primitive_value'] == value, 'Predicate selection')
             require(row['kind'] == 'native_pixel_primitive_mask_observation' and
-                    row['backend'] == 'native-pixel-primitive-mask-observation/1' and
+                    row['backend'] == ('native-pixel-primitive-mask-observation/2' if complement else
+                                       'native-pixel-primitive-mask-observation/1') and
                     row['scope'] == 'original_ps_body_with_private_primitive_predicate' and
                     row['original_fragment_eligibility'] is None and row['primitive_ordinal'] is None and
                     row['instance'] is None and row['debug_validation'] == 'no_errors' and
@@ -149,7 +156,7 @@ def main():
                     row['adapter']['vendor'] == (5140 if vendor == 0 else vendor), 'Actual binding and adapter')
             require(len(row['pixels']) == r['samples'] == (4 if mode == 'sample' else 1), 'Samples')
             for sample, pixel in enumerate(row['pixels']):
-                require(pixel[:3] == (s['marker_bits'] if expected & mask == value else [0, 0, 0]) and
+                require(pixel[:3] == (s['marker_bits'] if ((expected & mask == value) != complement) else [0, 0, 0]) and
                         pixel[3] == r['reference'][sample][3], 'Exact predicate output and alpha')
             mutations = [('primitive_mask', mask ^ 1), ('input_component', s['input_component'] ^ 1),
                          ('extra_uav_slots', 1), ('original_fragment_eligibility', True)]

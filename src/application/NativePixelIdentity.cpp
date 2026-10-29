@@ -55,7 +55,7 @@ Json observeNativePixelIdentity(Replay &replay, Id event, uint32_t target,
     checkCancellation(bounded);
     Json result{{"schema", 1},
                 {"kind", "native_pixel_identity_observation"},
-                {"backend", "native-pixel-identity/1"},
+                {"backend", "native-pixel-identity/2"},
                 {"event", event},
                 {"target", target},
                 {"status", "unverified"},
@@ -133,7 +133,7 @@ Json observeNativePixelIdentity(Replay &replay, Id event, uint32_t target,
         else {
             result["candidate_system_id"] = candidate;
             const auto equal = pass("equal", PixelPrimitiveMask{UINT32_MAX, candidate});
-            const auto different = pass("different", PixelPrimitiveMask{UINT32_MAX, candidate ^ 1});
+            const auto different = pass("different", PixelPrimitiveMask{UINT32_MAX, candidate, true});
             const auto repeated = pass("reference_repeat");
             if (equal == true && different == false && repeated == true) {
                 result["status"] = "verified_conditional_replay";

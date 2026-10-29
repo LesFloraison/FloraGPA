@@ -35,8 +35,10 @@ def pipeline_test(row, mode):
 
 
 def common(row, vendor, mode='preserve'):
+    complement = row['completion_shader'].get('primitive_comparison', 'equal') == 'not_equal'
     require(row['schema'] == 1 and row['kind'] == 'native_pixel_primitive_presence_observation' and
-            row['backend'] == 'native-pixel-primitive-presence/1' and
+            row['backend'] == ('native-pixel-primitive-presence/2' if complement else
+                               'native-pixel-primitive-presence/1') and
             row['scope'] == ('original_ps_body_with_private_primitive_presence' if mode == 'preserve' else
                              'original_ps_body_with_counterfactual_primitive_presence'), 'Observation contract')
     require(row['original_fragment_eligibility'] is None and row['original_gpu_schedule'] is False and
@@ -50,7 +52,8 @@ def common(row, vendor, mode='preserve'):
             target['blend_and_logic_disabled'] is False and target['write_mask'] == 15, 'Reduction state')
     code = row['completion_shader']
     require(code['kind'] == 'native_pixel_primitive_presence_shader' and
-            code['backend'] == 'native-pixel-primitive-presence-shader/1' and code['component_type'] == 3 and
+            code['backend'] == ('native-pixel-primitive-presence-shader/2' if complement else
+                                'native-pixel-primitive-presence-shader/1') and code['component_type'] == 3 and
             code['requires_private_unblended_target'] is False and code['requires_private_max_rgb_target'] is True and
             code['requires_zero_initial_rgb'] is True and code['requires_alpha_replace'] is True and
             code['alpha_preserved'] is True and code['nonmatching_rgb_zero'] is True, 'Shader transport contract')
@@ -265,7 +268,9 @@ def main():
             row = json.loads((directory / 'report.json').read_text(encoding='utf-8'))
             common(row, int(directory.name.rsplit('-', 1)[1]))
             code = copy.deepcopy(row['completion_shader'])
-            code.update(kind='native_pixel_primitive_mask_shader', backend='native-pixel-primitive-mask/1')
+            code.update(kind='native_pixel_primitive_mask_shader',
+                        backend=('native-pixel-primitive-mask/2' if code.get('primitive_comparison') == 'not_equal'
+                                 else 'native-pixel-primitive-mask/1'))
             shader(code, (directory / 'original.dxbc').read_bytes(), (directory / 'marked.dxbc').read_bytes())
             require(row['probe']['status'] == 'ok' and row['probe']['original_storage_restored'] is True,
                     'Independent ordinary draw comparison')

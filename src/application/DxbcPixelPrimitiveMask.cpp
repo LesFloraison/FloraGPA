@@ -135,8 +135,8 @@ PixelCompletionShader instrumentPixelPrimitiveMask(Bytes original, uint32_t targ
             throw std::runtime_error("Primitive identity completion marker differs");
         rows.push_back({0x07000001, 0x00100012, temporary, 0x0010100a | (component << 4), input, 0x00004001,
                         selection.mask});
-        rows.push_back(
-            {0x07000020, 0x00100012, temporary, 0x0010000a, temporary, 0x00004001, selection.value});
+        rows.push_back({selection.notEqual ? 0x07000027u : 0x07000020u, 0x00100012, temporary, 0x0010000a,
+                        temporary, 0x00004001, selection.value});
         std::vector<uint32_t> select{55};
         select.insert(select.end(), row.begin() + 1, row.end() - 5);
         select.insert(select.end(), {0x0010000a, temporary});
@@ -169,6 +169,10 @@ PixelCompletionShader instrumentPixelPrimitiveMask(Bytes original, uint32_t targ
                             {"temporary_register", temporary},
                             {"requires_primitive_id_producer", true},
                             {"nonmatching_rgb_zero", true}});
+    if (selection.notEqual) {
+        result.identity["backend"] = "native-pixel-primitive-mask/2";
+        result.identity["primitive_comparison"] = "not_equal";
+    }
     return result;
 }
 PixelCompletionShader instrumentPixelPrimitivePresence(Bytes original, uint32_t target,
@@ -184,6 +188,8 @@ PixelCompletionShader instrumentPixelPrimitivePresence(Bytes original, uint32_t 
                             {"requires_private_max_rgb_target", true},
                             {"requires_zero_initial_rgb", true},
                             {"requires_alpha_replace", true}});
+    if (selection.notEqual)
+        result.identity["backend"] = "native-pixel-primitive-presence-shader/2";
     return result;
 }
 } // namespace flora

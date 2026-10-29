@@ -446,6 +446,8 @@ class NativePixelGeometryReplay {
                         if (primitiveMask) {
                             report["kind"] = "native_pixel_primitive_mask_observation";
                             report["backend"] = "native-pixel-primitive-mask-observation/1";
+                            if (primitiveMask->notEqual)
+                                report["backend"] = "native-pixel-primitive-mask-observation/2";
                             report["scope"] = "original_ps_body_with_private_primitive_predicate";
                             report["primitive_id_source"] =
                                 state.stages[3].shader ? "bound_geometry_shader" : "rasterizer";
@@ -463,6 +465,8 @@ class NativePixelGeometryReplay {
                         if (accumulatePredicate) {
                             report["kind"] = "native_pixel_primitive_presence_observation";
                             report["backend"] = "native-pixel-primitive-presence/1";
+                            if (primitiveMask->notEqual)
+                                report["backend"] = "native-pixel-primitive-presence/2";
                             report["scope"] = "original_ps_body_with_private_primitive_presence";
                             if (testOverride != NativePixelTestOverride::Preserve)
                                 report["scope"] = "original_ps_body_with_counterfactual_primitive_presence";

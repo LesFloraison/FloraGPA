@@ -23,12 +23,14 @@ PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
                                                 const CancelCheck &cancelled = {});
 struct PixelPrimitiveMask {
     uint32_t mask = UINT32_MAX, value = 0;
+    bool notEqual = false;
 };
 struct PixelPrimitiveInput {
     uint32_t reg, component;
 };
 // Returning fragments write the marker when their actual SV_PrimitiveID matches
-// the mask, otherwise zero RGB. Both paths retain alpha and all original work.
+// the masked comparison, otherwise zero RGB. notEqual complements the entire
+// comparison, not a selected bit. Both paths retain alpha and all original work.
 // The caller must establish a valid primitive-ID producer (rasterizer or GS).
 PixelCompletionShader instrumentPixelPrimitiveMask(Bytes original, uint32_t target,
                                                    PixelPrimitiveMask selection,

@@ -52,7 +52,7 @@ def predicate(row):
 
 def validate(r):
     require(r['schema'] == 1 and r['kind'] == 'native_pixel_identity_observation' and
-            r['backend'] == 'native-pixel-identity/1' and
+            r['backend'] in ('native-pixel-identity/1', 'native-pixel-identity/2') and
             r['scope'] == 'repeated_original_ps_private_color_predicates', 'Identity observation schema')
     require(r['original_fragment_eligibility'] is None and r['primitive_ordinal'] is None and
             r['instance'] is None and r['original_gpu_schedule'] is False, 'Unproved invocation fields')
@@ -91,8 +91,12 @@ def validate(r):
                     s['kind'] == 'native_pixel_primitive_mask_shader' and s['extra_temps'] == 1 and
                     obs['primitive_ordinal'] is None and obs['instance'] is None, 'System predicate scope')
             mask = 1 << (index-1) if role == 'bit' else 0xffffffff
-            value_mask = mask if role == 'bit' else candidate if role == 'equal' else candidate ^ 1
+            complement = role == 'different' and r['backend'] == 'native-pixel-identity/2'
+            value_mask = mask if role == 'bit' else candidate if role == 'equal' or complement else candidate ^ 1
             require(s['primitive_mask'] == mask and s['primitive_value'] == value_mask, 'Predicate argument')
+            require(s.get('primitive_comparison', 'equal') == ('not_equal' if complement else 'equal') and
+                    s['backend'] == ('native-pixel-primitive-mask/2' if complement else
+                                     'native-pixel-primitive-mask/1'), 'Full comparison semantics')
             if role == 'bit' and value is True:
                 candidate |= mask
     if values[0] is None or None in values[1:33]:
@@ -144,6 +148,8 @@ def main():
     parser.add_argument('directory', type=Path)
     parser.add_argument('--real', type=Path)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--require-complement', action='store_true',
+                        help='Reject legacy neighbor-only identity verification as new acceptance evidence')
     args = parser.parse_args()
     paths = sorted(args.directory.glob('*.json'))
     require(len(paths) == 30, 'Owned predicate matrix including repeated IDs')
@@ -159,7 +165,9 @@ def main():
             for index, row in enumerate(h['primitive_identity_observation']['passes']):
                 s = row['observation']['completion_shader']
                 if index in (0,35): shader_bytes(s,source,reference,MARKER)
-                else: shader(s,source,Path(str(path)+f'.{index-1}.dxbc').read_bytes())
+                else:
+                    file_index = 34 if index == 34 and h['primitive_identity_observation']['backend'] == 'native-pixel-identity/2' else index-1
+                    shader(s,source,Path(str(path)+f'.{file_index}.dxbc').read_bytes())
             checks.append(h)
         if r['identity_recovery'] is not None:
             recovery=r['identity_recovery']
@@ -169,6 +177,18 @@ def main():
             require(recovery['injected_equal_readback_zero'] is True and recovery['fault_injection']['status']=='inconsistent' and
                     recovery['fault_injection']['system_primitive_id'] is None, 'Injected full-width verification failure')
             require(recovery['retry']['system_primitive_id']==r['expected_system_primitive_id'] and recovery['masked']['status']=='no_color_completion','Recovery result')
+            if recovery['retry']['backend'] == 'native-pixel-identity/2':
+                fault = validate(recovery['complement_fault_injection'])
+                candidate = recovery['injected_multibit_candidate']
+                neighbor = recovery['legacy_neighbor_observation']['completion_shader']
+                require(candidate == 4 and fault['candidate_system_id'] == candidate and
+                        fault['system_primitive_id'] is None and fault['status'] == 'inconsistent' and
+                        predicate(fault['passes'][33]['after']) is True and
+                        predicate(fault['passes'][34]['after']) is True and
+                        neighbor['primitive_mask'] == 0xffffffff and neighbor['primitive_value'] == candidate ^ 1 and
+                        neighbor.get('primitive_comparison', 'equal') == 'equal' and
+                        recovery['legacy_neighbor_pixel'][:3] == [0, 0, 0],
+                        'Multi-bit false candidate rejected by full complement')
         files.append({'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
     require(len(checks)==39,'All owned samples joined including repeated IDs')
     real=sorted(args.real.glob('*/report.json')) if args.real else []
@@ -179,12 +199,16 @@ def main():
         require(r['probe']['status']=='ok' and bytes(r['after']['bytes'])==(path.parent/'reference.bin').read_bytes(), 'Independent real replay')
         checks.append(r); files.append({'path':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()})
     for h in checks:
-        for change in ('system_id','role','predicate','eligibility','association'):
+        if args.require_complement:
+            require(h['primitive_identity_observation']['backend'] == 'native-pixel-identity/2',
+                    'Legacy neighbor comparison does not satisfy the full-complement gate')
+        for change in ('system_id','role','predicate','eligibility','association','comparison'):
             bad=copy.deepcopy(h); identity=bad['primitive_identity_observation']
             if change=='system_id': identity['system_primitive_id']=(identity['system_primitive_id'] or 0)^1
             elif change=='role': identity['passes'][0]['role']='invalid'
             elif change=='predicate': identity['passes'][0]['after']['rgb_predicate']=not identity['passes'][0]['after']['rgb_predicate']
             elif change=='eligibility': identity['original_fragment_eligibility']=True
+            elif change=='comparison': identity['passes'][34]['observation']['completion_shader']['primitive_value'] ^= 4
             else: bad['primitive_identity_association']['matching_primitive_ordinals']=[999999999]
             try: validate_history_identity(bad)
             except (ValueError,TypeError,IndexError): controls+=1; continue
@@ -194,7 +218,9 @@ def main():
     for row in decoded: predicate(row)
     result={'schema':1,'status':'ok','owned_histories':39,'real_histories':len(real),
             'predicate_passes':sum(h['primitive_identity_observation']['pass_count'] for h in checks),
-            'decoder_cases':len(decoded),'negative_controls':controls,'complete_pixel_history':False,'files':files}
+            'decoder_cases':len(decoded),'negative_controls':controls,
+            'full_complement_histories':sum(h['primitive_identity_observation']['backend']=='native-pixel-identity/2' for h in checks),
+            'complete_pixel_history':False,'files':files}
     with args.out.open('x',encoding='utf-8') as output: json.dump(result,output,indent=2);output.write('\n')
     print(json.dumps({k:v for k,v in result.items() if k!='files'}))
 

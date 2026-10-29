@@ -147,12 +147,13 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                                                              : 2u;
             Json rows = Json::array();
             std::vector<std::vector<uint8_t>> shaders;
-            for (uint32_t bit = 0; bit < 34; ++bit) {
+            for (uint32_t bit = 0; bit < 36; ++bit) {
                 const uint32_t mask = bit < 32 ? 1u << bit : UINT32_MAX;
-                const uint32_t value = bit < 32 ? mask : bit == 32 ? last : last ^ 1;
+                const uint32_t value = bit < 32 ? mask : bit == 33 ? last ^ 1 : bit == 35 ? last ^ 2 : last;
+                const bool notEqual = bit >= 34;
                 std::vector<std::array<uint32_t, 4>> values;
-                auto report =
-                    replayNativePixelPrimitiveMask(r, 100, 0, {mask, value}, [&](Replay &p, bool after) {
+                auto report = replayNativePixelPrimitiveMask(
+                    r, 100, 0, {mask, value, notEqual}, [&](Replay &p, bool after) {
                         if (after)
                             for (uint32_t sample = 0; sample < samples; ++sample)
                                 values.push_back(pixel(p, sample, samples, format));
@@ -161,7 +162,7 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                     const auto marked =
                         report.at("completion_shader").at("marker_bits").get<std::array<uint32_t, 3>>();
                     for (uint32_t i = 0; i < 3; ++i)
-                        QCOMPARE(values[sample][i], ((last & mask) == value) ? marked[i] : 0u);
+                        QCOMPARE(values[sample][i], (((last & mask) == value) != notEqual) ? marked[i] : 0u);
                     QCOMPARE(values[sample][3], expected[sample][3]);
                     QCOMPARE(pixel(r, sample, samples, format), before[sample]);
                 }
@@ -172,7 +173,7 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                     producer = PixelPrimitiveInput{
                         report.at("completion_shader").at("input_register").get<uint32_t>(),
                         report.at("completion_shader").at("input_component").get<uint32_t>()};
-                auto rewritten = instrumentPixelPrimitiveMask(original, 0, {mask, value},
+                auto rewritten = instrumentPixelPrimitiveMask(original, 0, {mask, value, notEqual},
                                                               256ull * 1024 * 1024, {}, producer);
                 QCOMPARE(rewritten.identity, report.at("completion_shader"));
                 shaders.push_back(std::move(rewritten.bytecode));
@@ -234,6 +235,35 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                 QVERIFY(injected.at("system_primitive_id").is_null());
                 QCOMPARE(injected.at("candidate_system_id"), Json(last));
                 QCOMPARE(pixel(r, 0, 1, format), before[0]);
+                // A fabricated candidate differing in multiple bits must be
+                // rejected by an independent full-complement readback. Testing
+                // only candidate ^ 1 would not witness the actual ID here.
+                constexpr uint32_t falseCandidate = 4;
+                std::array<uint32_t, 4> neighbor{};
+                const auto neighborReport = replayNativePixelPrimitiveMask(
+                    r, 100, 0, {UINT32_MAX, falseCandidate ^ 1}, [&](Replay &p, bool after) {
+                        if (after)
+                            neighbor = pixel(p, 0, 1, format);
+                    });
+                QCOMPARE(neighbor[0], 0u);
+                unsigned complementReads = 0;
+                auto complement = observeNativePixelIdentity(r, 100, 0, [&](Replay &p) {
+                    auto value = reader(p);
+                    const auto read = ++complementReads;
+                    if ((read >= 4 && read <= 66 && read % 2 == 0) || read == 68) {
+                        const bool positive = read == 68 || (falseCandidate & (1u << ((read - 4) / 2)));
+                        const std::array<uint32_t, 3> words =
+                            positive ? std::array<uint32_t, 3>{0x3f800001, 0x40000001, 0x40400001}
+                                     : std::array<uint32_t, 3>{};
+                        std::memcpy(value.bytes.data(), words.data(), sizeof words);
+                    }
+                    return value;
+                });
+                QCOMPARE(complement.at("candidate_system_id"), Json(falseCandidate));
+                QCOMPARE(complement.at("status"), Json("inconsistent"));
+                QVERIFY(complement.at("system_primitive_id").is_null());
+                QCOMPARE(complement.at("passes")[34].at("after").at("rgb_predicate"), Json(true));
+                QCOMPARE(pixel(r, 0, 1, format), before[0]);
                 o.blendEdits[100].sampleMask = 0;
                 Replay masked(f, o);
                 masked.run();
@@ -247,6 +277,10 @@ class DxbcPixelPrimitiveMaskTests final : public QObject {
                             {"retry", retried},
                             {"injected_equal_readback_zero", true},
                             {"fault_injection", injected},
+                            {"injected_multibit_candidate", falseCandidate},
+                            {"legacy_neighbor_observation", neighborReport},
+                            {"legacy_neighbor_pixel", neighbor},
+                            {"complement_fault_injection", complement},
                             {"masked", absent},
                             {"storage_restored", true}};
             }
