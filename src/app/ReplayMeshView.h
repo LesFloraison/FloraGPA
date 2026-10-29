@@ -47,7 +47,7 @@ class ReplayMeshView final : public QWidget {
     std::shared_ptr<NativeReplayMesh> native_;
     QMap<QString, QByteArray> files_;
     QAction *read_, *cancel_, *export_, *backend_, *nativeMode_;
-    QComboBox *stage_;
+    QComboBox *stage_, *storage_;
     QLineEdit *instance_;
     QLabel *summary_;
     QPlainTextEdit *details_;

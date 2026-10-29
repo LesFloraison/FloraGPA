@@ -385,6 +385,118 @@ class NativeReplayMeshUiTests : public QObject {
             QVERIFY_THROWS_EXCEPTION(std::exception, present(malformed));
         }
     }
+    void remainingStorage_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("stage");
+        QTest::addColumn<uint32_t>("instance");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto stage : {"vs-inputs", "vs-index", "final", "gs"})
+                for (uint32_t instance = 0; instance < (std::string_view(stage) == "gs" ? 3u : 2u);
+                     ++instance)
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(stage).arg(instance)))
+                        << vendor << QString(stage) << instance;
+    }
+    void remainingStorage() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(QString, stage);
+            QFETCH(uint32_t, instance);
+            QTemporaryDir directory;
+            const auto capture = directory.filePath("storage.gpa_frame");
+            auto fixture = stage == "gs" ? testing::geometryUavEmissionCapture() : testing::hullCapture();
+            if (stage.startsWith("vs")) {
+                fixture.save(capture);
+                Frame frame(capture.toStdWString());
+                auto state = frame.state(199);
+                state.stages[1].shader = state.stages[2].shader = 0;
+                state.topology = 4;
+                std::erase_if(fixture.entries, [](const auto &entry) { return entry.id == 199; });
+                fixture.add(199, 3, 3, testing::snapshot(state));
+            }
+            fixture.save(capture);
+            Json options{{"gpa_event", 200},
+                         {"stage", stage == "gs" ? "final" : stage.toStdString()},
+                         {"instance", instance},
+                         {"vertex_storage", "remaining"}};
+            if (vendor)
+                options["gpu_vendor"] = vendor;
+            else
+                options["warp"] = true;
+            const auto output = directory.filePath("output");
+            const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
+            const auto job = prepareNativeAnalysisJob(capture, "mesh", output, worker, options);
+            const auto result = Json::parse(read(runNativeAnalysisJob(job, worker, 30)).toStdString());
+            const auto files = readNativeArtifacts(output, result.at("artifacts"), 64 * 1024 * 1024);
+            auto mesh = std::make_shared<NativeReplayMesh>(nativeReplayMesh(job, result, files));
+            const auto selected = stage == "gs" ? (instance + 1) * 3u : 6u;
+            const auto total =
+                stage == "gs" ? 18u - 3u * instance * (instance + 1u) / 2u : (instance ? 6u : 12u);
+            QCOMPARE(result.at("data").at("vertices"), Json(selected));
+            QCOMPARE(mesh->positions.positions.size(), size_t(total));
+            QCOMPARE(mesh->positions.indexCount, uint64_t(selected));
+            QCOMPARE(mesh->positions.faces.size(), size_t(selected / 3));
+            QCOMPARE(mesh->tables.at("vertex_storage").at("vertices"), Json(total));
+            QCOMPARE(mesh->files["post_vertices.bin"],
+                     files["vertices.bin"] + files["remaining_vertices.bin"]);
+            auto altered = result;
+            altered["data"]["vertex_storage"]["selected_vertices"] = selected + 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, altered, files));
+            altered = result;
+            altered["data"]["vertex_storage"]["first_vertex"] = UINT64_MAX;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, altered, files));
+            altered = result;
+            altered["data"]["vertex_storage"]["full_sha256"] = std::string(64, '0');
+            altered["data"]["instance_selection"]["full_capture"]["sha256"] = std::string(64, '0');
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, altered, files));
+            auto identities = Json::parse(files.value("remaining_identities.json").toStdString());
+            if (!identities.empty()) {
+                identities[0][0] = instance;
+                auto wrongIdentity = files;
+                wrongIdentity["remaining_identities.json"] = QByteArray::fromStdString(identities.dump());
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, wrongIdentity));
+            }
+            auto corrupt = files;
+            if (!corrupt["remaining_vertices.bin"].isEmpty()) {
+                corrupt["remaining_vertices.bin"][0] ^= 1;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, corrupt));
+            }
+            corrupt = files;
+            corrupt.remove("remaining_identities.json");
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, corrupt));
+            if (stage != "vs-index") {
+                ReplayMeshView view;
+                view.setNativeMode(true);
+                view.setContext("storage", 200);
+                view.findChild<QLineEdit *>("replayMeshInstance")->setText(QString::number(instance));
+                if (stage != "vs-inputs")
+                    view.findChild<QComboBox *>("replayMeshStage")->setCurrentIndex(1);
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         view.finishNative(view.requestId(), result, mesh));
+                auto storage = view.findChild<QComboBox *>("replayMeshStorage");
+                storage->setCurrentIndex(1);
+                QCOMPARE(view.request().at("vertex_storage"), Json("remaining"));
+                QVERIFY(view.finishNative(view.requestId(), result, mesh));
+                view.exportResult(directory.filePath("mesh.csv"));
+                QCOMPARE(read(directory.filePath("mesh.csv")), mesh->files["post_vertices.csv"]);
+                const auto previous = view.requestId();
+                storage->setCurrentIndex(0);
+                QVERIFY(view.result().is_null());
+                QVERIFY(!view.finishNative(previous, result, mesh));
+            }
+            const auto retained = qEnvironmentVariable("FLORA_NATIVE_MESH_STORAGE_EVIDENCE");
+            if (!retained.isEmpty()) {
+                const auto folder = retained + '/' + QString::fromLatin1(QTest::currentDataTag());
+                QVERIFY(QDir().mkpath(folder));
+                for (auto it = mesh->files.cbegin(); it != mesh->files.cend(); ++it)
+                    write(folder + '/' + it.key(), it.value());
+                write(folder + "/job.json", QByteArray::fromStdString(job.dump(2)));
+                write(folder + "/result.json", QByteArray::fromStdString(result.dump(2)));
+                write(folder + "/presentation.json", QByteArray::fromStdString(mesh->tables.dump(2)));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void pipeline() {
         try {
             QFETCH(uint32_t, vendor);

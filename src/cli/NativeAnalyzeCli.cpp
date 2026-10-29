@@ -23,6 +23,7 @@ int nativeAnalyzeCli(QStringList arguments) {
             }
         }
         QCommandLineParser parser;
+        parser.addOption({"vertex-storage", "Mesh vertex storage: selected or remaining", "scope"});
         parser.setApplicationDescription("Isolated native DX11 analysis of a GPA frame");
         parser.addHelpOption();
         parser.addPositionalArgument("capture", "DX11 .gpa_frame file");
@@ -85,7 +86,8 @@ int nativeAnalyzeCli(QStringList arguments) {
             if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
                 key == "primitive-identity" || key == "primitive-presence" || key == "primitive-tests")
                 options[field] = true;
-            else if (key == "stage" || key == "history-scope" || key == "debug-scope")
+            else if (key == "stage" || key == "history-scope" || key == "debug-scope" ||
+                     key == "vertex-storage")
                 options[field] = parser.value(key).toStdString();
             else if (key == "group" || key == "thread") {
                 options[field] = Json::array();

@@ -65,9 +65,9 @@ def validate_modules(modules):
                 "private GPA module loaded outside its installation directory")
 
 
-def compact_sources(data, raw, identities):
+def compact_sources(data, raw, identities, count=None):
     stride = data["stride"]
-    require(len(identities) == data["vertices"], "identity count")
+    require(len(identities) == (data["vertices"] if count is None else count), "identity count")
     unique, variants, keys = {}, {}, []
     for i, identity in enumerate(identities):
         owner = tuple(identity[:2])
@@ -80,6 +80,41 @@ def compact_sources(data, raw, identities):
     order = sorted(unique, key=lambda key: unique[key][0])
     remap = {key: i for i, key in enumerate(order)}
     return [unique[key][1] for key in order], [remap[key] for key in keys]
+
+
+def presentation_storage(folder, data, raw):
+    require(data["stride"] > 0 and len(raw) == data["vertices"] * data["stride"], "selected storage size")
+    identities = load(folder / "identities.json") if "vertex_identity" in data else []
+    if "vertex_storage" not in data:
+        return raw, identities
+    storage, selection = data["vertex_storage"], data["instance_selection"]
+    stride, selected = data["stride"], data["vertices"]
+    extra = (folder / "remaining_vertices.bin").read_bytes()
+    extra_ids = load(folder / "remaining_identities.json")
+    total = storage["vertices"]
+    require(storage["schema"] == 1 and storage["scope"] == "remaining" and storage["stride"] == stride and
+            storage["selected_vertices"] == selected and total >= selected and
+            len(raw) == selected * stride and len(extra) == (total - selected) * stride, "remaining storage size")
+    require(storage["full_vertices"] == selection["full_capture"]["vertices"] and
+            storage["full_sha256"] == selection["full_capture"]["sha256"] and
+            storage["first_vertex"] >= 0 and storage["first_vertex"] + total == storage["full_vertices"],
+            "remaining capture provenance")
+    if storage["first_vertex"] == 0:
+        require(storage["sha256"] == storage["full_sha256"], "full remaining capture digest")
+    if "first_vertex" not in selection:
+        require(data["requested_stage"] == "vs-inputs", "missing native instance range")
+    expected_first = selection.get("first_vertex", selected * selection["instance"])
+    require(storage["first_vertex"] == expected_first and digest(raw + extra) == storage["sha256"] and
+            digest(extra) == storage["remaining_sha256"], "remaining range and bytes")
+    require(isinstance(extra_ids, list) and len(extra_ids) == (total - selected if "vertex_identity" in data else 0),
+            "remaining identity size")
+    previous = selection["instance"]
+    for identity in extra_ids:
+        require(len(identity) == 3 and all(type(v) is int for v in identity) and
+                selection["instance"] < identity[0] < selection["instance_count"] and identity[0] >= previous,
+                "remaining instance identity")
+        previous = identity[0]
+    return raw + extra, identities + extra_ids
 
 
 def validate_stage(folder, label, event, instance, vendor, worker_hash, stage, position_channels=False):
@@ -116,13 +151,20 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage, p
     attribute = next(a for a in data["attributes"] if a["system_value"] == 1 and a["component_type"] == 3)
     require(attribute["components"] == [0, 1, 2, 3] and attribute["offset"] + 16 <= stride, "position layout")
     presentation = load(folder / "presentation.json")
+    remaining = options.get("vertex_storage", "selected") == "remaining"
+    require(remaining == ("vertex_storage" in data), "requested vertex storage scope")
+    storage_raw, storage_ids = presentation_storage(folder, data, raw)
+    stored_count = len(storage_raw) // stride
+    if remaining:
+        require(presentation["vertex_storage"] == data["vertex_storage"], "presentation storage provenance")
     mapping = presentation.get("replay_mesh")
     if position_channels:
         require(mapping is not None, "missing native semantic position mapping")
-    sources, references = list(range(count)), list(range(count))
+    sources, references = list(range(stored_count)), list(range(count))
     if mapping is not None:
         if "vertex_identity" in data:
-            sources, references = compact_sources(data, raw, load(folder / "identities.json"))
+            sources, all_references = compact_sources(data, storage_raw, storage_ids, stored_count)
+            references = all_references[:count]
         expected_mapping = {"schema": 1, "strategy": "sorted_input_identities_and_output_variants"
                             if "vertex_identity" in data else "expanded_outputs", "vertex_sources": sources,
                             "reference_vertices": references, "vertex_stride": stride, "index_count": count}
@@ -130,8 +172,8 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage, p
             expected_mapping.update(position_components=[0, 1, 2, 3], obj_unavailable_reason=None)
         require(mapping == expected_mapping, "independent compact identity mapping")
         require((folder / "post_vertices.bin").read_bytes() ==
-                b"".join(raw[i * stride:(i + 1) * stride] for i in sources), "compact vertex records")
-    positions = [struct.unpack_from("<4f", raw, i * stride + attribute["offset"]) for i in sources]
+                b"".join(storage_raw[i * stride:(i + 1) * stride] for i in sources), "compact vertex records")
+    positions = [struct.unpack_from("<4f", storage_raw, i * stride + attribute["offset"]) for i in sources]
     rows = list(csv.reader(io.StringIO((folder / "post_vertices.csv").read_text(encoding="utf-8"))))
     require(rows[0] == ["vertex", "x", "y", "z", "w"] and len(rows) == len(sources) + 1, "CSV layout")
     for i, (row, position) in enumerate(zip(rows[1:], positions)):
@@ -146,7 +188,8 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage, p
                 "OBJ perspective divide")
     faces = [[int(v) - 1 for v in row[1:]] for row in obj if row and row[0] == "f"]
     require(all(len(face) == 3 and all(0 <= v < len(sources) for v in face) for face in faces), "face bounds")
-    invalid_clip = any(p[3] == 0 or not all(map(math.isfinite, p)) for p in positions)
+    selected_positions = [struct.unpack_from("<4f", raw, i * stride + attribute["offset"]) for i in range(count)]
+    invalid_clip = any(p[3] == 0 or not all(map(math.isfinite, p)) for p in selected_positions)
     if invalid_clip:
         require(presentation["obj_unavailable_reason"] ==
                 "Nonfinite clip position or zero W; raw attributes remain available", "explicit preview limit")
@@ -195,6 +238,26 @@ def compare(inputs, final, instance):
             "sha256": digest(expected), "parameters": data["instance_selection"]["original_parameters"]}
 
 
+def compare_remaining(inputs, final, input_storage, final_storage, instance):
+    data, raw, _, presentation, _ = inputs
+    other, actual, _, _, _ = final
+    stride = data["stride"]
+    count = data["instance_selection"]["instance_count"] - instance
+    require(count > 0 and len(input_storage) == len(raw) * count and
+            len(final_storage) == len(actual) * count, "remaining instance ranges")
+    for metadata, storage in ((data, input_storage), (other, final_storage)):
+        require(metadata["vertex_storage"]["vertices"] * stride == len(storage) and
+                metadata["vertex_storage"]["sha256"] == digest(storage), "complete remaining storage identity")
+    rows = presentation["tables"]["input_references"]["rows"]
+    references = [row[4] for row in rows[:len(rows) // 3 * 3]]
+    expected = b"".join(input_storage[offset * len(raw) + index * stride:
+                                      offset * len(raw) + (index + 1) * stride]
+                        for offset in range(count) for index in references)
+    require(expected == final_storage, "remaining assembled outputs differ from final stream output")
+    return {"instances": count, "input_bytes": len(input_storage), "final_bytes": len(final_storage),
+            "assembled_sha256": digest(expected)}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--probe", type=Path, required=True)
@@ -202,6 +265,7 @@ def main():
     parser.add_argument("--captures", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--validate-only", action="store_true", help="Recheck retained output without GPU execution")
+    parser.add_argument("--vertex-storage", choices=("selected", "remaining"), default="selected")
     parser.add_argument("--position-channels", action="store_true", help="Require semantic position metadata added by the channel presentation implementation")
     parser.add_argument("--case-set", choices=CASE_SETS, default="baseline")
     args = parser.parse_args()
@@ -226,6 +290,8 @@ def main():
             folder = args.out / name
             command = [str(args.probe.resolve()), str((args.captures / CAPTURES[label][0]).resolve()),
                        str(event), str(instance), str(vendor), str(folder.resolve())]
+            if args.vertex_storage == "remaining":
+                command.append("remaining")
             if args.validate_only:
                 status = load(args.out / "validation.json")
                 code = next(r["exit_code"] for r in status["cases"] if r["case"] == name)
@@ -245,6 +311,8 @@ def main():
                         "probe execution measurements")
                 require([r["stage"] for r in probe["records"]] == ["vs-inputs", "final"] and
                         [r["ui_presented"] for r in probe["records"]] == [True, False], "UI presentation scope")
+                require(all(load(folder / stage / "job.json")["options"].get("vertex_storage", "selected") ==
+                            args.vertex_storage for stage in ("vs-inputs", "final")), "requested storage mode")
                 pair = [validate_stage(folder / stage, label, event, instance, vendor, worker_hash, stage, args.position_channels)
                         for stage in ("vs-inputs", "final")]
                 for snapshot, part in zip(probe["records"], pair):
@@ -254,6 +322,26 @@ def main():
                             snapshot["faces"] == len(part[2]) and snapshot["elapsed_ms"] > 0,
                             "probe result identity and presentation counts")
                 record.update(compare(*pair, instance))
+                if args.vertex_storage == "remaining":
+                    input_storage = presentation_storage(folder / "vs-inputs", pair[0][0], pair[0][1])[0]
+                    final_storage = presentation_storage(folder / "final", pair[1][0], pair[1][1])[0]
+                    record["remaining"] = compare_remaining(*pair, input_storage, final_storage, instance)
+                    remaining_controls = 0
+                    for target in ("input_storage", "final_storage", "count"):
+                        changed, first, second = copy.deepcopy(pair), input_storage, final_storage
+                        if target == "input_storage":
+                            first = first[:-1] + bytes([first[-1] ^ 1])
+                        elif target == "final_storage":
+                            second = second[:-1] + bytes([second[-1] ^ 1])
+                        else:
+                            changed[0][0]["vertex_storage"]["vertices"] += 1
+                        try:
+                            compare_remaining(*changed, first, second, instance)
+                        except ValueError:
+                            remaining_controls += 1
+                        else:
+                            raise ValueError("Accepted corrupt remaining " + target)
+                    record["remaining_corruption_controls"] = remaining_controls
                 controls = 0
                 for target in ("raw", "reference", "topology", "face"):
                     changed = copy.deepcopy(pair)
@@ -283,7 +371,8 @@ def main():
             print(name, "PASS" if record["passed"] else record["error"], flush=True)
             summary = {"schema": 1, "completed": len(records) == len(cases) * 3,
                        "passed": all(r["passed"] for r in records), "case_set": args.case_set,
-                       "position_channels": args.position_channels, "worker_sha256": worker_hash,
+                       "position_channels": args.position_channels, "vertex_storage": args.vertex_storage,
+                       "worker_sha256": worker_hash,
                        "probe_sha256": digest(args.probe.read_bytes()), "cases": records,
                        "renderdoc_parity": False, "full_mesh_parity": False}
             summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")

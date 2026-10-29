@@ -5,6 +5,7 @@
 #include "application/NativeReplayMesh.h"
 #include <Psapi.h>
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -60,8 +61,8 @@ int main(int argc, char **argv) {
     QApplication app(argc, argv);
     try {
         const auto args = app.arguments();
-        require(args.size() == 6,
-                "Usage: FloraNativeMeshCaptureProbe FRAME EVENT INSTANCE VENDOR NEW_DIRECTORY");
+        require(args.size() == 6 || (args.size() == 7 && args[6] == "remaining"),
+                "Usage: FloraNativeMeshCaptureProbe FRAME EVENT INSTANCE VENDOR NEW_DIRECTORY [remaining]");
         auto number = [&](int i) {
             bool ok = false;
             const auto value = args[i].toULongLong(&ok, 0);
@@ -89,6 +90,8 @@ int main(int argc, char **argv) {
             view.setNativeMode(true);
             view.setContext("real-capture", event);
             view.findChild<QLineEdit *>("replayMeshInstance")->setText(QString::number(instance));
+            if (args.size() == 7)
+                view.findChild<QComboBox *>("replayMeshStorage")->setCurrentIndex(1);
             auto options = view.request();
             options.erase("action");
             options["stage"] = stage;

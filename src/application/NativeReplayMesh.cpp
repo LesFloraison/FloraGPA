@@ -3,6 +3,7 @@
 #include "NativeMesh.h"
 #include <cmath>
 #include <cstring>
+#include <map>
 #include <numeric>
 #include <tuple>
 namespace flora {
@@ -39,49 +40,61 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
     mesh.components = components;
     mesh.componentOffsets();
     mesh.indexCount = count;
-    std::vector<uint64_t> sources(count), references(count);
+    std::vector<uint8_t> combinedBytes;
+    std::span<const uint8_t> storageBytes = geometry.bytes;
+    if (!geometry.remainingBytes.empty()) {
+        combinedBytes = geometry.bytes;
+        combinedBytes.insert(combinedBytes.end(), geometry.remainingBytes.begin(),
+                             geometry.remainingBytes.end());
+        storageBytes = combinedBytes;
+    }
+    std::vector<PostTransformGeometry::Identity> combinedIdentities;
+    std::span<const PostTransformGeometry::Identity> storageIdentities = geometry.identities;
+    if (!geometry.remainingIdentities.empty()) {
+        combinedIdentities = geometry.identities;
+        combinedIdentities.insert(combinedIdentities.end(), geometry.remainingIdentities.begin(),
+                                  geometry.remainingIdentities.end());
+        storageIdentities = combinedIdentities;
+    }
+    const auto storedCount = storageBytes.size() / stride;
+    std::vector<uint64_t> sources(storedCount), references(count);
     std::iota(sources.begin(), sources.end(), 0);
     std::iota(references.begin(), references.end(), 0);
     const auto &tables = output.tables.at("tables");
     const bool identified = tables.contains("unique_vertices");
     if (identified) {
-        const auto &unique = tables.at("unique_vertices").at("rows");
-        std::vector<size_t> order(unique.size());
-        std::iota(order.begin(), order.end(), 0);
-        auto key = [&](size_t i) {
-            const auto &row = unique[i];
-            return std::tuple{row[3].get<uint32_t>(), row[4].get<int64_t>(), row[2].get<uint64_t>()};
-        };
-        uint64_t comparisons = 0;
-        std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
-            if (!(++comparisons % 4096))
-                checkCancellation(cancelled);
-            return key(a) < key(b);
-        });
-        checkCancellation(cancelled);
-        sources.resize(unique.size());
-        std::vector<uint64_t> remap(unique.size());
-        for (size_t i = 0; i < order.size(); ++i) {
+        using Owner = std::pair<uint32_t, int64_t>;
+        using Key = std::tuple<uint32_t, int64_t, uint64_t>;
+        std::map<Owner, std::map<std::string, uint64_t>> variants;
+        std::map<Key, uint64_t> unique;
+        std::vector<Key> selectedKeys;
+        for (size_t i = 0; i < storedCount; ++i) {
             if (!(i % 4096))
                 checkCancellation(cancelled);
-            const auto &row = unique[order[i]];
-            sources[i] = row[6].get<uint64_t>();
-            remap.at(row[0].get<size_t>()) = i;
+            const auto &identity = storageIdentities[i];
+            auto &values = variants[{identity.instance, identity.vertexIndex}];
+            std::string bytes(reinterpret_cast<const char *>(storageBytes.data() + i * stride), stride);
+            const auto found = values.try_emplace(std::move(bytes), values.size()).first;
+            const Key key{identity.instance, identity.vertexIndex, found->second};
+            unique.try_emplace(key, i);
+            if (i < count)
+                selectedKeys.push_back(key);
         }
-        // Validated identities include the instance and full output bytes. Equal
-        // positions alone must not merge distinct inputs or output variants.
-        for (const auto &row : tables.at("references").at("rows")) {
-            if (!(row[0].get<size_t>() % 4096))
-                checkCancellation(cancelled);
-            references.at(row[0].get<size_t>()) = remap.at(row[8].get<size_t>());
+        sources.clear();
+        std::map<Key, uint64_t> remap;
+        for (const auto &[key, source] : unique) {
+            remap.emplace(key, sources.size());
+            sources.push_back(source);
         }
+        for (size_t i = 0; i < selectedKeys.size(); ++i)
+            references[i] = remap.at(selectedKeys[i]);
     }
     QByteArray compact;
     for (uint64_t i = 0; i < sources.size(); ++i) {
         if (!(i % 4096))
             checkCancellation(cancelled);
         std::array<float, 4> value{};
-        const auto begin = geometry.bytes.data() + sources[i] * stride;
+        const auto begin = storageBytes.data() + sources[i] * stride;
         std::memcpy(value.data(), begin + *offset, 4 * components);
         mesh.positions.push_back({value[0], value[1], value[2], value[3]});
         compact.append(reinterpret_cast<const char *>(begin), qsizetype(stride));
@@ -120,6 +133,8 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
         mesh.faces.push_back(
             {face[0].get<uint64_t>() - 1, face[1].get<uint64_t>() - 1, face[2].get<uint64_t>() - 1});
     mesh.candidateFaceCount = mesh.faces.size();
+    if (report.contains("vertex_storage"))
+        output.tables["vertex_storage"] = report.at("vertex_storage");
     output.preview = primitives;
     output.preview["positions"] = Json::array();
     const auto axes = mesh.componentOffsets();

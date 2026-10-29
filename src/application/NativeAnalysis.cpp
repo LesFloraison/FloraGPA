@@ -92,7 +92,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"inventory", {}},
         {"events", {}},
         {"texture", {"gpa_event", "resource", "mip", "layer", "slice", "sample", "typed_format"}},
-        {"mesh", {"gpa_event", "stage", "stream", "instance", "max_bytes"}},
+        {"mesh", {"gpa_event", "stage", "stream", "instance", "max_bytes", "vertex_storage"}},
         {"counters", {"gpa_event", "start_event", "end_event"}},
         {"history",
          {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format", "history_scope",
@@ -120,7 +120,10 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         } else {
             if (!selected->second.contains(key))
                 throw std::invalid_argument("Unsupported " + action + " option: " + key);
-            if (key == "history_scope") {
+            if (key == "vertex_storage") {
+                if (value != "selected" && value != "remaining")
+                    throw std::invalid_argument("Vertex storage must be selected or remaining");
+            } else if (key == "history_scope") {
                 if (value != "events" && value != "private-draw")
                     throw std::invalid_argument("Native history requires events or private-draw scope");
             } else if (key == "debug_scope") {
@@ -154,6 +157,9 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
     }
     if (options.value("warp", false) && options.contains("gpu_vendor"))
         throw std::invalid_argument("Vendor selection cannot use WARP");
+    if (options.value("vertex_storage", std::string("selected")) == "remaining" &&
+        (!options.contains("instance") || options.value("stage", std::string("final")) == "hs"))
+        throw std::invalid_argument("Remaining vertex storage requires an assembled mesh instance");
     if ((action == "mesh" || action.starts_with("debug-")) && !options.contains("gpa_event"))
         throw std::invalid_argument(action + " requires a GPA event");
     if ((action == "texture" || action == "history") && !options.contains("resource"))
@@ -427,6 +433,9 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
         } else if (request.action == "mesh") {
             PostTransformOptions inspect;
             inspect.stage = selection.value("stage", std::string("final"));
+            inspect.retainRemainingVertices =
+                selection.value("vertex_storage", std::string("selected")) == "remaining";
+            inspect.cancelled = cancelled;
             inspect.stream = selection.value("stream", 0u);
             inspect.maxBytes = selection.value("max_bytes", uint64_t(256) * 1024 * 1024);
             if (selection.contains("instance"))

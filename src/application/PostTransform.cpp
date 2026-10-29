@@ -388,6 +388,29 @@ class PostTransformCapture {
                 {"system_ids_rewritten", false},
                 {"input_offsets_rewritten", false}};
     }
+    void retainStorage(PostTransformGeometry &result, uint64_t first, uint64_t count) {
+        if (!options.retainRemainingVertices)
+            return;
+        const auto stride = result.report.at("stride").get<uint64_t>();
+        if (!stride)
+            throw std::runtime_error("Remaining vertex storage requires a nonzero stride");
+        const auto full = result.bytes.size() / stride;
+        if (!stride || result.bytes.size() % stride || first > full || count > full - first ||
+            result.bytes.size() > options.maxBytes)
+            throw std::runtime_error("Remaining vertex storage exceeds capture bounds");
+        const auto end = (first + count) * stride;
+        result.remainingBytes.assign(result.bytes.begin() + end, result.bytes.end());
+        result.report["vertex_storage"] = {{"schema", 1},
+                                           {"scope", "remaining"},
+                                           {"first_vertex", first},
+                                           {"selected_vertices", count},
+                                           {"vertices", full - first},
+                                           {"stride", stride},
+                                           {"full_vertices", full},
+                                           {"full_sha256", sha256(result.bytes)},
+                                           {"sha256", sha256(Bytes(result.bytes).subspan(first * stride))},
+                                           {"remaining_sha256", sha256(result.remainingBytes)}};
+    }
     void selectInstance(PostTransformGeometry &result, const Event &event, const State &state) {
         auto &report = result.report;
         const auto selection = instanceSelection(report, event, state, *options.instance);
@@ -397,6 +420,7 @@ class PostTransformCapture {
         const auto begin = first * stride, end = (first + count) * stride;
         if (end > result.bytes.size())
             throw std::runtime_error("Instance range exceeds captured SO storage");
+        retainStorage(result, first, count);
         result.bytes = std::vector<uint8_t>(result.bytes.begin() + begin, result.bytes.begin() + end);
         report["primitives"] = count / report.at("vertices_per_primitive").get<uint64_t>();
         report["vertices"] = count;
@@ -775,8 +799,14 @@ class PostTransformCapture {
                                   : parameters.at("start_vertex").get<int64_t>();
         Json rowReferences = Json::array();
         const auto fullHash = sha256(result.bytes);
+        if (options.retainRemainingVertices)
+            retainStorage(result, captured ? uint64_t(*options.instance) * vertices.size() : 0,
+                          captured ? vertices.size() : 0);
         if (captured) {
             for (uint32_t instance = 0; instance < instances; ++instance) {
+                if (options.retainRemainingVertices && instance > *options.instance)
+                    for (const auto vertex : vertices)
+                        result.remainingIdentities.push_back({instance, int64_t(vertex) + base, vertex});
                 if (options.instance && instance != *options.instance)
                     continue;
                 for (size_t i = 0; i < vertices.size(); ++i) {
@@ -940,6 +970,22 @@ class PostTransformCapture {
                 }
             if (identities.size() % factor)
                 throw std::runtime_error("VS identity selection splits a native primitive");
+            if (options.retainRemainingVertices) {
+                report["stride"] = stride;
+                first = 0;
+                while (first < result.identities.size() &&
+                       result.identities[first].instance < *options.instance)
+                    ++first;
+                for (size_t i = 0; i < result.identities.size(); ++i)
+                    if ((i && result.identities[i].instance < result.identities[i - 1].instance) ||
+                        (i >= first && i < first + identities.size() &&
+                         result.identities[i].instance != *options.instance))
+                        throw std::runtime_error(
+                            "Remaining vertex storage requires ordered instance identities");
+                retainStorage(result, first, identities.size());
+                result.remainingIdentities.assign(result.identities.begin() + first + identities.size(),
+                                                  result.identities.end());
+            }
             result.bytes = std::move(selected);
             result.identities = std::move(identities);
             report["instance_selection"] = {
@@ -1673,6 +1719,9 @@ class PostTransformCapture {
         return result;
     }
     PostTransformGeometry run(Id id) {
+        if (options.retainRemainingVertices &&
+            (!options.instance || options.stage == "hs" || isOutputLogStage(options.stage)))
+            throw std::runtime_error("Remaining vertex storage requires an assembled mesh instance");
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
             options.stage != "gs" && options.stage != "vs-index" && options.stage != "vs-inputs" &&
             options.stage != "hs" && !isOutputLogStage(options.stage))
@@ -2082,6 +2131,10 @@ void exportPostTransform(const PostTransformGeometry &geometry, const std::files
     });
     if (!hasObj && QFile::exists(root + "/geometry.obj") && !QFile::remove(root + "/geometry.obj"))
         throw std::runtime_error("Cannot remove obsolete post-transform OBJ");
+    if (!geometry.report.contains("vertex_storage"))
+        for (const auto name : {"remaining_vertices.bin", "remaining_identities.json"})
+            if (QFile::exists(root + '/' + name) && !QFile::remove(root + '/' + name))
+                throw std::runtime_error("Cannot remove obsolete remaining vertex storage");
 }
 static void visitPostTransformFiles(const PostTransformGeometry &geometry,
                                     const std::function<void(const QString &, const QByteArray &)> &save) {
@@ -2093,6 +2146,15 @@ static void visitPostTransformFiles(const PostTransformGeometry &geometry,
     save("geometry-ui.json", QByteArray::fromStdString(tables.dump()));
     save("vertices.bin",
          QByteArray(reinterpret_cast<const char *>(geometry.bytes.data()), geometry.bytes.size()));
+    if (geometry.report.contains("vertex_storage")) {
+        save("remaining_vertices.bin",
+             QByteArray(reinterpret_cast<const char *>(geometry.remainingBytes.data()),
+                        geometry.remainingBytes.size()));
+        Json identities = Json::array();
+        for (const auto &identity : geometry.remainingIdentities)
+            identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
+        save("remaining_identities.json", QByteArray::fromStdString(identities.dump()));
+    }
     QByteArray csv;
     auto append = [&](const Json &row) {
         QStringList cells;

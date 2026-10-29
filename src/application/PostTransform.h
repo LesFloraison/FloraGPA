@@ -9,6 +9,7 @@ struct PostTransformOptions {
     uint32_t stream = 0;
     uint64_t maxBytes = 256ull * 1024 * 1024;
     std::optional<uint32_t> instance;
+    bool retainRemainingVertices = false;
     bool hullDownstream = false;
     CancelCheck cancelled;
 };
@@ -21,6 +22,9 @@ struct PostTransformGeometry {
         uint32_t vertexId;
     };
     std::vector<Identity> identities;
+    // Additional storage from the same capture; selected references stay unchanged.
+    std::vector<uint8_t> remainingBytes;
+    std::vector<Identity> remainingIdentities;
     std::vector<uint8_t> downstreamBytes;
     // Optional shader primitive IDs in final-stream order, never storage ordinals.
     std::vector<uint32_t> primitiveIds;

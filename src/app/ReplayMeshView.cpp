@@ -79,6 +79,12 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     instance_->setMaximumWidth(100);
     instance_->setToolTip("Zero-based instance in the selected draw");
     bar->addWidget(instance_);
+    storage_ = new QComboBox;
+    storage_->setObjectName("replayMeshStorage");
+    storage_->addItem("Selected instance vertices", "selected");
+    storage_->addItem("Vertices from this instance onward", "remaining");
+    bar->addWidget(storage_);
+    connect(storage_, &QComboBox::currentIndexChanged, this, &ReplayMeshView::invalidate);
     auto detail = bar->addAction("Details");
     detail->setObjectName("replayMeshDetailsToggle");
     detail->setCheckable(true);
@@ -194,6 +200,7 @@ void ReplayMeshView::updateActions() {
     nativeMode_->setEnabled(!busy_);
     stage_->setEnabled(!busy_);
     instance_->setEnabled(!busy_);
+    storage_->setEnabled(!busy_ && nativeMode());
 }
 ReplayMeshView::Json ReplayMeshView::request() const {
     bool ok = false;
@@ -203,10 +210,13 @@ ReplayMeshView::Json ReplayMeshView::request() const {
     if (key_.isEmpty() || !event_)
         throw std::runtime_error("Select a draw first");
     const auto stage = stage_->currentData().toString().toStdString();
-    return {{"action", nativeMode() ? "mesh" : "postmesh"},
-            {"gpa_event", event_},
-            {"stage", nativeMode() ? (stage == "VSOut" ? "vs-inputs" : "final") : stage},
-            {"instance", value}};
+    Json result{{"action", nativeMode() ? "mesh" : "postmesh"},
+                {"gpa_event", event_},
+                {"stage", nativeMode() ? (stage == "VSOut" ? "vs-inputs" : "final") : stage},
+                {"instance", value}};
+    if (nativeMode() && storage_->currentData().toString() == "remaining")
+        result["vertex_storage"] = "remaining";
+    return result;
 }
 bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
                                   std::shared_ptr<NativeReplayMesh> native) {
@@ -221,6 +231,9 @@ bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
     for (const auto key : {"gpa_event", "stage", "instance"})
         if (options.at(key) != selection.at(key))
             throw std::runtime_error("Native mesh result belongs to another selection");
+    if (options.value("vertex_storage", std::string("selected")) !=
+        selection.value("vertex_storage", std::string("selected")))
+        throw std::runtime_error("Native mesh storage belongs to another selection");
     if (result.at("data").at("event").at("id") != event_ ||
         result.at("data").at("requested_stage") != options.at("stage") ||
         result.at("data").at("instance_selection").at("instance") != options.at("instance"))

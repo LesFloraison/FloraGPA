@@ -2,7 +2,7 @@
 import argparse
 import json
 from pathlib import Path
-from validate_native_mesh_captures import CASE_SETS, compact_sources, digest, load, require, selected_cases, validate_modules
+from validate_native_mesh_captures import CASE_SETS, compact_sources, digest, load, require, selected_cases, validate_modules, presentation_storage
 
 
 def compare(baseline, native, label, event, instance):
@@ -23,9 +23,11 @@ def compare(baseline, native, label, event, instance):
             environment["remote"] is False, "baseline replay environment")
     original = (new / "vertices.bin").read_bytes()
     require(digest(original) == data["sha256"], "native raw digest")
-    sources, references = compact_sources(data, original, load(new / "identities.json"))
+    storage, identities = presentation_storage(new, data, original)
+    sources, all_references = compact_sources(data, storage, identities, len(storage) // data["stride"])
+    references = all_references[:data["vertices"]]
     stride = data["stride"]
-    expected = b"".join(original[i * stride:(i + 1) * stride] for i in sources)
+    expected = b"".join(storage[i * stride:(i + 1) * stride] for i in sources)
     actual = (new / "post_vertices.bin").read_bytes()
     require(actual == expected, "native compact record provenance")
     previous = (old / "post_vertices.bin").read_bytes()

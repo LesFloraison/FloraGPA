@@ -56,6 +56,15 @@ class NativeAnalysisTests final : public QObject {
                                     Json{{"resource", 1}, {"warp", true}, {"gpu_vendor", 0x8086}}})
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("texture", options));
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("mesh", Json::object()));
+        for (const auto &options :
+             {Json{{"gpa_event", 200}, {"vertex_storage", "remaining"}},
+              Json{{"gpa_event", 200}, {"instance", 0}, {"vertex_storage", "all"}},
+              Json{{"gpa_event", 200}, {"instance", 0}, {"vertex_storage", "remaining"}, {"stage", "hs"}}})
+            QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("mesh", options));
+        QCOMPARE(nativeAnalysisRequest("mesh",
+                                       {{"gpa_event", 200}, {"instance", 0}, {"vertex_storage", "remaining"}})
+                     .options.at("vertex_storage"),
+                 Json("remaining"));
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
                                  nativeAnalysisRequest("counters", {{"start_event", 4}}));
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument,

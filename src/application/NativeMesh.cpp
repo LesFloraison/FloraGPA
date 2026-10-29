@@ -56,6 +56,73 @@ NativeMesh decodeNativeMesh(const nlohmann::json &job, const nlohmann::json &res
         }
     }
     checkCancellation(cancelled);
+    const bool remaining = options.value("vertex_storage", std::string("selected")) == "remaining";
+    if (remaining != report.contains("vertex_storage") ||
+        remaining != mesh.artifacts.contains("remaining_vertices.bin") ||
+        remaining != mesh.artifacts.contains("remaining_identities.json"))
+        throw std::runtime_error("Native vertex storage scope disagrees with its request");
+    if (remaining) {
+        const auto &storage = report.at("vertex_storage"), &selection = report.at("instance_selection");
+        const auto stride = report.at("stride").get<uint64_t>();
+        const auto selected = report.at("vertices").get<uint64_t>();
+        const auto total = storage.at("vertices").get<uint64_t>();
+        const auto full = storage.at("full_vertices").get<uint64_t>();
+        const auto first = storage.at("first_vertex").get<uint64_t>();
+        const auto &extra = mesh.artifacts["remaining_vertices.bin"];
+        if (!stride || storage.at("schema") != 1 || storage.at("scope") != "remaining" ||
+            storage.at("stride") != stride || storage.at("selected_vertices") != selected ||
+            selected > total || first > full || total != full - first ||
+            total > options.value("max_bytes", uint64_t(256) * 1024 * 1024) / stride ||
+            mesh.geometry.bytes.size() / stride != selected || mesh.geometry.bytes.size() % stride ||
+            uint64_t(extra.size()) % stride || uint64_t(extra.size()) / stride != total - selected ||
+            selection.at("full_capture").at("vertices") != full ||
+            selection.at("full_capture").at("sha256") != storage.at("full_sha256") ||
+            (!first && storage.at("full_sha256") != storage.at("sha256")))
+            throw std::runtime_error("Native remaining storage bounds or provenance mismatch");
+        uint64_t expectedFirst = 0;
+        if (selection.contains("first_vertex"))
+            expectedFirst = selection.at("first_vertex").get<uint64_t>();
+        else {
+            const auto instance = options.at("instance").get<uint32_t>();
+            if (report.at("requested_stage") != "vs-inputs" || (selected && instance > full / selected))
+                throw std::runtime_error("Native remaining storage lacks a selected range");
+            expectedFirst = selected * instance;
+        }
+        if (first != expectedFirst)
+            throw std::runtime_error("Native remaining storage starts outside the selected instance");
+        mesh.geometry.remainingBytes.assign(reinterpret_cast<const uint8_t *>(extra.constData()),
+                                            reinterpret_cast<const uint8_t *>(extra.constData()) +
+                                                extra.size());
+        auto combined = mesh.geometry.bytes;
+        combined.insert(combined.end(), mesh.geometry.remainingBytes.begin(),
+                        mesh.geometry.remainingBytes.end());
+        if (storage.at("sha256") != sha256(combined) ||
+            storage.at("remaining_sha256") != sha256(mesh.geometry.remainingBytes))
+            throw std::runtime_error("Native remaining vertex digest mismatch");
+        const auto identities =
+            nlohmann::json::parse(mesh.artifacts["remaining_identities.json"].toStdString());
+        const auto expected = report.contains("vertex_identity") ? total - selected : 0;
+        if (!identities.is_array() || identities.size() != expected)
+            throw std::runtime_error("Native remaining identity count mismatch");
+        const auto instance = options.at("instance").get<uint32_t>();
+        for (const auto &id : mesh.geometry.identities)
+            if (id.instance != instance)
+                throw std::runtime_error("Native selected storage contains another instance");
+        uint32_t previous = instance;
+        for (const auto &id : identities) {
+            if (!id.is_array() || id.size() != 3 || !id[0].is_number_integer() || id[0] < 0 ||
+                id[0] > UINT32_MAX || !id[1].is_number_integer() ||
+                (id[1].is_number_unsigned() && id[1].get<uint64_t>() > uint64_t(INT64_MAX)) ||
+                !id[2].is_number_integer() || id[2] < 0 || id[2] > UINT32_MAX)
+                throw std::runtime_error("Invalid native remaining identity");
+            const auto owner = id[0].get<uint32_t>();
+            if (owner <= instance || owner < previous ||
+                owner >= selection.at("instance_count").get<uint32_t>())
+                throw std::runtime_error("Native remaining identities are outside the storage scope");
+            previous = owner;
+            mesh.geometry.remainingIdentities.push_back({owner, id[1].get<int64_t>(), id[2].get<uint32_t>()});
+        }
+    }
     mesh.tables = postTransformTables(mesh.geometry);
     if (report.at("primitives").get<uint64_t>() !=
         report.at("vertices").get<uint64_t>() / report.at("vertices_per_primitive").get<uint32_t>())
