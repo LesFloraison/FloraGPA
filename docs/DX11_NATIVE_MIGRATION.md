@@ -1667,3 +1667,12 @@ Helldivers selections with one- or four-byte budgets. The initial Intel Helldive
 timing outlier and focused repeats are retained; performance acceptance is open.
 See `research/DX11_NATIVE_HISTORY_BLOCK_READBACK.md` for byte comparisons, module
 checks, reproduction commands and the remaining P4-P8 gates.
+
+Native PS implicit, bias and comparison sampling now preserve floating minimum
+precision with per-sample clamps. Eighteen WARP/NVIDIA/Intel cases match their
+unchanged original GPU bytecode/results, exercise changed clamps through one
+helper cache and preserve unknown-clamp validity. Independent checks reject
+ninety corruptions. The three related suites record 498 passes, no skips and the
+unchanged Intel literal-zero SampleBias clamp-effect failure. See
+`research/DX11_MINIMUM_CLAMP_PRECISION.md` for the retained baseline, exact scope
+and reproduction steps. This increment does not close P6 or authorize P7/P8.
