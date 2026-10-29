@@ -1529,3 +1529,10 @@ and are not a historical-failure waiver. See the
 [feedback relocation study](research/DX11_NATIVE_FEEDBACK_RELOCATION.md).
 Feedback execution semantics, full native parity and release acceptance remain
 open.
+
+The [status-lifetime investigation](research/DX11_NATIVE_FEEDBACK_STATUS_LIFETIME.md)
+narrows the NVIDIA failures: interpreted status depends on a register's value
+before the feedback load. Zero/all-ones controls cover 180 dispatches and preserve
+all original instructions. Mandatory tests clear these research controls and
+still fail; no initialization workaround or failure waiver is enabled. Native
+status modeling must separate mapping knowledge from opaque raw-bit validity.

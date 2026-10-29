@@ -1,0 +1,2873 @@
+{
+  "schema": 1,
+  "implementation_commit": "e07652ecaf94156fc55abe46d01b3a805eef0046",
+  "status": "evidence_valid_semantics_failed",
+  "dispatches": 180,
+  "exact_seed_insertions": 180,
+  "corruptions_rejected": 198,
+  "byte_identical_default_shaders": 174,
+  "default_qt_passed": 42,
+  "default_qt_failed": 2,
+  "default_qt_skipped": 0,
+  "product_seed_workaround": false,
+  "gpu_feedback_acceptance": false,
+  "renderdoc_removed": false,
+  "standalone_release_accepted": false,
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-adapters.json",
+      "bytes": 362,
+      "sha256": "0d773077810c4fdabbb094a8e99a8dec28bfde039fcbc37b70b68119b6a40b66"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-build.log",
+      "bytes": 1257,
+      "sha256": "9c1283dec243c8a9d690067c6304d76745189df55f8770fc40edc1c7251207e6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-0/report.json",
+      "bytes": 1083,
+      "sha256": "404eadcf64a8f57328a3395884884d5d9a5e20a9b6813aa36c1c000e23b5ab18"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-0-1/report.json",
+      "bytes": 1082,
+      "sha256": "f7760a8fd1bbeeb6b2523104a67b65482573c2b21b97a2771d412922185e36b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-0/report.json",
+      "bytes": 1113,
+      "sha256": "19c08683b148cfd357b4c2496b7362665b2dbb62e624d1b66d9a2203871dd1db"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-1-1/report.json",
+      "bytes": 1112,
+      "sha256": "f3e84e30037c913b77cd1623fca69e01b5be0113770f00fb1c2bafaedd6935d6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-0/report.json",
+      "bytes": 1113,
+      "sha256": "cbd6937b35e3dc6ee713ec85ee3b84f01035070c277646ffe1a2e6e947daa329"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-0-2-1/report.json",
+      "bytes": 1112,
+      "sha256": "eeceaba2a6ed54b46de1c695e355225c5b849fae836ece5f484d17cecdc4c3e4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-0/report.json",
+      "bytes": 1087,
+      "sha256": "55f875027967b99f4d20136dd26a6bd98af32aa2614525ada7f82748c093b171"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-0-1/report.json",
+      "bytes": 1086,
+      "sha256": "fe5e9d692b6805791dbe54570cbd3a29935f1be4ff2f759950b0ab611cabf1de"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-0/report.json",
+      "bytes": 1117,
+      "sha256": "10f01db571863fff957f7ff9f43fc0eda6088566b5b16ebc6c6cb2c91d4c9519"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-1-1/report.json",
+      "bytes": 1116,
+      "sha256": "42286eb603f9c40bf4b7544317829cfc580b6f14ba249be38bcf33159b2473e5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-0/report.json",
+      "bytes": 1117,
+      "sha256": "ca072b34d11de2e84cbfa941fdcea193b40c65826bdb8e7f5a2cf47aef585ded"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-32902-2-1/report.json",
+      "bytes": 1116,
+      "sha256": "9b8a1bd7d52f351de873e5f71dfb7ebe5d51adb3922b7e94031b16708d382af6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-0/report.json",
+      "bytes": 1086,
+      "sha256": "f450f3fca9779fa52e0c6816122bafc74e0c8dda157ffdd11a3a2debb0b2837f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-0-1/report.json",
+      "bytes": 1085,
+      "sha256": "4d55bb46aa17dd2545d5e38a68eb19c2bd918d00d12bcc463d02fd0dff249bea"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-0/report.json",
+      "bytes": 1116,
+      "sha256": "9289d80e529df8a700785b7b433c041456316951cbbe4204eaefc1149f3de149"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-1-1/report.json",
+      "bytes": 1115,
+      "sha256": "b2f63e7bd04856f1386c8fcc9fd296b313d345874905947ffd5525e9ff79935a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-0/report.json",
+      "bytes": 1116,
+      "sha256": "8f1eeabed9cde75adcca10468c9a8c179c9e4fc2e9017e6a93ef5eb98c0dd66f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/gpu-4318-2-1/report.json",
+      "bytes": 1115,
+      "sha256": "8f2af934cf7a91533adfc9b2e30cc6385b13eb673a44a535786cf55df48d8add"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-0/report.json",
+      "bytes": 362,
+      "sha256": "eb6faddaa5ce4d878d17856b3de7d0c28600d15769559f9bbca42386d4ec323c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-1/moved-63.dxbc",
+      "bytes": 392,
+      "sha256": "bb4fa278edcfddc83bd92a6908b0c58300b62614ef8f201c96a6a24013500773"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-1/moved-7.dxbc",
+      "bytes": 392,
+      "sha256": "ad57e72c5b3039048a0c6f4ba063eb3454331fec6daa6b982c2a693eeb7781e0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-1/original.dxbc",
+      "bytes": 392,
+      "sha256": "526f92d930bca2c1fd8e2d73d5b70bc03a212c5bfae3964f3af61a43130321d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-0-1/report.json",
+      "bytes": 361,
+      "sha256": "d636a6ce6f1a8c5e7580e04e7a9a7c14d0f4b3dbf4a8601126fb825a86d1224f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "12f4302ef043bde0522f58d07d203fdb29b5e7f14702637688181b90f29073c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "a32d7d0f02a5c1cbeebdb170ea189df0924c46f375c6fe01af31825be1165714"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "325a679323271686f95c2613f0ec326ddb9c5f43981cc414824c7344de2f9947"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-0/report.json",
+      "bytes": 361,
+      "sha256": "b63fecc757beb8a167429453de10be5d182bc7892c6d548ad550e43de98174dd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-0/reserved.dxbc",
+      "bytes": 888,
+      "sha256": "777bb99a0d249dac45ee6c9b6ab7b8a17aa92581ac8fee8ea32be4f51fa9e826"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-1/moved-63.dxbc",
+      "bytes": 412,
+      "sha256": "25f5a6fc2ab005fc82126710593f981873376cfbeba5c1078fc6d13f1b2cd0cf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-1/moved-7.dxbc",
+      "bytes": 412,
+      "sha256": "47fc8e14e3d7af3dfd5e28ccdd63d2b1f1ef1d27758a32e83eb790134ec4514f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-1/original.dxbc",
+      "bytes": 412,
+      "sha256": "4bd0eb610f118e4a198d6927aabf916820587a2b67602ca81c28d0d2a620984d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-1/report.json",
+      "bytes": 360,
+      "sha256": "64441b7fa3be0a9f7f468445642047fd1fb356f5c9a0fffb5b392331acc194aa"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-0-1-1/reserved.dxbc",
+      "bytes": 412,
+      "sha256": "00c539cb4002cbaf639c9210a20a8d7bf30c9796a492a4cf8fde08d3fe42c795"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-0/report.json",
+      "bytes": 361,
+      "sha256": "e57d19944129d280218ad47f85a244b33ee23766ad2f4db1da6219962294a86f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-1/moved-63.dxbc",
+      "bytes": 392,
+      "sha256": "cbd7286413e30e090356ca99b0dcb248ab0cc25147587f2781ca9349d928ba67"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-1/moved-7.dxbc",
+      "bytes": 392,
+      "sha256": "cbd7286413e30e090356ca99b0dcb248ab0cc25147587f2781ca9349d928ba67"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-1/original.dxbc",
+      "bytes": 392,
+      "sha256": "cbd7286413e30e090356ca99b0dcb248ab0cc25147587f2781ca9349d928ba67"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-0-1/report.json",
+      "bytes": 360,
+      "sha256": "ea54f000cbf6ed134ea48f8352b4bad793399f349a13c892fad390c3d1e33bc5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "5bc51c156ff5b7eecbe103a75ad7a870f503b655d071737b932dc57c02df411e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "5bc51c156ff5b7eecbe103a75ad7a870f503b655d071737b932dc57c02df411e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "5bc51c156ff5b7eecbe103a75ad7a870f503b655d071737b932dc57c02df411e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-0/report.json",
+      "bytes": 360,
+      "sha256": "10bfeee8f718f19d5089b735176ca7c2505bd1ef32d9bc7f2f33587f1e01ff23"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-0/reserved.dxbc",
+      "bytes": 888,
+      "sha256": "56db93032b0d519048436428327836d17d1b43d8b3f894fdd424228be7120f82"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-1/moved-63.dxbc",
+      "bytes": 412,
+      "sha256": "c8e653c6f8711dc48f6f371504b99e86a0afa8bf027f577abd3d79da649629fc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-1/moved-7.dxbc",
+      "bytes": 412,
+      "sha256": "c8e653c6f8711dc48f6f371504b99e86a0afa8bf027f577abd3d79da649629fc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-1/original.dxbc",
+      "bytes": 412,
+      "sha256": "c8e653c6f8711dc48f6f371504b99e86a0afa8bf027f577abd3d79da649629fc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-1/report.json",
+      "bytes": 359,
+      "sha256": "bbec2298661e25e509e7f380362bd436c7a35e90362aaa3b7166b704615035de"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-0-1-1-1/reserved.dxbc",
+      "bytes": 412,
+      "sha256": "1ed1153c146b5ae2b16a8261f26b2dc679ac1e96bc58ba07d5d62e027fa22df2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-0/report.json",
+      "bytes": 341,
+      "sha256": "ab75670c803a60d93c74d2606db5e8ff5d119dbbe20bb9acc198992f35d3b8d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-1/moved-63.dxbc",
+      "bytes": 376,
+      "sha256": "0cb33076584c89247ab9fd32f63370781977091772f2f6af5b081b6c8686cb48"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-1/moved-7.dxbc",
+      "bytes": 376,
+      "sha256": "680e6f54540a1236a2ac7301617e916bfe318e904c46daafc237b512985df091"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-1/original.dxbc",
+      "bytes": 376,
+      "sha256": "2248d573bcbd7e413fe78a21def8488ffc7b1fc917a62db5f33c3113318ed6c2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-0-1/report.json",
+      "bytes": 340,
+      "sha256": "283202a19acd12a645f596e1d260105d1e2ce87df11978480ca6dcdf64a6b781"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "0a57892dfc4515bddd80cd5565a43ffc47ae78258bf64431a3dde5c1f00b9f1a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "373b44a4b2bd1fc8826a82421f008d7d32851683f7e18cb24ba2807d1bfd97c7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "ee637ffd97c33d36ae155cb280002560f866ca33c66c15719c899e96e0f7ee17"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-0/report.json",
+      "bytes": 340,
+      "sha256": "ea78c339f3e84aa49888342f38dec936fc3f0bcd7db95929ae0e991c69816182"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-0/reserved.dxbc",
+      "bytes": 872,
+      "sha256": "5a090183b2bd62ea2ab81e581edb18b90467767c8ee7e9be4b38e6b2ee7d5544"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-1/moved-63.dxbc",
+      "bytes": 396,
+      "sha256": "4ff4925e3258e488b1a141a09e54f498c96ff24b6ebbe6cedfb02ca076df0ba5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-1/moved-7.dxbc",
+      "bytes": 396,
+      "sha256": "923a7aa5dc365d1c03428eb35d2fb87e68145cb3b38b5d11e1baa7676f5b6ef9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-1/original.dxbc",
+      "bytes": 396,
+      "sha256": "da2864fc3649a6dd457512320627ace0deebeffdf898173d1a0db5f247a1e284"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-1/report.json",
+      "bytes": 339,
+      "sha256": "f4158eb5bab15256534c1708dd0fd4f25cb0dfb0e61adcd4a244f1672e716109"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-0-1-1/reserved.dxbc",
+      "bytes": 396,
+      "sha256": "e55a3c358254ba6587620574c6b6f7b35badaf7ac00985ae4227371d5f156521"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-0/report.json",
+      "bytes": 340,
+      "sha256": "1a1f9f6aba56115e86c8bca600f470e50212aaeb19a50019773515f5f43511c4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-1/moved-63.dxbc",
+      "bytes": 376,
+      "sha256": "047034e438742d0ddc445705d2dfdbfab6196100e70629529c70d99ca3904ff2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-1/moved-7.dxbc",
+      "bytes": 376,
+      "sha256": "047034e438742d0ddc445705d2dfdbfab6196100e70629529c70d99ca3904ff2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-1/original.dxbc",
+      "bytes": 376,
+      "sha256": "047034e438742d0ddc445705d2dfdbfab6196100e70629529c70d99ca3904ff2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-0-1/report.json",
+      "bytes": 339,
+      "sha256": "8b7629969f2d441b2f3e1a6f2b447e29c6c5eb1f4be786585e7a546c838868bd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "2d9c97bf857c9faed09640db3d922995052884b5299dc814caa6d3a72a9cc9b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "2d9c97bf857c9faed09640db3d922995052884b5299dc814caa6d3a72a9cc9b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "2d9c97bf857c9faed09640db3d922995052884b5299dc814caa6d3a72a9cc9b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-0/report.json",
+      "bytes": 339,
+      "sha256": "23996dd393da61c213263a204ef0eaa10716a37e446e4bb132b7cc735cc41464"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-0/reserved.dxbc",
+      "bytes": 872,
+      "sha256": "3000c8a5b233a68ad28484ebe24aeceef0cb323d7b922e1faaf20c67ceb6cf01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-1/moved-63.dxbc",
+      "bytes": 396,
+      "sha256": "3df241a208565f57a65b2b0b3d0b79bfb3ad323c65c3ff5a71004eb5cf12a19b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-1/moved-7.dxbc",
+      "bytes": 396,
+      "sha256": "3df241a208565f57a65b2b0b3d0b79bfb3ad323c65c3ff5a71004eb5cf12a19b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-1/original.dxbc",
+      "bytes": 396,
+      "sha256": "3df241a208565f57a65b2b0b3d0b79bfb3ad323c65c3ff5a71004eb5cf12a19b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-1/report.json",
+      "bytes": 338,
+      "sha256": "e467c17a1478c8f8fa118348793ec40b551c8e013dde50f40ec3a370e63a42b4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-1-1-1-1/reserved.dxbc",
+      "bytes": 396,
+      "sha256": "54f9cb6c8b236523bfb83919b9e866ef5fe676f1769ea88163c7afc1523d7f0b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-0/report.json",
+      "bytes": 359,
+      "sha256": "6185a9f4ceb6f6e75ff588286cc6315df108d99a6a88b7384a900d4e6a475458"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-1/moved-63.dxbc",
+      "bytes": 388,
+      "sha256": "6f5c0298c2ad8caa1247a55d54b71ce2db57bab146ce23e8ac9963900cf57dc1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-1/moved-7.dxbc",
+      "bytes": 388,
+      "sha256": "310e54ff17c402669351dfaae268039ed375a58e43373ce7d6737ebca154dd3c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-1/original.dxbc",
+      "bytes": 388,
+      "sha256": "87de156ad3ed36b8ff7c0fb8d28aa58bead6c6459cc9eca5f18c9daa2d12fdcf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-0-1/report.json",
+      "bytes": 358,
+      "sha256": "0713b18f9ee09afc4d608acb4a86519fc4d1f285ba81171c9d39281fd1d465e4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "29e6448f4353e1f24a7924cb5e880cc00c804251d7a55ecb26ed8bea4c463028"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "c728109db08f3c176cfeec32235c913a09903c7a85861c4d1d8231fe7677e72f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "ea6594ee94de1a30ca8a19a9f794c49c7d902d3c8803704695db7c8368aa9934"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-0/report.json",
+      "bytes": 358,
+      "sha256": "e2350b62e1a57c5c18a55aa7ab6e6641583f820fdd3ebf5ed1448b56304f3d10"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-0/reserved.dxbc",
+      "bytes": 948,
+      "sha256": "582429ae80ccce147fe6ca5cee71b17187892f87fee1771a9a79017ea6fdcc89"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-1/moved-63.dxbc",
+      "bytes": 408,
+      "sha256": "4db3ed8105441112cedebde71ab6cc41a9ea2640947928400ebaa796555457d7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-1/moved-7.dxbc",
+      "bytes": 408,
+      "sha256": "39b29d24df36b4922f283365600030be551cce315695f923180fa289bcda744d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-1/original.dxbc",
+      "bytes": 408,
+      "sha256": "d6bb557187a73fa23b66bc347491add70d1ff5bf886f8f0881b3489a43876188"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-1/report.json",
+      "bytes": 357,
+      "sha256": "4b9d465a9881c2f20daa8ba43d926c94575c255b98a223aa4763de329d96c8b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-0-1-1/reserved.dxbc",
+      "bytes": 408,
+      "sha256": "08631d86e5d969db5c85377c08c8f5a459a84126a24c656dd56f7a7c90d64fd8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-0/report.json",
+      "bytes": 358,
+      "sha256": "b4bf991906e2b0668cbe9dc914fcda59a00b4d0cafc93cbbb4d35eef493939f2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-1/moved-63.dxbc",
+      "bytes": 388,
+      "sha256": "4fa0fc5068e423910309899fdec3a88468d96bcec93c18dd5666315d26508b8c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-1/moved-7.dxbc",
+      "bytes": 388,
+      "sha256": "4fa0fc5068e423910309899fdec3a88468d96bcec93c18dd5666315d26508b8c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-1/original.dxbc",
+      "bytes": 388,
+      "sha256": "4fa0fc5068e423910309899fdec3a88468d96bcec93c18dd5666315d26508b8c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-0-1/report.json",
+      "bytes": 357,
+      "sha256": "d876695dc874707b4683539df642da2cae47f57515ec993537e0f83ee5da4530"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "441abc79dda0e5025bdd6f24b1b2f9b6a5bfae8868b5f8f2d21d462e195aeb14"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "441abc79dda0e5025bdd6f24b1b2f9b6a5bfae8868b5f8f2d21d462e195aeb14"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "441abc79dda0e5025bdd6f24b1b2f9b6a5bfae8868b5f8f2d21d462e195aeb14"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-0/report.json",
+      "bytes": 357,
+      "sha256": "2eafec09684ee3ed74970c82efc0a1db0f4534606e59493be16ac823a35e4c08"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-0/reserved.dxbc",
+      "bytes": 948,
+      "sha256": "c1683ce96f7455bd7bec27baa982754ce82c1f01d6f16a8b2d6d4fbcb62d8e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-1/moved-63.dxbc",
+      "bytes": 408,
+      "sha256": "ea716c047a4533fa1ac019a94727ec534c4c4f82ac041779e822835c17dfd391"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-1/moved-7.dxbc",
+      "bytes": 408,
+      "sha256": "ea716c047a4533fa1ac019a94727ec534c4c4f82ac041779e822835c17dfd391"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-1/original.dxbc",
+      "bytes": 408,
+      "sha256": "ea716c047a4533fa1ac019a94727ec534c4c4f82ac041779e822835c17dfd391"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-1/report.json",
+      "bytes": 356,
+      "sha256": "110dc224253895bc7110d805a3d796c0ac56eff1d7f75fd9618b20b6a18148b2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default/layout-2-1-1-1/reserved.dxbc",
+      "bytes": 408,
+      "sha256": "80b7ec5d9b16aaa63cbd18c71fb34d3c61c313c89793b741b0753e5f0dd4b5b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default-build.log",
+      "bytes": 1584,
+      "sha256": "af283f48cd3807f9f82d6de0fe31967560b2e4bdf03c26c9f351742a9d9c6a19"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default-ctest.log",
+      "bytes": 424,
+      "sha256": "db57ab8777dcf5a9033db697f57034a0d7c59841247c6d07d7b494d315b97d0b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default-parity.json",
+      "bytes": 779,
+      "sha256": "f56d462f006a7be7d0465151813ba31c164f53ea2fe160d335e1349bc27284d1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default-validation.json",
+      "bytes": 1672,
+      "sha256": "2aeb7c63635402ac4f3e33ed969c436170c00813374b3e57945319fa0582ef44"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-default.txt",
+      "bytes": 3429,
+      "sha256": "eb585ca60d78178d88d70c888948be649af5846ffe44f349f58252ce4ad27d38"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "aef2d7510dd4ce0769709b9002a97168911bceeb6e330c50f850e2f948a9ce1a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "3b6f9f4eec594243e9f956afe89e85d73748f723e51aa96e698706a65cb94688"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "f72c8d044d87ab414b7d03a8070c0b078528a59b69f70f92040309288ca00424"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "595171420d41488bd3bfe4b61e9f3ff8fd98a741fdff027195893f830817e594"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "94d010b436bfbb60bc306c9c8adbaca5374a22b35da80adfa3ef24a7d54490cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-1-0/report.json",
+      "bytes": 1092,
+      "sha256": "aa8a266f26a8b775330be4abdfdbe5d6a0cf5d551499776cb7c7382fc0a575fc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "430e9605df417d05fc167a0228dcbcfab1168cabde55b3e98e00b9cf94074cf7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "bc1a6647aef846cddc3f46c255673854ab6af6ff0a938ec1ab91218a1153c711"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "bc8c65b13dd855fc006cc1efd9d8edfaa7c631dc07d9575138d4dd9a5ed83523"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "3286d7449add2c478aa507e200dbc828311351b66f107aa079e66eab03711755"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "468a6b66e75cd9d245fb7001eac3af5765c2d25dc1bcdc97a5c4462b434746a9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first/gpu-4318-2-0/report.json",
+      "bytes": 1092,
+      "sha256": "7e822144024e26667390cca909c5e37413816d11b7b792a047729b5f7d69b8d8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-first.txt",
+      "bytes": 931,
+      "sha256": "37e562c94565f544d4a562f93fae45ab84dddce27088d11b6db5ce5748a472c9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "b1fcdde4a17f7b66b15a639590286a75bdd3b661c57cac03e6b906c3e25db9e2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "983beff1156cdfd10e938fcc235cb787783cc95d1c04f4037ea0fe56afc3ee2a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "d158bf977d5e94d186a373ce3f9169941d1f63667b47ee03dbf56963bd561749"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "d1a7d6baa9be78cc00a73591a628c67221d377a8abef78718508d7a4e31cf1b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "e25f6714482914651771d1a711e6147d848a9cfdddd93e6dfd2bac5db5bbc4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-0/report.json",
+      "bytes": 1089,
+      "sha256": "241a8d017aa0e46412b6274f9482e01cc2da552fda7e46a1707ae372c845082a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-0-1/report.json",
+      "bytes": 1088,
+      "sha256": "376a6dc64be32ff5f59f9b454d6601e477152c9abbaf4765ce51d61359df3d8d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "28c2f424674af73187b38c95dc13c37278de3547488e0097bfb807cdd7acb7c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "8a524d87e3f7864e3d98b873daa38ac618a556c3449f807247f7fdd0c7cf3f50"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "cd1a2b8218772c7948b5129a210483f6b5b9eebc920f9177db32770fdfbca0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "222f8eded33a43638086e3f6537939add2ab8d1b54c99cdd2b0ce77297864db7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "025002e12d725044a49d55d313e4eb738711fa8135a64ef1ae827b5159294eb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-0/report.json",
+      "bytes": 1119,
+      "sha256": "040fc1beef08bccc3676578a6aaca895342887a21a56d235a6d1cfc79ad3ac8d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-1-1/report.json",
+      "bytes": 1118,
+      "sha256": "f5f3004c39494e48f93bbc54d4428de53dffeaa5af738399d330ccd828a1c991"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "081848ccd4b9656f76ec9d81023971593f6cc0aac58326ab090068ff1f76b2e0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "1d8b2496fc2794c0483c1088feddca659adbbb85eded72fb7a07a20d2d7b6395"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "70f6e6d3779723f3be54be8258db1020f7d33db121646aee20413f3b14f0ab38"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "9e48e8f613845926a9053c38d76fa90d197514f54a5ce9e536903233b966b896"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "ca46625ea4e7735a0b87062c2b1fda3dc5bf42e04d9b87c9e64e5208422c1057"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-0/report.json",
+      "bytes": 1119,
+      "sha256": "1a841370d7e7097633e6d53361f2207feffbbbf9abc7814639ef6a7cd3c01b8b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-0-2-1/report.json",
+      "bytes": 1118,
+      "sha256": "a5539e720b5aa5ac713f4425670f64ec71b78dfc25ab4edc0cefc122c329e897"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "b1fcdde4a17f7b66b15a639590286a75bdd3b661c57cac03e6b906c3e25db9e2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "983beff1156cdfd10e938fcc235cb787783cc95d1c04f4037ea0fe56afc3ee2a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "d158bf977d5e94d186a373ce3f9169941d1f63667b47ee03dbf56963bd561749"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "d1a7d6baa9be78cc00a73591a628c67221d377a8abef78718508d7a4e31cf1b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "e25f6714482914651771d1a711e6147d848a9cfdddd93e6dfd2bac5db5bbc4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-0/report.json",
+      "bytes": 1093,
+      "sha256": "297a847803a995a13d8253b6b84618ce3b5fe291e5cb5d2a0810886a4865c6b2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-0-1/report.json",
+      "bytes": 1092,
+      "sha256": "a6e7d27d39cb71dd9e5295a84622cab8ff4509c7be7a1f02bf99fddf61d590e9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "28c2f424674af73187b38c95dc13c37278de3547488e0097bfb807cdd7acb7c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "8a524d87e3f7864e3d98b873daa38ac618a556c3449f807247f7fdd0c7cf3f50"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "cd1a2b8218772c7948b5129a210483f6b5b9eebc920f9177db32770fdfbca0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "222f8eded33a43638086e3f6537939add2ab8d1b54c99cdd2b0ce77297864db7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "025002e12d725044a49d55d313e4eb738711fa8135a64ef1ae827b5159294eb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-0/report.json",
+      "bytes": 1123,
+      "sha256": "2d00c13e4812caf5c9e4b84448f6d36633a739e809c3428bd46ff36a1616cfbc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-1-1/report.json",
+      "bytes": 1122,
+      "sha256": "821f0b57b4e0a66babed30f6e79c2e21a8401f91df3979b1f5193bd0e5a52f17"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "081848ccd4b9656f76ec9d81023971593f6cc0aac58326ab090068ff1f76b2e0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "1d8b2496fc2794c0483c1088feddca659adbbb85eded72fb7a07a20d2d7b6395"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "70f6e6d3779723f3be54be8258db1020f7d33db121646aee20413f3b14f0ab38"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "9e48e8f613845926a9053c38d76fa90d197514f54a5ce9e536903233b966b896"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "ca46625ea4e7735a0b87062c2b1fda3dc5bf42e04d9b87c9e64e5208422c1057"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-0/report.json",
+      "bytes": 1123,
+      "sha256": "ed6b14848cdb20c6df15ecd6ec97690b2977b5256c143debb01275c8991513a2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-32902-2-1/report.json",
+      "bytes": 1122,
+      "sha256": "d7d1b094f6d512cd656a978180e68a33b0eb12f11610730d120e8814158bbcf0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "b1fcdde4a17f7b66b15a639590286a75bdd3b661c57cac03e6b906c3e25db9e2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "983beff1156cdfd10e938fcc235cb787783cc95d1c04f4037ea0fe56afc3ee2a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "d158bf977d5e94d186a373ce3f9169941d1f63667b47ee03dbf56963bd561749"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "d1a7d6baa9be78cc00a73591a628c67221d377a8abef78718508d7a4e31cf1b8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "e25f6714482914651771d1a711e6147d848a9cfdddd93e6dfd2bac5db5bbc4b2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-0/report.json",
+      "bytes": 1092,
+      "sha256": "4de7210ce8eb0b5b09c85c806650dcc8ba304c7ec19737e67eb20585b963e0d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "3036e80c3585c272ac6729eb73577136a9de52a22ca8138a776d38a2584ab46b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-0-1/report.json",
+      "bytes": 1091,
+      "sha256": "34d4dc6167b379652f4ccf3cd931f1c6519f1148946f23b5b093e04985e9394f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "28c2f424674af73187b38c95dc13c37278de3547488e0097bfb807cdd7acb7c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "8a524d87e3f7864e3d98b873daa38ac618a556c3449f807247f7fdd0c7cf3f50"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "cd1a2b8218772c7948b5129a210483f6b5b9eebc920f9177db32770fdfbca0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "222f8eded33a43638086e3f6537939add2ab8d1b54c99cdd2b0ce77297864db7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "025002e12d725044a49d55d313e4eb738711fa8135a64ef1ae827b5159294eb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-0/report.json",
+      "bytes": 1122,
+      "sha256": "f28b55cda07699b0cb78a4ee87158b76b439b6a11723387f2469b5296761c3a6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "9d62b2d4cca328477f75d0b3ff6b6d58ce6526395306f8882a153bf16a80d0b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-1-1/report.json",
+      "bytes": 1121,
+      "sha256": "f6147ffd1c1d8e64bc3a52b2b6d23fb720a8886f595d4d71b02abb6dd853df2b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "081848ccd4b9656f76ec9d81023971593f6cc0aac58326ab090068ff1f76b2e0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "1d8b2496fc2794c0483c1088feddca659adbbb85eded72fb7a07a20d2d7b6395"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "70f6e6d3779723f3be54be8258db1020f7d33db121646aee20413f3b14f0ab38"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "9e48e8f613845926a9053c38d76fa90d197514f54a5ce9e536903233b966b896"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "ca46625ea4e7735a0b87062c2b1fda3dc5bf42e04d9b87c9e64e5208422c1057"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-0/report.json",
+      "bytes": 1122,
+      "sha256": "7237046951aa567f9380737c3b8f2fa5ecb5abf4957a036371e27515454d89cc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "b4bcfc3ce6094414f4cb98e38a253c949edcf8d8f409781d2fd4cfc6a5f6bf3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones/gpu-4318-2-1/report.json",
+      "bytes": 1121,
+      "sha256": "825c8f3086fb212ed4795485a6e5cf0d1fd2dc6b0df81eb0b44531f42b2ba282"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-ones.txt",
+      "bytes": 1457,
+      "sha256": "5e248e9bb8b89c8ba18cf23a94b90effc04a7d349099a61f39ed78895b752c82"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-seed-build.log",
+      "bytes": 1257,
+      "sha256": "fd027b56411097653c67eca92551618e6c7e3bb572f01fd6688ff308a3a9b12a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-validation.json",
+      "bytes": 353,
+      "sha256": "c1abc0660caee48e0ac79070916e7ed11dfc3cfde3613fceabc728bd5b8bff34"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "a282b0b775fd6253523ceffad6cd42e2bae5defdb6a052673730647986157302"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "b6f9d9f32637436fa26a0b1a8e25e825ed9086507d88a23f9c259a40332268ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "4b9273c453731ee130b524bb953e7baef5be9c0bf24dfc506b4f983d4a166b42"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "f61a042add4ac0839753435846519c923d678cbacf64fa8eae90c293d909b994"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "44f6c400454d04cbd63c4d21cb334c24b9a72e18e2f3ea91643732c785b8a047"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-0/report.json",
+      "bytes": 1080,
+      "sha256": "da6c92eaee78caca8b3e3fc71123bc81ace4d55e6d4a581fc2e06142a08bd164"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-0-1/report.json",
+      "bytes": 1079,
+      "sha256": "2236d875b4d2ceeecb36aee7e273756af6103ad53ba656efe51729a498d4b83e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "70abf5ebe672d60dcf976f2192fe5e6f2c7c84e01915466a44938b840dbbe598"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0aae38657db63b6e8067c197e46920114f0704fd39a9b5f2738958e3a1cc45d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "67a1b374691052b1501be01e27dc513b6d598773725813ad919ee0c028704644"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "b43382134078f0db111e216a382b7ba1c41eed8985416c33ba730f13abef2149"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "35b3ca69ac18d01bf3c51eda09c0e4f7406e68daea90b466446004e39c0c6c0e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-0/report.json",
+      "bytes": 1110,
+      "sha256": "9799dcd27b9d4bea36574967447678f774e6cd52d70dd66ffce6120beeaa9901"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-1-1/report.json",
+      "bytes": 1109,
+      "sha256": "0c63d05c613d79ffa7bef0023e01c602851b39afba7a80667481d2e9f202a788"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "92c21b7f93a5e2516ee8d62c3549587bd71609b922a130632b33ba68baacd11f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "e994a4b7664e27ee9fcc849ce27cd2542f8d41cdb3afd89a4065bbdf063adfb2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "3b264b77f5975b488c3fb6f06f2943d26ffcf8d69fc3de1e0222de4327643153"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "faaa5dd1f540c51b28d29971b1da0cca73cea91691c2eda326800aeddd93deb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "480b724dc91bd013e335e4b866edef9e686b19b6e5417f875517ae22c1d53abb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-0/report.json",
+      "bytes": 1110,
+      "sha256": "9385cea3f6fbebbe8aa64e24a6416e41a869b0c738e33d1e2e124d02c28752ff"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-0-2-1/report.json",
+      "bytes": 1109,
+      "sha256": "773fb6bc8497b075be364d8f46fcfecb3530ce07347892a91d16138216fcc265"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "a282b0b775fd6253523ceffad6cd42e2bae5defdb6a052673730647986157302"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "b6f9d9f32637436fa26a0b1a8e25e825ed9086507d88a23f9c259a40332268ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "4b9273c453731ee130b524bb953e7baef5be9c0bf24dfc506b4f983d4a166b42"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "f61a042add4ac0839753435846519c923d678cbacf64fa8eae90c293d909b994"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "44f6c400454d04cbd63c4d21cb334c24b9a72e18e2f3ea91643732c785b8a047"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-0/report.json",
+      "bytes": 1084,
+      "sha256": "8df3310c3e2dad3dd9b392000d8517fc90b44fdde07e1845fca295b93f20ecfc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-0-1/report.json",
+      "bytes": 1083,
+      "sha256": "4bcde9a3407fef2fd4f61271f8237a33a00818cfcb0c9caa8540f8dcee213a43"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "70abf5ebe672d60dcf976f2192fe5e6f2c7c84e01915466a44938b840dbbe598"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0aae38657db63b6e8067c197e46920114f0704fd39a9b5f2738958e3a1cc45d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "67a1b374691052b1501be01e27dc513b6d598773725813ad919ee0c028704644"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "b43382134078f0db111e216a382b7ba1c41eed8985416c33ba730f13abef2149"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "35b3ca69ac18d01bf3c51eda09c0e4f7406e68daea90b466446004e39c0c6c0e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-0/report.json",
+      "bytes": 1114,
+      "sha256": "97345b125a4ef1f9588cd6654b32935deb26ce0879c2dfb8907cb4d57ff157a7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-1-1/report.json",
+      "bytes": 1113,
+      "sha256": "6ca5239fbd6220a072477d961aa2cd30c270dc4d15f880a6e9ef3fd1a20e8366"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "92c21b7f93a5e2516ee8d62c3549587bd71609b922a130632b33ba68baacd11f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "e994a4b7664e27ee9fcc849ce27cd2542f8d41cdb3afd89a4065bbdf063adfb2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "3b264b77f5975b488c3fb6f06f2943d26ffcf8d69fc3de1e0222de4327643153"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "faaa5dd1f540c51b28d29971b1da0cca73cea91691c2eda326800aeddd93deb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "480b724dc91bd013e335e4b866edef9e686b19b6e5417f875517ae22c1d53abb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-0/report.json",
+      "bytes": 1114,
+      "sha256": "47f9a1eeb1ee211fb62437b284cece3730ce03e2e03b4fcd17d133b4fed7e20c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-32902-2-1/report.json",
+      "bytes": 1113,
+      "sha256": "056bdaf1cf6dc57437c3593f46456763bba02da2a046b6125b688f02631a2b78"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "a282b0b775fd6253523ceffad6cd42e2bae5defdb6a052673730647986157302"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "b6f9d9f32637436fa26a0b1a8e25e825ed9086507d88a23f9c259a40332268ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "4b9273c453731ee130b524bb953e7baef5be9c0bf24dfc506b4f983d4a166b42"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "f61a042add4ac0839753435846519c923d678cbacf64fa8eae90c293d909b994"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/original.dxbc",
+      "bytes": 888,
+      "sha256": "44f6c400454d04cbd63c4d21cb334c24b9a72e18e2f3ea91643732c785b8a047"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-0/report.json",
+      "bytes": 1083,
+      "sha256": "4a009513876b36d8bda1a5281d85ccb5f1fb665c0725d3b13762c830e3243596"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/control-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/control-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/moved-63.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/moved-7.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/original.dxbc",
+      "bytes": 888,
+      "sha256": "81277f1c3370150db72f25d44362bc3ebb4364c280876f38f2cdcc4c7dd85a41"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-0-1/report.json",
+      "bytes": 1082,
+      "sha256": "554490e62264571ad8fffd3c493e8246c891b7af4a40e703eeca4fbea7d1b078"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "70abf5ebe672d60dcf976f2192fe5e6f2c7c84e01915466a44938b840dbbe598"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0aae38657db63b6e8067c197e46920114f0704fd39a9b5f2738958e3a1cc45d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "67a1b374691052b1501be01e27dc513b6d598773725813ad919ee0c028704644"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "b43382134078f0db111e216a382b7ba1c41eed8985416c33ba730f13abef2149"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/original.dxbc",
+      "bytes": 872,
+      "sha256": "35b3ca69ac18d01bf3c51eda09c0e4f7406e68daea90b466446004e39c0c6c0e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-0/report.json",
+      "bytes": 1113,
+      "sha256": "9f05bb2616646a9f0fab41eec7f151266440c71896401ab5ca2841fe566865d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/control-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/control-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/moved-63.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/moved-7.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/original.dxbc",
+      "bytes": 872,
+      "sha256": "0f72d44f40dfc65f780f2e788a50b7c0f8f2884a4c404377278d2fe340561e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-1-1/report.json",
+      "bytes": 1112,
+      "sha256": "a792644d0656dd6002bc1b870191334f586235ce9794aed943e4bc20c5af24cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "92c21b7f93a5e2516ee8d62c3549587bd71609b922a130632b33ba68baacd11f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "e994a4b7664e27ee9fcc849ce27cd2542f8d41cdb3afd89a4065bbdf063adfb2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "3b264b77f5975b488c3fb6f06f2943d26ffcf8d69fc3de1e0222de4327643153"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "faaa5dd1f540c51b28d29971b1da0cca73cea91691c2eda326800aeddd93deb4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/original.dxbc",
+      "bytes": 948,
+      "sha256": "480b724dc91bd013e335e4b866edef9e686b19b6e5417f875517ae22c1d53abb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-0/report.json",
+      "bytes": 1113,
+      "sha256": "39624b98cd83b05bca87b5896801a61896fa08496675e68e101778e1fa7537a0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/control-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/control-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/moved-63.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/moved-7.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/original.dxbc",
+      "bytes": 948,
+      "sha256": "dd995cfaf14e9f0536a5201f8679d452c2684a920c7d719912552dd3d7224591"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero/gpu-4318-2-1/report.json",
+      "bytes": 1112,
+      "sha256": "821f1a2a72933db050023b3dc24dc08b5941251ba2655cad72188dd11a2d93d0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-lifetime-zero.txt",
+      "bytes": 1817,
+      "sha256": "b91e03808e086db074b73c6809e0e6eba031c0e00f8f4a44e7f21b87047af454"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-0/report.json",
+      "bytes": 1035,
+      "sha256": "5e243950f501455e55cb9ce80c0ec7ebcefc692b18733ea680752bd9040f903a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-0-1/report.json",
+      "bytes": 1034,
+      "sha256": "3654aa87a6d5d1862ec002ef4285b75edeffb9cefaf319574a8c557801e7a7fb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-0/report.json",
+      "bytes": 1065,
+      "sha256": "094a97cf34549cc02e58f8463ad342c709820b160c9541b0b68578355bcc9f6f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-1-1/report.json",
+      "bytes": 1064,
+      "sha256": "c37cf42687bfce64e5c3a3d2f0635ef86b079a212664c7feab7128ebc684e4d3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-0/report.json",
+      "bytes": 1065,
+      "sha256": "78300cb979c357946a645f03d30c31dd95aabc7d8531b1a5fc521fbca2ea45f4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-0-2-1/report.json",
+      "bytes": 1064,
+      "sha256": "b77c84dbc9f3df43d14e597a78e3e178c249fd84f99632646a55686e11d95f1c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-0/report.json",
+      "bytes": 1039,
+      "sha256": "4318bb890259cfd04a7eff7050a802c7e01ceb88487b92d02e4e40d8da3a22ec"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-0-1/report.json",
+      "bytes": 1038,
+      "sha256": "319943f32178d0be0c9b1f351a44255e173ef95b42e948413cc225285a9b5337"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-0/report.json",
+      "bytes": 1069,
+      "sha256": "74dbc257efeb7dc6c8218a08793d0f7a2814509c0fa2638be7d66de244856616"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-1-1/report.json",
+      "bytes": 1068,
+      "sha256": "acae00960fca9778e1884a24e34923b9cfde0bd1ae778e72b153c19ece4e172f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-0/report.json",
+      "bytes": 1069,
+      "sha256": "865d2dd5fa1770df2bde385397eacb1bded4372b2869ad85dfa3919d91bc7291"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-32902-2-1/report.json",
+      "bytes": 1068,
+      "sha256": "d31b25cb5f3e95d935abae855a1677e39a2cc2824c6727814579be0f4326d1e8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "524a8b8b6f863a8eff27d767896a17197bb6331c2223cd8a1f82a58ceb9b87f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "cf6635914a403e860eebc20a859f27f784ce90d279e640940c1854304d23d8c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "f0f6647b88ace6c17d3068664b1fa155deadf396a605acbf55473a2eddbf6577"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "cc579baeaf91bf71e21d2b2ceb872c3f47e5ec79b54fa4e2cce654e11d23df76"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/original.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-0/report.json",
+      "bytes": 1038,
+      "sha256": "eed5e0ebb03080a895487fbb5d283a8abd2119ba5acdfed9691bf27dcc0cd3ad"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/control-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/control-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/moved-63.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/moved-7.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/original.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-0-1/report.json",
+      "bytes": 1037,
+      "sha256": "2fd25df57e166063d389ae11a3b0c34c89959c4e42c3c567fd05b1c6b3980306"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "39736707272110f9b271ea1172b733c50068608fcfea6d3bc86882fc849fdb31"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "1ef0b38f7172b76a12e806ea6ee976ffe70d08e9e8b9baaa61aaf6b9f539d24d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "8dc9f09efbfed68262df07c57263b2bf969c2d3497ea46479a884c4d8a277d62"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "f3d802873de85aa75b1c7ae4ea853c33c1e45e2b8a1049ace9e94398d9711cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/original.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-0/report.json",
+      "bytes": 1068,
+      "sha256": "44ae6f34906e7591d7e825609ab1439752d23bcf66ae4024788dad25d625f6aa"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/control-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/control-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/moved-63.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/moved-7.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/original.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-1-1/report.json",
+      "bytes": 1067,
+      "sha256": "6d5dc84a1e8c1bb777067ca66db73e1d43edc47ada0ff4a1447fe9f197f8c6ab"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "3f63c33d65c24f27b9cdcffd18398262c4ac5ca2d294decae8696486df2a05b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "9db262dc5d281479a6edadc67cffdfda4ce9bc449a4e46049e48a334e4cbbc01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "298458ebcedbfe4d5cffc014cb1731ea8fc94bc41ed6d6e2528fee1d1d7c6fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "1c7e04b5feb4a0703515d067dfba38040272c1aab32e18f0e1304c0457b8554e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/original.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-0/report.json",
+      "bytes": 1068,
+      "sha256": "6c0732c39e849201fc21d7c222f9c23327ed8363e4fae88e5f2abe3ed64cd7f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/control-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/control-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/moved-63.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/moved-7.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/original.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-relocation-audit/gpu-4318-2-1/report.json",
+      "bytes": 1067,
+      "sha256": "26bd93d618796d3a167d00b36e413f730ec8f5589813bd8c52128cf3ac1aff19"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 134302,
+      "sha256": "a7ce79f52c04eaca1d56db6e6f33ef357863b34a7d050639403255f41465bea2"
+    },
+    {
+      "path": "tests/DxbcFeedbackRelocationTests.cpp",
+      "bytes": 22872,
+      "sha256": "475670fbb078a36eebd92f02b0f657ab9ea6070bd38e462bfc5ebab4f3692031"
+    },
+    {
+      "path": "tools/validate_feedback_relocation.py",
+      "bytes": 6123,
+      "sha256": "23ee5de67c1bfc06c5a8f4d4606b79891a963f6fd1226046370f4776f857ac3a"
+    },
+    {
+      "path": "tools/validate_feedback_status_lifetime.py",
+      "bytes": 4929,
+      "sha256": "2caaade1d3ad18850cf8619e1cf0dd3046dadbb5320f8d65ba4e5b52cd02a5ef"
+    }
+  ]
+}
