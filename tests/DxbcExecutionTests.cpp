@@ -333,6 +333,7 @@ class DxbcExecutionTests final : public QObject {
     }
     void compiledFeedbackAggregation() {
         try {
+            const bool partial = QString::fromLatin1(QTest::currentTestFunction()) == "nullBufferData";
             QFETCH(uint32_t, vendor);
             QFETCH(uint32_t, fields);
             std::string source = "struct Element{";
@@ -342,7 +343,7 @@ class DxbcExecutionTests final : public QObject {
                       "RWStructuredBuffer<uint4> outputData:register(u0);"
                       "[numthreads(1,1,1)]void main(){uint status;Element value=inputData.Load(1,status);"
                       "uint4 sum=value.v0;";
-            for (uint32_t i = 1; i < fields; ++i)
+            for (uint32_t i = 1; i < (partial ? 1u : fields); ++i)
                 source += "sum+=value.v" + std::to_string(i) + ";";
             source += "outputData[0]=uint4(sum.xyz,CheckAccessFullyMapped(status));}";
             const auto original = compileHlsl(source, "cs_5_0").bytecode;
@@ -386,13 +387,20 @@ class DxbcExecutionTests final : public QObject {
             QCOMPARE(rewrittenMerges, fields - 1);
             const auto shader = makeDxbc(parts);
             const Program program(shader);
-            uint32_t loads = 0, merges = 0;
+            uint32_t loads = 0, merges = 0, nullLoads = 0;
             for (const auto &instruction : program.instructions()) {
                 loads += instruction.opcode == 227;
                 merges += instruction.opcode == 60;
+                if (instruction.opcode == 227) {
+                    size_t first = 1;
+                    while (instruction.words.at(first - 1) & 0x80000000u)
+                        ++first;
+                    nullLoads += instruction.words.at(first) == 0xd000;
+                }
             }
             QCOMPARE(loads, fields);
             QCOMPARE(merges, fields - 1);
+            QCOMPARE(nullLoads, partial ? fields - 1 : 0u);
             const auto stride = fields * 16;
             std::vector<uint8_t> bytes(stride * 2);
             for (uint32_t i = 0; i < bytes.size() / 4; ++i) {
@@ -401,7 +409,7 @@ class DxbcExecutionTests final : public QObject {
             }
             std::array<uint32_t, 4> expected{0, 0, 0, 1};
             for (unsigned c = 0; c < 3; ++c)
-                for (uint32_t i = 0; i < fields; ++i)
+                for (uint32_t i = 0; i < (partial ? 1u : fields); ++i)
                     expected[c] += 100 + fields * 4 + i * 4 + c;
             Device device(vendor, D3D_FEATURE_LEVEL_11_1);
             const auto control = runStructuredFeedback(device, original, bytes, stride);
@@ -420,8 +428,10 @@ class DxbcExecutionTests final : public QObject {
                 Lane lane(program, inputs);
                 const auto steps = execute(lane);
                 for (const auto &step : steps)
-                    for (const auto &change : step.changes)
+                    for (const auto &change : step.changes) {
                         QVERIFY(change.after.wellFormed());
+                        QVERIFY(change.destination.kind != 13);
+                    }
                 const auto &output = inputs.memory->buffers().at(2);
                 std::array<uint32_t, 4> words;
                 std::memcpy(words.data(), output.bytes.data(), 16);
@@ -437,7 +447,8 @@ class DxbcExecutionTests final : public QObject {
                                         {"validity", output.valid},
                                         {"steps", steps.size()}});
             }
-            const auto root = qEnvironmentVariable("FLORA_FEEDBACK_AGGREGATE_EVIDENCE");
+            const auto root = qEnvironmentVariable(partial ? "FLORA_FEEDBACK_NULL_BUFFER_EVIDENCE"
+                                                           : "FLORA_FEEDBACK_AGGREGATE_EVIDENCE");
             if (!root.isEmpty()) {
                 QDir directory(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag())));
                 QVERIFY(directory.mkpath("."));
@@ -455,6 +466,7 @@ class DxbcExecutionTests final : public QObject {
                                             {"vendor", vendor},
                                             {"loads", loads},
                                             {"merges", merges},
+                                            {"null_loads", nullLoads},
                                             {"shader_sha256", sha256(shader)},
                                             {"original_sha256", sha256(original)},
                                             {"control", control},
@@ -467,6 +479,54 @@ class DxbcExecutionTests final : public QObject {
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
+    }
+    void nullBufferData_data() { compiledFeedbackAggregation_data(); }
+    void nullBufferData() { compiledFeedbackAggregation(); }
+    void nullRawFeedback() {
+        for (bool known : {false, true})
+            for (bool discardStatus : {false, true}) {
+                BufferView view{1, 0, 16};
+                view.nonTiled = known;
+                Inputs inputs;
+                inputs.memory = std::make_shared<Memory>(
+                    std::map<uint64_t, Buffer>{{1, Buffer::known(std::vector<uint8_t>(16))}},
+                    std::map<Register, BufferView>{{{7, {0}}, view}});
+                auto rows =
+                    std::vector<Words>{op(161, {dst(7, 0)}),
+                                       op(226, {Words{0xd000}, discardStatus ? Words{0xd000} : dst(0, 0, 1),
+                                                literal(0), src(7, 0)})};
+                if (!discardStatus)
+                    rows.push_back(op(234, {dst(2, 0, 1), Words{0x10000a, 0}}));
+                rows.push_back(op(62));
+                const Program program(binary(rows));
+                Lane lane(program, inputs);
+                const auto steps = execute(lane);
+                for (const auto &step : steps)
+                    for (const auto &change : step.changes)
+                        QVERIFY(change.destination.kind != 13);
+                if (discardStatus)
+                    QVERIFY(lane.registers().empty());
+                else {
+                    QCOMPARE(lane.value({2, {0}}).valid, uint8_t(known));
+                    QCOMPARE(lane.value({2, {0}}).bits[0], known ? UINT32_MAX : 0u);
+                }
+                for (const auto &invalid :
+                     std::vector<Words>{{0xd001}, {0xd002}, {0xd010}, {0x10d000, 0}, {0x8000d000, 0x41}}) {
+                    const Program malformed(
+                        binary({op(161, {dst(7, 0)}), op(226, {invalid, dst(0, 0, 1), literal(0), src(7, 0)}),
+                                op(62)}));
+                    Lane rejected(malformed, inputs);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(rejected));
+                    QVERIFY(rejected.registers().empty());
+                }
+                for (const auto &invalid : std::vector<Words>{{0xd000}, {0xd0f2}}) {
+                    const Program ordinary(
+                        binary({op(161, {dst(7, 0)}), op(165, {invalid, literal(0), src(7, 0)}), op(62)}));
+                    Lane rejected(ordinary, inputs);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(rejected));
+                    QVERIFY(rejected.registers().empty());
+                }
+            }
     }
     void feedbackStatusAggregation() {
         const auto inputsFor = [](bool leftKnown, bool rightKnown) {

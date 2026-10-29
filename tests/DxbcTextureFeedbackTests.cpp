@@ -11,7 +11,7 @@ using namespace flora::dxbc_exec;
 using namespace flora::testing;
 using Json = nlohmann::json;
 namespace {
-Com<ID3D11Device> device(uint32_t vendor) {
+Com<ID3D11Device> device(uint32_t vendor, bool feedbackOnly = false) {
     Com<IDXGIAdapter1> selected;
     if (vendor) {
         Com<IDXGIFactory1> factory;
@@ -33,13 +33,14 @@ Com<ID3D11Device> device(uint32_t vendor) {
             throw std::runtime_error("Requested feedback adapter is absent");
     }
     Com<ID3D11Device> result;
+    const D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_1;
     check(D3D11CreateDevice(selected.Get(), vendor ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_WARP, nullptr,
-                            D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, &result, nullptr,
-                            nullptr),
+                            D3D11_CREATE_DEVICE_DEBUG, feedbackOnly ? &level : nullptr, feedbackOnly ? 1 : 0,
+                            D3D11_SDK_VERSION, &result, nullptr, nullptr),
           "Create feedback device");
     return result;
 }
-std::vector<uint8_t> shader(uint32_t stage, unsigned mode, bool feedback) {
+std::vector<uint8_t> shader(uint32_t stage, unsigned mode, bool feedback, bool statusOnly = false) {
     const std::string offset = mode == 4 || mode == 6 ? "int2(control.xy)" : "int2(0,0)";
     const std::string operation = mode == 0   ? "inputData.Load(int3(1,2,0)," + offset
                                   : mode == 1 ? "inputData.SampleLevel(s,float2(0.4,0.6),0," + offset
@@ -55,7 +56,7 @@ std::vector<uint8_t> shader(uint32_t stage, unsigned mode, bool feedback) {
     else
         source += stage == 0 ? "uint4 main():SV_Target{" : "uint4 main():TEXCOORD0{";
     source += "uint status;float4 value=" + operation + (feedback ? ",status);" : ");");
-    source += "uint4 result=asuint(value);";
+    source += statusOnly ? "uint4 result=uint4(99,123,456,0);" : "uint4 result=asuint(value);";
     if (feedback)
         source += "result.w^=CheckAccessFullyMapped(status)?0:0xffffffff;";
     source += stage == 5 ? "outputData[0]=result;}" : "return result;}";
@@ -67,10 +68,80 @@ void save(const QString &name, Bytes bytes) {
         file.write(reinterpret_cast<const char *>(bytes.data()), bytes.size()) != qint64(bytes.size()))
         throw std::runtime_error("Cannot save feedback evidence");
 }
+std::vector<uint8_t> canonicalFeedback(Bytes shader) {
+    auto parts = readDxbcParts(shader);
+    std::vector<uint8_t> storage;
+    for (auto &[tag, data] : parts) {
+        if (tag != 0x58454853 && tag != 0x52444853)
+            continue;
+        auto program = readDxbcProgram(data);
+        for (auto &row : program.instructions)
+            if (dxbc_detail::compilerInstructionPadding(row, row.size() - 1)) {
+                row.pop_back();
+                row[0] = (row[0] & ~(127u << 24)) | (uint32_t(row.size()) << 24);
+            }
+        storage = writeDxbcProgram(program);
+        data = storage;
+    }
+    return makeDxbc(parts);
+}
 } // namespace
 class DxbcTextureFeedbackTests final : public QObject {
     Q_OBJECT
   private slots:
+    void nullShaderCreation() {
+        const auto root = qEnvironmentVariable("FLORA_TEXTURE_NULL_CREATION_EVIDENCE");
+        Json rows = Json::array();
+        for (uint32_t stage : {0u, 1u, 5u})
+            for (unsigned mode : {1u, 2u}) {
+                const auto original = shader(stage, mode, true, true);
+                const auto canonical = canonicalFeedback(original);
+                const auto observed = shader(stage, mode, true, false);
+                Json row{{"stage", stage},
+                         {"mode", mode},
+                         {"original_sha256", sha256(original)},
+                         {"canonical_sha256", sha256(canonical)},
+                         {"observed_sha256", sha256(observed)}};
+                if (!root.isEmpty()) {
+                    QDir directory(QDir(root).filePath(QString("%1-%2").arg(stage).arg(mode)));
+                    QVERIFY(directory.mkpath("."));
+                    save(directory.filePath("original.dxbc"), original);
+                    save(directory.filePath("canonical.dxbc"), canonical);
+                    save(directory.filePath("observed.dxbc"), observed);
+                }
+                for (unsigned variant : {0u, 1u, 2u}) {
+                    auto native = device(32902, true);
+                    const auto &bytes = variant == 0 ? original : variant == 1 ? canonical : observed;
+                    HRESULT status;
+                    if (stage == 0) {
+                        Com<ID3D11PixelShader> object;
+                        status = native->CreatePixelShader(bytes.data(), bytes.size(), nullptr, &object);
+                    } else if (stage == 1) {
+                        Com<ID3D11VertexShader> object;
+                        status = native->CreateVertexShader(bytes.data(), bytes.size(), nullptr, &object);
+                    } else {
+                        Com<ID3D11ComputeShader> object;
+                        status = native->CreateComputeShader(bytes.data(), bytes.size(), nullptr, &object);
+                    }
+                    row[variant == 0   ? "original"
+                        : variant == 1 ? "canonical"
+                                       : "data_observed"] = {
+                        {"creation_hresult", uint32_t(status)},
+                        {"removed_reason", uint32_t(native->GetDeviceRemovedReason())}};
+                    if (variant == 2)
+                        QCOMPARE(status, S_OK);
+                }
+                rows.push_back(row);
+            }
+        qInfo().noquote() << QString::fromStdString(rows.dump());
+        if (!root.isEmpty()) {
+            QDir directory(root);
+            QVERIFY(directory.mkpath("."));
+            const auto text = rows.dump(2);
+            save(directory.filePath("creation.json"),
+                 Bytes(reinterpret_cast<const uint8_t *>(text.data()), text.size()));
+        }
+    }
     void padding_data() {
         QTest::addColumn<uint32_t>("stage");
         QTest::addColumn<unsigned>("mode");
@@ -144,8 +215,11 @@ class DxbcTextureFeedbackTests final : public QObject {
         QFETCH(uint32_t, stage);
         QFETCH(unsigned, mode);
         QFETCH(bool, known);
+        const bool statusOnly = QString::fromLatin1(QTest::currentTestFunction()) == "nullTextureData";
+        const auto evidenceRoot = qEnvironmentVariable(statusOnly ? "FLORA_TEXTURE_NULL_FEEDBACK_EVIDENCE"
+                                                                  : "FLORA_TEXTURE_FEEDBACK_EVIDENCE");
         try {
-            auto native = device(vendor);
+            auto native = device(vendor, statusOnly);
             auto gpu = std::make_shared<GpuOperations>(native.Get(), !vendor);
             auto textures = std::make_shared<TextureInputs>();
             TextureInput input;
@@ -192,8 +266,8 @@ class DxbcTextureFeedbackTests final : public QObject {
             inputs.memory = std::make_shared<Memory>(
                 std::map<uint64_t, Buffer>{{9, Buffer::known(std::vector<uint8_t>(16))}},
                 std::map<Register, BufferView>{{{30, {3}}, {9, 0, 16, 16}}});
-            const auto feedback = shader(stage, mode, true), control = shader(stage, mode, false);
-            const auto evidenceRoot = qEnvironmentVariable("FLORA_TEXTURE_FEEDBACK_EVIDENCE");
+            const auto feedback = shader(stage, mode, true, statusOnly),
+                       control = shader(stage, mode, false, statusOnly);
             if (!evidenceRoot.isEmpty()) {
                 QDir directory(QDir(evidenceRoot).filePath(QString::fromLatin1(QTest::currentDataTag())));
                 QVERIFY(directory.mkpath("."));
@@ -207,6 +281,14 @@ class DxbcTextureFeedbackTests final : public QObject {
                            assembly->GetBufferSize()));
             }
             const Program program(feedback);
+            if (statusOnly)
+                for (const auto &instruction : program.instructions())
+                    if (instruction.opcode >= 219 && instruction.opcode <= 233) {
+                        size_t operand = 1;
+                        while (instruction.words.at(operand - 1) & 0x80000000u)
+                            ++operand;
+                        QCOMPARE(instruction.words.at(operand), 0xd000u);
+                    }
             static constexpr unsigned opcodes[]{223, 228, 229, 219, 221, 220, 222};
             QCOMPARE(std::count_if(program.instructions().begin(), program.instructions().end(),
                                    [&](const auto &i) { return i.opcode == opcodes[mode]; }),
@@ -215,6 +297,8 @@ class DxbcTextureFeedbackTests final : public QObject {
             unsigned opaque = 0;
             while (!lane.finished()) {
                 const auto step = lane.step();
+                for (const auto &change : step.changes)
+                    QVERIFY(change.destination.kind != 13);
                 for (const auto &change : step.changes)
                     for (unsigned c = 0; c < 4; ++c)
                         if (change.after.mapping[c] != MappingStatus::NotStatus) {
@@ -237,9 +321,41 @@ class DxbcTextureFeedbackTests final : public QObject {
                 result = lane.value({2, {0}});
             const auto ordinary =
                 directTexture(native.Get(), control, stage, input, view, {{1, 0, 0, 0}}, 0, &sampler);
+            if (statusOnly) {
+                const auto observedFeedback = shader(stage, mode, true),
+                           observedControl = shader(stage, mode, false);
+                const auto observed = directTexture(native.Get(), observedFeedback, stage, input, view,
+                                                    {{1, 0, 0, 0}}, 0, &sampler);
+                const auto observedOrdinary = directTexture(native.Get(), observedControl, stage, input, view,
+                                                            {{1, 0, 0, 0}}, 0, &sampler);
+                QCOMPARE(observed, observedOrdinary);
+                QCOMPARE(ordinary, (std::array<uint32_t, 4>{99, 123, 456, 0}));
+                QCOMPARE(result.valid, uint8_t(known ? 15 : 7));
+                for (unsigned c = 0; c < 4; ++c)
+                    if (result.valid & (1u << c))
+                        QCOMPARE(result.bits[c], ordinary[c]);
+                if (!evidenceRoot.isEmpty()) {
+                    QDir directory(QDir(evidenceRoot).filePath(QString::fromLatin1(QTest::currentDataTag())));
+                    save(directory.filePath("observed-feedback.dxbc"), observedFeedback);
+                    save(directory.filePath("observed-control.dxbc"), observedControl);
+                    const auto report = Json({{"adapter", gpu->identity()},
+                                              {"stage", stage},
+                                              {"mode", mode},
+                                              {"known_non_tiled", known},
+                                              {"native", result.bits},
+                                              {"valid", result.valid},
+                                              {"observed_feedback", observed},
+                                              {"observed_control", observedOrdinary},
+                                              {"constant_control", ordinary},
+                                              {"opaque_changes", opaque}})
+                                            .dump(2);
+                    save(directory.filePath("native.json"),
+                         Bytes(reinterpret_cast<const uint8_t *>(report.data()), report.size()));
+                }
+            }
             const auto original =
                 directTexture(native.Get(), feedback, stage, input, view, {{1, 0, 0, 0}}, 0, &sampler);
-            const auto root = qEnvironmentVariable("FLORA_TEXTURE_FEEDBACK_EVIDENCE");
+            const auto root = evidenceRoot;
             if (!root.isEmpty()) {
                 QDir directory(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag())));
                 QVERIFY(directory.mkpath("."));
@@ -249,6 +365,7 @@ class DxbcTextureFeedbackTests final : public QObject {
                                           {"stage", stage},
                                           {"mode", mode},
                                           {"known_non_tiled", known},
+                                          {"null_data_destination", statusOnly},
                                           {"native", result.bits},
                                           {"valid", result.valid},
                                           {"original", original},
@@ -263,11 +380,15 @@ class DxbcTextureFeedbackTests final : public QObject {
                 if (result.valid & (1u << c))
                     QCOMPARE(result.bits[c], ordinary[c]);
             QCOMPARE(original, ordinary);
+            if (statusOnly)
+                QCOMPARE(original, (std::array<uint32_t, 4>{99, 123, 456, 0}));
             QCOMPARE(textures->resources.at(1).storage.bytes, bytes);
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }
     }
+    void nullTextureData_data() { texture_data(); }
+    void nullTextureData() { texture(); }
 };
 QTEST_GUILESS_MAIN(DxbcTextureFeedbackTests)
 #include "DxbcTextureFeedbackTests.moc"

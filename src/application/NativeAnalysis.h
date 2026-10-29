@@ -6,7 +6,7 @@
 namespace flora {
 // These identifiers and result schemas belong to FloraGPA, independent of external replay ABIs.
 inline constexpr unsigned nativeAnalysisSchema = 1;
-inline constexpr const char *nativeAnalysisBackend = "dx11-native/7";
+inline constexpr const char *nativeAnalysisBackend = "dx11-native/8";
 struct NativeAnalysisRequest {
     std::string action;
     nlohmann::json options;

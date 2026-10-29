@@ -24,6 +24,7 @@ struct Index {
 struct Operand {
     uint32_t kind = 0, components = 0, mode = 0, mask = 0, modifier = 0, precision = 0;
     std::array<uint32_t, 4> select{0, 1, 2, 3}, literal{};
+    bool discardedData = false;
     std::vector<Index> indices;
 };
 Operand operand(const Words &words, size_t &pos, unsigned depth = 0) {
@@ -98,6 +99,17 @@ const std::vector<Operand> &dataOperands(const std::vector<Operand> &original, u
         return original;
     normalized = original;
     normalized.erase(normalized.begin() + 1);
+    auto &destination = normalized.at(0);
+    if (destination.kind == 13) {
+        if (destination.components || destination.mode || destination.mask || destination.modifier ||
+            destination.precision || !destination.indices.empty())
+            fail("Invalid null DXBC feedback data destination");
+        // Validate and execute the same resource operation, discarding only its
+        // data result. No synthetic temporary or register change is introduced.
+        destination.components = 2;
+        destination.mask = 15;
+        destination.discardedData = true;
+    }
     return normalized;
 }
 bool declaration(uint32_t opcode) {
@@ -766,6 +778,8 @@ struct Lane::State {
     std::optional<Value> pendingDerivative;
     bool quad = false, helper = false;
     bool inBounds(const Register &reg) const {
+        if (reg.kind == 13)
+            return false;
         if (reg.kind == 0)
             return reg.indices.size() == 1 && reg.indices[0] < program->temps;
         if (reg.kind == 3) {
@@ -913,8 +927,10 @@ struct Lane::State {
             fail("Unexpected saturation on a DXBC sampling instruction");
         const auto &destination = args[0], &resource = args[2], &sampler = args[3];
         if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
-            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
-            resource.modifier || sampler.kind != 6 || sampler.components || sampler.modifier ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3 &&
+             !destination.discardedData) ||
+            resource.kind != 7 || resource.modifier || sampler.kind != 6 || sampler.components ||
+            sampler.modifier ||
             (op != 69 && op != 73 && op != 108 && args[4].components != 1 &&
              !(args[4].components == 2 &&
                (args[4].mode == 2 ||
@@ -1435,10 +1451,11 @@ Step Lane::step() {
                    &sampler = args[programmable ? 4 : 3];
         if ((p.stage != 0 && p.stage != 1 && p.stage != 5) || (instruction.words[0] & 0x00fff800u) ||
             destination.modifier || destination.components != 2 || destination.mode != 0 ||
-            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || resource.kind != 7 ||
-            resource.modifier || resource.components != 2 || (resource.mode != 1 && resource.mode != 2) ||
-            sampler.kind != 6 || sampler.modifier || sampler.components != 2 || sampler.mode != 2 ||
-            (comparison && sampler.select[0]))
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3 &&
+             !destination.discardedData) ||
+            resource.kind != 7 || resource.modifier || resource.components != 2 ||
+            (resource.mode != 1 && resource.mode != 2) || sampler.kind != 6 || sampler.modifier ||
+            sampler.components != 2 || sampler.mode != 2 || (comparison && sampler.select[0]))
             fail("Invalid DXBC gather operands or stage");
         const auto binding = s.address(resource), samplerBinding = s.address(sampler);
         const auto [dimension, returns] = s.textureDeclaration(resource);
@@ -1584,7 +1601,8 @@ Step Lane::step() {
         } else {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
-                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3 &&
+                 !destination.discardedData))
                 fail("Invalid DXBC typed load destination");
             const auto target = s.address(destination);
             Value value;
@@ -1690,7 +1708,8 @@ Step Lane::step() {
         } else {
             const auto &destination = args[0];
             if (destination.modifier || destination.components != 2 || destination.mode != 0 ||
-                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+                (destination.kind != 0 && destination.kind != 2 && destination.kind != 3 &&
+                 !destination.discardedData))
                 fail("Invalid DXBC buffer load destination");
             const auto target = s.address(destination);
             const auto value =
