@@ -1576,3 +1576,12 @@ execution, including a newly isolated Intel immediate-bias behavior. A separate
 clamp-effect assertion and verifier still fail for that behavior; it remains an
 open semantic acceptance gate. No vendor exception or weakened assertion is
 enabled. Full native parity and standalone release acceptance remain incomplete.
+
+The optional original-engine contract study now verifies the host `+0x3c0`
+caller's five arguments, result callback and cleanup slot using an explicitly
+synthetic receiver. Twelve serial capture/adapter/selection cases pass independent
+validation; 96 corrupted reports are rejected. Null-engine dispatch also returns
+success without a result, so dispatch completion is not shader-debug evidence.
+See `research/DX11_DEBUGGER_ENGINE_CONTRACT.md`. The actual original engine's
+construction and module remain unresolved; no product dependency or routing
+change is introduced by this study.

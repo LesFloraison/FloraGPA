@@ -1,0 +1,719 @@
+{
+  "schema": 1,
+  "tools_commit": "34f838b670b101e1df5bee4cddcd3b707ac3514b",
+  "status": "caller_contract_verified_original_engine_unresolved",
+  "authoritative_matrix": "artifacts/dx11-native/debugger-engine-contract/final-v2/runs.json",
+  "validation": {
+    "schema": 1,
+    "status": "caller_contract_verified",
+    "cases": 12,
+    "corruptions_rejected": 96,
+    "default_mode_controls": 1,
+    "original_engine_recovered": false,
+    "shader_execution_verified": false
+  },
+  "binaries": [
+    {
+      "path": "C:/Program Files/IntelSWTools/GPA/dx11_player.dll",
+      "bytes": 2206728,
+      "sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+    }
+  ],
+  "captures": [
+    {
+      "path": "D:\\CDXrepo\\captures\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e"
+    },
+    {
+      "path": "D:\\CDXrepo\\captures\\bf1_2026_01_21__16_53_05.gpa_frame",
+      "sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620"
+    },
+    {
+      "path": "D:\\CDXrepo\\captures\\helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139"
+    }
+  ],
+  "adapters": [
+    {
+      "context_event": 1,
+      "device": 11352,
+      "luid": 69256,
+      "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+      "vendor": 4318
+    },
+    {
+      "context_event": 1,
+      "device": 32103,
+      "luid": 74756,
+      "name": "Intel(R) Graphics",
+      "vendor": 32902
+    },
+    {
+      "context_event": 2,
+      "device": 11352,
+      "luid": 69256,
+      "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+      "vendor": 4318
+    },
+    {
+      "context_event": 2,
+      "device": 32103,
+      "luid": 74756,
+      "name": "Intel(R) Graphics",
+      "vendor": 32902
+    },
+    {
+      "context_event": 6,
+      "device": 11352,
+      "luid": 69256,
+      "name": "NVIDIA GeForce RTX 5090 Laptop GPU",
+      "vendor": 4318
+    },
+    {
+      "context_event": 6,
+      "device": 32103,
+      "luid": 74756,
+      "name": "Intel(R) Graphics",
+      "vendor": 32902
+    }
+  ],
+  "sources": [
+    {
+      "path": "tools/ghidra/Invoke-EngineContractResearch.ps1",
+      "bytes": 2463,
+      "sha256": "7ee8f6d25f3ec2c67ac12b525e828f430df9a990c1a94541755087d0d70f3c63"
+    },
+    {
+      "path": "tools/ghidra/ExportFunctionEvidence.java",
+      "bytes": 2676,
+      "sha256": "400d8907d08c349acd4ad323105a5ace67d89252cf1b085fad8698757a7ca7e7"
+    },
+    {
+      "path": "tools/ghidra/ExportAddressEvidence.java",
+      "bytes": 2682,
+      "sha256": "72bb158b3c89cfbb87e073c23e4d59d4603257a87e4cb96a79edb5c1b201c565"
+    },
+    {
+      "path": "tools/probe_original_debugger_host.py",
+      "bytes": 19857,
+      "sha256": "720ed464e427c021120f5f0bc5e3d7f52d8c48e85903cb696d832c7e0d121995"
+    },
+    {
+      "path": "tools/probe_original_engine_contract.py",
+      "bytes": 4874,
+      "sha256": "90544d3358f1e5fef37c7520a4967613b2ede392495f33fcfbc27d11f6c6ce4b"
+    },
+    {
+      "path": "tools/run_original_engine_contract.py",
+      "bytes": 2414,
+      "sha256": "5441a8f301a6cb7f56b29fbe38023d1263cb4884661ef9535069b5cc13df069f"
+    },
+    {
+      "path": "tools/validate_original_engine_contract.py",
+      "bytes": 8223,
+      "sha256": "b88702867db90303effa77f179deb8518d755e408ae261aada8c99fb2db9df41"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/default-control/dispatch.json",
+      "bytes": 43286,
+      "sha256": "6e966523de4348f1c8d7a700b49f2929555c721f0a016ef6e5d364a650423bb9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/default-control/process.json",
+      "bytes": 526,
+      "sha256": "95066e13b3c1e839f4348fcc1268903a2f09ce5ca4671270f1d4145d93c62694"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/default-control/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-0/dispatch.json",
+      "bytes": 45514,
+      "sha256": "9ee0eeac5a539edb355261cd9b20bfc7a392424deaa8b313b57c37c06428481f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-0/process.json",
+      "bytes": 635,
+      "sha256": "32af63b91be6b1f6990dd57fc741c3076ad337a350c44f713f71be035d6da721"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-0.log",
+      "bytes": 104,
+      "sha256": "412e87e0ccbe91fbb17b69d4bf9619e49978de84a5f5ea6f9d383c41fff346c8"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-324508639/dispatch.json",
+      "bytes": 45685,
+      "sha256": "b9648a455570c61ae17cb6d46713da18caa8d22c482230c5a412e591c8c2a94b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-324508639/process.json",
+      "bytes": 651,
+      "sha256": "12d44e7221ac702b33c987d40f04cb9737ffe5d836480d8e90223f5d8b6d74ff"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-32902-324508639.log",
+      "bytes": 112,
+      "sha256": "aed5be1230ddf2f5ef2955f28fa73f627fe0d2a98bd0bd04ba3be6433f3a92d5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-0/dispatch.json",
+      "bytes": 44665,
+      "sha256": "16752d9d3f7b653588dd43195830006c3048b4d28a2ebf49cce64676a893d214"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-0/process.json",
+      "bytes": 633,
+      "sha256": "4894a7381f01f9747a0157e756537d58aa9b87b20c516480945c5e5dede354ca"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-0.log",
+      "bytes": 103,
+      "sha256": "197bd90aa2ffc74ec8fb6e71fbe3e46c4c5f92e050127e0d927d231c1e431f10"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-324508639/dispatch.json",
+      "bytes": 44833,
+      "sha256": "a62a3e8ad48d7c09770144fe39906ef45e8bc8cb0a9a6699176d94889ccd63e6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-324508639/process.json",
+      "bytes": 649,
+      "sha256": "0bcc6ee6d825f0fa0979bd1799f7a885f8a2ba22a461b2c9c8fefd854b19a254"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/bf1-4318-324508639.log",
+      "bytes": 111,
+      "sha256": "c00d21787fedfc5c9594833cda962635ff624c7d64181a6593850fa655b33e48"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-0/dispatch.json",
+      "bytes": 52146,
+      "sha256": "d8e3430b5dc6af02daa5661fda126c7f21e101df0fc2df8f5b41dc13c23cd2e9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-0/process.json",
+      "bytes": 643,
+      "sha256": "c1906b6ce6412718246cd311a175df9028d4c57be25a489bfc31e7f18e840f05"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-0.log",
+      "bytes": 104,
+      "sha256": "7f011647a52be820ee38119a7e5d6dfc3644b92eb21096e61c6b84a9a5100836"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-324508639/dispatch.json",
+      "bytes": 52317,
+      "sha256": "3a91723952daab7dcf35fd8f5e45c5e57b2b36fc6c616c918eea6a352c1ab3f5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-324508639/process.json",
+      "bytes": 659,
+      "sha256": "439205f0367b52b7f2a54907bd2bffb8b1bf9eaa893477094d0ebf38d134287d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-32902-324508639.log",
+      "bytes": 112,
+      "sha256": "37dc80b53d9b8d30fd38eae460f97c9afa6f59f21ad236d15991387f2b768a08"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-0/dispatch.json",
+      "bytes": 45342,
+      "sha256": "c2eabe82fc48b4d5462f453509c037beac80691f490a4a4675f710f7c86f05cb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-0/process.json",
+      "bytes": 641,
+      "sha256": "833da9e8e9c6a64c55d81be0d717fb709383b60b15fde8847943d9c0df46ab22"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-0.log",
+      "bytes": 103,
+      "sha256": "4babe916a599b0f6d3f53f2990e751573f8a959f79ad01fc634288bb6a44ec53"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-324508639/dispatch.json",
+      "bytes": 45507,
+      "sha256": "39c6650dbd24ed51c3d58f629e189cb2d997d4232b0f5b17ade263863d41547d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-324508639/process.json",
+      "bytes": 657,
+      "sha256": "62ea06b40cc02953e9675845698f4f82dc2be030f026b4804ddba95b9d2aeb55"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/gf2-4318-324508639.log",
+      "bytes": 111,
+      "sha256": "81dbb422cbde415e9646ffd0a61913c377695226757aca1c855ddf005510d46c"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-0/dispatch.json",
+      "bytes": 45525,
+      "sha256": "d5d68d912698ee19d0d75456afdf361fb4e5fc481b9db21e2d1f8cbc4bd49664"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-0/process.json",
+      "bytes": 650,
+      "sha256": "02211c94a8ca451cccf6e8b7aa9362ed803b1b9dd5a0a8faa9fec6fc9c8fa3d5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-0.log",
+      "bytes": 111,
+      "sha256": "32cba42133fb20aba20ad958b64135cf05a2f841a2a0a6ed8fcbc130c8dc154b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-324508639/dispatch.json",
+      "bytes": 45693,
+      "sha256": "0c30a1d93c47d701bf33a719ff264e00d32a61a13723925f6dd52df90e94e219"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-324508639/process.json",
+      "bytes": 666,
+      "sha256": "aa479fd190922f759165fd3ced710db1f20f3974c963ed4295d30b0a60473df1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-32902-324508639.log",
+      "bytes": 119,
+      "sha256": "b4846782156c052df80febc178a6505d8c32431a565b7205385668886dd84fd5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-0/dispatch.json",
+      "bytes": 44673,
+      "sha256": "9163eba7fa3c4da44c041ff3e12a2e3fd6fbfdba76200042cd666ce583da62a6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-0/process.json",
+      "bytes": 648,
+      "sha256": "b4cdd09db58d24ffe23f5efeeed20d79e22748ba39b72acd63b7ea19fad2cf0d"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-0.log",
+      "bytes": 110,
+      "sha256": "7536fcdc031455231b223e8080850a8be7c9eb9500f64d232b703594172d9432"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-324508639/dispatch.json",
+      "bytes": 44841,
+      "sha256": "35209b71122a77251f59ee9e866f06d79e05e300f9177a683eed0bb988e0e87c"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-324508639/process.json",
+      "bytes": 664,
+      "sha256": "9c8f4e635c37d5e20ed90765e527daa8ca420d3674aefac33b260e2e5e830946"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/helldivers-4318-324508639.log",
+      "bytes": 118,
+      "sha256": "ecd8ee419ad4612adfb9be670409c89060b61296bfd45c71c3785a1fef47fd12"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final/runs.json",
+      "bytes": 11024,
+      "sha256": "96199cf654606b70bb6016db3bc42aa8cc001357f28251dd73bd222e1457729f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-32902-1/dispatch.json",
+      "bytes": 52317,
+      "sha256": "f51f993c2cd5e8e117a55dceafe2755dd4f88b7a2758e615654767ce8e841a27"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-32902-1/process.json",
+      "bytes": 618,
+      "sha256": "d479d943bec3b7b03e8f9fb2b1d97567f864211508a0799e473a3e632de2dfb7"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-32902-1/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-4318-0/dispatch.json",
+      "bytes": 45339,
+      "sha256": "98338f4444c5ff82be9688cfc40ae2cfe84dcbb8268f002424cc9009b0c53524"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-4318-0/process.json",
+      "bytes": 563,
+      "sha256": "e001db8ba731966b59d6167684b0edb1867994595ea1a63300ea384381a95e12"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-gf2-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-0/dispatch.json",
+      "bytes": 45517,
+      "sha256": "8452d8d65964b0c62d2144e1bef31967c01e04aebaaa51329a6cae33368ccb52"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-0/process.json",
+      "bytes": 638,
+      "sha256": "b8ce4bf62fff5d2cad7f3de84ab67511bc50ca63295dee54bc8f94cea8b590c2"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-0.log",
+      "bytes": 107,
+      "sha256": "1357947cfc692e70ca520d0439dc15503791ea2b3957d33ac8fe2f260ca34a52"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-324508639/dispatch.json",
+      "bytes": 45685,
+      "sha256": "6f9183cecae09fb9b5fda5b784fd0082e1aab8bcd8553b844a2fa9ae15a20c05"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-324508639/process.json",
+      "bytes": 654,
+      "sha256": "8c33ba4fd532e39fe0ccfb8f12bdf523645e957851ffd46c3c17d5f15c8a4298"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-32902-324508639.log",
+      "bytes": 115,
+      "sha256": "2b583530bf4644bf037fe931eaa30fbbfcd061b5d918c0f9c50bd06d8f43d96f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-0/dispatch.json",
+      "bytes": 44665,
+      "sha256": "1ce039a8f1b34e40349f2de94c48aabf2e01a6336da57f41f053b74414cef442"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-0/process.json",
+      "bytes": 636,
+      "sha256": "e3d81bf63bed245d08c77c8e79bf1be8d1c6b2fae730e4989282fd5fdd8e44eb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-0.log",
+      "bytes": 106,
+      "sha256": "30640cfae9899a0ccf472558e161def1d52f7287efbdcb83235ade2fb404b03a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-324508639/dispatch.json",
+      "bytes": 44833,
+      "sha256": "31923b12503f957d4d7050543856e59b95c4d575f03a6e6cb09a3df51a470e26"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-324508639/process.json",
+      "bytes": 652,
+      "sha256": "16645e9c603305dc78d0b7ee344ea505aa5de20ccb4947f1d8d2ef4005933a23"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/bf1-4318-324508639.log",
+      "bytes": 114,
+      "sha256": "1a4ebc2d469c33d9bd778ace95e83ae8b8ccc9d1237095674d610e1057b43704"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-0/dispatch.json",
+      "bytes": 52152,
+      "sha256": "07360b72f11470d81180c696125b3872ee8e8c9419c32002e9234b6e12e29497"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-0/process.json",
+      "bytes": 646,
+      "sha256": "a5e8442769cceb5a2db8b460199554fe0de85cce42d897e1cb4cdbf41dc6acc6"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-0.log",
+      "bytes": 107,
+      "sha256": "005317bbe3d460ef16387d00382c43453c83c818f25f957265463e3b73cb7dbe"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-324508639/dispatch.json",
+      "bytes": 52320,
+      "sha256": "7468f950596967fbdea52be2e8b4737db16c834b463eb1a76a44dc7eec1c8b74"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-324508639/process.json",
+      "bytes": 662,
+      "sha256": "b9de5d7a925c0cc54e0352ee284193beeb5da64c90e01d3ad63f4727e2e103db"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-32902-324508639.log",
+      "bytes": 115,
+      "sha256": "27322cea552c919817ca9a082de029ef8d0794aa8dcb3d3af3bc2a58c19ee993"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-0/dispatch.json",
+      "bytes": 45339,
+      "sha256": "27af62b180c3ab8a0b4a2a409fef76f656f6bed5c6e3f4dd60a8b021b271d067"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-0/process.json",
+      "bytes": 644,
+      "sha256": "bc9fad0ad6c22f4410cff065d4418d1dff5ef4f601ba50a831b5d5d678d6c989"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-0.log",
+      "bytes": 106,
+      "sha256": "64edf72f7a921a9adc55bc71d8f8d107f6d0dcf84c5b27d36c59c39d4cb9411b"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-324508639/dispatch.json",
+      "bytes": 45504,
+      "sha256": "e2e27f1e9e16cedf9e2b1a14b409a4bc1128992959a310af83026eb14c395904"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-324508639/process.json",
+      "bytes": 660,
+      "sha256": "21bef4b77e3e7084e2028587e6686465bee7d774b6a7b978ce5098755a95d01f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/gf2-4318-324508639.log",
+      "bytes": 114,
+      "sha256": "cbae773850085363c09f470cef48888004a1d574b4d5a5b58f3868e645b739fa"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-0/dispatch.json",
+      "bytes": 46708,
+      "sha256": "9019a8e53e4129d86ee88fc24dfd134a6324fac188a29dd823e76fa5348711fb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-0/process.json",
+      "bytes": 653,
+      "sha256": "a4f9cab0dde3edde5cb684c3a5452db6016330f31e768f82572b2252b1324b13"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-0.log",
+      "bytes": 114,
+      "sha256": "114e89dbecadb30a1b7d990592b455e2311217b8f98a0a618cc38057326d424a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-324508639/dispatch.json",
+      "bytes": 46873,
+      "sha256": "f9397bdb3b05d2387554d28604472d011327b252a5fad737282656e48f791345"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-324508639/process.json",
+      "bytes": 669,
+      "sha256": "c0d304b03d9e5542f6461ab8d07327848ef1d0e0eae89ed9bb711177c230cb12"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-32902-324508639.log",
+      "bytes": 122,
+      "sha256": "1cede6721733304410119ccd77d151d018506ca54ebbe6b6d4ea2a14ce2f356f"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-0/dispatch.json",
+      "bytes": 44673,
+      "sha256": "a0e4b09426a52c1235ea1535f77cfe89f75cb22f48c69af2927620263a102ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-0/process.json",
+      "bytes": 651,
+      "sha256": "8234bff4adbe2ab45221f2c9d9ab2afbc8a34aec4e4632bfbe8fa52c199279e0"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-0/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-0.log",
+      "bytes": 113,
+      "sha256": "eb43dd14ac862ffe6484c6f495f4a2f86b7457afab7d443dd31c65e986a0ccd9"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-324508639/dispatch.json",
+      "bytes": 45730,
+      "sha256": "83cb2e934dd522c3a3fc6f495d33681fac61f25b856cea5cb4fc97a3447d2ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-324508639/process.json",
+      "bytes": 667,
+      "sha256": "8dfcf6f6581057af17b0e3c32fc89d42213818f253b54706b41d1d7fadea52d3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-324508639/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/helldivers-4318-324508639.log",
+      "bytes": 121,
+      "sha256": "e4fa925ec45ee811bba2490ece8d46d3f3a824f012f754da1b779ef613786882"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/final-v2/runs.json",
+      "bytes": 11096,
+      "sha256": "3b4057a72c553dc49f95b8962a6c414074c4f51692174cfe31e9630e2118e246"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/gf2-nvidia/dispatch.json",
+      "bytes": 44859,
+      "sha256": "d8f00cdb2dbb98f14ad780052c75d83f12295c6ecc5b964f43785a63320cd8b8"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/gf2-nvidia/process.json",
+      "bytes": 557,
+      "sha256": "7ee9f6bdb46f542e92c138eb0ca7dc16821bbb214c04c6a49b0202332f9cb812"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/gf2-nvidia/process.log",
+      "bytes": 78,
+      "sha256": "a0d9bec2c2a249623af5d1cf698d8badd6a985b518f684c66f72cf5f98824dac"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/initial-validation.json",
+      "bytes": 187,
+      "sha256": "04b1a18af6d5c575f3c95bb3aedbba632eb78632a49bb96801dc53b62ed44765"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/initial.log",
+      "bytes": 3778,
+      "sha256": "8e33123111267d1f81f3a1e977a77cafd941e6cbe57ff452fe204f90245c9004"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/initial.txt",
+      "bytes": 35185,
+      "sha256": "05e8791f5650af2b048c9d098d087848022f2c0efedda2775510e18e568de0c3"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/validation.json",
+      "bytes": 218,
+      "sha256": "e87a9e674605abdca974da01457cdfb55af6487357135b5cf49463116be19c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/binary.json",
+      "bytes": 191,
+      "sha256": "9de4b31df1fa3241c0cce598e58c220cabc36a75aedd619c9de90c7e8240b7de"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/evidence-sha256.json",
+      "bytes": 612,
+      "sha256": "5b541e51193e4b5ba8db58fd3f2305f1fb26c372236d7aadc5af703a2711ae05"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/functions.log",
+      "bytes": 3819,
+      "sha256": "7beb2c8f119b42ae11ea4e76a2f8b8a47ab43c02dfb3364fed612867254272eb"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/functions.txt",
+      "bytes": 44302,
+      "sha256": "e9bebfe96cd5f7e603b4362d1c1c4d821505bd4f695448b6ab4cfb3518f69686"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/tables.log",
+      "bytes": 3786,
+      "sha256": "5471cf050dd20e4add66b41bed94976ff38a7ba14e89527b0e20e6a2a3125319"
+    },
+    {
+      "path": "artifacts/dx11-native/debugger-engine-contract/verified/tables.txt",
+      "bytes": 3589,
+      "sha256": "53f35712c93dd556c191840e8828ad9d0d273143057a2adb240353dcfa422721"
+    }
+  ]
+}
