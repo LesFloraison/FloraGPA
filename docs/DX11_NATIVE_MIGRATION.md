@@ -1517,3 +1517,15 @@ The [instance study](research/DX11_NATIVE_PIXEL_GEOMETRY_INSTANCES.md) records
 topology, indirect draw, variable-output, alias, restoration, candidate/history
 and real-capture checks. Full fragment attribution, debugger parity, dependency
 removal and standalone release remain incomplete.
+
+### Feedback load operand inspection and relocation
+
+UAV inspection and relocation now parse the extra status destinations of typed,
+raw and structured feedback loads, including SRV controls. Twenty-four shader
+layout cases pass. The new mandatory GPU test passes sixteen of eighteen
+scenarios and fails NVIDIA raw/structured UAV mapping status checks; independent
+HLSL controls also exhibit false status results. These failures remain unresolved
+and are not a historical-failure waiver. See the
+[feedback relocation study](research/DX11_NATIVE_FEEDBACK_RELOCATION.md).
+Feedback execution semantics, full native parity and release acceptance remain
+open.
