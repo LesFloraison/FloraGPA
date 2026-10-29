@@ -7,6 +7,12 @@ struct PixelCompletionShader {
     std::vector<uint8_t> bytecode;
     nlohmann::json identity;
 };
+// Add an otherwise unused RGB output to a depth/coverage-only PS. The caller
+// must instrument its returns and bind a private diagnostic RTV before use.
+// Original depth, coverage and executable instructions are retained.
+PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target,
+                                               uint64_t maxBytes = 256ull * 1024 * 1024,
+                                               const CancelCheck &cancelled = {});
 // Retains the original PS executable and emits a constant RGB marker before
 // returns. Alpha, depth, coverage, resources and input declarations are retained.
 // The selected existing target must be private, unblended and RGB-writable.

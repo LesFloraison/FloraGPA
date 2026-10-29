@@ -37,6 +37,19 @@ nlohmann::json replayNativePixelCompletion(
     Replay &, Id event, uint32_t target, const std::function<void(Replay &, bool after)> &observe = {},
     uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {},
     std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000});
+struct NativeDepthCompletionSelection {
+    uint32_t x = 0, y = 0, layer = 0, sample = 0;
+};
+// Adds a private color transport to a 2D depth-only draw and reads one sample.
+// Layer is relative to the bound DSV. Original depth/stencil, discard and
+// coverage remain active; alpha-to-coverage and an occupied UAV slot zero are
+// rejected because adding target zero would change their binding/alpha contract.
+// Counts come from a separate unmodified draw on fresh private outputs. The
+// diagnostic pass's own counts are retained separately; one deadline spans both.
+nlohmann::json replayNativeDepthCompletion(Replay &, Id event, const NativeDepthCompletionSelection &,
+                                           const std::function<void(Replay &, bool after)> &observe = {},
+                                           uint64_t maxBytes = 256ull * 1024 * 1024,
+                                           uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
 // Observes a predicate on the returning fragment's actual SV_PrimitiveID.
 // This is a system identity, not an inferred primitive ordinal or instance ID.
 nlohmann::json replayNativePixelPrimitiveMask(Replay &, Id event, uint32_t target, PixelPrimitiveMask,

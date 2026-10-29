@@ -10,6 +10,98 @@ uint32_t word(Bytes bytes, size_t offset) {
     return Reader(bytes.subspan(offset)).read<uint32_t>();
 }
 } // namespace
+PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, uint64_t maxBytes,
+                                               const CancelCheck &cancelled) {
+    if (target >= 8 || !maxBytes || original.size() > maxBytes)
+        throw std::invalid_argument("Invalid additional pixel completion target or budget");
+    checkCancellation(cancelled);
+    std::vector<std::pair<uint32_t, std::vector<uint8_t>>> parts;
+    size_t code = SIZE_MAX, signature = SIZE_MAX;
+    std::set<uint32_t> tags;
+    for (const auto &[tag, bytes] : readDxbcParts(original)) {
+        checkCancellation(cancelled);
+        if (!tags.insert(tag).second)
+            throw std::runtime_error("Duplicate additional pixel target DXBC chunk");
+        if (tag == 0x52444853 || tag == 0x58454853) {
+            if (code != SIZE_MAX)
+                throw std::runtime_error("Conflicting additional pixel target executables");
+            code = parts.size();
+        }
+        if (tag == 0x4e47534f || tag == 0x3547534f || tag == 0x3147534f) {
+            if (signature != SIZE_MAX)
+                throw std::runtime_error("Conflicting additional pixel target signatures");
+            signature = parts.size();
+        }
+        parts.emplace_back(tag, std::vector<uint8_t>(bytes.begin(), bytes.end()));
+    }
+    if (code == SIZE_MAX || signature == SIZE_MAX)
+        throw std::runtime_error("Additional pixel target requires code and output signature");
+    auto program = readDxbcProgram(parts[code].second);
+    if (program.header[0] != 0x40 && program.header[0] != 0x41 && program.header[0] != 0x50)
+        throw std::runtime_error("Additional pixel target requires an SM4/SM5 pixel shader");
+    for (const auto &row : program.instructions) {
+        checkCancellation(cancelled);
+        if ((row[0] & 2047) == 101 && row.size() >= 2 && ((row[1] >> 12) & 255) == 2)
+            throw std::runtime_error("Additional pixel target requires a shader without color outputs");
+    }
+    auto &[tag, output] = parts[signature];
+    const uint32_t count = word(output, 0);
+    const size_t stride = tag == 0x4e47534f ? 24 : tag == 0x3547534f ? 28 : 32;
+    const size_t bias = tag == 0x4e47534f ? 0 : 4, end = 8 + size_t(count) * stride;
+    if (count >= 128 || end > output.size())
+        throw std::runtime_error("Additional pixel target signature bounds");
+    auto put = [&](size_t offset, uint32_t value) { std::memcpy(output.data() + offset, &value, 4); };
+    for (uint32_t i = 0; i < count; ++i) {
+        const auto row = 8 + size_t(i) * stride + bias;
+        const auto name = word(output, row);
+        if (name < end || name >= output.size() ||
+            std::find(output.begin() + name, output.end(), 0) == output.end() || word(output, row + 16) < 8)
+            throw std::runtime_error("Additional pixel target conflicts with an output signature");
+    }
+    // Color registers precede the special depth/coverage signature entries.
+    output.insert(output.begin() + 8, stride, 0);
+    for (uint32_t i = 0; i < count; ++i) {
+        const auto row = 8 + size_t(i + 1) * stride + bias;
+        put(row, word(output, row) + uint32_t(stride));
+    }
+    put(0, count + 1);
+    put(8 + bias, uint32_t(output.size()));
+    put(8 + bias + 4, target);
+    put(8 + bias + 8, 64);
+    put(8 + bias + 12, 3);
+    put(8 + bias + 16, target);
+    output[8 + bias + 20] = 7;
+    constexpr char name[] = "SV_Target";
+    output.insert(output.end(), name, name + sizeof name);
+    while (output.size() % 4)
+        output.push_back(0);
+    const auto position =
+        std::find_if(program.instructions.begin(), program.instructions.end(), [](const auto &row) {
+            const auto op = row[0] & 2047;
+            return op == 101 ||
+                   !((op >= 88 && op <= 106) || (op >= 143 && op <= 162) || op == 53 || op == 206);
+        });
+    program.instructions.insert(position, {0x03000065, 0x00102072, target});
+    parts[code].second = writeDxbcProgram(program);
+    const std::set<uint32_t> stale{0x54415453, 0x47424453, 0x42445053, 0x42444c49, 0x49435253, 0x4e444c49};
+    DxbcParts assembled;
+    for (const auto &[partTag, bytes] : parts)
+        if (!stale.contains(partTag))
+            assembled.emplace_back(partTag, bytes);
+    PixelCompletionShader result;
+    result.bytecode = makeDxbc(assembled);
+    if (result.bytecode.size() > maxBytes)
+        throw std::runtime_error("Additional pixel target exceeds shader budget");
+    result.identity = {{"schema", 1},
+                       {"kind", "native_pixel_additional_target"},
+                       {"source_sha256", sha256(original, cancelled)},
+                       {"shader_sha256", sha256(result.bytecode, cancelled)},
+                       {"target", target},
+                       {"requires_return_instrumentation", true},
+                       {"original_alpha_available", false},
+                       {"original_fragment_eligibility", nullptr}};
+    return result;
+}
 PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
                                                 std::array<uint32_t, 3> markerBits, uint64_t maxBytes,
                                                 const CancelCheck &cancelled) {

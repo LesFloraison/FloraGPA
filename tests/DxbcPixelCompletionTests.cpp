@@ -2,6 +2,7 @@
 #include "DepthStencilCapture.h"
 #include "application/DxbcGpuCompletion.h"
 #include "application/DxbcPixelCompletion.h"
+#include "application/HlslCompilation.h"
 #include "application/NativePixelGeometryReplay.h"
 #include "replay/BlendState.h"
 #include <QDir>
@@ -19,7 +20,7 @@ void floatTarget(Capture &c) {
     c.add(490, 9, 1, statePack(16u, 0u, 0u, 0u, 0u));
     c.add(21, 5, 0x8d, statePack(Id(0), Id(0), Id(20), 2u, 4u, 0u, 0u, 0u));
 }
-void save(const Json &report, Bytes original = {}, Bytes marked = {}) {
+void save(const Json &report, Bytes original = {}, Bytes marked = {}, Bytes prepared = {}) {
     const auto root = qEnvironmentVariable("FLORA_PIXEL_COMPLETION_EVIDENCE");
     if (root.isEmpty())
         return;
@@ -31,8 +32,8 @@ void save(const Json &report, Bytes original = {}, Bytes marked = {}) {
     if (!file.open(QIODevice::WriteOnly | QIODevice::NewOnly) ||
         file.write(text.data(), qint64(text.size())) != qint64(text.size()))
         throw std::runtime_error("Cannot save pixel completion evidence");
-    for (const auto &[suffix, bytes] :
-         std::vector<std::pair<QString, Bytes>>{{".original.dxbc", original}, {".marked.dxbc", marked}}) {
+    for (const auto &[suffix, bytes] : std::vector<std::pair<QString, Bytes>>{
+             {".original.dxbc", original}, {".marked.dxbc", marked}, {".prepared.dxbc", prepared}}) {
         if (bytes.empty())
             continue;
         QFile binary(file.fileName() + suffix);
@@ -102,6 +103,166 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0) {
 class DxbcPixelCompletionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void depthTransport_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<uint32_t>("sample");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *mode :
+                 {"pass", "depth-fail", "discard", "early-discard", "shader-depth", "coverage", "null",
+                  "stencil-pass", "stencil-fail", "early-stencil-discard"})
+                for (const auto [samples, sample] : {std::pair{1u, 0u}, std::pair{4u, 0u}, std::pair{4u, 3u}})
+                    QTest::newRow(
+                        qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(mode).arg(samples).arg(sample)))
+                        << vendor << QString(mode) << samples << sample;
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString("%1-original-control-4-0").arg(vendor)))
+                << vendor << QString("original-control") << 4u << 0u;
+    }
+    void depthTransport() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        QFETCH(uint32_t, samples);
+        QFETCH(uint32_t, sample);
+        const char *stage = "prepare fixture";
+        try {
+            auto c = depthStencilCapture();
+            if (samples > 1) {
+                std::erase_if(c.entries, [](const auto &e) { return e.id == 720 || e.id == 722; });
+                c.add(720, 5, 0x85,
+                      statePack(Id(0), Id(0), 1u, 1u, 1u, 1u, 45u, samples, 0u, 0u, 64u, 0u, 0u, Id(0)));
+                c.add(722, 5, 0x8e, statePack(Id(0), Id(0), Id(720), 45u, 5u, 0u, 0u, 0u, 0u));
+            }
+            std::erase_if(c.entries, [](const auto &e) { return e.category == 3; });
+            State state{};
+            state.topology = 4;
+            state.sampleMask = UINT32_MAX;
+            state.omStart = 8;
+            state.dsv = 722;
+            state.rasterizer = 724;
+            state.viewports = 22;
+            state.stages[0].shader = 30;
+            state.stages[4].shader = mode == "null" ? 0 : 32;
+            c.add(990, 3, 3, snapshot(state));
+            c.add(1990, 3, 3, snapshot(state));
+            const bool early = mode.startsWith("early"), discard = mode.contains("discard");
+            std::string source = std::string(early ? "[earlydepthstencil]" : "") + "void main(){" +
+                                 (discard ? "discard;" : "") + "}";
+            if (mode == "shader-depth")
+                source = "float main():SV_Depth{return .75;}";
+            if (mode == "coverage")
+                source = "uint main():SV_Coverage{return 5;}";
+            const auto original =
+                mode == "null" ? compileHlsl(source, "ps_5_0", "main", "native-null-depth-ps.hlsl").bytecode
+                               : compileClassProgram(source, "ps_5_0");
+            const auto added = addPixelCompletionTarget(original, 0);
+            const auto marked = instrumentPixelCompletion(added.bytecode, 0, marker);
+            unchangedInstructions(added.bytecode, marked.bytecode);
+            QTemporaryDir directory;
+            const auto path = directory.filePath("depth-only.gpa_frame");
+            c.save(path);
+            Frame frame(path.toStdWString());
+            auto o = options(vendor, 1000);
+            if (mode != "null")
+                o.shaders[32] = original;
+            D3D11_DEPTH_STENCIL_DESC ds{};
+            ds.DepthEnable = TRUE;
+            ds.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+            ds.DepthFunc = mode == "depth-fail" ? D3D11_COMPARISON_NEVER : D3D11_COMPARISON_LESS;
+            ds.StencilEnable = mode.contains("stencil");
+            ds.StencilReadMask = ds.StencilWriteMask = 255;
+            ds.FrontFace =
+                ds.BackFace = {D3D11_STENCIL_OP_INCR_SAT, D3D11_STENCIL_OP_DECR_SAT, D3D11_STENCIL_OP_INVERT,
+                               mode == "stencil-fail" ? D3D11_COMPARISON_NEVER : D3D11_COMPARISON_ALWAYS};
+            o.depthStencilEdits[1000].descriptor = ds;
+            stage = "create reference replay";
+            Replay reference(frame, o);
+            stage = "execute reference draw";
+            reference.run();
+            const auto readDepth = [&](Replay &r) {
+                return samples == 1 ? r.readTexture(720) : r.readMsaa(720, sample, 45).bytes;
+            };
+            stage = "read reference depth sample";
+            const auto referenceDepth = readDepth(reference);
+            const auto passing = reference.measurementResult()->occlusion;
+            o.before = o.prepareBeforeDraw = true;
+            o.measurement.reset();
+            stage = "create diagnostic replay";
+            Replay replay(frame, o);
+            stage = "prepare diagnostic draw";
+            replay.run();
+            stage = "read initial depth sample";
+            const auto initial = readDepth(replay);
+            std::vector<uint8_t> observedDepth;
+            if (mode == "original-control") {
+                stage = "execute unmodified private draw";
+                const auto control = replayNativeOriginalDraw(replay, 1000, [&](Replay &r, bool after) {
+                    if (after) {
+                        stage = "read unmodified private depth sample";
+                        observedDepth = readDepth(r);
+                        stage = "finish unmodified private draw";
+                    }
+                });
+                QCOMPARE(observedDepth, referenceDepth);
+                QCOMPARE(control.at("passing_samples"), Json(passing));
+                stage = "verify unmodified private draw restoration";
+                QCOMPARE(readDepth(replay), initial);
+                save({{"status", "observed"},
+                      {"control", control},
+                      {"reference_depth", referenceDepth},
+                      {"observed_depth", observedDepth}});
+                return;
+            }
+            stage = "execute depth completion";
+            const auto report =
+                replayNativeDepthCompletion(replay, 1000, {0, 0, 0, sample}, [&](Replay &r, bool after) {
+                    if (after) {
+                        stage = "read diagnostic depth sample";
+                        observedDepth = readDepth(r);
+                        stage = "finish depth completion";
+                    }
+                });
+            stage = "verify restored depth sample";
+            QCOMPARE(observedDepth, referenceDepth);
+            QCOMPARE(readDepth(replay), initial);
+            save({{"status", "observed"},
+                  {"mode", mode.toStdString()},
+                  {"vendor_request", vendor},
+                  {"samples", samples},
+                  {"sample", sample},
+                  {"reference_depth", referenceDepth},
+                  {"observed_depth", observedDepth},
+                  {"reference_passing_samples", passing},
+                  {"private_observation", report},
+                  {"initial_depth", initial},
+                  {"original_storage_restored", true}},
+                 original, marked.bytecode, added.bytecode);
+            QCOMPARE(report.at("passing_samples"), Json(passing));
+            QCOMPARE(report.at("reference_draw").at("passing_samples"), Json(passing));
+            QCOMPARE(report.at("count_domain"), Json("unmodified_draw_on_fresh_private_outputs"));
+            QCOMPARE(report.at("replay_passes"), Json(2));
+            QCOMPARE(report.at("diagnostic_counts_match"),
+                     Json(report.at("diagnostic_passing_samples") == Json(passing)));
+            const bool survived = !discard && mode != "shader-depth" &&
+                                  (mode != "coverage" || sample % 2 == 0) && mode != "depth-fail" &&
+                                  mode != "stencil-fail";
+            QCOMPARE(report.at("depth_transport").at("marker_present"), Json(survived));
+            replay.inspectNativeState([&](auto *context, const auto &) {
+                Com<ID3D11RenderTargetView> view;
+                context->OMGetRenderTargets(1, &view, nullptr);
+                QVERIFY(!view);
+            });
+            QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+                                     replayNativeDepthCompletion(replay, 1000, {1, 0, 0, 0}));
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                                     replayNativeDepthCompletion(replay, 1000, {}, {}, 256ull * 1024 * 1024,
+                                                                 30000, [] { return true; }));
+            QCOMPARE(readDepth(replay), initial);
+        } catch (const std::exception &error) {
+            QFAIL(qPrintable(QString::fromLatin1(stage) + ": " + QString::fromUtf8(error.what())));
+        }
+    }
     void color_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("samples");
@@ -666,6 +827,20 @@ class DxbcPixelCompletionTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, instrumentPixelCompletion(vertex, 0, marker));
         const auto depth = compileClassProgram("float main():SV_Depth{return .5;}", "ps_5_0");
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, instrumentPixelCompletion(depth, 0, marker));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, addPixelCompletionTarget(shader, 0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, addPixelCompletionTarget(vertex, 0));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, addPixelCompletionTarget(depth, 8));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, addPixelCompletionTarget(depth, 0, 1));
+        DxbcParts compactParts;
+        for (const auto &[tag, bytes] : readDxbcParts(depth))
+            if (tag != 0x54415453)
+                compactParts.emplace_back(tag, bytes);
+        const auto compactDepth = makeDxbc(compactParts);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 addPixelCompletionTarget(compactDepth, 0, compactDepth.size()));
+        QVERIFY_THROWS_EXCEPTION(std::exception, addPixelCompletionTarget(Bytes(depth).first(12), 0));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled, addPixelCompletionTarget(depth, 0, 256ull * 1024 * 1024,
+                                                                              [] { return true; }));
         QVERIFY_THROWS_EXCEPTION(std::exception,
                                  instrumentPixelCompletion(Bytes(shader).first(12), 0, marker));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, instrumentPixelCompletion(shader, 0, marker, 1));
@@ -683,6 +858,10 @@ class DxbcPixelCompletionTests final : public QObject {
             const auto original = compileClassProgram("float4 main():SV_Target{return 1;}", profile);
             const auto result = instrumentPixelCompletion(original, 0, marker);
             unchangedInstructions(original, result.bytecode);
+            const auto depthOnly = compileClassProgram("float main():SV_Depth{return .5;}", profile);
+            const auto prepared = addPixelCompletionTarget(depthOnly, 7);
+            const auto completed = instrumentPixelCompletion(prepared.bytecode, 7, marker);
+            unchangedInstructions(prepared.bytecode, completed.bytecode, 7);
         }
     }
 };

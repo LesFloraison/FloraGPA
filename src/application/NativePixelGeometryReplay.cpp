@@ -4,9 +4,11 @@
 #include "DxbcPixelCompletion.h"
 #include "DxbcPixelGeometry.h"
 #include "DxbcPixelRaster.h"
+#include "HlslCompilation.h"
 #include "core/ClassLinkage.h"
 #include "core/StreamOutput.h"
 #include "replay/BlendState.h"
+#include "replay/NativeMsaaTransfer.h"
 #include "replay/Unpredicated.h"
 #include <algorithm>
 #include <chrono>
@@ -93,7 +95,8 @@ class NativePixelGeometryReplay {
                   std::optional<PixelPrimitiveMask> primitiveMask = {},
                   std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000},
                   bool accumulatePredicate = false,
-                  NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve) {
+                  NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve,
+                  std::optional<NativeDepthCompletionSelection> depthSelection = {}) {
         checkDeadline();
         const auto overrideName = nativePixelTestOverrideName(testOverride);
         if (testOverride != NativePixelTestOverride::Preserve && !accumulatePredicate)
@@ -156,10 +159,130 @@ class NativePixelGeometryReplay {
                     Com<ID3D11PixelShader> completionShader;
                     Com<ID3D11BlendState1> completionBlend;
                     Com<ID3D11DepthStencilState> testDepthState;
+                    Com<ID3D11Texture2D> depthTransport;
+                    Resource transportResource;
+                    uint64_t workingBytes = cloneBytes;
+                    if (depthSelection) {
+                        auto *context = r.context_.Get();
+                        std::array<ID3D11RenderTargetView *, 8> raw{};
+                        Com<ID3D11DepthStencilView> depth;
+                        context->OMGetRenderTargets(8, raw.data(), &depth);
+                        bool colorBound = false;
+                        for (auto *view : raw)
+                            if (view) {
+                                colorBound = true;
+                                view->Release();
+                            }
+                        Com<ID3D11UnorderedAccessView> slotZero;
+                        context->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 1,
+                                                                           &slotZero);
+                        if (!depth || colorBound || slotZero || completionTarget != 0)
+                            throw std::runtime_error(
+                                "Depth completion requires a DSV, no RTVs and an unused UAV slot zero");
+                        D3D11_DEPTH_STENCIL_VIEW_DESC view{};
+                        depth->GetDesc(&view);
+                        Com<ID3D11Resource> source;
+                        depth->GetResource(&source);
+                        Com<ID3D11Texture2D> texture;
+                        check(source.As(&texture), "Get 2D depth completion source");
+                        D3D11_TEXTURE2D_DESC desc{};
+                        texture->GetDesc(&desc);
+                        uint32_t mip = 0, layers = 1;
+                        switch (view.ViewDimension) {
+                        case D3D11_DSV_DIMENSION_TEXTURE2D:
+                            mip = view.Texture2D.MipSlice;
+                            break;
+                        case D3D11_DSV_DIMENSION_TEXTURE2DARRAY:
+                            mip = view.Texture2DArray.MipSlice;
+                            layers = view.Texture2DArray.ArraySize;
+                            break;
+                        case D3D11_DSV_DIMENSION_TEXTURE2DMS:
+                            break;
+                        case D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY:
+                            layers = view.Texture2DMSArray.ArraySize;
+                            break;
+                        default:
+                            throw std::runtime_error("Unsupported depth completion view dimension");
+                        }
+                        desc.Width = std::max(1u, desc.Width >> mip);
+                        desc.Height = std::max(1u, desc.Height >> mip);
+                        if (depthSelection->x >= desc.Width || depthSelection->y >= desc.Height ||
+                            depthSelection->layer >= layers ||
+                            depthSelection->sample >= desc.SampleDesc.Count)
+                            throw std::invalid_argument("Depth completion selection exceeds its DSV");
+                        const uint64_t plane = uint64_t(desc.Width) * desc.Height * 16;
+                        if (!layers || !desc.SampleDesc.Count ||
+                            plane > (request.maxBytes - workingBytes) / 3 / layers / desc.SampleDesc.Count)
+                            throw std::runtime_error("Depth completion transport payload budget exceeded");
+                        workingBytes += plane * layers * desc.SampleDesc.Count * 3;
+                        desc.MipLevels = 1;
+                        desc.ArraySize = layers;
+                        desc.Format = desc.SampleDesc.Count > 1 ? DXGI_FORMAT_R32G32B32A32_TYPELESS
+                                                                : DXGI_FORMAT_R32G32B32A32_FLOAT;
+                        desc.Usage = D3D11_USAGE_DEFAULT;
+                        desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+                        desc.CPUAccessFlags = desc.MiscFlags = 0;
+                        check(r.device_->CreateTexture2D(&desc, nullptr, &depthTransport),
+                              "Create depth completion transport");
+                        Com<ID3D11RenderTargetView> target;
+                        D3D11_RENDER_TARGET_VIEW_DESC targetView{};
+                        targetView.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+                        if (desc.SampleDesc.Count > 1) {
+                            targetView.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+                            targetView.Texture2DMSArray = {0, layers};
+                        } else {
+                            targetView.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+                            targetView.Texture2DArray = {0, 0, layers};
+                        }
+                        check(r.device_->CreateRenderTargetView(depthTransport.Get(), &targetView, &target),
+                              "Create depth completion RTV");
+                        auto *pointer = target.Get();
+                        context->OMSetRenderTargetsAndUnorderedAccessViews(
+                            1, &pointer, depth.Get(), 0, D3D11_KEEP_UNORDERED_ACCESS_VIEWS, nullptr, nullptr);
+                        transportResource.type = 0x85;
+                        transportResource.desc = {desc.Width,
+                                                  desc.Height,
+                                                  1,
+                                                  layers,
+                                                  uint32_t(desc.Format),
+                                                  desc.SampleDesc.Count,
+                                                  desc.SampleDesc.Quality,
+                                                  0,
+                                                  desc.BindFlags,
+                                                  0,
+                                                  0};
+                        report["depth_transport"] = {{"width", desc.Width},
+                                                     {"height", desc.Height},
+                                                     {"layers", layers},
+                                                     {"samples", desc.SampleDesc.Count},
+                                                     {"format", uint32_t(desc.Format)},
+                                                     {"view_format", uint32_t(targetView.Format)},
+                                                     {"x", depthSelection->x},
+                                                     {"y", depthSelection->y},
+                                                     {"layer", depthSelection->layer},
+                                                     {"sample", depthSelection->sample},
+                                                     {"layer_domain", "bound_dsv_view"},
+                                                     {"budgeted_bytes", workingBytes - cloneBytes}};
+                    }
                     if (completionTarget) {
                         const auto target = *completionTarget;
-                        if (!state.stages[4].shader)
+                        if (!state.stages[4].shader && !depthSelection)
                             throw std::runtime_error("Private pixel completion requires a pixel shader");
+                        std::vector<uint8_t> ownedCode;
+                        if (!state.stages[4].shader)
+                            ownedCode =
+                                compileHlsl("void main(){}", "ps_5_0", "main", "native-null-depth-ps.hlsl")
+                                    .bytecode;
+                        Bytes completionCode =
+                            state.stages[4].shader ? shader(state.stages[4].shader) : Bytes(ownedCode);
+                        if (depthSelection) {
+                            auto added = addPixelCompletionTarget(completionCode, target,
+                                                                  request.maxBytes - workingBytes, scoped);
+                            ownedCode = std::move(added.bytecode);
+                            completionCode = ownedCode;
+                            report["additional_target_shader"] = std::move(added.identity);
+                            report["original_null_pixel_shader"] = !state.stages[4].shader;
+                        }
                         std::optional<PixelPrimitiveInput> producer;
                         if (primitiveMask && state.stages[3].shader) {
                             uint32_t stream = 0;
@@ -181,16 +304,17 @@ class NativePixelGeometryReplay {
                                 throw std::runtime_error("Bound GS does not provide a primitive identity");
                         }
                         const auto marked =
-                            accumulatePredicate ? instrumentPixelPrimitivePresence(
-                                                      shader(state.stages[4].shader), target, *primitiveMask,
-                                                      request.maxBytes - cloneBytes, scoped, producer)
+                            accumulatePredicate
+                                ? instrumentPixelPrimitivePresence(completionCode, target, *primitiveMask,
+                                                                   request.maxBytes - workingBytes, scoped,
+                                                                   producer)
                             : primitiveMask
-                                ? instrumentPixelPrimitiveMask(shader(state.stages[4].shader), target,
-                                                               *primitiveMask, request.maxBytes - cloneBytes,
-                                                               scoped, producer)
-                                : instrumentPixelCompletion(shader(state.stages[4].shader), target, marker,
-                                                            request.maxBytes - cloneBytes, scoped);
-                        if (marked.bytecode.size() > request.maxBytes - cloneBytes)
+                                ? instrumentPixelPrimitiveMask(completionCode, target, *primitiveMask,
+                                                               request.maxBytes - workingBytes, scoped,
+                                                               producer)
+                                : instrumentPixelCompletion(completionCode, target, marker,
+                                                            request.maxBytes - workingBytes, scoped);
+                        if (marked.bytecode.size() > request.maxBytes - workingBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
                         auto *context = r.context_.Get();
                         std::array<ID3D11RenderTargetView *, 8> rawViews{};
@@ -216,6 +340,9 @@ class NativePixelGeometryReplay {
                                     Bytes(reinterpret_cast<const uint8_t *>(&base), sizeof base), false);
                             }
                         }
+                        if (depthSelection && blend.AlphaToCoverageEnable)
+                            throw std::runtime_error(
+                                "Depth completion has no original alpha-to-coverage value");
                         if (accumulatePredicate) {
                             Com<ID3D11DepthStencilState> currentDepth;
                             UINT reference = 0;
@@ -289,8 +416,9 @@ class NativePixelGeometryReplay {
                         check(r.device_.As(&extendedDevice), "Get private completion device");
                         check(extendedDevice->CreateBlendState1(&blend, &completionBlend),
                               "Create private completion blend state");
-                        auto linkage =
-                            r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, state.stages[4].shader));
+                        auto linkage = state.stages[4].shader ? r.get<ID3D11ClassLinkage>(shaderClassLinkage(
+                                                                    r.frame_, state.stages[4].shader))
+                                                              : nullptr;
                         check(r.device_->CreatePixelShader(marked.bytecode.data(), marked.bytecode.size(),
                                                            linkage, &completionShader),
                               "Create private completion shader");
@@ -399,6 +527,41 @@ class NativePixelGeometryReplay {
                         {"cs_invocations", counts.CSInvocations}};
                     if (observe)
                         observe(r, true);
+                    if (depthTransport) {
+                        // The transport is no longer an output after the draw.
+                        // Restore the depth-only OM layout before inspection.
+                        Com<ID3D11DepthStencilView> depth;
+                        context->OMGetRenderTargets(0, nullptr, &depth);
+                        context->OMSetRenderTargetsAndUnorderedAccessViews(
+                            0, nullptr, depth.Get(), 0, D3D11_KEEP_UNORDERED_ACCESS_VIEWS, nullptr, nullptr);
+                        Unpredicated unpredicated(context);
+                        Replay::PredicateIsolation isolation(r);
+                        const auto storage =
+                            transportResource.desc[5] == 1
+                                ? r.readTextureStorage(depthTransport.Get(), transportResource, scoped)
+                                : readNativeMsaaStorage(
+                                      r.device_.Get(), context, depthTransport.Get(), transportResource,
+                                      depthSelection->sample, uint32_t(DXGI_FORMAT_R32G32B32A32_FLOAT),
+                                      [&](ID3D11Resource *resource, const Resource &layout) {
+                                          return r.readTextureStorage(resource, layout, scoped);
+                                      },
+                                      scoped)
+                                      .bytes;
+                        const auto width = transportResource.desc[0], height = transportResource.desc[1];
+                        const auto offset =
+                            ((uint64_t(depthSelection->layer) * height + depthSelection->y) * width +
+                             depthSelection->x) *
+                            16;
+                        if (offset > storage.size() || storage.size() - offset < 16)
+                            throw std::runtime_error("Depth completion readback bounds");
+                        std::array<uint32_t, 3> rgb{};
+                        std::memcpy(rgb.data(), storage.data() + offset, 12);
+                        report["depth_transport"]["rgb_bits"] = rgb;
+                        report["depth_transport"]["marker_present"] = rgb == marker;
+                        report["kind"] = "native_depth_completion_observation";
+                        report["scope"] = "original_depth_draw_with_private_color_transport";
+                        report["backend"] = "native-depth-completion/1";
+                    }
                     checkDeadline();
                     validate();
                 },
@@ -604,6 +767,28 @@ Json replayNativePixelCompletion(Replay &r, Id event, uint32_t target,
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
         .original(observe, target, {}, marker);
+}
+Json replayNativeDepthCompletion(Replay &r, Id event, const NativeDepthCompletionSelection &selection,
+                                 const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                 uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    NativePixelGeometryReplay replay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled);
+    // Adding a color output can change early-test occlusion accounting on the
+    // selected driver. Measure the unmodified draw separately on fresh clones.
+    const auto reference = replay.original({});
+    auto result = replay.original(observe, 0, {}, {0x3f800000, 0x40000000, 0x40400000}, false,
+                                  NativePixelTestOverride::Preserve, selection);
+    result["diagnostic_passing_samples"] = result.at("passing_samples");
+    result["diagnostic_pipeline_statistics"] = result.at("pipeline_statistics");
+    result["passing_samples"] = reference.at("passing_samples");
+    result["pipeline_statistics"] = reference.at("pipeline_statistics");
+    result["count_domain"] = "unmodified_draw_on_fresh_private_outputs";
+    result["diagnostic_count_domain"] = "draw_with_added_color_transport";
+    result["diagnostic_counts_match"] =
+        result.at("diagnostic_passing_samples") == result.at("passing_samples");
+    result["reference_draw"] = reference;
+    result["replay_passes"] = 2;
+    return result;
 }
 Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
                                     const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
