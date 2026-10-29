@@ -1,0 +1,564 @@
+{
+  "schema": 1,
+  "implementation_commit": "3284d9eea61334d085afcdd0b2dec94ac63af8e5",
+  "status": "non_tiled_feedback_aggregation_verified_full_parity_open",
+  "backend": "dx11-native/7",
+  "helper": "dxbc-gpu/29",
+  "qt_suites": {
+    "DxbcExecution": {
+      "passed": 1222,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecution.txt"
+    },
+    "DxbcExecutionTrace": {
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTrace.txt"
+    },
+    "DxbcExecutionTraceReader": {
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTraceReader.txt"
+    },
+    "NativeComputeDebug": {
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-aggregate-release-NativeComputeDebug.txt"
+    },
+    "NativeAnalysis": {
+      "passed": 46,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-aggregate-release-NativeAnalysis.txt"
+    }
+  },
+  "validation": {
+    "schema": 1,
+    "status": "verified",
+    "gpu_cases": 9,
+    "gpu_dispatches": 18,
+    "native_executions": 18,
+    "shader_variants": 6,
+    "corruptions_rejected": 45,
+    "tiled_mapping_verified": false,
+    "full_debugger_parity": false
+  },
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 121514,
+      "sha256": "eadb0870f5582fbfdd6689cc2e95681abcde2fe7c7645ea13c2baa1c751c9b26"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 980,
+      "sha256": "886a9fb5290b56fdd66c4cd6416f07bb8858f22bd99d2138f267a5e5a88c96e3"
+    },
+    {
+      "path": "tests/DxbcExecutionTests.cpp",
+      "bytes": 96855,
+      "sha256": "2dba19bb9bcfe560bd4903ad09e872d72a7cd98adf497859142fe086fd08f11d"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "bytes": 29108,
+      "sha256": "e470ca114dd55ce5d02c47ac3144fcdd25b3abdd83c068c435a9f4ef088b5818"
+    },
+    {
+      "path": "tools/validate_native_compute_captures.py",
+      "bytes": 10366,
+      "sha256": "ae7aa676362ca0117a30593f238622e6236b6fd5024567dbe59184d582b27cec"
+    },
+    {
+      "path": "tools/validate_native_compute_debug.py",
+      "bytes": 10499,
+      "sha256": "a3caebf1e7288d263ae90b903a4202e34d42495ef6942ed88f4e0fb66771b9bd"
+    },
+    {
+      "path": "tools/validate_native_feedback_aggregation.py",
+      "bytes": 4691,
+      "sha256": "056984c552d5b9f8c382a22228df0813548bc5de4021306e829f3268644b9a98"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-build.log",
+      "bytes": 1013,
+      "sha256": "051d03f57fa94d4a19f8a0063fc1361e8b69f3bbceeee58a3f20bb4c50868824"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-compound-2048.asm",
+      "bytes": 1976,
+      "sha256": "545786e57910b7c5324e1d48152fd256ea3ce36db7ea18cb43c8dfb2298b5632"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-compound-4.asm",
+      "bytes": 2165,
+      "sha256": "4ae2e2743722ad3c6f7bd37987da96524ddce3629146a1ee07fb2618566ef4e7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-explicit-2048.asm",
+      "bytes": 2325,
+      "sha256": "82c8ed301c6f4ff56ad2ea1852b2389c736419a747a1dea9b45af706cca5cc18"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-explicit-4.asm",
+      "bytes": 2513,
+      "sha256": "d7dfde193b66d797ac892acce330c186e3f066b0f5b87c07be7d642028484d3b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-final-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-final.txt",
+      "bytes": 2571,
+      "sha256": "27ee164786555a28b5641fd017114a9fd3303e727c60dfbbd2e2f5bad97363d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-fixture-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-initial-console.log",
+      "bytes": 975,
+      "sha256": "558ab722feda4abeb2abeaaefdcb41d252cce7fdac5844da24f6dcbd1059618b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-initial.txt",
+      "bytes": 519,
+      "sha256": "e9e03fb40757e18a3d3223996a8a2637e3d6bce96067ab031c011adb8fde3053"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-inspection-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-inspection-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-inspection.txt",
+      "bytes": 2662,
+      "sha256": "f6277abb3fa88d5138cc0532a43f0371f474f8e540833863307b953ddebbfd6b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-or-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-or-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-or.txt",
+      "bytes": 3461,
+      "sha256": "e056c6450582b532d6b967b9e4bdd22ad1256b84c0af05c0ba35051c6d9f1108"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-2/report.json",
+      "bytes": 1090,
+      "sha256": "da4e98392539e6994916bc9870051f84fe873262cf270de838e45e834f544e3a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-3/report.json",
+      "bytes": 1090,
+      "sha256": "93b89db9f330fb5e344383c33d4f29c30f44fb34829e07b7e48fc33692076cc9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-4/report.json",
+      "bytes": 1090,
+      "sha256": "a70bc10afc2bc0a734aed137358a9ec687ff81139cda085399d1f21f472c1dda"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/0-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-2/report.json",
+      "bytes": 1094,
+      "sha256": "4e789b80bb7cb2d8c488c557ea0884e7cc2481dccb056a4458d0811b7636ef81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-3/report.json",
+      "bytes": 1094,
+      "sha256": "b32bdb9f259799f2f48da545723129942b51e5573467441dab644dee90dcbf1c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-4/report.json",
+      "bytes": 1094,
+      "sha256": "8720021bc6e8fadfb91091b25dceb316b87553a113fc22c87eb11b45d218dd32"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/32902-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-2/report.json",
+      "bytes": 1093,
+      "sha256": "f240739c12483952090b96faeb2b8f4febf814d18b8f753ab51bc00bfe6d814e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-3/report.json",
+      "bytes": 1093,
+      "sha256": "975b5133e09bdcb6fc94f7bb594d2115e9aa7b9adff6738639a8650009b11751"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-4/report.json",
+      "bytes": 1093,
+      "sha256": "a419d086c82b583e93416e7a7c36299fc5dab52fcb167147cd2196c35a1acae1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned/4318-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned-validation.json",
+      "bytes": 244,
+      "sha256": "784a328d25664a138420d1cf2143cdcdffa546c1c855eff4894ed7de812996b7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-owned.txt",
+      "bytes": 2912,
+      "sha256": "17ab0b5311d32326ad300d129d2a48b71a94412e5847f28b6d4cd00539438fa9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-products-build.log",
+      "bytes": 11270,
+      "sha256": "672a49046d46ceb62ad6f96f67f87dc08fa11ab221663aebb8d68d0f31597700"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-products-final-build.log",
+      "bytes": 10701,
+      "sha256": "da14f8b69fdfa8bb04859560773f79bdeb522c988153d183accb4dc90b7d7b5a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-2/report.json",
+      "bytes": 1090,
+      "sha256": "da4e98392539e6994916bc9870051f84fe873262cf270de838e45e834f544e3a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-3/report.json",
+      "bytes": 1090,
+      "sha256": "93b89db9f330fb5e344383c33d4f29c30f44fb34829e07b7e48fc33692076cc9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-4/report.json",
+      "bytes": 1090,
+      "sha256": "a70bc10afc2bc0a734aed137358a9ec687ff81139cda085399d1f21f472c1dda"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/0-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-2/report.json",
+      "bytes": 1094,
+      "sha256": "4e789b80bb7cb2d8c488c557ea0884e7cc2481dccb056a4458d0811b7636ef81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-3/report.json",
+      "bytes": 1094,
+      "sha256": "b32bdb9f259799f2f48da545723129942b51e5573467441dab644dee90dcbf1c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-4/report.json",
+      "bytes": 1094,
+      "sha256": "8720021bc6e8fadfb91091b25dceb316b87553a113fc22c87eb11b45d218dd32"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/32902-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-2/original.dxbc",
+      "bytes": 1064,
+      "sha256": "f236c755d53a04283165ac0ed733235fc4563d689702036e8b03741adc7f6361"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-2/report.json",
+      "bytes": 1093,
+      "sha256": "f240739c12483952090b96faeb2b8f4febf814d18b8f753ab51bc00bfe6d814e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-2/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2749dd33a7a4b92f901207c2879bcf2ecf81bbc7d8f5444e5efa200954a167b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-3/original.dxbc",
+      "bytes": 1208,
+      "sha256": "7fd16bf38a953050f2eb0ddfa4c311ec2afe6ca8e190bd560e831e49bd784133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-3/report.json",
+      "bytes": 1093,
+      "sha256": "975b5133e09bdcb6fc94f7bb594d2115e9aa7b9adff6738639a8650009b11751"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-3/shader.dxbc",
+      "bytes": 1228,
+      "sha256": "7ab778a28ac07b413a2f258484c5a391be3feeb8aa720da7d351fe2b409856ac"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-4/original.dxbc",
+      "bytes": 1352,
+      "sha256": "c5515394817124741300914036526eb83fdd99145b8c43d8746b5f78348e4df6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-4/report.json",
+      "bytes": 1093,
+      "sha256": "a419d086c82b583e93416e7a7c36299fc5dab52fcb167147cd2196c35a1acae1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release/4318-4/shader.dxbc",
+      "bytes": 1372,
+      "sha256": "bae341a8439018c213af299d5462d7e1bcd93340530636936a31632d79d0ea01"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraDxbcExecutionTests.exe",
+      "bytes": 994304,
+      "sha256": "be3345dfc07adc1543d59ef0e355b7dece79d9ec887f12a47f3f1d9c66354632"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraDxbcExecutionTraceReaderTests.exe",
+      "bytes": 934400,
+      "sha256": "bacfd44d4cb76713a30c7378b5d054cd1dc605cbf5dc08421840eb80b33d9178"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1944576,
+      "sha256": "af93c6ac9b065808d6f4056069a93b9a18900778f34d6b3242da8756dcc49f40"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraGPA.Cli.exe",
+      "bytes": 6148608,
+      "sha256": "b3a698089efdc0ba2525837e51c40b622ece7e61fb6291098a0479e90406788f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraGPA.exe",
+      "bytes": 5143040,
+      "sha256": "e05bf29cb9f130a08ed05eaa1d23d1c1d57532add61bcc1167763002524fc0ee"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraGPA.Worker.exe",
+      "bytes": 6148608,
+      "sha256": "1bd9d8fa02ebf18c72face1695575abba9e4ba1ff8377c018a0ff443d6c21537"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1517568,
+      "sha256": "e88134118248c7c0c1cdefb5a7afb619bc19ba9d97976a3ba961fa1381d2791f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-binaries/FloraNativeComputeDebugTests.exe",
+      "bytes": 3040768,
+      "sha256": "fe8cc9f73a20d3b39da39663003faf16ccd2d963261ea77fa98e76e0664f0633"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecution-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecution.txt",
+      "bytes": 679394,
+      "sha256": "e6383c92b4bf033cbef654b7ed0966039e14eccf33e9c4dae6808c3222cfcb68"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTrace-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTrace.txt",
+      "bytes": 2837,
+      "sha256": "fdd3826b64712e6ddb9b73188ae3cf52e436c5eaf060c0a9434767f9b4ac9e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTraceReader-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-DxbcExecutionTraceReader.txt",
+      "bytes": 4565,
+      "sha256": "bc79284dc2bf9e4e8c668762cf79b8a509635d8ecd4ec6d470c644903b6ba159"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-NativeAnalysis-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-NativeAnalysis.txt",
+      "bytes": 2952,
+      "sha256": "0fd8facc922c5f6b726cff70a42b319dbcbb21d81ce8dc4b472b54121a625be7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-NativeComputeDebug-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-NativeComputeDebug.txt",
+      "bytes": 4340,
+      "sha256": "72b11c97ae9d20b682c0755788bcd1bde1ec962686c155493f6e685ef56f000d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-aggregate-release-validation.json",
+      "bytes": 244,
+      "sha256": "784a328d25664a138420d1cf2143cdcdffa546c1c855eff4894ed7de812996b7"
+    }
+  ]
+}

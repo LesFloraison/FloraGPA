@@ -1585,3 +1585,11 @@ success without a result, so dispatch completion is not shader-debug evidence.
 See `research/DX11_DEBUGGER_ENGINE_CONTRACT.md`. The actual original engine's
 construction and module remain unresolved; no product dependency or routing
 change is introduced by this study.
+
+Native DXBC OR now preserves opaque aggregate resource-feedback provenance,
+including known-zero identity and unknown mapping validity. Analysis identity is
+`dx11-native/7`; existing caches from prior versions are distinct. Nine independent
+WARP/NVIDIA/Intel GPU cases compare compiler controls, constructed OR variants and
+native execution. Five regression suites pass 1,423 cases without failures or
+skips. See `research/DX11_NATIVE_FEEDBACK_AGGREGATION.md`. Actual tiled residency,
+null feedback data destinations and the full debugger/removal gates remain open.
