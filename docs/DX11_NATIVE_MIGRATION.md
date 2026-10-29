@@ -1624,3 +1624,14 @@ without failures or skips; independent geometry, UI and channel verifiers reject
 their unchanged evidence. See `research/DX11_NATIVE_TERMINAL_DOMAIN_COUNTS.md`.
 Full geometry/workflow parity, original fragment qualification, the original GPA
 debugger engine, RenderDoc removal and standalone release acceptance remain open.
+
+Additional real-capture mesh selections establish that the frozen-main BF1
+instance-1 and instance-4 exports contain 2248 and 1405 vertices respectively,
+while native selected geometry contains 281. Both complete old buffers exactly
+match the corresponding tails of retained native all-instance storage. Selected
+references agree, but strict export comparisons still fail. Three additional
+selections pass native checks on each of three adapters; the ten distinct report
+collection now passes the unchanged saved-report UI test on frozen main and the
+current branch. The original source-fixture UI rows remain unqualified. See
+`research/DX11_NATIVE_MESH_INSTANCE_STORAGE.md` for retained failures, reproduction
+and the required separation of selected geometry from exported vertex storage.

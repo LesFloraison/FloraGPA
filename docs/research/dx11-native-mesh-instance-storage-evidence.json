@@ -1,0 +1,3593 @@
+{
+  "schema": 1,
+  "research_commit": "336ebc3e44ead0e0e8b9f46602c57ddbea312e14",
+  "product_source_commit": "2a33e594064c509760f5353cf3684175a6f8d285",
+  "main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "backend": "dx11-native/9",
+  "status": "instance_storage_observations_verified_strict_export_parity_failing",
+  "initial_validation": {
+    "passed": false,
+    "probe_failures": 0,
+    "metadata_failures": 9,
+    "path": "artifacts/dx11-native/mesh-instance-native/validation.json"
+  },
+  "native_validation": {
+    "schema": 1,
+    "completed": true,
+    "passed": true,
+    "case_set": "additional-instances",
+    "position_channels": true,
+    "worker_sha256": "9a7b5be55510e9eca5122dd81bc7d37e09ecd7f01a9cb7d86a21f19792d07aa0",
+    "probe_sha256": "931b30dfbdea1451caf4dd6966b2de371ef82b6e84136385535f81d4849aaa1e",
+    "cases": [
+      {
+        "case": "4318-bf1-1415-1",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "38cbfb2d423f624e07550cc338025a92d20d7adcdc1c2735f1ac2c92a7c4dad2",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21992,
+        "probe_peak_working_set_bytes": 30507008,
+        "execution": [
+          {
+            "elapsed_ms": 1088,
+            "peak_working_set_bytes": 1757229056
+          },
+          {
+            "elapsed_ms": 1080,
+            "peak_working_set_bytes": 1759854592
+          }
+        ]
+      },
+      {
+        "case": "4318-bf1-1415-4",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "32c474f63a476e87de69913ffb6c7a3e2e205f0bf2a22664d1e594e91b5f9c06",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21846,
+        "probe_peak_working_set_bytes": 29753344,
+        "execution": [
+          {
+            "elapsed_ms": 1091,
+            "peak_working_set_bytes": 1757433856
+          },
+          {
+            "elapsed_ms": 1036,
+            "peak_working_set_bytes": 1755779072
+          }
+        ]
+      },
+      {
+        "case": "4318-helldivers-200-11",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 1164,
+        "final_vertices": 1164,
+        "triangles": 388,
+        "compared_bytes": 60528,
+        "sha256": "e500a2b1732cfd02007d2a0870e500c6c0ad771f1299b2e4d9de75d06a316f7d",
+        "parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21920,
+        "probe_peak_working_set_bytes": 30351360,
+        "execution": [
+          {
+            "elapsed_ms": 1052,
+            "peak_working_set_bytes": 1729232896
+          },
+          {
+            "elapsed_ms": 992,
+            "peak_working_set_bytes": 1722146816
+          }
+        ]
+      },
+      {
+        "case": "32902-bf1-1415-1",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "a040d2bf158ac468d2c77a51036afe498d8bdcc54707510ee359633f4daca71a",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21860,
+        "probe_peak_working_set_bytes": 29736960,
+        "execution": [
+          {
+            "elapsed_ms": 1016,
+            "peak_working_set_bytes": 2121965568
+          },
+          {
+            "elapsed_ms": 1055,
+            "peak_working_set_bytes": 2118283264
+          }
+        ]
+      },
+      {
+        "case": "32902-bf1-1415-4",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "95040562365b7606955b20711f7458f01f91b589ccd11eecfa62d54d2a72f5f4",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21840,
+        "probe_peak_working_set_bytes": 29609984,
+        "execution": [
+          {
+            "elapsed_ms": 1045,
+            "peak_working_set_bytes": 2121515008
+          },
+          {
+            "elapsed_ms": 1020,
+            "peak_working_set_bytes": 2118320128
+          }
+        ]
+      },
+      {
+        "case": "32902-helldivers-200-11",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 1164,
+        "final_vertices": 1164,
+        "triangles": 388,
+        "compared_bytes": 60528,
+        "sha256": "2a58a15f6801741c5673c9d83a806725dc8f92662beb838204237a8417fd8abb",
+        "parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21409,
+        "probe_peak_working_set_bytes": 30576640,
+        "execution": [
+          {
+            "elapsed_ms": 947,
+            "peak_working_set_bytes": 1802764288
+          },
+          {
+            "elapsed_ms": 898,
+            "peak_working_set_bytes": 1799356416
+          }
+        ]
+      },
+      {
+        "case": "0-bf1-1415-1",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "ffa100216410507e6f2416464442b99022c435cddc70285985186aba0bf43b60",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 22315,
+        "probe_peak_working_set_bytes": 29667328,
+        "execution": [
+          {
+            "elapsed_ms": 1143,
+            "peak_working_set_bytes": 2202759168
+          },
+          {
+            "elapsed_ms": 1165,
+            "peak_working_set_bytes": 2201387008
+          }
+        ]
+      },
+      {
+        "case": "0-bf1-1415-4",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 882,
+        "final_vertices": 882,
+        "triangles": 294,
+        "compared_bytes": 112896,
+        "sha256": "8ae50de523c70366ec48540a5840f5c2d07896727cef0efef601f9ae5d4bdf0f",
+        "parameters": {
+          "base_vertex": 0,
+          "index_count": 882,
+          "instance_count": 9,
+          "start_index": 0,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 22168,
+        "probe_peak_working_set_bytes": 29569024,
+        "execution": [
+          {
+            "elapsed_ms": 1168,
+            "peak_working_set_bytes": 2201702400
+          },
+          {
+            "elapsed_ms": 1113,
+            "peak_working_set_bytes": 2201288704
+          }
+        ]
+      },
+      {
+        "case": "0-helldivers-200-11",
+        "exit_code": 0,
+        "passed": true,
+        "input_vertices": 1164,
+        "final_vertices": 1164,
+        "triangles": 388,
+        "compared_bytes": 60528,
+        "sha256": "f5a30b62a74d20f4bbb4e6049d10f55976943f9cbc7507abe959f48f6f0230a9",
+        "parameters": {
+          "base_vertex": 39524,
+          "index_count": 1164,
+          "instance_count": 12,
+          "start_index": 93888,
+          "start_instance": 0
+        },
+        "corruption_controls": 4,
+        "probe_elapsed_ms": 21806,
+        "probe_peak_working_set_bytes": 30613504,
+        "execution": [
+          {
+            "elapsed_ms": 1024,
+            "peak_working_set_bytes": 1917485056
+          },
+          {
+            "elapsed_ms": 985,
+            "peak_working_set_bytes": 1917063168
+          }
+        ]
+      }
+    ],
+    "renderdoc_parity": false,
+    "full_mesh_parity": false
+  },
+  "verification": {
+    "schema": 1,
+    "status": "observations_verified",
+    "baseline_selections": 10,
+    "baseline_files": 77,
+    "native_cases": 9,
+    "native_jobs": 18,
+    "native_corruptions_rejected": 36,
+    "metadata_corruptions_rejected": [
+      {
+        "target": "missing_mapping",
+        "error": "missing native semantic position mapping"
+      },
+      {
+        "target": "channels",
+        "error": "independent compact identity mapping"
+      },
+      {
+        "target": "missing_reason",
+        "error": "independent compact identity mapping"
+      },
+      {
+        "target": "reason",
+        "error": "independent compact identity mapping"
+      },
+      {
+        "target": "references",
+        "error": "independent compact identity mapping"
+      },
+      {
+        "target": "compact_bytes",
+        "error": "compact vertex records"
+      }
+    ],
+    "strict_exports_equal": false,
+    "full_mesh_parity": false,
+    "full_renderdoc_removal": false
+  },
+  "comparison": {
+    "schema": 1,
+    "completed": true,
+    "case_set": "additional-instances",
+    "strict_exports_equal": false,
+    "referenced_records_equal": true,
+    "indices_equal": true,
+    "cases": [
+      {
+        "case": "bf1-1415-1",
+        "gpa_event": 1415,
+        "instance": 1,
+        "strict_exports_equal": false,
+        "export_equality": {
+          "post_vertices.bin": false,
+          "post_vertices.csv": false,
+          "post_geometry.obj": false
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 2248,
+        "native_vertices": 281,
+        "baseline_trailing_vertices": 1967,
+        "indices": 882,
+        "referenced_bytes": 112896,
+        "native_compact_sha256": "6b4771b676fbd5be2b15ebdd2d8f3f33e12b3dc3cca52113334582f537d84ac1",
+        "baseline_buffer_sha256": "ad80e36ae88aa28b137a3fd441e555277ce077b58925bb2040ead4f8cba4a0db",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "all_instances": {
+          "vertices": 2529,
+          "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef",
+          "matches_baseline_buffer": false,
+          "source": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0",
+          "context_id": "97fa8918a7eb4f1edbd8186725264802b1dd07151bf564d77d00a757c3b804a9",
+          "backend": "dx11-native/3",
+          "from_selected_instance": {
+            "vertices": 2248,
+            "sha256": "ad80e36ae88aa28b137a3fd441e555277ce077b58925bb2040ead4f8cba4a0db",
+            "matches_baseline_buffer": true
+          }
+        }
+      },
+      {
+        "case": "bf1-1415-4",
+        "gpa_event": 1415,
+        "instance": 4,
+        "strict_exports_equal": false,
+        "export_equality": {
+          "post_vertices.bin": false,
+          "post_vertices.csv": false,
+          "post_geometry.obj": false
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 1405,
+        "native_vertices": 281,
+        "baseline_trailing_vertices": 1124,
+        "indices": 882,
+        "referenced_bytes": 112896,
+        "native_compact_sha256": "4316499ec7c96d5c85f629d62f7ac6e25b7f03b17ea0a5304efb435eb713159f",
+        "baseline_buffer_sha256": "f5e6c94dc80b55f46d374c993d4823112a87d524a604405e38187a8b5269de7b",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "all_instances": {
+          "vertices": 2529,
+          "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef",
+          "matches_baseline_buffer": false,
+          "source": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0",
+          "context_id": "97fa8918a7eb4f1edbd8186725264802b1dd07151bf564d77d00a757c3b804a9",
+          "backend": "dx11-native/3",
+          "from_selected_instance": {
+            "vertices": 1405,
+            "sha256": "f5e6c94dc80b55f46d374c993d4823112a87d524a604405e38187a8b5269de7b",
+            "matches_baseline_buffer": true
+          }
+        }
+      },
+      {
+        "case": "helldivers-200-11",
+        "gpa_event": 200,
+        "instance": 11,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 834,
+        "native_vertices": 834,
+        "baseline_trailing_vertices": 0,
+        "indices": 1164,
+        "referenced_bytes": 60528,
+        "native_compact_sha256": "19a0a2158098c21afbb6ead8b710b0706896617244855ae45b1c36decea90310",
+        "baseline_buffer_sha256": "19a0a2158098c21afbb6ead8b710b0706896617244855ae45b1c36decea90310",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/helldivers/capture/independent_capture.rdc",
+        "native_frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139"
+      }
+    ],
+    "full_mesh_parity": false,
+    "full_renderdoc_removal": false
+  },
+  "historical_comparison": {
+    "schema": 1,
+    "completed": true,
+    "case_set": "baseline",
+    "strict_exports_equal": false,
+    "referenced_records_equal": true,
+    "indices_equal": true,
+    "cases": [
+      {
+        "case": "gf2-113-0",
+        "gpa_event": 113,
+        "instance": 0,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 4,
+        "native_vertices": 4,
+        "baseline_trailing_vertices": 0,
+        "indices": 6,
+        "referenced_bytes": 336,
+        "native_compact_sha256": "cc3b8b493c8afd3144aae0564a0ef52a597d94918175dace484af248a71ba58e",
+        "baseline_buffer_sha256": "cc3b8b493c8afd3144aae0564a0ef52a597d94918175dace484af248a71ba58e",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gf2-counter-cutover/capture/independent_capture.rdc",
+        "native_frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e"
+      },
+      {
+        "case": "gf2-181-0",
+        "gpa_event": 181,
+        "instance": 0,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 4,
+        "native_vertices": 4,
+        "baseline_trailing_vertices": 0,
+        "indices": 6,
+        "referenced_bytes": 336,
+        "native_compact_sha256": "aa7379d3207e618dc86ac35263733610f30fb402cf64cb744a8a5ee777e1307c",
+        "baseline_buffer_sha256": "aa7379d3207e618dc86ac35263733610f30fb402cf64cb744a8a5ee777e1307c",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gf2-counter-cutover/capture/independent_capture.rdc",
+        "native_frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e"
+      },
+      {
+        "case": "bf1-876-0",
+        "gpa_event": 876,
+        "instance": 0,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 3312,
+        "native_vertices": 3312,
+        "baseline_trailing_vertices": 0,
+        "indices": 19290,
+        "referenced_bytes": 308640,
+        "native_compact_sha256": "a57a13e2d4317eef814b4ed53a0890bd001d655cce83ddc1363415fc222a6f8e",
+        "baseline_buffer_sha256": "a57a13e2d4317eef814b4ed53a0890bd001d655cce83ddc1363415fc222a6f8e",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620"
+      },
+      {
+        "case": "bf1-1415-0",
+        "gpa_event": 1415,
+        "instance": 0,
+        "strict_exports_equal": false,
+        "export_equality": {
+          "post_vertices.bin": false,
+          "post_vertices.csv": false,
+          "post_geometry.obj": false
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 2529,
+        "native_vertices": 281,
+        "baseline_trailing_vertices": 2248,
+        "indices": 882,
+        "referenced_bytes": 112896,
+        "native_compact_sha256": "3316b3966f23dfdae310615d1b312504b05599d0c533567fad6880753ca328bd",
+        "baseline_buffer_sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "all_instances": {
+          "vertices": 2529,
+          "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef",
+          "matches_baseline_buffer": true,
+          "source": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0",
+          "context_id": "97fa8918a7eb4f1edbd8186725264802b1dd07151bf564d77d00a757c3b804a9",
+          "backend": "dx11-native/3",
+          "from_selected_instance": {
+            "vertices": 2529,
+            "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef",
+            "matches_baseline_buffer": true
+          }
+        }
+      },
+      {
+        "case": "bf1-1415-8",
+        "gpa_event": 1415,
+        "instance": 8,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 281,
+        "native_vertices": 281,
+        "baseline_trailing_vertices": 0,
+        "indices": 882,
+        "referenced_bytes": 112896,
+        "native_compact_sha256": "3a6a849025778b79ba1237ea26a39677bd529362f9994d7a82f88e5d151418c9",
+        "baseline_buffer_sha256": "3a6a849025778b79ba1237ea26a39677bd529362f9994d7a82f88e5d151418c9",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620"
+      },
+      {
+        "case": "bf1-2010-0",
+        "gpa_event": 2010,
+        "instance": 0,
+        "strict_exports_equal": true,
+        "export_equality": {
+          "post_vertices.bin": true,
+          "post_vertices.csv": true,
+          "post_geometry.obj": true
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 10348,
+        "native_vertices": 10348,
+        "baseline_trailing_vertices": 0,
+        "indices": 15960,
+        "referenced_bytes": 1021440,
+        "native_compact_sha256": "94806970ec29dd7cb2cfe7fa4207219dfd4b0d627c6ff2a27cc1ad280528c4c1",
+        "baseline_buffer_sha256": "94806970ec29dd7cb2cfe7fa4207219dfd4b0d627c6ff2a27cc1ad280528c4c1",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+        "native_frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620"
+      },
+      {
+        "case": "helldivers-200-0",
+        "gpa_event": 200,
+        "instance": 0,
+        "strict_exports_equal": false,
+        "export_equality": {
+          "post_vertices.bin": false,
+          "post_vertices.csv": false,
+          "post_geometry.obj": false
+        },
+        "indices_equal": true,
+        "referenced_records_equal": true,
+        "selected_record_prefix_equal": true,
+        "baseline_vertices": 10008,
+        "native_vertices": 834,
+        "baseline_trailing_vertices": 9174,
+        "indices": 1164,
+        "referenced_bytes": 60528,
+        "native_compact_sha256": "4a107fe50d4a0c792b456a70273b622b1b3270b75218db3e492b0db373a6a559",
+        "baseline_buffer_sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78",
+        "baseline_capture": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/helldivers/capture/independent_capture.rdc",
+        "native_frame_sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+        "all_instances": {
+          "vertices": 10008,
+          "sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78",
+          "matches_baseline_buffer": true,
+          "source": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0",
+          "context_id": "6f913b53474340c13cdf9446e4d747d6916c6eb3e60f647fb10b9b757717b213",
+          "backend": "dx11-native/3",
+          "from_selected_instance": {
+            "vertices": 10008,
+            "sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78",
+            "matches_baseline_buffer": true
+          }
+        }
+      }
+    ],
+    "full_mesh_parity": false,
+    "full_renderdoc_removal": false
+  },
+  "ui_tests": {
+    "selection": "recordedReportsAndExports",
+    "baseline": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "current": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "full_legacy_ui_suite_qualified": false,
+    "current_full": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 2,
+      "log": "artifacts/dx11-native/mesh-instance-current-ui-full.log",
+      "reason": "Original shader_sources/source.gpa_frame fixture remains unavailable"
+    }
+  },
+  "strict_comparison_exit_codes": {
+    "additional_instances": 1,
+    "historical": 1
+  },
+  "full_mesh_parity": false,
+  "full_renderdoc_removal": false,
+  "standalone_release_acceptance": false,
+  "sources": [
+    {
+      "path": "tools/compare_native_mesh_baseline.py",
+      "bytes": 8716,
+      "sha256": "b7ca9ac97469c522833b162469ee8297b451a4ad8e85ff42295404bdec2067f8"
+    },
+    {
+      "path": "tools/record_mesh_instance_baselines.py",
+      "bytes": 5783,
+      "sha256": "daad36c6ef18e2e8d14e3fda70d06e86ce2bc1043f71a18490d1b28d7973315a"
+    },
+    {
+      "path": "tools/validate_mesh_instance_evidence.py",
+      "bytes": 7654,
+      "sha256": "7e48f63e763073cec5e603d852c222bba5bc4a53d08a3579d1541db67db4022c"
+    },
+    {
+      "path": "tools/validate_native_mesh_captures.py",
+      "bytes": 17212,
+      "sha256": "77d00206abf9df79847d29bd3cb241ebf6fe5a55ebe8fd4f1b72f9b05d556798"
+    },
+    {
+      "path": "tools/probe_native_mesh_capture.cpp",
+      "bytes": 7762,
+      "sha256": "2abf95da9e46da073aebae10a1bd6539b80301dda671f58fa574815b24f92169"
+    },
+    {
+      "path": "tests/ReplayMeshUiTests.cpp",
+      "bytes": 14644,
+      "sha256": "a7635d288600423a09fc6deb3933f6f41723d18752fe23d4d39743111f84a360"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 960,
+      "sha256": "1976d5db519083b6072a3f3f302a6c9687ed28f9ad8cc2d6fa7a49529e397c88"
+    },
+    {
+      "path": "src/application/ReplayMesh.cpp",
+      "bytes": 7431,
+      "sha256": "d7afc0284a6380fcf12cffaec506484a9e531bbacee1d06146ec4f5be04f974e"
+    },
+    {
+      "path": "src/application/NativeReplayMesh.cpp",
+      "bytes": 8043,
+      "sha256": "5f17d6b54b26a6e3cf900b0464c1e9b701370bcf3efbb8b7d779d01eed024d45"
+    },
+    {
+      "path": "src/app/ReplayMeshView.cpp",
+      "bytes": 15422,
+      "sha256": "250cd32cf76b69d34e36aa0c628a02917bec319f9cf8401d250e992dbe40da02"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "C:/Program Files/RenderDoc/renderdoc.dll",
+      "bytes": 27160728,
+      "sha256": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/gf2-counter-cutover/capture/independent_capture.rdc",
+      "bytes": 36129953,
+      "sha256": "81d0700cf0a05d176065f5dba68cf944590955723555d46e8617bf1cba760545"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/job.json",
+      "bytes": 555,
+      "sha256": "be84c2334c7db4aa62bcf8ba289b8a95cdc943375e0c4fb726e62213ae1385ea"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "64a7b7a9b2833fe6e2a69471e72c36d02bba202074d2803dca6126e728094c4d"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/post_geometry.obj",
+      "bytes": 167247,
+      "sha256": "99983a90ff1befcdb20456ae9dbb34a70af12ab46e3c16df09610f9b94d985ce"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/post_vertices.bin",
+      "bytes": 323712,
+      "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/post_vertices.csv",
+      "bytes": 209045,
+      "sha256": "67aa246b36242e3613fa52d047be40dd35eca222b3146ac5bafa3fbc56038f3b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/result.json",
+      "bytes": 1691400,
+      "sha256": "22a5747452ee83e883095ea208c9cf12640dcd1c1f6ad0c9416fc02632cc44b2"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/job.json",
+      "bytes": 555,
+      "sha256": "348ac6430be27e0a774f235c8d0cb89bd9387aeccf187e35e0ce69839a7cb1d3"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "4d15b153303de2bc75a49a6635b1fcb4ea65b5f60d5a7a61e684511a35668b6f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/post_geometry.obj",
+      "bytes": 22300,
+      "sha256": "91f0d37e1a438261cb1bb20079d3eba837b97ab85a4e9720677966a5e1388376"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "3a6a849025778b79ba1237ea26a39677bd529362f9994d7a82f88e5d151418c9"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/post_vertices.csv",
+      "bytes": 22982,
+      "sha256": "3f329786bac013ba86c92cbe8f9607ab87c0afe110194d7968a3b7ddd52236c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/result.json",
+      "bytes": 1691404,
+      "sha256": "2cf4db38c4ab72c5b501b25ba198602b05bb8e07e25f57c7f050062fbc1db23f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-1415-8/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/job.json",
+      "bytes": 555,
+      "sha256": "7ef253a588a7ac7cd2622b6cea4fc2808b9e0ef6a2e68124d4f0aabb2fe16358"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "a963576e53b355bf57fed4afadfd88da012469fd1cf354540db0fb4c69e07395"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/post_geometry.obj",
+      "bytes": 612769,
+      "sha256": "3522a94b45e6e87fb79189d5c97ebee6590a6ac4cfa05c2d1cf3123ed79e3920"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/post_indices.bin",
+      "bytes": 31920,
+      "sha256": "cf10c8bd26be5dc3a6f2f503590b1b260ae085a059ff49cc200415f30924891b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/post_vertices.bin",
+      "bytes": 662272,
+      "sha256": "94806970ec29dd7cb2cfe7fa4207219dfd4b0d627c6ff2a27cc1ad280528c4c1"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/post_vertices.csv",
+      "bytes": 685911,
+      "sha256": "f84fee4a064dd5cbf620d34beee8231a5e663530e6edbfead55343703056162f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/result.json",
+      "bytes": 1691404,
+      "sha256": "6ff0c37f9d48f3779edb08923b8b8eb0ec6368c373f8fe65cc8480f382e67c53"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-2010-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/job.json",
+      "bytes": 553,
+      "sha256": "46fd272b34c3bb521787a4c802f6ee5d19a552a81345f8f245b6ca2484c2f613"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "5130bec376fd53e3f6595a3d3f8034f385f130fbb0144a32a6521a6bddcd8bdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/post_geometry.obj",
+      "bytes": 310839,
+      "sha256": "1d263fd30705a56f859fa8dc21f7dfba94b4ba1b04ff0f0d1e4ee608476d10de"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/post_indices.bin",
+      "bytes": 38580,
+      "sha256": "8c5b036be1092254ffa2a853bc3a3aa1b488085959950b87e9f2181c4ff1a6d7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/post_vertices.bin",
+      "bytes": 52992,
+      "sha256": "a57a13e2d4317eef814b4ed53a0890bd001d655cce83ddc1363415fc222a6f8e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/post_vertices.csv",
+      "bytes": 285414,
+      "sha256": "9ae6f94cbecc19564c5db68fdec32959cfe25d5febf41be8428c5522f6e8ba0f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/result.json",
+      "bytes": 1691385,
+      "sha256": "fb58633ac4d0648eee9aa7cdf9e71d91995b3fc7f473da4adfb985ac33cd1b01"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/bf1-876-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/job.json",
+      "bytes": 546,
+      "sha256": "40d42736835104a94a5d0d19f547b076fc51b325fb9dc7b0cf31ce6945d846fc"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/loaded_modules.json",
+      "bytes": 4064,
+      "sha256": "0432fb3c92e2c0d6431aee7849b2db5bad4c6e878b502d3a000cc259b32160ad"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/post_geometry.obj",
+      "bytes": 256,
+      "sha256": "9720f1f612a3476cac90ed8a9920eeca6502f95b6e4da8e04cd87c4aaa3f2e36"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "cc3b8b493c8afd3144aae0564a0ef52a597d94918175dace484af248a71ba58e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "e7fcde5f2d32ea8792db8fcaba56b5bb3aab90487876016aa97779fcc7124d1f"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/result.json",
+      "bytes": 39464,
+      "sha256": "9432ffc1bfea4df5879bed0c4ef48243b6b4118a6533b5bafc855dcb6e8d7c68"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-113/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/job.json",
+      "bytes": 548,
+      "sha256": "f2db1edf2250a8a99be3be40c9e52ff21e49f31e089f4935daed4b7f052e4e63"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "613931e3189326e134708664403b558dbbce48463f694589e68c56e01f3a037c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/post_geometry.obj",
+      "bytes": 258,
+      "sha256": "18a23058649b5bf9f3218f5db865dd54d24d3d78e956cacbf7522674c6423fd0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "aa7379d3207e618dc86ac35263733610f30fb402cf64cb744a8a5ee777e1307c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "a4010b728f99019a73fa7b160d2aa5734dfd9c47eea73b205058cbb74a3f27c0"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/result.json",
+      "bytes": 39423,
+      "sha256": "69debf0ec426d1f60e005abf8f25a03e2411e51f4a43d67aca2f51cf79c46364"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/gf2-181-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/job.json",
+      "bytes": 567,
+      "sha256": "cc83e37454e38bf2641f7d58fc2baab016ea8330689d279186563a16823b682c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "52a4c480fbd41641db88d2df8510699d1bffb5d94e6b69cefe02577599472457"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/post_geometry.obj",
+      "bytes": 649356,
+      "sha256": "9eb5af6845d5d923478197d1715f6bdea5f6316d54ec8ab0424287a078a1abfe"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/post_indices.bin",
+      "bytes": 2328,
+      "sha256": "4738bcc78aaec1040b0ef053d762369268a7f2cfb6e6e51414853c1a1d185e82"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/post_vertices.bin",
+      "bytes": 520416,
+      "sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/post_vertices.csv",
+      "bytes": 811171,
+      "sha256": "ff59ea3250047474235a0a29e06fad290423cf6c9f8f6b59be1520df6981f2f5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/result.json",
+      "bytes": 934787,
+      "sha256": "e468b5898444fe3af9ae197e1a2f6be9fc7ccd155ced95f8c9c98a916cfc7053"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/mesh-baseline-diff/helldivers-200-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/bf1/capture/independent_capture.rdc",
+      "bytes": 950850793,
+      "sha256": "341919e35f09177614ffb39abca74a91c189f517e575bc6dabc0c964d6b69d62"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/real-counter-cutover/helldivers/capture/independent_capture.rdc",
+      "bytes": 881810934,
+      "sha256": "4c88952c871424f0963a852d5c1b554bb9297e77bb70ad342112226d064af79f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/geometry-ui.json",
+      "bytes": 5732490,
+      "sha256": "35a704a4ff3dd95fe09ed271f3da251e5683f3151b0c3f2a788730195bd4cf00"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/geometry.json",
+      "bytes": 101821,
+      "sha256": "9196fd38e84edd18904cc24c4eba762e26eb39b299c1a62142fa3af3a79e67e3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/geometry.obj",
+      "bytes": 367568,
+      "sha256": "3f9d1d17a217eab68b190c4064575b08ec3d2b5cf16a3405cf97c8821d8f05b8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/identities.json",
+      "bytes": 256143,
+      "sha256": "03d75ef657eca85db4ba49cfe4bbaf430967614684b96a11e44ac0b169a555df"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/input_references.csv",
+      "bytes": 169683,
+      "sha256": "73a57ae91b1c2f0809f9df724e7e058bbf0f3eefb3adaa7e8407ec2395dd698b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/job.json",
+      "bytes": 607,
+      "sha256": "5d170b07d7fb4039e3579a85b122001fa555b35d6aaa725bf2749b58f7b5ce16"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/references.csv",
+      "bytes": 263026,
+      "sha256": "561e713299af8d1c73093820a6ba6f50cbcb6caab0dc7a5ecf0aa3cad8aadaec"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/result.json",
+      "bytes": 126045,
+      "sha256": "cfdbc8c5a40f9f0880947e238f586adbffda0a06b49f742f134e1869d375e766"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/unique_vertices.bin",
+      "bytes": 323712,
+      "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/unique_vertices.csv",
+      "bytes": 1168302,
+      "sha256": "6c549117bb8ae65150f84178d2ed9d9c097104a0ad98ee6bb9c8ce76db583be3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/vertices.bin",
+      "bytes": 1016064,
+      "sha256": "fd964153d65475857a93b7983ad4be7710cbdf99c5b8edc05acd3ff222bad767"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/vertices.csv",
+      "bytes": 3556934,
+      "sha256": "91c29c22e29065835800bb1dd543df9b32c7caa71585fb1a2b590c7361df0f15"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/bf1-1415-0/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/geometry-ui.json",
+      "bytes": 7667987,
+      "sha256": "f211e1df6e61170e17cac300255dd4aed033a94801d652832ab9db4c40ea7d7c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/geometry.json",
+      "bytes": 171687,
+      "sha256": "9c10a4baabc7bb0d1c27796d5d123b22951494d598926201d39f07e63ca37aa4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/geometry.obj",
+      "bytes": 653934,
+      "sha256": "fc86350846e3430544f5830f750643957abf620ef9b6c267296fbc668dd3a855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/identities.json",
+      "bytes": 489183,
+      "sha256": "82dbeed81f5715b19018cbabf84c0e33010268bff3b7021924a5ef1209f61a0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/input_references.csv",
+      "bytes": 311156,
+      "sha256": "352c79c95ecbebe1e32b9233c62145002b3dceeedbfebf7d8dead8b231fc9c0d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/job.json",
+      "bytes": 620,
+      "sha256": "a4cf29ac4ca369935986536385a98747bfed3c892307e9ba49feef16284a604e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/references.csv",
+      "bytes": 519790,
+      "sha256": "0e0778b40c43bdb50001beb67e16f5928bb4b5eda8001b367bb117eea4a9136d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/result.json",
+      "bytes": 208361,
+      "sha256": "d6907534a090ef3e0b5b97814307e3acd2cbe7951c0c04b1efd8d64daa5e8615"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/unique_vertices.bin",
+      "bytes": 520416,
+      "sha256": "3e8e4ea8cd17c23d4aabec4cb4f9f3f8dc45f67d1190baeaa70e0f1267dadac9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/unique_vertices.csv",
+      "bytes": 2525584,
+      "sha256": "6643d138f4d4da690ac9e6d762694aa8d891b46309665db6a3f4d4fddba59076"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/vertices.bin",
+      "bytes": 726336,
+      "sha256": "48deb432cc01f54757df1844d4cca3f97a9f94d8bbadf8217d54d717f92f223e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/vertices.csv",
+      "bytes": 3292931,
+      "sha256": "bd000a32a463dcc264f261ba1105c4382b55c4f3c7873f0d7cb83deaaeb219d4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-indexed-all-instances/helldivers-200-0/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-build.log",
+      "bytes": 3333,
+      "sha256": "ed920ec975c00439656ad4319fe25b92772ad604dbc77fe400e724028781ff02"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-recording.log",
+      "bytes": 358,
+      "sha256": "e805da69c221c84212ab092dd71e5eefe6876324e9758c1b71550a293944895d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/bf1-1415-1-job.json",
+      "bytes": 604,
+      "sha256": "bebb45876257a92357585db6ec434dc4c4970a7332c40b949678ff5b70f61b15"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/bf1-1415-1.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/bf1-1415-4-job.json",
+      "bytes": 604,
+      "sha256": "a8ff7de171c21c18b61af6c61d842be33bbd59fdb04d513de6a278034fa2e959"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/bf1-1415-4.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/helldivers-200-11-job.json",
+      "bytes": 618,
+      "sha256": "baf3e1ef6766a6a92961edce875ece66ab96d2febdcc8c630060f6dd512cb80a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/helldivers-200-11.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/manifest.json",
+      "bytes": 28410,
+      "sha256": "eda18ba23a59227b376acbfc033d67fcf111be45bcd51688e1dc06fc9d75a40f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/job.json",
+      "bytes": 555,
+      "sha256": "be84c2334c7db4aa62bcf8ba289b8a95cdc943375e0c4fb726e62213ae1385ea"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "64a7b7a9b2833fe6e2a69471e72c36d02bba202074d2803dca6126e728094c4d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/post_geometry.obj",
+      "bytes": 167247,
+      "sha256": "99983a90ff1befcdb20456ae9dbb34a70af12ab46e3c16df09610f9b94d985ce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/post_vertices.bin",
+      "bytes": 323712,
+      "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/post_vertices.csv",
+      "bytes": 209045,
+      "sha256": "67aa246b36242e3613fa52d047be40dd35eca222b3146ac5bafa3fbc56038f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/result.json",
+      "bytes": 1691400,
+      "sha256": "22a5747452ee83e883095ea208c9cf12640dcd1c1f6ad0c9416fc02632cc44b2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/job.json",
+      "bytes": 604,
+      "sha256": "bebb45876257a92357585db6ec434dc4c4970a7332c40b949678ff5b70f61b15"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "9124b8604b8c385685d8aab78957a89ac1df669eaf52caac7f9dd7535a96de75"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/post_geometry.obj",
+      "bytes": 149204,
+      "sha256": "de4f1d5da3656560d15303089c589f1bb75fc3c88633e435abed531bcf84e65f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/post_vertices.bin",
+      "bytes": 287744,
+      "sha256": "ad80e36ae88aa28b137a3fd441e555277ce077b58925bb2040ead4f8cba4a0db"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/post_vertices.csv",
+      "bytes": 185775,
+      "sha256": "c900c44d368ee02e470c74a7d125ad1e40bdfe6017ea968966b9192c8491bd29"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-1/result.json",
+      "bytes": 1691404,
+      "sha256": "b816feb01c8fe7738788dde2c97cd4083f8d240b1939b98e6bfd994a4bdd5fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/job.json",
+      "bytes": 604,
+      "sha256": "a8ff7de171c21c18b61af6c61d842be33bbd59fdb04d513de6a278034fa2e959"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "3d50a6b92bc8734070e61f9a4a46df7971797afb6806ec82a5896cab0c27f673"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/post_geometry.obj",
+      "bytes": 94651,
+      "sha256": "acd7b9497d785c5de480ea16a71b4b2e224c2e6609a92a7a340a975c1ea6979b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/post_vertices.bin",
+      "bytes": 179840,
+      "sha256": "f5e6c94dc80b55f46d374c993d4823112a87d524a604405e38187a8b5269de7b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/post_vertices.csv",
+      "bytes": 115723,
+      "sha256": "c0b40fa94703074d65af3c470971fa9b225de16f716de6d45eaab5925f61b348"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-4/result.json",
+      "bytes": 1691405,
+      "sha256": "f46433e87286a79949be522519b46bd85d315acffaa44bbcbb9494bac2b28963"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/job.json",
+      "bytes": 555,
+      "sha256": "348ac6430be27e0a774f235c8d0cb89bd9387aeccf187e35e0ce69839a7cb1d3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "4d15b153303de2bc75a49a6635b1fcb4ea65b5f60d5a7a61e684511a35668b6f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/post_geometry.obj",
+      "bytes": 22300,
+      "sha256": "91f0d37e1a438261cb1bb20079d3eba837b97ab85a4e9720677966a5e1388376"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "3a6a849025778b79ba1237ea26a39677bd529362f9994d7a82f88e5d151418c9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/post_vertices.csv",
+      "bytes": 22982,
+      "sha256": "3f329786bac013ba86c92cbe8f9607ab87c0afe110194d7968a3b7ddd52236c1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/result.json",
+      "bytes": 1691404,
+      "sha256": "2cf4db38c4ab72c5b501b25ba198602b05bb8e07e25f57c7f050062fbc1db23f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-1415-8/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/job.json",
+      "bytes": 555,
+      "sha256": "7ef253a588a7ac7cd2622b6cea4fc2808b9e0ef6a2e68124d4f0aabb2fe16358"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "a963576e53b355bf57fed4afadfd88da012469fd1cf354540db0fb4c69e07395"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/post_geometry.obj",
+      "bytes": 612769,
+      "sha256": "3522a94b45e6e87fb79189d5c97ebee6590a6ac4cfa05c2d1cf3123ed79e3920"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/post_indices.bin",
+      "bytes": 31920,
+      "sha256": "cf10c8bd26be5dc3a6f2f503590b1b260ae085a059ff49cc200415f30924891b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/post_vertices.bin",
+      "bytes": 662272,
+      "sha256": "94806970ec29dd7cb2cfe7fa4207219dfd4b0d627c6ff2a27cc1ad280528c4c1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/post_vertices.csv",
+      "bytes": 685911,
+      "sha256": "f84fee4a064dd5cbf620d34beee8231a5e663530e6edbfead55343703056162f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/result.json",
+      "bytes": 1691404,
+      "sha256": "6ff0c37f9d48f3779edb08923b8b8eb0ec6368c373f8fe65cc8480f382e67c53"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-2010-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/job.json",
+      "bytes": 553,
+      "sha256": "46fd272b34c3bb521787a4c802f6ee5d19a552a81345f8f245b6ca2484c2f613"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "5130bec376fd53e3f6595a3d3f8034f385f130fbb0144a32a6521a6bddcd8bdf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/post_geometry.obj",
+      "bytes": 310839,
+      "sha256": "1d263fd30705a56f859fa8dc21f7dfba94b4ba1b04ff0f0d1e4ee608476d10de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/post_indices.bin",
+      "bytes": 38580,
+      "sha256": "8c5b036be1092254ffa2a853bc3a3aa1b488085959950b87e9f2181c4ff1a6d7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/post_vertices.bin",
+      "bytes": 52992,
+      "sha256": "a57a13e2d4317eef814b4ed53a0890bd001d655cce83ddc1363415fc222a6f8e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/post_vertices.csv",
+      "bytes": 285414,
+      "sha256": "9ae6f94cbecc19564c5db68fdec32959cfe25d5febf41be8428c5522f6e8ba0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/result.json",
+      "bytes": 1691385,
+      "sha256": "fb58633ac4d0648eee9aa7cdf9e71d91995b3fc7f473da4adfb985ac33cd1b01"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/bf1-876-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/job.json",
+      "bytes": 546,
+      "sha256": "40d42736835104a94a5d0d19f547b076fc51b325fb9dc7b0cf31ce6945d846fc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/loaded_modules.json",
+      "bytes": 4064,
+      "sha256": "0432fb3c92e2c0d6431aee7849b2db5bad4c6e878b502d3a000cc259b32160ad"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/post_geometry.obj",
+      "bytes": 256,
+      "sha256": "9720f1f612a3476cac90ed8a9920eeca6502f95b6e4da8e04cd87c4aaa3f2e36"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "cc3b8b493c8afd3144aae0564a0ef52a597d94918175dace484af248a71ba58e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "e7fcde5f2d32ea8792db8fcaba56b5bb3aab90487876016aa97779fcc7124d1f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/result.json",
+      "bytes": 39464,
+      "sha256": "9432ffc1bfea4df5879bed0c4ef48243b6b4118a6533b5bafc855dcb6e8d7c68"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-113/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/job.json",
+      "bytes": 548,
+      "sha256": "f2db1edf2250a8a99be3be40c9e52ff21e49f31e089f4935daed4b7f052e4e63"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "613931e3189326e134708664403b558dbbce48463f694589e68c56e01f3a037c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/post_geometry.obj",
+      "bytes": 258,
+      "sha256": "18a23058649b5bf9f3218f5db865dd54d24d3d78e956cacbf7522674c6423fd0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "aa7379d3207e618dc86ac35263733610f30fb402cf64cb744a8a5ee777e1307c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "a4010b728f99019a73fa7b160d2aa5734dfd9c47eea73b205058cbb74a3f27c0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/result.json",
+      "bytes": 39423,
+      "sha256": "69debf0ec426d1f60e005abf8f25a03e2411e51f4a43d67aca2f51cf79c46364"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/gf2-181-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/job.json",
+      "bytes": 567,
+      "sha256": "cc83e37454e38bf2641f7d58fc2baab016ea8330689d279186563a16823b682c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "52a4c480fbd41641db88d2df8510699d1bffb5d94e6b69cefe02577599472457"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/post_geometry.obj",
+      "bytes": 649356,
+      "sha256": "9eb5af6845d5d923478197d1715f6bdea5f6316d54ec8ab0424287a078a1abfe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/post_indices.bin",
+      "bytes": 2328,
+      "sha256": "4738bcc78aaec1040b0ef053d762369268a7f2cfb6e6e51414853c1a1d185e82"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/post_vertices.bin",
+      "bytes": 520416,
+      "sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/post_vertices.csv",
+      "bytes": 811171,
+      "sha256": "ff59ea3250047474235a0a29e06fad290423cf6c9f8f6b59be1520df6981f2f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/result.json",
+      "bytes": 934787,
+      "sha256": "e468b5898444fe3af9ae197e1a2f6be9fc7ccd155ced95f8c9c98a916cfc7053"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-0/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/job.json",
+      "bytes": 618,
+      "sha256": "baf3e1ef6766a6a92961edce875ece66ab96d2febdcc8c630060f6dd512cb80a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "c9d037a51cd6f660e08d314d04f23ae2383f13a7188d6de613e7c8eb909f8ddc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/post_geometry.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/post_indices.bin",
+      "bytes": 2328,
+      "sha256": "4738bcc78aaec1040b0ef053d762369268a7f2cfb6e6e51414853c1a1d185e82"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/post_vertices.bin",
+      "bytes": 43368,
+      "sha256": "19a0a2158098c21afbb6ead8b710b0706896617244855ae45b1c36decea90310"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/post_vertices.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/reports/helldivers-200-11/result.json",
+      "bytes": 934790,
+      "sha256": "49450fff7457459bab41c5256ba2b568a3b45d7daba370a300a521e630c12dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/job.json",
+      "bytes": 555,
+      "sha256": "be84c2334c7db4aa62bcf8ba289b8a95cdc943375e0c4fb726e62213ae1385ea"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "64a7b7a9b2833fe6e2a69471e72c36d02bba202074d2803dca6126e728094c4d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/post_geometry.obj",
+      "bytes": 167247,
+      "sha256": "99983a90ff1befcdb20456ae9dbb34a70af12ab46e3c16df09610f9b94d985ce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/post_vertices.bin",
+      "bytes": 323712,
+      "sha256": "616b0d7ebfe2f437919f2a68b8d9681fe3c93091fd3282380bba771b67aaccef"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/post_vertices.csv",
+      "bytes": 209045,
+      "sha256": "67aa246b36242e3613fa52d047be40dd35eca222b3146ac5bafa3fbc56038f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/result.json",
+      "bytes": 1691400,
+      "sha256": "22a5747452ee83e883095ea208c9cf12640dcd1c1f6ad0c9416fc02632cc44b2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-0-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/job.json",
+      "bytes": 604,
+      "sha256": "bebb45876257a92357585db6ec434dc4c4970a7332c40b949678ff5b70f61b15"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "9124b8604b8c385685d8aab78957a89ac1df669eaf52caac7f9dd7535a96de75"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/post_geometry.obj",
+      "bytes": 149204,
+      "sha256": "de4f1d5da3656560d15303089c589f1bb75fc3c88633e435abed531bcf84e65f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/post_vertices.bin",
+      "bytes": 287744,
+      "sha256": "ad80e36ae88aa28b137a3fd441e555277ce077b58925bb2040ead4f8cba4a0db"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/post_vertices.csv",
+      "bytes": 185775,
+      "sha256": "c900c44d368ee02e470c74a7d125ad1e40bdfe6017ea968966b9192c8491bd29"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-1-native/result.json",
+      "bytes": 1691404,
+      "sha256": "b816feb01c8fe7738788dde2c97cd4083f8d240b1939b98e6bfd994a4bdd5fb3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/job.json",
+      "bytes": 604,
+      "sha256": "a8ff7de171c21c18b61af6c61d842be33bbd59fdb04d513de6a278034fa2e959"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "3d50a6b92bc8734070e61f9a4a46df7971797afb6806ec82a5896cab0c27f673"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/post_geometry.obj",
+      "bytes": 94651,
+      "sha256": "acd7b9497d785c5de480ea16a71b4b2e224c2e6609a92a7a340a975c1ea6979b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/post_vertices.bin",
+      "bytes": 179840,
+      "sha256": "f5e6c94dc80b55f46d374c993d4823112a87d524a604405e38187a8b5269de7b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/post_vertices.csv",
+      "bytes": 115723,
+      "sha256": "c0b40fa94703074d65af3c470971fa9b225de16f716de6d45eaab5925f61b348"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-4-native/result.json",
+      "bytes": 1691405,
+      "sha256": "f46433e87286a79949be522519b46bd85d315acffaa44bbcbb9494bac2b28963"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/job.json",
+      "bytes": 555,
+      "sha256": "348ac6430be27e0a774f235c8d0cb89bd9387aeccf187e35e0ce69839a7cb1d3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "4d15b153303de2bc75a49a6635b1fcb4ea65b5f60d5a7a61e684511a35668b6f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/post_geometry.obj",
+      "bytes": 22300,
+      "sha256": "91f0d37e1a438261cb1bb20079d3eba837b97ab85a4e9720677966a5e1388376"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/post_indices.bin",
+      "bytes": 1764,
+      "sha256": "e298f61753c1f0c587994420790fb9f5caeafd1af92a3dac862f324125f544c7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "3a6a849025778b79ba1237ea26a39677bd529362f9994d7a82f88e5d151418c9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/post_vertices.csv",
+      "bytes": 22982,
+      "sha256": "3f329786bac013ba86c92cbe8f9607ab87c0afe110194d7968a3b7ddd52236c1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/result.json",
+      "bytes": 1691404,
+      "sha256": "2cf4db38c4ab72c5b501b25ba198602b05bb8e07e25f57c7f050062fbc1db23f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-1415-8-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/job.json",
+      "bytes": 555,
+      "sha256": "7ef253a588a7ac7cd2622b6cea4fc2808b9e0ef6a2e68124d4f0aabb2fe16358"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "a963576e53b355bf57fed4afadfd88da012469fd1cf354540db0fb4c69e07395"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/post_geometry.obj",
+      "bytes": 612769,
+      "sha256": "3522a94b45e6e87fb79189d5c97ebee6590a6ac4cfa05c2d1cf3123ed79e3920"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/post_indices.bin",
+      "bytes": 31920,
+      "sha256": "cf10c8bd26be5dc3a6f2f503590b1b260ae085a059ff49cc200415f30924891b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/post_vertices.bin",
+      "bytes": 662272,
+      "sha256": "94806970ec29dd7cb2cfe7fa4207219dfd4b0d627c6ff2a27cc1ad280528c4c1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/post_vertices.csv",
+      "bytes": 685911,
+      "sha256": "f84fee4a064dd5cbf620d34beee8231a5e663530e6edbfead55343703056162f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/result.json",
+      "bytes": 1691404,
+      "sha256": "6ff0c37f9d48f3779edb08923b8b8eb0ec6368c373f8fe65cc8480f382e67c53"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-2010-0-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/job.json",
+      "bytes": 553,
+      "sha256": "46fd272b34c3bb521787a4c802f6ee5d19a552a81345f8f245b6ca2484c2f613"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "5130bec376fd53e3f6595a3d3f8034f385f130fbb0144a32a6521a6bddcd8bdf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/post_geometry.obj",
+      "bytes": 310839,
+      "sha256": "1d263fd30705a56f859fa8dc21f7dfba94b4ba1b04ff0f0d1e4ee608476d10de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/post_indices.bin",
+      "bytes": 38580,
+      "sha256": "8c5b036be1092254ffa2a853bc3a3aa1b488085959950b87e9f2181c4ff1a6d7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/post_vertices.bin",
+      "bytes": 52992,
+      "sha256": "a57a13e2d4317eef814b4ed53a0890bd001d655cce83ddc1363415fc222a6f8e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/post_vertices.csv",
+      "bytes": 285414,
+      "sha256": "9ae6f94cbecc19564c5db68fdec32959cfe25d5febf41be8428c5522f6e8ba0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/result.json",
+      "bytes": 1691385,
+      "sha256": "fb58633ac4d0648eee9aa7cdf9e71d91995b3fc7f473da4adfb985ac33cd1b01"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/bf1-876-0-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/job.json",
+      "bytes": 546,
+      "sha256": "40d42736835104a94a5d0d19f547b076fc51b325fb9dc7b0cf31ce6945d846fc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/loaded_modules.json",
+      "bytes": 4064,
+      "sha256": "0432fb3c92e2c0d6431aee7849b2db5bad4c6e878b502d3a000cc259b32160ad"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/post_geometry.obj",
+      "bytes": 256,
+      "sha256": "9720f1f612a3476cac90ed8a9920eeca6502f95b6e4da8e04cd87c4aaa3f2e36"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "cc3b8b493c8afd3144aae0564a0ef52a597d94918175dace484af248a71ba58e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "e7fcde5f2d32ea8792db8fcaba56b5bb3aab90487876016aa97779fcc7124d1f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/result.json",
+      "bytes": 39464,
+      "sha256": "9432ffc1bfea4df5879bed0c4ef48243b6b4118a6533b5bafc855dcb6e8d7c68"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-113-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/job.json",
+      "bytes": 548,
+      "sha256": "f2db1edf2250a8a99be3be40c9e52ff21e49f31e089f4935daed4b7f052e4e63"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "613931e3189326e134708664403b558dbbce48463f694589e68c56e01f3a037c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/post_geometry.obj",
+      "bytes": 258,
+      "sha256": "18a23058649b5bf9f3218f5db865dd54d24d3d78e956cacbf7522674c6423fd0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/post_indices.bin",
+      "bytes": 12,
+      "sha256": "cdd30f0b81cab4dfa7b9612bc1866099b922c77e381302d6efd3f70ca0a9d0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/post_vertices.bin",
+      "bytes": 224,
+      "sha256": "aa7379d3207e618dc86ac35263733610f30fb402cf64cb744a8a5ee777e1307c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/post_vertices.csv",
+      "bytes": 204,
+      "sha256": "a4010b728f99019a73fa7b160d2aa5734dfd9c47eea73b205058cbb74a3f27c0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/result.json",
+      "bytes": 39423,
+      "sha256": "69debf0ec426d1f60e005abf8f25a03e2411e51f4a43d67aca2f51cf79c46364"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/gf2-181-0-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/job.json",
+      "bytes": 567,
+      "sha256": "cc83e37454e38bf2641f7d58fc2baab016ea8330689d279186563a16823b682c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "52a4c480fbd41641db88d2df8510699d1bffb5d94e6b69cefe02577599472457"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/post_geometry.obj",
+      "bytes": 649356,
+      "sha256": "9eb5af6845d5d923478197d1715f6bdea5f6316d54ec8ab0424287a078a1abfe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/post_indices.bin",
+      "bytes": 2328,
+      "sha256": "4738bcc78aaec1040b0ef053d762369268a7f2cfb6e6e51414853c1a1d185e82"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/post_vertices.bin",
+      "bytes": 520416,
+      "sha256": "c44375af06123dcec5dc9227b1b925cf0b6b2bc90a88888e6273b18c4e204d78"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/post_vertices.csv",
+      "bytes": 811171,
+      "sha256": "ff59ea3250047474235a0a29e06fad290423cf6c9f8f6b59be1520df6981f2f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/result.json",
+      "bytes": 934787,
+      "sha256": "e468b5898444fe3af9ae197e1a2f6be9fc7ccd155ced95f8c9c98a916cfc7053"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-0-native/worker.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/job.json",
+      "bytes": 618,
+      "sha256": "baf3e1ef6766a6a92961edce875ece66ab96d2febdcc8c630060f6dd512cb80a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/loaded_modules.json",
+      "bytes": 4024,
+      "sha256": "c9d037a51cd6f660e08d314d04f23ae2383f13a7188d6de613e7c8eb909f8ddc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/post_geometry.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/post_indices.bin",
+      "bytes": 2328,
+      "sha256": "4738bcc78aaec1040b0ef053d762369268a7f2cfb6e6e51414853c1a1d185e82"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/post_vertices.bin",
+      "bytes": 43368,
+      "sha256": "19a0a2158098c21afbb6ead8b710b0706896617244855ae45b1c36decea90310"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/post_vertices.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-records/ui-reports/helldivers-200-11-native/result.json",
+      "bytes": 934790,
+      "sha256": "49450fff7457459bab41c5256ba2b568a3b45d7daba370a300a521e630c12dbf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-baseline-ui.log",
+      "bytes": 1789,
+      "sha256": "d4931b8e38a20e324fef90e3808407b3d6fbc5f4048bbfacdd823ef5dd18b358"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-binaries/BaselineRdc.exe",
+      "bytes": 570880,
+      "sha256": "f9c38e18a4e8717f3b37c14a378cd4087baff3c286719b43d6d9f23b98eb9140"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-binaries/BaselineReplayMeshUiTests.exe",
+      "bytes": 4540416,
+      "sha256": "b61b001f06ccdbc2094f2f1c351ebe38e82345a4f9f782d9505f2f95843f5be6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-binaries/FloraGPA.Worker.exe",
+      "bytes": 6151680,
+      "sha256": "9a7b5be55510e9eca5122dd81bc7d37e09ecd7f01a9cb7d86a21f19792d07aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-binaries/FloraNativeMeshCaptureProbe.exe",
+      "bytes": 5118464,
+      "sha256": "931b30dfbdea1451caf4dd6966b2de371ef82b6e84136385535f81d4849aaa1e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-binaries/FloraReplayMeshUiTests.exe",
+      "bytes": 5171200,
+      "sha256": "6997d7bfe5f109a7970987489cb563daaac62e574619daa347e02bbc60354627"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-comparison.json",
+      "bytes": 4467,
+      "sha256": "7db4bb4b386f9c6e657d54683a541568360d8327449b566c8459d33e7d26ec2a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-comparison.log",
+      "bytes": 182,
+      "sha256": "b9280d3156180621c51fe9ac4dd726856a2314c664dd5704b1c5bb18ffc025e3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-current-ui-full.log",
+      "bytes": 2234,
+      "sha256": "0de952622ec5fde620a75e87df38fbbe2b462982ec42b5fedf8a880f2fb23601"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-current-ui.log",
+      "bytes": 1809,
+      "sha256": "9ac9c84263cc406d94186bac9d426c577d48589e2b07edb235a603858aa07d37"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-historical-comparison.json",
+      "bytes": 8369,
+      "sha256": "b759a9156c412a1cb3e194e20a81cc0f62513044ebcbd518b5473fc57901de21"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-historical-comparison.log",
+      "bytes": 382,
+      "sha256": "6e5213cec9390cfc82ed88c47d23d4d7fac95291fbda6438908c30669a15b46c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native-revalidation.log",
+      "bytes": 213,
+      "sha256": "0bc431efee1a9f0ae97aa10b0bbc6b222855a9cde6f69dfe0bd6da12c23e5be0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native.log",
+      "bytes": 501,
+      "sha256": "29d454255c44072b1a39e1871a72bb950c6ae9ebdf9be71fa7c083d624fc2895"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1.log",
+      "bytes": 2838,
+      "sha256": "d40dfcd6d4a7c394b12582249af82de960c2f1711ccddbc59971d3e01425fd81"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/geometry-ui.json",
+      "bytes": 453815,
+      "sha256": "932a878df7eb6a353fb1df0d3eaa5d9a39d343f6525b39b7f31226a468efe9b9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/geometry.json",
+      "bytes": 5768,
+      "sha256": "58b6d5fa88f134f6b9d4c0b380b7d11e15cb6054b4e752d56486982a6e277ae8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/geometry.obj",
+      "bytes": 39892,
+      "sha256": "8e6b32be5021b36abc1031f5d382bbf1a862582c76371db4c1516f4ea6f110f3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/job.json",
+      "bytes": 618,
+      "sha256": "e52b9d9c46e32a2bb6067b5aaaab9f77fd05cf43d2ed83c73dbba5fe4ed61ebe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/post_geometry.obj",
+      "bytes": 61659,
+      "sha256": "c68f072afa04295d64e0d5deee0154d00e0d25c30631dc3a23e2da917c60dc14"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "ffa100216410507e6f2416464442b99022c435cddc70285985186aba0bf43b60"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/post_vertices.csv",
+      "bytes": 72164,
+      "sha256": "42bafb760ebea72fbd4cc4df08e51a1ad2dc7c508984610d89056a1630c8d35f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/presentation.json",
+      "bytes": 877391,
+      "sha256": "55728ff4de24b2e41b23706eb7746d54d3bdd0b1b83985a4c4d8fd49b7e81538"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/result.json",
+      "bytes": 10816,
+      "sha256": "66870ada3e87feef6673b2ffca0c8e364df9ecc561fa2b94792cd227db145d16"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "ffa100216410507e6f2416464442b99022c435cddc70285985186aba0bf43b60"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/vertices.csv",
+      "bytes": 392211,
+      "sha256": "db4762c5a0dd6cea9b90ebbedf7465795dde8498f4aab4a210e2f0a1b446dea4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/probe.json",
+      "bytes": 3425,
+      "sha256": "62c6ff89e1b6edbf20501bfbeefe0c3c469c838ae79ea801a4866fba9c37a9bc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/geometry-ui.json",
+      "bytes": 629347,
+      "sha256": "8645c1a90c01acea92334a44bb1255a83b55191ab9008104bc4899e7cf52af8d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "585c1835e3c6e2e54e19959f3baca5d29b2280b4124e667d53d812ad3cbb6bf9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/geometry.obj",
+      "bytes": 39892,
+      "sha256": "8e6b32be5021b36abc1031f5d382bbf1a862582c76371db4c1516f4ea6f110f3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "1c9753cf7d15b4883817950fd32041f1a57e99d683881971c4ebedbf29cbbe79"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "48016caf8737553061af0a332ce748b6d46258ed4e0a88a8fd05e6772e3fc9e7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/job.json",
+      "bytes": 626,
+      "sha256": "72f0de5096bd83fd983a8d0c987174a6f563e68ff18ec8dda037bcef92c95abc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/post_geometry.obj",
+      "bytes": 22432,
+      "sha256": "4db88572e86f442c7b711044d0f63de4f57240ba99c17e0f4c89cedf1cabc235"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "1f3e700008c128ed3cab7074c884c51af3e04db7ae778243758f906cd4f5215c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/post_vertices.csv",
+      "bytes": 22938,
+      "sha256": "be02ea21242a6cbeaf3f01a7ba3ffe73d297a68857173f39049e2eaed108a1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/presentation.json",
+      "bytes": 1339987,
+      "sha256": "69ba472d1c20f0344284f97821c80e6ed13b5d4663b05b82b758657eb72f17da"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "d0642a46553c558c00ad2ca60917e2211438e0f43087629e2a1f9e99d0a1ef38"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/result.json",
+      "bytes": 34978,
+      "sha256": "1daac21638315f9bd9a4019260669c10c2eafee2a869f3d933c865086ac82249"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/ui-export.csv",
+      "bytes": 22938,
+      "sha256": "be02ea21242a6cbeaf3f01a7ba3ffe73d297a68857173f39049e2eaed108a1c0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/ui-export.json",
+      "bytes": 1509432,
+      "sha256": "d0a8d3f6cebd007066ae45c1c7117c86580b5e1954ae418738de1efeee46a07a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/ui-export.obj",
+      "bytes": 22432,
+      "sha256": "4db88572e86f442c7b711044d0f63de4f57240ba99c17e0f4c89cedf1cabc235"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "1f3e700008c128ed3cab7074c884c51af3e04db7ae778243758f906cd4f5215c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/unique_vertices.csv",
+      "bytes": 129021,
+      "sha256": "636d5274bedfd6082361f9d8e740540cc717dc08792b07ef44ed5cbe0d3ad34b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "ffa100216410507e6f2416464442b99022c435cddc70285985186aba0bf43b60"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/vertices.csv",
+      "bytes": 392431,
+      "sha256": "bea643acc662fbd62fa4c3d05fdf2de75801ab1afe6b178310f01b4b235ecb8c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-1/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4.log",
+      "bytes": 2838,
+      "sha256": "c21fd7ea9917d65fe3e62beca824659a48a1c67201a30c13ba042269e3e38b7f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/geometry-ui.json",
+      "bytes": 454620,
+      "sha256": "7e1c54d11a7bbdb37a3297725f43636bbcb31f403ec2db96a4cf0efc43fa0450"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/geometry.json",
+      "bytes": 5769,
+      "sha256": "fd977d40775250f383fd1614b2bc09d6cb59772d8056cd16289a69fd287f653f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/geometry.obj",
+      "bytes": 39889,
+      "sha256": "b892301dd243f5071f0b13cfbc109a16f30e6b2646057b8351d9b5f1dee9922b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/job.json",
+      "bytes": 618,
+      "sha256": "bc6850d90fa999376e17d6858d618649ac4fb9680b62217e50fcee8f5244f151"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/post_geometry.obj",
+      "bytes": 60817,
+      "sha256": "afadf4e24c764cd3b4e8d7c076e30b38277baac141fa8da3cb2a98a458ed3da2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "8ae50de523c70366ec48540a5840f5c2d07896727cef0efef601f9ae5d4bdf0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/post_vertices.csv",
+      "bytes": 72439,
+      "sha256": "45c41def06ce9f04f1f83f85c2c4913ab949089558b68d354c99174f1ff6b1ee"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/presentation.json",
+      "bytes": 878196,
+      "sha256": "9e379a9ff88d1eb7cb4ccfb944c9309b6e7ea5448267cac1496cc7c6dd2df36e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/result.json",
+      "bytes": 10817,
+      "sha256": "557da5a66a3421e7ec07844f14e19464e1b53a640e8ec57bbad1c5a6d5a6306a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "8ae50de523c70366ec48540a5840f5c2d07896727cef0efef601f9ae5d4bdf0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/vertices.csv",
+      "bytes": 393858,
+      "sha256": "d93f9f7582b23d7c2674de6121b7f08e27a648b40840e50c152d3dfefbd39762"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/probe.json",
+      "bytes": 3425,
+      "sha256": "71ecec663903aa45b1849677641280e5144f767a29bb64461a46cb4b5de02eb3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/geometry-ui.json",
+      "bytes": 630720,
+      "sha256": "ee55876355322a5970655973a4489ee392aac3636ed228f5f4070c31bacb4588"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "b8fd0097412868f9ab536cf082ae7cf31fbde11d5aa5515632d8d899f3ebade4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/geometry.obj",
+      "bytes": 39889,
+      "sha256": "b892301dd243f5071f0b13cfbc109a16f30e6b2646057b8351d9b5f1dee9922b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "8defd62ee531f2215e83959c9b17bd40757c38ee7b2ae15b38870c0bdc8dd542"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "b7fb645fe7fec1c4626b9a908767f81c3845d4479936df3239837335345044e3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/job.json",
+      "bytes": 626,
+      "sha256": "e44e8ba6267c59c4d14af8b183c7b5f7537d4b061e278c4c2c7750ecdd0e097e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/post_geometry.obj",
+      "bytes": 22159,
+      "sha256": "65201c519ff80e6deae702be7bb3ac31498e03bd34451098d458e3fffeab0b47"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "f20cdedc0d8819a171f512c16e3f2ee99e7d66f46550584e901cebb94083d046"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/post_vertices.csv",
+      "bytes": 23029,
+      "sha256": "c63e1755a342d8de95ab894f2ffef09daae88fcd00923f04a87c7c73ae39595f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/presentation.json",
+      "bytes": 1341360,
+      "sha256": "f8ab8ec0ee0056526ce212287417897ead1a4db861b233832b5be4af57ba4fcc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "163fcd0552b46408d1f3c1b94932bec59e79a12f8ad8ca1cc97f9fd362f6058e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/result.json",
+      "bytes": 34978,
+      "sha256": "36c446449e8816c905936ff2712bd595c734b009b3462b311c1b74ed7f133b9e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/ui-export.csv",
+      "bytes": 23029,
+      "sha256": "c63e1755a342d8de95ab894f2ffef09daae88fcd00923f04a87c7c73ae39595f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/ui-export.json",
+      "bytes": 1510805,
+      "sha256": "aca89ef56e7e9565c2a699a34c932ba2a011cc38bad17beb73d22e39d4f4c28a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/ui-export.obj",
+      "bytes": 22159,
+      "sha256": "65201c519ff80e6deae702be7bb3ac31498e03bd34451098d458e3fffeab0b47"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "f20cdedc0d8819a171f512c16e3f2ee99e7d66f46550584e901cebb94083d046"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/unique_vertices.csv",
+      "bytes": 129589,
+      "sha256": "1141b76f06eaca0b5f235555b4181fe81d2c67b600303aa27779728f4a88dcda"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "8ae50de523c70366ec48540a5840f5c2d07896727cef0efef601f9ae5d4bdf0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/vertices.csv",
+      "bytes": 394078,
+      "sha256": "3864ff039ceecf5fa8ab527f3626ae71f42673fb7ce2f7b3d3211db9a792435d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-bf1-1415-4/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11.log",
+      "bytes": 2843,
+      "sha256": "5919decd9b5f796a31eff68315933e953a2fada345914eeb3210c700329fc49e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/geometry-ui.json",
+      "bytes": 354810,
+      "sha256": "c3af95681443d788aa874b7e449e1acda9faf46251770fc2a8eeff4e3a9a13b2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/geometry.json",
+      "bytes": 4405,
+      "sha256": "d461e5d0bd1ba9ecd43d963c212944a8fea8bd83e3aefbc58bfdbced99f52847"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/geometry.obj",
+      "bytes": 53442,
+      "sha256": "4793de1987a1ec715046ee2068ae222edc1b1b2c5c11494e82ebf3e4a30079b6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/job.json",
+      "bytes": 633,
+      "sha256": "5973428d782cda307fc69831338e129302870f6a08c2b6968442196c2c26aea4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/post_geometry.obj",
+      "bytes": 81567,
+      "sha256": "1f892981995d1c1cf0252c1560b95f24d3efd93b2d6b8efb21c991e36eeb8967"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/post_vertices.bin",
+      "bytes": 60528,
+      "sha256": "f5a30b62a74d20f4bbb4e6049d10f55976943f9cbc7507abe959f48f6f0230a9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/post_vertices.csv",
+      "bytes": 93964,
+      "sha256": "3b0cf633d24c4fbad8ada2e4627e4b12a4730215cb779af3c4bb7b5522393762"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/presentation.json",
+      "bytes": 670533,
+      "sha256": "df311ccaf0343bf49ebdfe52f05795bb338a3e596516cb3c5e698676b649d706"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/result.json",
+      "bytes": 9279,
+      "sha256": "c7c3645cc7c381191b67f5a974cb4f53f56afe2434c8cadaec804d264922afde"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/vertices.bin",
+      "bytes": 60528,
+      "sha256": "f5a30b62a74d20f4bbb4e6049d10f55976943f9cbc7507abe959f48f6f0230a9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/vertices.csv",
+      "bytes": 273425,
+      "sha256": "de1a2eb20bbdb9996e6fa9950ebdb3e9c41acf8ef2b1c86fbb68e06965e42650"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/probe.json",
+      "bytes": 3430,
+      "sha256": "35a996a7f5f81ff7241ff2259ffc26886e88eed5646ff5ad9d3cf48a5361dfe4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/geometry-ui.json",
+      "bytes": 633610,
+      "sha256": "779924a8958b3ab03e1e1d099f08035076d08e1fcd17586f9cd089f0b5ff9197"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/geometry.json",
+      "bytes": 30790,
+      "sha256": "9464c799e9bc919aff0ea6dd5a145b1042ffc9b8c8b204596705ef493887231b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/geometry.obj",
+      "bytes": 53442,
+      "sha256": "4793de1987a1ec715046ee2068ae222edc1b1b2c5c11494e82ebf3e4a30079b6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/identities.json",
+      "bytes": 41738,
+      "sha256": "a5d91b239e665ab3be27428c1bc82a1b3d9da7d1ae1e69e13fd1f27f2f2f5a01"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/input_references.csv",
+      "bytes": 25601,
+      "sha256": "ad48c209292d27c1f7c1b74169c57a32c2e518369ed6f972d7b251afcde0e61a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/job.json",
+      "bytes": 641,
+      "sha256": "c7d59f3e9b18318f7444880b1d01317e02fdb3ec7ed2c68e726d2b9ba1c9452f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/post_geometry.obj",
+      "bytes": 59918,
+      "sha256": "47ee04afa98b04b57a7e71dc7845c47b4b0d08f5fc67ddc5971c070bfa520ea4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/post_vertices.bin",
+      "bytes": 43368,
+      "sha256": "5bb418c588e2b54084bfde6c212530f543e095efff672216fc026f822689b2ed"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/post_vertices.csv",
+      "bytes": 67187,
+      "sha256": "9f265697fe5c9a65689b3f7b35a7019d87ae57b23b0f74e5d2b1664b22d0b5da"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/presentation.json",
+      "bytes": 1365587,
+      "sha256": "2061bc1288cd4d4ba043813d8156a1c11909594c11e2b89295c9b24f1f1c6b9b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/references.csv",
+      "bytes": 39277,
+      "sha256": "1e5f83259bbb2d576602ffb2acf7d549af300e3f1e2009c48ae798d77255282d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/result.json",
+      "bytes": 41108,
+      "sha256": "7151c2a843369728d113d3f900bfe4bc753ae06573514c411fa723a57576c1bb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/ui-export.csv",
+      "bytes": 67187,
+      "sha256": "9f265697fe5c9a65689b3f7b35a7019d87ae57b23b0f74e5d2b1664b22d0b5da"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/ui-export.json",
+      "bytes": 1546958,
+      "sha256": "e2d174e65ee8c13fc150a857dc0b1fd84c7af6d0d38920a76513de441496948c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/ui-export.obj",
+      "bytes": 59918,
+      "sha256": "47ee04afa98b04b57a7e71dc7845c47b4b0d08f5fc67ddc5971c070bfa520ea4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/unique_vertices.bin",
+      "bytes": 43368,
+      "sha256": "87c331bb7ebaa19ae2540b8505af823f39b305ecc06ff8f5151d82b385d6fd4a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/unique_vertices.csv",
+      "bytes": 210119,
+      "sha256": "f91244206e45cd066e84dc6f56d289fd337409b395f9f0e61669bcf4ff0f23ac"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/vertices.bin",
+      "bytes": 60528,
+      "sha256": "f5a30b62a74d20f4bbb4e6049d10f55976943f9cbc7507abe959f48f6f0230a9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/vertices.csv",
+      "bytes": 273809,
+      "sha256": "daed76e0b99cd3358576fad47286194a5791c70001a5a6aa1fbb5b8cb3622d2c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/0-helldivers-200-11/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1.log",
+      "bytes": 2842,
+      "sha256": "8a621346eae14b32985fc27dc1633cabfd955a11b9784a180223d11013c9b462"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/geometry-ui.json",
+      "bytes": 453853,
+      "sha256": "b1bbc8dd9fc941399153597cbeb075f49d8a3e7de18b5960a4a97fdfbaacdd11"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/geometry.json",
+      "bytes": 5768,
+      "sha256": "71d2ad5edd9dd3148345fd052c66922f5a738820fbc08eab5a0c4bcb2b92ffc2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/geometry.obj",
+      "bytes": 39892,
+      "sha256": "35d8c3a315b1fbda8e8939caf25b2322bc7235fe5009b3266c6fc6ebf62aec09"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/job.json",
+      "bytes": 629,
+      "sha256": "50a00e5f0cb2036f6f10fb848b8c334d2c9f0f36cda46540c9ef476ee3a6b434"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/post_geometry.obj",
+      "bytes": 61599,
+      "sha256": "4e539ac4b00139246947c5e84b3b5348a3058ea40b32f539746db62769d3b0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "a040d2bf158ac468d2c77a51036afe498d8bdcc54707510ee359633f4daca71a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/post_vertices.csv",
+      "bytes": 72192,
+      "sha256": "bcd6cd1c5d25ab44b69237dc1b8c6f59d1515f8089cab88fc361cbf7337ccd76"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/presentation.json",
+      "bytes": 877429,
+      "sha256": "7ca11735f1a9eea6cb6938ae3103536d20ca4636d7da2869f6ce3e766121eb86"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/result.json",
+      "bytes": 11231,
+      "sha256": "da2b5ad66fc1f03774f5daefacc1f943c9a6ec8d2cf57aab72d2b68947b2465c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "a040d2bf158ac468d2c77a51036afe498d8bdcc54707510ee359633f4daca71a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/vertices.csv",
+      "bytes": 392309,
+      "sha256": "124a3e9116df96898cc40e037b46de732f1fa4bde9526c0c38e8b2b9a71924fe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/probe.json",
+      "bytes": 3429,
+      "sha256": "e1700705dd85acde2274d66584c261ab24fb265d04f9934503a40ab03a6f0ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/geometry-ui.json",
+      "bytes": 629409,
+      "sha256": "3808ab5f4ff97b4485c6038af34e1f99029cc0097f4767ca27f85db2311ed598"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "9fd6b7d91fb6bfe10dfd02529cf7ea783c01e11812a2804bd2ed53a0b628fdb7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/geometry.obj",
+      "bytes": 39892,
+      "sha256": "35d8c3a315b1fbda8e8939caf25b2322bc7235fe5009b3266c6fc6ebf62aec09"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "1c9753cf7d15b4883817950fd32041f1a57e99d683881971c4ebedbf29cbbe79"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "48016caf8737553061af0a332ce748b6d46258ed4e0a88a8fd05e6772e3fc9e7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/job.json",
+      "bytes": 637,
+      "sha256": "e1362fca5f9d18818e0cb87a45e1c05a36047c8e3fcd3f88631a6aba48f3fe7f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/post_geometry.obj",
+      "bytes": 22415,
+      "sha256": "1c4feae41acb973b381df380bb826b1fcac7ab4b12ab84d4189cd095566f47f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "973e27c15a3f88517fb13918bba834f9337d053bb0910e366e9330d106701262"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/post_vertices.csv",
+      "bytes": 22934,
+      "sha256": "49975dca270f29fbb50e1798f59b7c36a06a033affc3c32c3aad95af5aa2056f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/presentation.json",
+      "bytes": 1340049,
+      "sha256": "eab45fc05c0c68039717e74747d619e4669311a8b2c9c07dc27ee8adbe02bc30"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "d0642a46553c558c00ad2ca60917e2211438e0f43087629e2a1f9e99d0a1ef38"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/result.json",
+      "bytes": 35393,
+      "sha256": "3d4e79bf57ad8b19c55f2e64126c59c38a99d3f8024b266ee2650bf712cd4f91"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/ui-export.csv",
+      "bytes": 22934,
+      "sha256": "49975dca270f29fbb50e1798f59b7c36a06a033affc3c32c3aad95af5aa2056f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/ui-export.json",
+      "bytes": 1509909,
+      "sha256": "c0d46bda0d573d6104672621aa42c03e737fa6894c86228674c7610d0ab4f6ab"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/ui-export.obj",
+      "bytes": 22415,
+      "sha256": "1c4feae41acb973b381df380bb826b1fcac7ab4b12ab84d4189cd095566f47f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "973e27c15a3f88517fb13918bba834f9337d053bb0910e366e9330d106701262"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/unique_vertices.csv",
+      "bytes": 129045,
+      "sha256": "a339df7e88f47646d1207e05311a434b217807804ebce752514a2022406db32c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "a040d2bf158ac468d2c77a51036afe498d8bdcc54707510ee359633f4daca71a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/vertices.csv",
+      "bytes": 392529,
+      "sha256": "0e95d6eea7caa83d3ed703213e479f120192494bfa5c51c3b3764e2934f33d03"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-1/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4.log",
+      "bytes": 2842,
+      "sha256": "bfbdd2d02f088ea74ce7637e549ec6f9cf5c0116b099a88665d4721c83f531e2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/geometry-ui.json",
+      "bytes": 454568,
+      "sha256": "bd1a8a26ddc8e93823a68cfaf00852d54171395576c54cb57b907e23c340116d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/geometry.json",
+      "bytes": 5769,
+      "sha256": "f77b2c8450242f24fb925242595a24f7de4fb939ae2e651156242614c38d4f2b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/geometry.obj",
+      "bytes": 39872,
+      "sha256": "82726e484ec2d7e20dc1811e9f32a10d16c9ec7195b6c17c84a37e69028be978"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/job.json",
+      "bytes": 629,
+      "sha256": "75b334f014ee0dfdff6c324b599ce75ebaefd08b6ea7c84af040ab7571d9d641"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/post_geometry.obj",
+      "bytes": 60858,
+      "sha256": "68153aabf439e1b5ca94458c4e38daf0e47a9857c80b59299160e3152f00c713"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "95040562365b7606955b20711f7458f01f91b589ccd11eecfa62d54d2a72f5f4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/post_vertices.csv",
+      "bytes": 72346,
+      "sha256": "95456f8f92f61676b16b6d10b68af613e62da00729eb02836a6c4690dfed95ba"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/presentation.json",
+      "bytes": 878144,
+      "sha256": "10ce8f2dd71a4712efde49cae02cb207a0e05047dc226080346b954302ebff08"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/result.json",
+      "bytes": 11232,
+      "sha256": "0d11b7c2792f59889dbb756ab9cd48203586cb9078820eb8759cc30057accb50"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "95040562365b7606955b20711f7458f01f91b589ccd11eecfa62d54d2a72f5f4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/vertices.csv",
+      "bytes": 393765,
+      "sha256": "e1df7f4d398ff50a35738e2c7fb6a9784b4000ff9c7955e63014818c8e13ff0b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/probe.json",
+      "bytes": 3429,
+      "sha256": "c18ac7e136e787ad008ac6e0c6afe0d6944047ebc885bede8865b3fd1677e70d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/geometry-ui.json",
+      "bytes": 630631,
+      "sha256": "7dc2e0cb8dad1355783e8dff736dca3d339e64af2a764e7123499a6546bfedce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "ba2032ff5cf0e24b9de3565b72dcebbc4c88d6f2aec9057059f16b0d5f03f0eb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/geometry.obj",
+      "bytes": 39872,
+      "sha256": "82726e484ec2d7e20dc1811e9f32a10d16c9ec7195b6c17c84a37e69028be978"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "8defd62ee531f2215e83959c9b17bd40757c38ee7b2ae15b38870c0bdc8dd542"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "b7fb645fe7fec1c4626b9a908767f81c3845d4479936df3239837335345044e3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/job.json",
+      "bytes": 637,
+      "sha256": "a3e4364b3dab193d0b1dbfcaa93a066b10d30c86e97985db5c2a348553825fb1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/post_geometry.obj",
+      "bytes": 22179,
+      "sha256": "87d64785a7f6df3737821be00dd3b213f481973f5aec1eba7b5db357ffc4a8d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "7c81930749e74ecf362c8bf7b1ab0e5ab59e8397e17651d0e2e9cb461902d0c5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/post_vertices.csv",
+      "bytes": 22994,
+      "sha256": "15465d4e1f7b8646b75d2a126296e6519c19b116ee437ee0ac01eb0081c6c0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/presentation.json",
+      "bytes": 1341271,
+      "sha256": "cbd0f69db6355086cdbf1b34d6084c4d66694aea6f198f1c7f11d1b4f45e73df"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "163fcd0552b46408d1f3c1b94932bec59e79a12f8ad8ca1cc97f9fd362f6058e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/result.json",
+      "bytes": 35393,
+      "sha256": "fa754d390da762847bb209bcdb85da9700e3828440f6c26b551525ec05d336d2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/ui-export.csv",
+      "bytes": 22994,
+      "sha256": "15465d4e1f7b8646b75d2a126296e6519c19b116ee437ee0ac01eb0081c6c0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/ui-export.json",
+      "bytes": 1511131,
+      "sha256": "84e055beb9368521bc5a2f41393ed872eeff5ecb0d33c7504c7022a802f46b47"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/ui-export.obj",
+      "bytes": 22179,
+      "sha256": "87d64785a7f6df3737821be00dd3b213f481973f5aec1eba7b5db357ffc4a8d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "7c81930749e74ecf362c8bf7b1ab0e5ab59e8397e17651d0e2e9cb461902d0c5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/unique_vertices.csv",
+      "bytes": 129552,
+      "sha256": "a6e742f6db4f6622cbd0bed8f81d82eac9d6ba3a038922c75e4c59948b2f7879"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "95040562365b7606955b20711f7458f01f91b589ccd11eecfa62d54d2a72f5f4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/vertices.csv",
+      "bytes": 393985,
+      "sha256": "3cced96b1e788bd5e5c7335b7b68c39bc566a7739456d94a71acfd42b56a6eda"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-bf1-1415-4/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11.log",
+      "bytes": 2847,
+      "sha256": "3951cbac131fee130642827c5d8830dcf44870bd2b90746b1b3675424a6d4070"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/geometry-ui.json",
+      "bytes": 354839,
+      "sha256": "6e3d15296321bc8e739589b251929001d38a8e6eac93fdfda0f4f4c6d2d21e45"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/geometry.json",
+      "bytes": 4405,
+      "sha256": "5582a154f9532c95726273144fdc62f95b6e5fa05d1c2c9c606d40eb7ba2d0aa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/geometry.obj",
+      "bytes": 53442,
+      "sha256": "6536a82c19b357fbcf720181227872ae875bd520ee886948319fd96cf6108bcf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/job.json",
+      "bytes": 644,
+      "sha256": "694393028b38a703270f16370b2cb4614179107ea901e3b66551c1f25a4e2193"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/post_geometry.obj",
+      "bytes": 81551,
+      "sha256": "ff2c0f52d4ed421060764a43763d46cd5b63407fc70470c67c9ca875ad21a23f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/post_vertices.bin",
+      "bytes": 60528,
+      "sha256": "2a58a15f6801741c5673c9d83a806725dc8f92662beb838204237a8417fd8abb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/post_vertices.csv",
+      "bytes": 93995,
+      "sha256": "2e3ea76c2f88aeaf9acefdd7c8277c15f6266e069d330184b1360e439d0ad0c3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/presentation.json",
+      "bytes": 670562,
+      "sha256": "982d130d98ff08b54a2c8293730945522d0b6e2a8962459d66a38501a5ef0917"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/result.json",
+      "bytes": 9694,
+      "sha256": "ff38c3c494c58e892eab7653212e1aedec1ea9878a7f7fd7837515e8b7a98706"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/vertices.bin",
+      "bytes": 60528,
+      "sha256": "2a58a15f6801741c5673c9d83a806725dc8f92662beb838204237a8417fd8abb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/vertices.csv",
+      "bytes": 273470,
+      "sha256": "0485b6118a2edb1c6219b0af13e91c4f9903a00d87314335cef7ad96f3e0e2c9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/probe.json",
+      "bytes": 3434,
+      "sha256": "bb7c6cbe40afb312eb77f7366848e09e5ad0212de418fc177e453f58f9ff7400"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/geometry-ui.json",
+      "bytes": 633671,
+      "sha256": "dd7a572357ace071b28172835836850f6707c8c64e8ff7fe635ce38752cebadb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/geometry.json",
+      "bytes": 30790,
+      "sha256": "cf40c453f7ff7cf2a9d1fbe77584ca98a3b8043c38c9e0fbe3aa59c7580f98d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/geometry.obj",
+      "bytes": 53442,
+      "sha256": "6536a82c19b357fbcf720181227872ae875bd520ee886948319fd96cf6108bcf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/identities.json",
+      "bytes": 41738,
+      "sha256": "a5d91b239e665ab3be27428c1bc82a1b3d9da7d1ae1e69e13fd1f27f2f2f5a01"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/input_references.csv",
+      "bytes": 25601,
+      "sha256": "ad48c209292d27c1f7c1b74169c57a32c2e518369ed6f972d7b251afcde0e61a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/job.json",
+      "bytes": 652,
+      "sha256": "5bfe7eb0fa90b756c26bb276c0c439d127d021204599119827b188edc001cd0d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/post_geometry.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/post_vertices.bin",
+      "bytes": 43368,
+      "sha256": "4aa2f54c3e8cb788919b9beca5381010e09dbd6040863b4af4cc5f64b0a10628"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/post_vertices.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/presentation.json",
+      "bytes": 1365648,
+      "sha256": "42773e4cdd746fed121133dba353886befff55379c5a4cc0732dd16fb5edee72"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/references.csv",
+      "bytes": 39277,
+      "sha256": "1e5f83259bbb2d576602ffb2acf7d549af300e3f1e2009c48ae798d77255282d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/result.json",
+      "bytes": 41522,
+      "sha256": "10b59681719422bc7033a7fbded8fb775f651bdfa09a866f181ecd1754d4fc10"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/ui-export.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/ui-export.json",
+      "bytes": 1547433,
+      "sha256": "bb2b100ae2dd49abf70373a4e156177780ea763fd6d1455df12876c7db7326f2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/ui-export.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/unique_vertices.bin",
+      "bytes": 43368,
+      "sha256": "2cd848aa0dac3cbda34f45b32bfcc0816a3df6f497f8dacf760d6449e0eb21be"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/unique_vertices.csv",
+      "bytes": 210151,
+      "sha256": "ce517bbc78b419336fe39474aa309be8a5f89bdad436800d9c0f0dab7d985e2a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/vertices.bin",
+      "bytes": 60528,
+      "sha256": "2a58a15f6801741c5673c9d83a806725dc8f92662beb838204237a8417fd8abb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/vertices.csv",
+      "bytes": 273854,
+      "sha256": "ba992c6490e78a8b9969be7cbf36f8f73136d0380e78dbb6a011b529008dfb55"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/32902-helldivers-200-11/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1.log",
+      "bytes": 2878,
+      "sha256": "3bcbc1d5ea087c04e230b040b0984165684b2b420200745ae79e63d258bbf603"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/geometry-ui.json",
+      "bytes": 453896,
+      "sha256": "8256fc187ee68d40e06858f2246f9db35d25e7c5ad41dace2d9095e6dac09259"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/geometry.json",
+      "bytes": 5768,
+      "sha256": "84b9180e563c0f47ab5e2878bf3ee47367d66178dc0a196845a1778bb1a6a574"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/geometry.obj",
+      "bytes": 39892,
+      "sha256": "35d8c3a315b1fbda8e8939caf25b2322bc7235fe5009b3266c6fc6ebf62aec09"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/job.json",
+      "bytes": 627,
+      "sha256": "e630ceaa17bcb610926f7d47917304d463a6b5b7e271e20af25d0a36768eb061"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/post_geometry.obj",
+      "bytes": 61599,
+      "sha256": "4e539ac4b00139246947c5e84b3b5348a3058ea40b32f539746db62769d3b0de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "38cbfb2d423f624e07550cc338025a92d20d7adcdc1c2735f1ac2c92a7c4dad2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/post_vertices.csv",
+      "bytes": 72192,
+      "sha256": "bcd6cd1c5d25ab44b69237dc1b8c6f59d1515f8089cab88fc361cbf7337ccd76"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/presentation.json",
+      "bytes": 877472,
+      "sha256": "13655ae32c085f2851550b29d27a0ff212190cb2a130587e8a7ee9b73f9ccf5a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/result.json",
+      "bytes": 11616,
+      "sha256": "ae8bf086556bc1ccec12b2282ce18c90d1cf978bdbf488dc48324b35382b2014"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "38cbfb2d423f624e07550cc338025a92d20d7adcdc1c2735f1ac2c92a7c4dad2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/vertices.csv",
+      "bytes": 392352,
+      "sha256": "20a34bf980cc0037faad4e32f0de711058453544f9418f527a6ef1332197bcbd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/probe.json",
+      "bytes": 3472,
+      "sha256": "1a7df3526fe82a73d74bcab390c4992750b0c151b55c4e468e76eca249633594"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/geometry-ui.json",
+      "bytes": 629467,
+      "sha256": "cd3737ff418b0c0100bee05b850e9f1909c09f7177fdf532f682d12b4090f961"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "c7581c70c656a8df05c09344930948fe2bba28c4ffd24271624e988e329967a0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/geometry.obj",
+      "bytes": 39892,
+      "sha256": "35d8c3a315b1fbda8e8939caf25b2322bc7235fe5009b3266c6fc6ebf62aec09"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "1c9753cf7d15b4883817950fd32041f1a57e99d683881971c4ebedbf29cbbe79"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "48016caf8737553061af0a332ce748b6d46258ed4e0a88a8fd05e6772e3fc9e7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/job.json",
+      "bytes": 635,
+      "sha256": "1764b5b17d9f8e4bd4fac58352267fe87e861efa804b0d0ad7df0c760f6f821c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/post_geometry.obj",
+      "bytes": 22415,
+      "sha256": "1c4feae41acb973b381df380bb826b1fcac7ab4b12ab84d4189cd095566f47f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "6b4771b676fbd5be2b15ebdd2d8f3f33e12b3dc3cca52113334582f537d84ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/post_vertices.csv",
+      "bytes": 22934,
+      "sha256": "49975dca270f29fbb50e1798f59b7c36a06a033affc3c32c3aad95af5aa2056f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/presentation.json",
+      "bytes": 1340107,
+      "sha256": "a04bac3e357c2f131c69bb99b698b6789e3e25476dd578ccb91cd5187ccf8672"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "d0642a46553c558c00ad2ca60917e2211438e0f43087629e2a1f9e99d0a1ef38"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/result.json",
+      "bytes": 35778,
+      "sha256": "54f40b3107bdcf575b82f33c2ffee404948a9b1308f74a92cb8201f16c35ad29"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/ui-export.csv",
+      "bytes": 22934,
+      "sha256": "49975dca270f29fbb50e1798f59b7c36a06a033affc3c32c3aad95af5aa2056f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/ui-export.json",
+      "bytes": 1510352,
+      "sha256": "ba3be24d1a45aefb54656d0a9fd500041bce9a0fca5ad08a4cd63758f6a53693"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/ui-export.obj",
+      "bytes": 22415,
+      "sha256": "1c4feae41acb973b381df380bb826b1fcac7ab4b12ab84d4189cd095566f47f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "6b4771b676fbd5be2b15ebdd2d8f3f33e12b3dc3cca52113334582f537d84ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/unique_vertices.csv",
+      "bytes": 129060,
+      "sha256": "df0640d7aed287d35f75cf2729a954184b99d2eb5db05ec5fd48bedf3c3a3c16"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "38cbfb2d423f624e07550cc338025a92d20d7adcdc1c2735f1ac2c92a7c4dad2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/vertices.csv",
+      "bytes": 392572,
+      "sha256": "44a52507469570629380c423bb425ecd9cb2070d98cd4d327b134a4fec4dcc68"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-1/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4.log",
+      "bytes": 2841,
+      "sha256": "956f40e3f7616633180f73ebb468d97e229066c6e51c14aee67af0eb04ee9e42"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/geometry-ui.json",
+      "bytes": 454502,
+      "sha256": "c0beaa699d5a6630be16b7d8a176cfd15b6db660771cc1a14029681b819695ad"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/geometry.json",
+      "bytes": 5769,
+      "sha256": "a082433350b95d9c8f3bb5fa4b17cad5cb8eefbc8563dbe631b7985b5f8199fd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/geometry.obj",
+      "bytes": 39872,
+      "sha256": "82726e484ec2d7e20dc1811e9f32a10d16c9ec7195b6c17c84a37e69028be978"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/job.json",
+      "bytes": 627,
+      "sha256": "a05fafa7a92eeef54819aee1f8736fead5997c7e9cb349193d3037106e836e9b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/post_geometry.obj",
+      "bytes": 60858,
+      "sha256": "68153aabf439e1b5ca94458c4e38daf0e47a9857c80b59299160e3152f00c713"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/post_vertices.bin",
+      "bytes": 112896,
+      "sha256": "32c474f63a476e87de69913ffb6c7a3e2e205f0bf2a22664d1e594e91b5f9c06"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/post_vertices.csv",
+      "bytes": 72346,
+      "sha256": "95456f8f92f61676b16b6d10b68af613e62da00729eb02836a6c4690dfed95ba"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/presentation.json",
+      "bytes": 878078,
+      "sha256": "c7d20855542a957b58193ca1c9057431c7de1bab9ce05d4823c1ec89f0f72209"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/result.json",
+      "bytes": 11617,
+      "sha256": "9fb0f65ea4f0df73ca1394c800afacaa2d9b81682e76cb16e94fc40e351710b4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/vertices.bin",
+      "bytes": 112896,
+      "sha256": "32c474f63a476e87de69913ffb6c7a3e2e205f0bf2a22664d1e594e91b5f9c06"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/vertices.csv",
+      "bytes": 393699,
+      "sha256": "cc3f40169f837d36603777c1b294d41832a9df29f122d7957e83d30c5a5aeac8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/probe.json",
+      "bytes": 3428,
+      "sha256": "ef1c28176af5bb623db184c25f2b8f6c0c81bc8fedf95b6490033e116e08404b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/geometry-ui.json",
+      "bytes": 630561,
+      "sha256": "ece37cf1731491fd061f557e9e24d9946d0eb2067d3f561dd94a0c6132b3f20c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/geometry.json",
+      "bytes": 25615,
+      "sha256": "7e6199d6cb343507e81f94e365b3a5862b2a9e31a101b9dd593d980b7b3a81c1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/geometry.obj",
+      "bytes": 39872,
+      "sha256": "82726e484ec2d7e20dc1811e9f32a10d16c9ec7195b6c17c84a37e69028be978"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/identities.json",
+      "bytes": 28463,
+      "sha256": "8defd62ee531f2215e83959c9b17bd40757c38ee7b2ae15b38870c0bdc8dd542"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/input_references.csv",
+      "bytes": 18033,
+      "sha256": "b7fb645fe7fec1c4626b9a908767f81c3845d4479936df3239837335345044e3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/job.json",
+      "bytes": 635,
+      "sha256": "3e96872ea1664423f64aeb8c1e930e7aeac2961a0e0581bc259d5a2978fe1240"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/post_geometry.obj",
+      "bytes": 22179,
+      "sha256": "87d64785a7f6df3737821be00dd3b213f481973f5aec1eba7b5db357ffc4a8d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/post_vertices.bin",
+      "bytes": 35968,
+      "sha256": "4316499ec7c96d5c85f629d62f7ac6e25b7f03b17ea0a5304efb435eb713159f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/post_vertices.csv",
+      "bytes": 22994,
+      "sha256": "15465d4e1f7b8646b75d2a126296e6519c19b116ee437ee0ac01eb0081c6c0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/presentation.json",
+      "bytes": 1341201,
+      "sha256": "1867a05d3ccd2172b649d03ef325d2580fb6c0c0e07bfb52bc258f13d0ee6f1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/references.csv",
+      "bytes": 25918,
+      "sha256": "163fcd0552b46408d1f3c1b94932bec59e79a12f8ad8ca1cc97f9fd362f6058e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/result.json",
+      "bytes": 35778,
+      "sha256": "a73a4be13cff9c6649787205395accada64302e0d64a4a769c298d1ba50a91f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/ui-export.csv",
+      "bytes": 22994,
+      "sha256": "15465d4e1f7b8646b75d2a126296e6519c19b116ee437ee0ac01eb0081c6c0ab"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/ui-export.json",
+      "bytes": 1511446,
+      "sha256": "814017078d541ccd4e5e98e2fb0cad8457311c0ea788267738c4d8aeb925e847"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/ui-export.obj",
+      "bytes": 22179,
+      "sha256": "87d64785a7f6df3737821be00dd3b213f481973f5aec1eba7b5db357ffc4a8d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/unique_vertices.bin",
+      "bytes": 35968,
+      "sha256": "4316499ec7c96d5c85f629d62f7ac6e25b7f03b17ea0a5304efb435eb713159f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/unique_vertices.csv",
+      "bytes": 129548,
+      "sha256": "710ecee4e71c2bcbe605c1a3c99eb8d62a9534e983d3bd1815d6486f83de9032"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/vertices.bin",
+      "bytes": 112896,
+      "sha256": "32c474f63a476e87de69913ffb6c7a3e2e205f0bf2a22664d1e594e91b5f9c06"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/vertices.csv",
+      "bytes": 393919,
+      "sha256": "015471f7b24c8f249554482628560e227d449513a1ba90093ebef4135cb9283a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-bf1-1415-4/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11.log",
+      "bytes": 2846,
+      "sha256": "ad356f4ca52ffa8529c488c40bfada2b4070bf3db50eb832aed4ff7b7faeb4c4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/geometry-ui.json",
+      "bytes": 354467,
+      "sha256": "42bfe19615b0ea3427a78a8054025eb9a427fb60e630f9d848b3b7dd4214e095"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/geometry.json",
+      "bytes": 4405,
+      "sha256": "3fc92005398a4350ff651658802f45086bd45e10d06ee3fff5052b12c4851704"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/geometry.obj",
+      "bytes": 53442,
+      "sha256": "6536a82c19b357fbcf720181227872ae875bd520ee886948319fd96cf6108bcf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/job.json",
+      "bytes": 642,
+      "sha256": "76ab071126c1d2e78f1f43751a04701c7cbd0e98151594b6387d9b7f405ac80b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/post_geometry.obj",
+      "bytes": 81551,
+      "sha256": "ff2c0f52d4ed421060764a43763d46cd5b63407fc70470c67c9ca875ad21a23f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/post_vertices.bin",
+      "bytes": 60528,
+      "sha256": "e500a2b1732cfd02007d2a0870e500c6c0ad771f1299b2e4d9de75d06a316f7d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/post_vertices.csv",
+      "bytes": 93995,
+      "sha256": "2e3ea76c2f88aeaf9acefdd7c8277c15f6266e069d330184b1360e439d0ad0c3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/presentation.json",
+      "bytes": 670190,
+      "sha256": "06d5484c962e11413d632ebc6f94b387c52370f8caa4d8744913aa63d7bced5c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/result.json",
+      "bytes": 10079,
+      "sha256": "7c2b88a8e97892928935bd7d5116972162609c3eba31b5c372bc18dbfa08f67e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/vertices.bin",
+      "bytes": 60528,
+      "sha256": "e500a2b1732cfd02007d2a0870e500c6c0ad771f1299b2e4d9de75d06a316f7d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/vertices.csv",
+      "bytes": 273098,
+      "sha256": "4196748291f8f00fc83155b1a3a6295ed248a0dd7a235cf668fb6154a3aa3877"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/final/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/probe.json",
+      "bytes": 3433,
+      "sha256": "ac85e21442a69922c5227adcd01640ee08b6fb5ae3b879c4fa0cb5458b8a152a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/geometry-ui.json",
+      "bytes": 633001,
+      "sha256": "b577f512fc671c21f3d97c89a60c7b6e148476d1c3011190df5a64a4df8eb691"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/geometry.json",
+      "bytes": 30790,
+      "sha256": "bdcae1e27eb247548ee28232fe326148ba3ef505d20e691d4d40e99ef19ff0f3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/geometry.obj",
+      "bytes": 53442,
+      "sha256": "6536a82c19b357fbcf720181227872ae875bd520ee886948319fd96cf6108bcf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/identities.json",
+      "bytes": 41738,
+      "sha256": "a5d91b239e665ab3be27428c1bc82a1b3d9da7d1ae1e69e13fd1f27f2f2f5a01"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/input_references.csv",
+      "bytes": 25601,
+      "sha256": "ad48c209292d27c1f7c1b74169c57a32c2e518369ed6f972d7b251afcde0e61a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/job.json",
+      "bytes": 650,
+      "sha256": "33dd3b6c43e7b93c60156e7a5659b7390e3e048b61a9c56d947d4c116ce96456"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/post_geometry.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/post_vertices.bin",
+      "bytes": 43368,
+      "sha256": "19a0a2158098c21afbb6ead8b710b0706896617244855ae45b1c36decea90310"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/post_vertices.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/presentation.json",
+      "bytes": 1364978,
+      "sha256": "2606eb863d6c55a5ad1e987cbda95efd30fc52088f434db0b419f5ba6888cc44"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/references.csv",
+      "bytes": 39277,
+      "sha256": "1e5f83259bbb2d576602ffb2acf7d549af300e3f1e2009c48ae798d77255282d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/result.json",
+      "bytes": 41908,
+      "sha256": "d8428e99c93862d9ba5069af0f0e5256f8ba370db4eea72fce13dffa3a89fb27"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/ui-export.csv",
+      "bytes": 67202,
+      "sha256": "3dc53dc41f1b9ba4fecbc82eb073911dc3fca7b8e4744b3054dedf41831535e1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/ui-export.json",
+      "bytes": 1547149,
+      "sha256": "a833f2ae29bb8bff966d7412b67b8bdc65d9655aae143bf85bb5af034d59e8a3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/ui-export.obj",
+      "bytes": 59908,
+      "sha256": "18e24bcac72891ecdee0a20c1f86d8b38bceea82e224a0ecbf2665b50b239c0f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/unique_vertices.bin",
+      "bytes": 43368,
+      "sha256": "6c5b9bde98a0cdf80ff80397ac1dd53c74c536cee8c8c658c3a2a6c069a1aaf8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/unique_vertices.csv",
+      "bytes": 209853,
+      "sha256": "85249607865aab3a09f1118510e223ae0c3786e21a46f893d05fb4d33c6df1a0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/vertices.bin",
+      "bytes": 60528,
+      "sha256": "e500a2b1732cfd02007d2a0870e500c6c0ad771f1299b2e4d9de75d06a316f7d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/vertices.csv",
+      "bytes": 273482,
+      "sha256": "0427b3a33585d2ebf7fdd3f319a643934de33e035c4ce0d92e6225df9b90a2a5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/4318-helldivers-200-11/vs-inputs/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/revalidation.json",
+      "bytes": 7836,
+      "sha256": "25e076842bdbef8413581e0e93a45226b830284590e8843bd6f54fcd8aa6976d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-native/validation.json",
+      "bytes": 1730,
+      "sha256": "a510c094fd59bb89e10c4db08970e45e7fc5b9255cf0e802e4fb2e7aacda2143"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-ui-exits.json",
+      "bytes": 50,
+      "sha256": "866c9a96e30c615cccadaed0b54064d94a8ebb42005fb6f22f388336cb3d3cbe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-verification-final.json",
+      "bytes": 941,
+      "sha256": "d97859ca5d759d587470472581ebead9d75fd4814cd597a277db687a5903e6c3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-instance-verification.json",
+      "bytes": 831,
+      "sha256": "b876d9444d7af39c7ff224a90e882d0cfe012517949e26e36f42ac5b4401de07"
+    }
+  ]
+}
