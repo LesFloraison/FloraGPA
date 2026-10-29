@@ -1695,3 +1695,13 @@ reject 216 corruptions. Six suites record 929 passes, one unchanged Intel clamp
 failure and no skips; GUI/CLI/Worker builds pass. See
 `research/DX11_SAMPLING_OUTPUT_PRECISION.md`. Implicit minimum-precision outputs,
 minimum-precision gradients, full P6 parity and P7/P8 remain open.
+
+Original GPA diagnostic state now has pinned Ghidra constant/instruction evidence
+for additive RGB counting and its color-disabled variant. An independent stencil
+ordinal probe validates 7,920 sample vectors across 144 groups, including repeated
+GS/instance primitive IDs, MSAA and eight MRTs. It exposes the saturation boundary
+and distinct early/late discard populations. Strict checks retain six Intel
+multi-target occlusion failures; no counts are normalized or skipped. See
+`research/DX11_PIXEL_ORDINAL_RESEARCH.md`. This is P1/P5 research, not a product
+cutover; original fragment qualification, overlap support beyond the stencil
+range and P7/P8 remain open.
