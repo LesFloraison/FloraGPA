@@ -1503,3 +1503,17 @@ adapter. Existing equality shader bytes remain unchanged.
 See the [correction and evidence](research/DX11_NATIVE_PIXEL_IDENTITY_COMPLEMENT.md).
 This strengthens conditional identity observations; it does not close original
 instance/fragment attribution or the remaining migration and release gates.
+
+### Captured geometry instance partitions
+
+Pixel candidates and private history records now expose `geometry_instance`,
+using the same native boundary calculation as Mesh instance selection. Variable
+HS/DS/GS output uses cached Stream Output prefix measurements with the existing
+UAV-independence and alias proof; zero-output instances retain their positions.
+Unproved partitions remain unknown. The original invocation `instance` field is
+still null because geometry ownership alone does not establish a pixel invocation.
+
+The [instance study](research/DX11_NATIVE_PIXEL_GEOMETRY_INSTANCES.md) records
+topology, indirect draw, variable-output, alias, restoration, candidate/history
+and real-capture checks. Full fragment attribution, debugger parity, dependency
+removal and standalone release remain incomplete.
