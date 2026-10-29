@@ -472,7 +472,7 @@ RWStructuredBuffer<uint> output:register(u0);
                                                   selection, experiment);
         const auto result = load(runNativeAnalysisJob(job, worker(), 30));
         validateNativeAnalysisResult(job, result);
-        QCOMPARE(result.at("backend"), Json("dx11-native/4"));
+        QCOMPARE(result.at("backend"), Json("dx11-native/5"));
         QCOMPARE(result.at("data").at("invocation").at("dispatch_groups"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("invocation").at("group_size"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("trace_file"), Json("trace.jsonl"));

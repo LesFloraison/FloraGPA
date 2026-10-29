@@ -34,6 +34,8 @@ struct TextureInputView {
     };
     std::shared_ptr<const Samples> samples;
     std::shared_ptr<const SampleQueryInput> queries;
+    // Established from the source resource, not the diagnostic copy's descriptor.
+    bool nonTiled = false;
 };
 // Resolve a planar SRV's actual dimensions and byte range; validate explicit plane identity.
 std::optional<TexturePlane> textureInputPlane(const Resource &, const TextureInputView &, uint32_t mip,

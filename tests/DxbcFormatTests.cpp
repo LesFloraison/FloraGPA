@@ -43,7 +43,7 @@ class DxbcFormatTests final : public QObject {
                     const auto parsed = checkpoint::instructionOperands(instruction);
                     QCOMPARE(parsed.ranges.size(), size_t(3));
                     const auto end = parsed.ranges.back().second;
-                    QVERIFY(dxbc_detail::samplePositionPadding(instruction, end));
+                    QVERIFY(dxbc_detail::compilerInstructionPadding(instruction, end));
                     if (sample < 4)
                         QCOMPARE(instruction[end - 1], sample);
                     auto malformed = instruction;
@@ -54,11 +54,11 @@ class DxbcFormatTests final : public QObject {
                     QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpoint::instructionOperands(malformed));
                     malformed = instruction;
                     malformed[0] = (malformed[0] & ~2047u) | 54;
-                    QVERIFY(!dxbc_detail::samplePositionPadding(malformed, end));
+                    QVERIFY(!dxbc_detail::compilerInstructionPadding(malformed, end));
                     malformed = instruction;
                     malformed.resize(parsed.ranges.back().first);
                     malformed.insert(malformed.end(), {0x4002, 0, 0, 0, 0, 0});
-                    QVERIFY(!dxbc_detail::samplePositionPadding(malformed, malformed.size() - 1));
+                    QVERIFY(!dxbc_detail::compilerInstructionPadding(malformed, malformed.size() - 1));
                     QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpoint::instructionOperands(malformed));
                     qInfo().noquote()
                         << QString::fromStdString(Json{{"samplepos_tokens", instruction}}.dump());

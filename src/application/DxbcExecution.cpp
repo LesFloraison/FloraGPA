@@ -87,6 +87,18 @@ Operand operand(const Words &words, size_t &pos, unsigned depth = 0) {
     }
     return result;
 }
+uint32_t feedbackOperation(uint32_t opcode) {
+    static constexpr std::array<uint32_t, 11> operations{109, 126, 127, 128, 45, 46, 163, 165, 167, 72, 71};
+    return opcode >= 219 && opcode <= 229 ? operations[opcode - 219] : opcode;
+}
+const std::vector<Operand> &dataOperands(const std::vector<Operand> &original, uint32_t opcode,
+                                         std::vector<Operand> &normalized) {
+    if (feedbackOperation(opcode) == opcode)
+        return original;
+    normalized = original;
+    normalized.erase(normalized.begin() + 1);
+    return normalized;
+}
 bool declaration(uint32_t opcode) {
     return (opcode >= 88 && opcode <= 106) || (opcode >= 143 && opcode <= 162) || opcode == 53 ||
            opcode == 206;
@@ -373,6 +385,8 @@ Program::Program(Bytes dxbc) {
                 fail("LOD requires pixel shader model 4.1 or later");
             if (op == 121 && version != 0x50)
                 fail("Buffer information requires shader model 5.0");
+            if (op >= 219 && op <= 234 && version != 0x50)
+                fail("Feedback instructions require shader model 5.0");
             if ((op == 109 && version < 0x41) || ((op == 126 || op == 127 || op == 128) && version != 0x50))
                 fail("Gather instruction requires its shader model capability");
             if (doubleOperation(op)) {
@@ -443,7 +457,7 @@ Program::Program(Bytes dxbc) {
                 throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
                                          " at word " + std::to_string(data->instructions.back().wordOffset) +
                                          " is not implemented");
-            if (pos != words.size() && !dxbc_detail::samplePositionPadding(words, pos))
+            if (pos != words.size() && !dxbc_detail::compilerInstructionPadding(words, pos))
                 fail("DXBC execution instruction operand tail");
         } else if (op == 144) {
             if (version != 0x50 || words.size() != 2 || (words[0] & 0xffffff) != op ||
@@ -885,8 +899,9 @@ struct Lane::State {
         const auto &s = *this;
         const auto &p = *program;
         const auto &instruction = p.instructions.at(pc);
-        const auto &args = p.operands.at(pc);
-        const auto op = instruction.opcode;
+        std::vector<Operand> normalized;
+        const auto &args = dataOperands(p.operands.at(pc), instruction.opcode, normalized);
+        const auto op = feedbackOperation(instruction.opcode);
         const bool comparison = op == 70 || op == 71;
         const bool implicit = op == 69 || op == 70 || op == 74 || op == 108;
         if (op == 108 && (instruction.words[0] & 0x00fff800u))
@@ -1050,19 +1065,10 @@ Step Lane::step() {
     const auto &p = *s.program;
     const auto &instruction = p.instructions.at(s.pc);
     const auto &originalArgs = p.operands.at(s.pc);
-    const bool feedback =
-        instruction.opcode == 223 || (instruction.opcode >= 225 && instruction.opcode <= 227);
+    const auto op = feedbackOperation(instruction.opcode);
+    const bool feedback = op != instruction.opcode;
     std::vector<Operand> loadArgs;
-    if (feedback) {
-        loadArgs = originalArgs;
-        loadArgs.erase(loadArgs.begin() + 1);
-    }
-    const auto &args = feedback ? loadArgs : originalArgs;
-    const auto op = instruction.opcode == 223   ? 45u
-                    : instruction.opcode == 225 ? 163u
-                    : instruction.opcode == 226 ? 165u
-                    : instruction.opcode == 227 ? 167u
-                                                : instruction.opcode;
+    const auto &args = dataOperands(originalArgs, instruction.opcode, loadArgs);
     const bool derivative = op == 11 || op == 12 || (op >= 122 && op <= 125);
     Step result{s.sequence, s.pc, instruction.wordOffset, {}, s.calls, {}, false};
     uint32_t next = s.pc + 1;
@@ -2025,10 +2031,24 @@ Step Lane::step() {
             if (target == s.address(args[0]) && (args[0].mask & destination.mask))
                 fail("Overlapping DXBC feedback destinations");
             auto mapping = MappingStatus::Unknown;
-            if (!suppressedResource && s.inputs.memory) {
-                const auto view = s.inputs.memory->views_.find(s.address(args.back()));
-                if (view != s.inputs.memory->views_.end() && view->second.resource && view->second.nonTiled)
-                    mapping = MappingStatus::Mapped;
+            if (!suppressedResource) {
+                const auto &resource =
+                    op == 165 || op == 167 ? args.back() : args[op == 127 || op == 128 ? 3 : 2];
+                const auto binding = s.address(resource);
+                const auto dimension = s.resourceShape(resource).dimension;
+                if (dimension == 1 || dimension == 11 || dimension == 12) {
+                    if (s.inputs.memory) {
+                        const auto view = s.inputs.memory->views_.find(binding);
+                        if (view != s.inputs.memory->views_.end() && view->second.resource &&
+                            view->second.nonTiled)
+                            mapping = MappingStatus::Mapped;
+                    }
+                } else if (s.inputs.textures) {
+                    const auto view = s.inputs.textures->views.find(binding);
+                    if (view != s.inputs.textures->views.end() && view->second.resource &&
+                        view->second.nonTiled)
+                        mapping = MappingStatus::Mapped;
+                }
             }
             const auto previous = std::find_if(result.changes.begin(), result.changes.end(),
                                                [&](const Change &c) { return c.destination == target; });

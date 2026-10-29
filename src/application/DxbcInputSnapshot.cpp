@@ -313,6 +313,11 @@ class Snapshot {
                                        TextureMetadata{std::move(description.resource), description.minLod});
         }
         const auto info = textureInfo(textures->metadata.at(id).resource);
+        auto &bindingMetadata = result.bindings[binding];
+        bindingMetadata.capturedMiscFlags = replay.frame().resource(id).desc.back();
+        bindingMetadata.nativeMiscFlags = textures->metadata.at(id).resource.desc.back();
+        view.nonTiled = !((*bindingMetadata.capturedMiscFlags | *bindingMetadata.nativeMiscFlags) &
+                          D3D11_RESOURCE_MISC_TILED);
         auto range = [](uint32_t first, uint32_t &count, uint32_t total) {
             if (first >= total)
                 throw std::runtime_error("Native texture view starts outside its storage");

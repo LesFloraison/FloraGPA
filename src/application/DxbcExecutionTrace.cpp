@@ -326,7 +326,8 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
                            {"layer_count", view.layerCount},
                            {"depth_slices", view.depthSlices ? Json(*view.depthSlices) : Json(nullptr)},
                            {"plane_slice", view.planeSlice ? Json(*view.planeSlice) : Json(nullptr)},
-                           {"d3d11_descriptor", view.nativeDescriptor}});
+                           {"d3d11_descriptor", view.nativeDescriptor},
+                           {"non_tiled", view.nonTiled}});
             if (view.queries)
                 queries(reg(r), *view.queries);
             if (view.samples) {

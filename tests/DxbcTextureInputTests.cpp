@@ -211,6 +211,9 @@ class DxbcTextureInputTests final : public QObject {
         QCOMPARE(texture.minLod, shape == 6 ? 1.25f : 0.f);
         const Register reg{writable ? 30u : 7u, {0}};
         const auto &view = observed.inputs.textures->views.at(reg);
+        QVERIFY(view.nonTiled);
+        QCOMPARE(observed.bindings.at(reg).capturedMiscFlags, description(shape).desc.back());
+        QCOMPARE(observed.bindings.at(reg).nativeMiscFlags, expectedDescription.back());
         QCOMPARE(view.resource, std::optional<uint64_t>(20));
         QCOMPARE(view.firstMip, 1u);
         QCOMPARE(view.mipCount, writable ? 1u : 2u);

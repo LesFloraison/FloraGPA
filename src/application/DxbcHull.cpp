@@ -314,7 +314,7 @@ OutputLogShader instrumentHullOutputs(Bytes original, uint32_t slot, uint32_t pa
                     outputsFound.emplace_back(pos, end);
                 pos = end;
             }
-            if (pos != row.size() && !dxbc_detail::samplePositionPadding(row, pos))
+            if (pos != row.size() && !dxbc_detail::compilerInstructionPadding(row, pos))
                 throw std::runtime_error("Unsupported HS instruction operand layout");
             if (outputsFound.empty()) {
                 result.push_back(row);

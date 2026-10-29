@@ -18,15 +18,20 @@ Words op(uint32_t opcode, std::initializer_list<Words> args = {}) {
     result[0] |= uint32_t(result.size()) << 24;
     return result;
 }
-std::vector<uint8_t> shader(uint32_t dimension, uint32_t format, bool extended = false, bool alias = false) {
+std::vector<uint8_t> shader(uint32_t dimension, uint32_t format, bool extended = false, bool alias = false,
+                            bool feedback = false) {
     const auto returns = (format == 24 || format == 28 ? 1u : typedBufferFormat(format)->returnType) * 0x1111;
-    std::vector<Words> rows{op(89, {{0x208e46, 0, 2}}), op(104, {{1}}), op(155, {{1, 1, 1}}),
+    std::vector<Words> rows{op(89, {{0x208e46, 0, 2}}), op(104, {{feedback ? 2u : 1u}}), op(155, {{1, 1, 1}}),
                             op(156 | (dimension << 11), {{0x11e0f2, 0}, {returns}}),
                             op(158, {{0x11e0f2, 1}, {16}})};
     if (alias)
         rows.push_back(op(156 | (dimension << 11), {{0x11e0f2, 2}, {returns}}));
     auto store = op(164, {{0x11e0f2, 0}, {0x208e46, 0, 0}, {0x208e46, 0, 1}});
     auto load = op(163, {{0x1000f2, 0}, {0x208e46, 0, 0}, {0x11e1b6, alias ? 2u : 0u}});
+    if (feedback) {
+        load.insert(load.begin() + 3, {0x100012, 1});
+        load[0] = 225u | (uint32_t(load.size()) << 24);
+    }
     if (extended)
         for (auto *instruction : {&store, &load}) {
             instruction->insert(instruction->begin() + 1,
@@ -373,6 +378,17 @@ class DxbcTextureUavTests final : public QObject {
                     QVERIFY(!changes.at(0).before.empty());
                 }
             }
+            QCOMPARE(replay.readTexture(20), before);
+            auto feedbackInputs = snapshotResourceInputs(replay, 5).inputs;
+            feedbackInputs.textures->views[{30, {2}}] = feedbackInputs.textures->views.at({30, {0}});
+            const Program feedbackProgram(shader(dimension, format, mode == 6, true, true));
+            Group feedbackGroup(feedbackProgram, feedbackInputs);
+            while (!feedbackGroup.finished())
+                feedbackGroup.step();
+            QCOMPARE(feedbackInputs.memory->buffers().at(10).bytes, expected);
+            const auto status = feedbackGroup.lane(0).value({0, {1}});
+            QCOMPARE(status.mapping[0], mode == 4 ? MappingStatus::Unknown : MappingStatus::Mapped);
+            QCOMPARE(status.valid & 1, 0);
             QCOMPARE(replay.readTexture(20), before);
             validate(replay);
             validate(reference);

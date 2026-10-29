@@ -177,15 +177,27 @@ size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> 
         throw std::runtime_error("Truncated DXBC operand");
     return pos;
 }
-bool samplePositionPadding(const std::vector<uint32_t> &row, size_t end) {
-    // D3DCompiler emits one trailing zero for SRV SAMPLE_POS, including dynamic indices.
-    if (row.empty() || (row[0] & 2047) != 110 || end < 2 || end + 1 != row.size() || row[end] != 0)
+bool compilerInstructionPadding(const std::vector<uint32_t> &row, size_t end) {
+    // Observed D3DCompiler padding, separately validated from operand framing.
+    if (row.empty() || end < 2 || end + 1 != row.size() || row[end] != 0)
+        return false;
+    const auto opcode = row[0] & 2047;
+    if (opcode != 110 && opcode != 228 && opcode != 229)
         return false;
     size_t start = 1;
     try {
         for (auto extended = row[0] >> 31; extended;)
             extended = row.at(start++) >> 31;
         std::set<unsigned> unused;
+        if (opcode == 228 || opcode == 229) {
+            for (unsigned i = 0; i < 6; ++i) {
+                const auto kind = (row.at(start) >> 12) & 255;
+                if ((i == 3 && kind != 7) || (i == 4 && kind != 6))
+                    return false;
+                start = operand(row, start, unused, 0, false);
+            }
+            return start == end;
+        }
         start = operand(row, start, unused, 0, false);
         if (((row.at(start) >> 12) & 255) != 7)
             return false;

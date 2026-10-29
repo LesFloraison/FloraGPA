@@ -33,7 +33,7 @@ def result(directory, vendor, expected, edited, mode, created):
     header = records[0]
     require(header['stage'] == 'cs' and header['gpa_event'] == 100 and header['gpa_shader'] == 15 and
             header['resource_observation'] == 'before_event_replay' and
-            header['input_source'] == 'independent-replay-resource-inputs/11' and
+            header['input_source'] == 'independent-replay-resource-inputs/12' and
             header['frame_sha256'] == context['frame_sha256'], 'Wrong snapshot provenance')
     require(header['class_bindings'][0]['object'] == 62 and
             header['class_bindings'][0]['this_bits'] == [0, 0, 6 if created else 3, 0], 'Wrong class binding')

@@ -107,7 +107,7 @@ SystemIdShader offsetSystemId(Bytes original, uint32_t offset, uint32_t systemVa
             ++pos; // Interface-call function index precedes its operand.
         for (unsigned i = 0; i < arity->second; ++i)
             pos = rewrite(row, pos, reg, temporary, seen);
-        if (pos != row.size() && !dxbc_detail::samplePositionPadding(row, pos))
+        if (pos != row.size() && !dxbc_detail::compilerInstructionPadding(row, pos))
             throw std::runtime_error("Unexpected system-ID instruction tail");
     }
     std::vector<Row> added;

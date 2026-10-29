@@ -21,7 +21,7 @@ Words op(uint32_t code, std::initializer_list<Words> args = {}) {
     return out;
 }
 Program load(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask = 15,
-             std::array<int32_t, 3> offset = {}) {
+             std::array<int32_t, 3> offset = {}, bool feedback = false) {
     const auto target = (stage == 5 ? 0x100002u : 0x102002u) | (mask << 4);
     uint32_t control = 1;
     for (unsigned c = 0; c < 3; ++c)
@@ -29,13 +29,20 @@ Program load(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask
     std::vector<Words> rows{op(89, {{0x208e46, 0, 2}}),
                             op(88 | (dimension << 11), {{0x1070f2, 0}, {returns * 0x1111}})};
     if (stage == 5) {
-        rows.push_back(op(104, {{1}}));
+        rows.push_back(op(104, {{feedback ? 2u : 1u}}));
         rows.push_back(op(155, {{1, 1, 1}}));
     } else
         rows.push_back(op(101, {{target | 0xf0, 0}}));
+    if (feedback && stage != 5)
+        rows.push_back(op(104, {{2}}));
     rows.push_back(op(54, {{target | 0xf0, 0}, {0x4002, 7, 8, 9, 10}}));
-    rows.push_back(
-        op(46 | 0x80000000, {{control}, {target, 0}, {0x208e46, 0, 0}, {0x1071b6, 0}, {0x20800a, 0, 1}}));
+    auto read =
+        op(46 | 0x80000000, {{control}, {target, 0}, {0x208e46, 0, 0}, {0x1071b6, 0}, {0x20800a, 0, 1}});
+    if (feedback) {
+        read.insert(read.begin() + 4, {0x100012, 1});
+        read[0] = (read[0] & ~(2047u | (127u << 24))) | 224u | (uint32_t(read.size()) << 24);
+    }
+    rows.push_back(read);
     rows.push_back(op(62));
     return Program(makeDxbc({{0x58454853, writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows})}}));
 }
@@ -668,6 +675,16 @@ class DxbcMultisampleTests final : public QObject {
                         lane.step();
                         const auto step = lane.step();
                         const auto value = lane.value({stage == 5 ? 0u : 2u, {0}});
+                        QVERIFY(view.nonTiled);
+                        const auto feedbackProgram =
+                            load(stage, array ? 9u : 4u, returns, mode == 4 ? 5u : 15u, offset, true);
+                        Lane feedbackLane(feedbackProgram, inputs);
+                        feedbackLane.step();
+                        feedbackLane.step();
+                        QCOMPARE(feedbackLane.value({stage == 5 ? 0u : 2u, {0}}), value);
+                        const auto status = feedbackLane.value({0, {1}});
+                        QCOMPARE(status.mapping[0], MappingStatus::Mapped);
+                        QCOMPARE(status.valid & 1, 0);
                         const uint32_t mask = mode == 4 ? 5 : 15;
                         QCOMPARE(value.valid, uint8_t(sample == 4 ? 15 & ~mask : 15));
                         if (sample == 4)
