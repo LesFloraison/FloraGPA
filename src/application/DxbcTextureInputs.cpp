@@ -236,7 +236,12 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
         return (lane.address.valid & addressMask) != addressMask;
     });
     for (const auto &lane : invocations) {
-        if (lane.address.valid > 15 || lane.parameter.valid > 15)
+        if (lane.address.valid > 15 || lane.parameter.valid > 15 ||
+            (lane.clamp && !lane.clamp->wellFormed()) ||
+            lane.clamp.has_value() != invocations[0].clamp.has_value() ||
+            lane.literalParameter != invocations[0].literalParameter ||
+            (lane.literalParameter &&
+             (!(lane.parameter.valid & 1) || lane.parameter.bits[0] != *lane.literalParameter)))
             throw std::runtime_error("Invalid implicit sampling input validity");
         if (opcode == 74 && (lane.parameter.valid & 1)) {
             const auto bias = std::bit_cast<float>(lane.parameter.bits[0]);
@@ -252,9 +257,12 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
                           Value::known({}), swizzle, mask, offset, {}, opcode == 70, false, opcode == 108))
         return {*resolved, *resolved, *resolved, *resolved};
     auto batch = invocations;
-    for (auto &lane : batch)
+    for (auto &lane : batch) {
         if (opcode == 69 || opcode == 108 || !(lane.parameter.valid & 1))
             lane.parameter = Value::known({});
+        if (lane.clamp && !(lane.clamp->valid & 1))
+            lane.clamp = Value::known({});
+    }
     if (!gpu)
         throw std::runtime_error("Implicit pixel sampling requires the selected adapter GPU assist");
     const auto &view = views.at(binding);
@@ -262,8 +270,10 @@ std::array<Value, 4> TextureInputs::samplePixelQuad(
         gpu->samplePixelQuad(opcode, resources.at(*view.resource), view, samplers.at(samplerBinding),
                              dimension, returns, batch, swizzle, mask, offset, precision);
     for (unsigned i = 0; i < 4; ++i)
-        result[i].valid =
-            opcode == 69 || opcode == 108 || (invocations[i].parameter.valid & 1) ? uint8_t(mask) : 0;
+        result[i].valid = (opcode == 69 || opcode == 108 || (invocations[i].parameter.valid & 1)) &&
+                                  (!invocations[i].clamp || (invocations[i].clamp->valid & 1))
+                              ? uint8_t(mask)
+                              : 0;
     assisted = true;
     return result;
 }
@@ -271,7 +281,8 @@ Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, cons
                                    uint32_t dimension, uint32_t returns, const Value &address,
                                    const Value &lodOrDdx, const std::array<uint32_t, 4> &swizzle,
                                    uint32_t mask, const std::array<int32_t, 3> &offset, GpuOperations *gpu,
-                                   bool &assisted, const std::optional<Value> &ddy, bool comparison) const {
+                                   bool &assisted, const std::optional<Value> &ddy, bool comparison,
+                                   const std::optional<Value> &clamp) const {
     assisted = false;
     if (const auto resolved = prepareSample(stage, binding, samplerBinding, dimension, returns, address,
                                             lodOrDdx, swizzle, mask, offset, ddy, comparison))
@@ -281,8 +292,10 @@ Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, cons
     const auto sampler = samplers.find(samplerBinding);
     if (!gpu)
         throw std::runtime_error("Native texture sampling requires GPU assistance");
+    if (clamp && !(clamp->valid & 1))
+        return {};
     auto result = gpu->sampleTexture(stage, texture, view, sampler->second, dimension, returns, address,
-                                     lodOrDdx, swizzle, mask, offset, ddy, comparison);
+                                     lodOrDdx, swizzle, mask, offset, ddy, comparison, clamp);
     result.valid = uint8_t(mask);
     assisted = true;
     return result;
@@ -328,6 +341,13 @@ std::optional<std::vector<Value>> TextureInputs::sampleGradBatch(
                 result[i] = *resolved;
         return result;
     }
+    for (const auto &lane : invocations)
+        if (lane.active &&
+            (lane.clamp.has_value() != first->clamp.has_value() || (lane.clamp && !lane.clamp->wellFormed())))
+            throw std::runtime_error("Invalid sampling cohort clamp inputs");
+    if (std::any_of(invocations.begin(), invocations.end(),
+                    [](const auto &lane) { return lane.active && lane.clamp && !(lane.clamp->valid & 1); }))
+        return std::nullopt;
     if (!gpu)
         throw std::runtime_error("Native sampling group requires GPU assistance");
     const auto &view = views.at(binding);

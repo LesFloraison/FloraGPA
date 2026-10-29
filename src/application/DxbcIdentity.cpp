@@ -179,18 +179,20 @@ size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> 
 }
 bool compilerInstructionPadding(const std::vector<uint32_t> &row, size_t end) {
     // Observed D3DCompiler padding, separately validated from operand framing.
-    if (row.empty() || end < 2 || end + 1 != row.size() || row[end] != 0)
+    if (row.empty() || end < 2 || end + 1 != row.size())
         return false;
     const auto opcode = row[0] & 2047;
-    if (opcode != 110 && opcode != 228 && opcode != 229)
+    if ((row[end] != 0 && !(opcode == 232 && row[end] == 0x2000)) ||
+        (opcode != 110 && (opcode < 228 || opcode > 233)))
         return false;
     size_t start = 1;
     try {
         for (auto extended = row[0] >> 31; extended;)
             extended = row.at(start++) >> 31;
         std::set<unsigned> unused;
-        if (opcode == 228 || opcode == 229) {
-            for (unsigned i = 0; i < 6; ++i) {
+        if (opcode >= 228 && opcode <= 233) {
+            constexpr std::array<unsigned, 6> counts{6, 6, 6, 7, 8, 7};
+            for (unsigned i = 0; i < counts[opcode - 228]; ++i) {
                 const auto kind = (row.at(start) >> 12) & 255;
                 if ((i == 3 && kind != 7) || (i == 4 && kind != 6))
                     return false;

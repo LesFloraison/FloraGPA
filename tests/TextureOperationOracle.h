@@ -11,8 +11,11 @@ using namespace dxbc_exec;
 inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, uint32_t stage,
                                              const TextureInput &input, const TextureInputView &view,
                                              const std::vector<std::array<uint32_t, 4>> &values,
-                                             uint32_t outputPrecision,
-                                             const SamplerInput *sampler = nullptr) {
+                                             uint32_t outputPrecision, const SamplerInput *sampler = nullptr,
+                                             uint32_t outputCount = 1, uint32_t outputIndex = 0) {
+    if (!outputCount || outputCount > 1024 || outputIndex >= outputCount ||
+        (stage != 5 && (outputCount != 1 || outputIndex != 0)))
+        throw std::runtime_error("Invalid independent texture output range");
     Com<ID3D11DeviceContext> context;
     auto shaderCheck = [&](HRESULT status, const char *message) {
         if (FAILED(status)) {
@@ -144,7 +147,7 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
         context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         context->Draw(3, 0);
     } else {
-        bd = {16,
+        bd = {outputCount * 16,
               D3D11_USAGE_DEFAULT,
               UINT(stage == 1 ? D3D11_BIND_STREAM_OUTPUT : D3D11_BIND_UNORDERED_ACCESS),
               0,
@@ -209,7 +212,7 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
     D3D11_MAPPED_SUBRESOURCE mapped{};
     check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read independent precision output");
     std::array<uint32_t, 4> result;
-    std::memcpy(result.data(), mapped.pData, 16);
+    std::memcpy(result.data(), static_cast<const uint8_t *>(mapped.pData) + outputIndex * 16, 16);
     context->Unmap(staging.Get(), 0);
     return result;
 }

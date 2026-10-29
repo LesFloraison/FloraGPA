@@ -88,8 +88,9 @@ Operand operand(const Words &words, size_t &pos, unsigned depth = 0) {
     return result;
 }
 uint32_t feedbackOperation(uint32_t opcode) {
-    static constexpr std::array<uint32_t, 11> operations{109, 126, 127, 128, 45, 46, 163, 165, 167, 72, 71};
-    return opcode >= 219 && opcode <= 229 ? operations[opcode - 219] : opcode;
+    static constexpr std::array<uint32_t, 15> operations{109, 126, 127, 128, 45, 46, 163, 165,
+                                                         167, 72,  71,  69,  74, 73, 70};
+    return opcode >= 219 && opcode <= 233 ? operations[opcode - 219] : opcode;
 }
 const std::vector<Operand> &dataOperands(const std::vector<Operand> &original, uint32_t opcode,
                                          std::vector<Operand> &normalized) {
@@ -747,6 +748,8 @@ struct SamplingRequest {
     uint32_t mask;
     std::array<int32_t, 3> offset;
     std::array<uint32_t, 3> precision;
+    std::optional<Value> clamp;
+    std::optional<uint32_t> literalParameter;
 };
 struct Lane::State {
     std::shared_ptr<const ProgramData> program;
@@ -949,6 +952,17 @@ struct Lane::State {
             } else
                 fail("Unsupported explicit sampling extension");
         }
+        const bool clamped = instruction.opcode >= 230 && instruction.opcode <= 233;
+        if (clamped) {
+            const auto &clamp = args.back();
+            if (clamp.precision ||
+                (clamp.components != 1 &&
+                 !(clamp.components == 2 &&
+                   (clamp.mode == 2 ||
+                    (clamp.mode == 1 && std::all_of(clamp.select.begin(), clamp.select.end(),
+                                                    [&](auto c) { return c == clamp.select[0]; }))))))
+                fail("Invalid per-sample LOD clamp operand");
+        }
         return {binding,
                 samplerBinding,
                 dimension,
@@ -959,13 +973,19 @@ struct Lane::State {
                 resource.select,
                 destination.mask,
                 offsets,
-                {destination.precision, args[1].precision, (op == 69 || op == 108) ? 0u : args[4].precision}};
+                {destination.precision, args[1].precision, (op == 69 || op == 108) ? 0u : args[4].precision},
+                clamped ? std::optional<Value>(source(args.back(), false)) : std::nullopt,
+                clamped && (op == 70 || op == 74) && args[4].kind == 4 && args[4].components == 1 &&
+                        !args[4].modifier && !args[4].precision
+                    ? std::optional<uint32_t>(source(args[4], false).bits[0])
+                    : std::nullopt};
     }
 };
 bool Lane::samplingBoundary() const {
     const auto &s = *state_;
     return !s.done && !s.waiting && !s.pendingSampling && s.program->stage == 5 &&
-           s.program->instructions.at(s.pc).opcode == 73 && s.inputs.textures && s.inputs.gpu;
+           feedbackOperation(s.program->instructions.at(s.pc).opcode) == 73 && s.inputs.textures &&
+           s.inputs.gpu;
 }
 bool Lane::hasPendingSampling() const { return state_->pendingSampling.has_value(); }
 bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
@@ -988,7 +1008,7 @@ bool Lane::prepareSamplingBatch(const std::vector<Lane *> &lanes) {
             request.swizzle != selected.swizzle || request.mask != selected.mask ||
             request.offset != selected.offset)
             continue;
-        invocations[i] = {request.address, request.lodOrDdx, *request.ddy, true};
+        invocations[i] = {request.address, request.lodOrDdx, *request.ddy, true, request.clamp};
     }
     bool assisted = false;
     const auto values = s.inputs.textures->sampleGradBatch(
@@ -1508,7 +1528,7 @@ Step Lane::step() {
             value = s.inputs.textures->sampleTexture(
                 p.stage, request.binding, request.sampler, request.dimension, request.returns,
                 request.address, request.lodOrDdx, request.swizzle, request.mask, request.offset,
-                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71);
+                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71, request.clamp);
         if (s.inBounds(target)) {
             const auto before = s.value(target);
             auto after = before;
@@ -2148,7 +2168,7 @@ PixelQuadStep PixelQuad::step() {
                 continue;
             if (lane.waiting)
                 fail("Pixel quad encountered a compute barrier");
-            const auto op = lane.program->instructions.at(lane.pc).opcode;
+            const auto op = feedbackOperation(lane.program->instructions.at(lane.pc).opcode);
             if (lane.pendingDerivative || lane.pendingSampling) {
                 if (pending == 4)
                     pending = i;
@@ -2172,7 +2192,7 @@ PixelQuadStep PixelQuad::step() {
                         other.loops != first.loops || other.callLoopDepths != first.callLoopDepths)
                         fail("Pixel lanes did not reach the same dynamic quad instruction");
                 }
-                const auto opcode = first.program->instructions.at(first.pc).opcode;
+                const auto opcode = feedbackOperation(first.program->instructions.at(first.pc).opcode);
                 if (opcode == 69 || opcode == 70 || opcode == 74 || opcode == 108) {
                     const auto request = first.sampling();
                     std::array<PixelSamplingInvocation, 4> invocations;
@@ -2183,7 +2203,7 @@ PixelQuadStep PixelQuad::step() {
                             item.swizzle != request.swizzle || item.mask != request.mask ||
                             item.offset != request.offset || item.precision != request.precision)
                             fail("Pixel sampling cohort bindings disagree");
-                        invocations[i] = {item.address, item.lodOrDdx};
+                        invocations[i] = {item.address, item.lodOrDdx, item.clamp, item.literalParameter};
                     }
                     bool assisted = false;
                     const auto results =
