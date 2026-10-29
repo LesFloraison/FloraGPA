@@ -24,7 +24,7 @@ def digest(path):
 
 def metadata(job, result, expected, reader):
     event, groups = expected
-    require(result['schema'] == job['schema'] == 1 and result['backend'] == job['backend'] == 'dx11-native/10' and
+    require(result['schema'] == job['schema'] == 1 and result['backend'] == job['backend'] == 'dx11-native/11' and
             result['ok'] and result['request_id'] == job['request_id'], 'Job completion identity')
     context = result['context']
     for key in ('schema', 'backend', 'backend_sha256', 'frame_sha256', 'experiment_sha256', 'action', 'options'):

@@ -7,6 +7,8 @@
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeCounters.h"
 #include "application/NativeMesh.h"
+#include "application/NativeReplayMesh.h"
+#include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
@@ -226,6 +228,111 @@ class NativeAnalysisTests final : public QObject {
                                         "ds-uav-independent", "ds-upstream-alias", "gs", "gs-read", "auto"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(scenario).arg(vendor)))
                     << QString(scenario) << vendor;
+    }
+    void cliMeshPresentation_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto mode : {"selected", "remaining", "no-position", "hs"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(mode))) << vendor << QString(mode);
+    }
+    void cliMeshPresentation() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(QString, mode);
+            QTemporaryDir directory;
+            const auto capture = directory.filePath("frame.gpa_frame"), output = directory.filePath("output");
+            auto fixture = testing::hullCapture();
+            if (mode != "hs") {
+                fixture.save(capture);
+                Frame frame(capture.toStdWString());
+                auto state = frame.state(199);
+                state.stages[1].shader = state.stages[2].shader = 0;
+                state.topology = 4;
+                std::erase_if(fixture.entries, [](const auto &entry) { return entry.id == 199; });
+                fixture.add(199, 3, 3, testing::snapshot(state));
+            }
+            if (mode == "no-position") {
+                const auto code =
+                    testing::compileClassProgram("float4 main(uint id:SV_VertexID,uint "
+                                                 "inst:SV_InstanceID):TEXCOORD0{return float4(id,inst,0,1);}",
+                                                 "vs_5_0");
+                auto payload = testing::statePack(uint64_t(code.size()));
+                payload.insert(payload.end(), code.begin(), code.end());
+                testing::append(payload, Id(0));
+                std::erase_if(fixture.entries, [](const auto &entry) { return entry.id == 7001; });
+                fixture.add(7001, 9, 0x81, payload);
+            }
+            fixture.save(capture);
+            QStringList arguments{"analyze",
+                                  capture,
+                                  "mesh",
+                                  "--gpa-event",
+                                  "200",
+                                  "--stage",
+                                  mode == "hs" ? "hs" : "vs-inputs",
+                                  "--instance",
+                                  "0",
+                                  "--out",
+                                  output};
+            if (mode == "remaining")
+                arguments << "--vertex-storage" << "remaining";
+            if (vendor)
+                arguments << "--gpu-vendor" << QString::number(vendor);
+            else
+                arguments << "--warp";
+            QProcess process;
+            process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", arguments);
+            QVERIFY(process.waitForStarted(5000));
+            QVERIFY(process.waitForFinished(30000));
+            QCOMPARE(process.exitStatus(), QProcess::NormalExit);
+            QVERIFY2(process.exitCode() == 0, process.readAllStandardError().constData());
+            const auto job = load(output + "/job.json"), result = load(output + "/result.json");
+            validateNativeAnalysisResult(job, result);
+            const auto files = readNativeArtifacts(output, result.at("artifacts"), 64 * 1024 * 1024);
+            const bool available = mode == "selected" || mode == "remaining";
+            QCOMPARE(result.at("mesh_presentation").at("available"), Json(available));
+            QCOMPARE(result.at("mesh_presentation").at("reason").is_null(), available);
+            QVERIFY(!files.isEmpty());
+            if (available) {
+                const auto mesh = nativeReplayMesh(job, result, files);
+                QCOMPARE(mesh.positions.positions.size(), mode == "remaining" ? size_t(12) : size_t(6));
+                QCOMPARE(mesh.positions.indexCount, uint64_t(6));
+                QCOMPARE(mesh.positions.faces.size(), size_t(2));
+                for (const auto name :
+                     {"post_vertices.bin", "post_vertices.csv", "post_geometry.obj", "presentation.json"}) {
+                    QCOMPARE(mesh.files.value(name), files.value(name));
+                    auto corrupt = files;
+                    corrupt[name][0] ^= 1;
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, corrupt));
+                    corrupt = files;
+                    corrupt.remove(name);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, corrupt));
+                }
+                auto missing = result;
+                missing.erase("mesh_presentation");
+                QVERIFY_THROWS_EXCEPTION(std::exception, nativeReplayMesh(job, missing, files));
+            } else {
+                QVERIFY(!files.contains("post_vertices.bin"));
+                QVERIFY(!files.contains("post_vertices.csv"));
+                QVERIFY(!files.contains("post_geometry.obj"));
+                QVERIFY(!files.contains("presentation.json"));
+                if (mode == "no-position") {
+                    const auto mesh = readNativeMesh(job, result, output, 64 * 1024 * 1024);
+                    QCOMPARE(mesh.geometry.bytes.size(), size_t(6 * 16));
+                    QVERIFY(files.contains("vertices.csv"));
+                }
+            }
+            if (const auto root = qEnvironmentVariable("FLORA_NATIVE_MESH_CLI_EVIDENCE"); !root.isEmpty()) {
+                const auto destination = QDir(root).filePath(QTest::currentDataTag());
+                QVERIFY(QDir().mkpath(destination));
+                for (const auto &file : QDir(output).entryInfoList(QDir::Files))
+                    QVERIFY(QFile::copy(file.filePath(), QDir(destination).filePath(file.fileName())));
+                QVERIFY(QFile::copy(capture, QDir(destination).filePath("source_fixture.gpa_frame")));
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void meshArtifacts() {
         try {

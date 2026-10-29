@@ -64,7 +64,11 @@ PresentationFixture presentationFixture(PostTransformGeometry geometry) {
                 {"context", context},
                 {"context_id", analysisIdentity(context)},
                 {"data", geometry.report}};
+    result["mesh_presentation"] = nativeReplayMeshPresentationStatus(geometry.report);
     auto files = postTransformFiles(geometry);
+    const auto presentation = presentNativeReplayMesh(geometry);
+    for (auto it = presentation.files.cbegin(); it != presentation.files.cend(); ++it)
+        files.insert(it.key(), it.value());
     Json identities = Json::array();
     for (const auto &identity : geometry.identities)
         identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
@@ -246,7 +250,12 @@ class NativeReplayMeshUiTests : public QObject {
                     {"context", context},
                     {"context_id", analysisIdentity(context)},
                     {"data", geometry.report}};
-        auto model = nativeReplayMesh(job, result, postTransformFiles(geometry));
+        result["mesh_presentation"] = nativeReplayMeshPresentationStatus(geometry.report);
+        auto files = postTransformFiles(geometry);
+        const auto presentation = presentNativeReplayMesh(geometry);
+        for (auto it = presentation.files.cbegin(); it != presentation.files.cend(); ++it)
+            files.insert(it.key(), it.value());
+        auto model = nativeReplayMesh(job, result, files);
         QCOMPARE(model.positions.components, components);
         QCOMPARE(model.positions.faces, (std::vector<std::array<uint64_t, 3>>{{0, 1, 2}}));
         for (size_t row = 0; row < 3; ++row)
@@ -314,7 +323,10 @@ class NativeReplayMeshUiTests : public QObject {
                 std::memcpy(geometry.bytes.data() + row * 24 + 4 + 4 * c, &value, 4);
             }
         auto fixture = presentationFixture(geometry);
-        fixture.files["post_geometry.obj"] = "Untrusted stale presentation";
+        auto stalePresentation = fixture.files;
+        stalePresentation["post_geometry.obj"] = "Untrusted stale presentation";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 nativeReplayMesh(fixture.job, fixture.result, stalePresentation));
         auto mesh =
             std::make_shared<NativeReplayMesh>(nativeReplayMesh(fixture.job, fixture.result, fixture.files));
         QCOMPARE(mesh->tables.at("replay_mesh").at("position_components"), indices);

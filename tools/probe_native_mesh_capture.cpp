@@ -123,11 +123,10 @@ int main(int argc, char **argv) {
                     Json::parse(read(QDir(directory).filePath("ui-export.json")).toStdString());
                 require(exported.at("presentation") == mesh->tables, "UI JSON presentation mismatch");
             }
-            save(QDir(directory).filePath("post_vertices.csv"), mesh->files["post_vertices.csv"]);
-            save(QDir(directory).filePath("post_vertices.bin"), mesh->files["post_vertices.bin"]);
-            save(QDir(directory).filePath("post_geometry.obj"), mesh->files["post_geometry.obj"]);
-            save(QDir(directory).filePath("presentation.json"),
-                 QByteArray::fromStdString(mesh->tables.dump(2)));
+            for (const auto name :
+                 {"post_vertices.csv", "post_vertices.bin", "post_geometry.obj", "presentation.json"})
+                require(read(QDir(directory).filePath(name)) == mesh->files[name],
+                        "Worker presentation differs from retained mesh");
             records.push_back({{"stage", stage},
                                {"ui_presented", present},
                                {"vertices", mesh->positions.positions.size()},

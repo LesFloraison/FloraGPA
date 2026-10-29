@@ -9,6 +9,7 @@
 #include "NativeHistory.h"
 #include "NativePixelDebug.h"
 #include "NativePixelDrawHistory.h"
+#include "NativeReplayMesh.h"
 #include "NativeVertexDebug.h"
 #include "PostTransform.h"
 #include "TextureInspector.h"
@@ -40,11 +41,13 @@ void number(const Json &value, uint64_t maximum, const std::string &key) {
         value.get<uint64_t>() > maximum)
         throw std::invalid_argument("Invalid unsigned analysis option: " + key);
 }
-void save(const QString &path, const Json &value) {
+void saveBytes(const QString &path, const QByteArray &bytes) {
     QSaveFile file(path);
-    const auto bytes = QByteArray::fromStdString(value.dump(2) + "\n");
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
         throw std::runtime_error("Cannot publish native analysis: " + path.toStdString());
+}
+void save(const QString &path, const Json &value) {
+    saveBytes(path, QByteArray::fromStdString(value.dump(2) + "\n"));
 }
 Json adapterIdentity(const Replay &replay) {
     const auto desc = replay.adapterDescription();
@@ -289,7 +292,7 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                  {"options", selection}};
     if (!QDir().mkpath(output))
         throw std::runtime_error("Cannot create analysis output directory");
-    Json data;
+    Json data, meshPresentation;
     const auto &view = effectiveFrame(frame, options);
     if (request.action == "inventory") {
         data = {{"resources", Json::array()},
@@ -448,6 +451,14 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                     identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
                 save(directory.filePath("identities.json"), identities);
             }
+            meshPresentation = nativeReplayMeshPresentationStatus(result.report);
+            if (meshPresentation.at("available") == true) {
+                const auto presentation = presentNativeReplayMesh(result, cancelled);
+                for (auto it = presentation.files.cbegin(); it != presentation.files.cend(); ++it) {
+                    checkCancellation(cancelled);
+                    saveBytes(directory.filePath(it.key()), it.value());
+                }
+            }
             data = result.report;
         }
     }
@@ -460,6 +471,8 @@ Json executeNativeAnalysis(const Json &job, const CancelCheck &cancelled) {
                 {"context_id", analysisIdentity(context)},
                 {"data", data},
                 {"artifacts", nativeArtifactManifest(output, cancelled)}};
+    if (request.action == "mesh")
+        result["mesh_presentation"] = meshPresentation;
     PROCESS_MEMORY_COUNTERS memory{};
     if (!GetProcessMemoryInfo(GetCurrentProcess(), &memory, sizeof memory))
         throw std::runtime_error("Cannot read native analysis memory usage");

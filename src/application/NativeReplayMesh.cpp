@@ -8,13 +8,24 @@
 #include <tuple>
 namespace flora {
 using Json = nlohmann::json;
-NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const NativeArtifactBytes &artifacts,
-                                  const CancelCheck &cancelled) {
-    auto validated = decodeNativeMesh(job, result, artifacts, cancelled);
-    const auto &geometry = validated.geometry;
+Json nativeReplayMeshPresentationStatus(const Json &report) {
+    Json reason = nullptr;
+    if (report.at("requested_stage") == "hs")
+        reason = "Hull phase output uses the hull inspection representation";
+    else {
+        bool position = false;
+        for (const auto &field : report.at("attributes"))
+            position |= field.at("system_value") == 1 && field.at("component_type") == 3;
+        if (!position)
+            reason = "No float SV_Position output; raw attributes remain available";
+    }
+    return {{"schema", 1}, {"available", reason.is_null()}, {"reason", reason}};
+}
+NativeReplayMesh presentNativeReplayMesh(const PostTransformGeometry &geometry,
+                                         const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     NativeReplayMesh output;
-    output.contextId = result.at("context_id").get<std::string>();
-    output.tables = std::move(validated.tables);
+    output.tables = postTransformTables(geometry);
     const auto &report = geometry.report;
     const auto count = report.at("vertices").get<uint64_t>(), stride = report.at("stride").get<uint64_t>();
     std::optional<uint64_t> offset;
@@ -63,6 +74,8 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
     const auto &tables = output.tables.at("tables");
     const bool identified = tables.contains("unique_vertices");
     if (identified) {
+        if (storageIdentities.size() != storedCount)
+            throw std::runtime_error("Native presentation identity count mismatch");
         using Owner = std::pair<uint32_t, int64_t>;
         using Key = std::tuple<uint32_t, int64_t, uint64_t>;
         std::map<Owner, std::map<std::string, uint64_t>> variants;
@@ -149,7 +162,6 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
     }
     if (!finite)
         output.preview = Json::object();
-    output.files = artifacts;
     output.tables["replay_mesh"] = {
         {"schema", 1},
         {"strategy", identified ? "sorted_input_identities_and_output_variants" : "expanded_outputs"},
@@ -174,7 +186,27 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
             obj += "p " + std::to_string(point.get<uint64_t>()) + "\r\n";
         output.files["post_geometry.obj"] = QByteArray::fromStdString(obj);
     }
+    output.files["presentation.json"] = QByteArray::fromStdString(output.tables.dump(2));
     checkCancellation(cancelled);
+    return output;
+}
+NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const NativeArtifactBytes &artifacts,
+                                  const CancelCheck &cancelled) {
+    auto validated = decodeNativeMesh(job, result, artifacts, cancelled);
+    const auto status = nativeReplayMeshPresentationStatus(validated.geometry.report);
+    if (result.at("mesh_presentation") != status || status.at("available") != true)
+        throw std::runtime_error("Native mesh presentation status disagrees with captured outputs");
+    auto output = presentNativeReplayMesh(validated.geometry, cancelled);
+    for (const auto name :
+         {"post_vertices.bin", "post_vertices.csv", "post_geometry.obj", "presentation.json"})
+        if (output.files.contains(name) != artifacts.contains(name) ||
+            (output.files.contains(name) && output.files[name] != artifacts[name]))
+            throw std::runtime_error("Native mesh presentation disagrees with vertex storage: " +
+                                     std::string(name));
+    output.contextId = result.at("context_id").get<std::string>();
+    for (auto it = artifacts.cbegin(); it != artifacts.cend(); ++it)
+        if (!output.files.contains(it.key()))
+            output.files.insert(it.key(), it.value());
     return output;
 }
 } // namespace flora
