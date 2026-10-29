@@ -1,8 +1,10 @@
 """Observe the pinned GPA debugger dispatch in an isolated research process.
 
 Uses only the Python standard library. The original DLL and capture stay read-only.
-A process-local forwarding observer records the real request's host field; it never
-supplies an engine. This is dispatch/lifecycle evidence, not shader-debug parity.
+A process-local forwarding observer records the real request's host field. The
+explicit synthetic-contract option temporarily supplies child-owned callbacks;
+the default observer never supplies a receiver. Neither mode recovers an engine
+or establishes shader-debug parity.
 """
 import argparse
 import ctypes as c
@@ -170,6 +172,11 @@ def child(args):
         base = dll._handle
         fn = lambda rva, result, *params: c.WINFUNCTYPE(result, *params)(base + rva)
         read = lambda address: Q.from_address(address).value
+        contract = None
+        if args.synthetic_engine_contract:
+            from probe_original_engine_contract import EngineContract
+            contract = EngineContract(base, report)
+            report['scope'] = 'synthetic_engine_call_contract_not_original_engine'
         def snapshot(label):
             host = read(base + 0x208540)
             engine = read(host + 0x3c0) if host else 0
@@ -199,6 +206,8 @@ def child(args):
         def result_callback(userdata, result, extra):
             report["requests"][-1]["result_callbacks"].append(
                 dict(userdata=hex(userdata or 0), result=hex(result or 0), extra=hex(extra or 0)))
+        if contract is not None:
+            result_callback = contract.result_callback
         error = Q()
         def playback(label):
             vectors = [(Q * 3)() for _ in range(3)]
@@ -237,6 +246,10 @@ def child(args):
             # dispatcher compares word 1 to an ERG identity. Other word semantics
             # remain unproven and are retained verbatim, not named as shader fields.
             selection = (U * 8)(0, args.event, 0, 0, 0, 0, 0, 0)
+            if contract is not None and args.contract_selection_seed:
+                for index in range(8):
+                    if index != 1:
+                        selection[index] = (args.contract_selection_seed + index * 0x10203) & 0xffffffff
             versions = (Q * 3)()
             slot, original = base + 0x183198, base + 0x902b0
             if read(slot) != original:
@@ -253,7 +266,8 @@ def child(args):
                                version=U.from_address(request + 0x10).value,
                                selection=list((U * 8).from_address(request + 0x20)))
                     report["requests"][-1]["execution"].append(row)
-                    result = execute(request, manager)
+                    result = (contract.execute(execute, request, manager, owner)
+                              if contract is not None else execute(request, manager))
                     row.update(returned=int(result), engine_after=hex(read(owner + 0x3c0)))
                     return result
                 except Exception as error:
@@ -300,7 +314,10 @@ def child(args):
                 if report["replay_adapter_after"] != report["replay_adapter"]:
                     raise ValueError("Original replay adapter changed during the requests")
         finally:
-            fn(0x86fc0, None)()
+            if contract is None:
+                fn(0x86fc0, None)()
+            else:
+                contract.close(read(base + 0x208540), fn(0x86fc0, None))
             snapshot("closed")
             report["closed"] = read(base + 0x208540) == 0
             report["player_unchanged"] = digest(player) == PLAYER_SHA256
@@ -322,12 +339,18 @@ def main():
     parser.add_argument("--timeout", type=float, default=120)
     parser.add_argument("--original-initialization", action="store_true",
                         help="Retain original query-manager and initial-playback defaults")
+    parser.add_argument("--synthetic-engine-contract", action="store_true",
+                        help="Temporarily supply a research callback object; never an original engine")
+    parser.add_argument("--contract-selection-seed", type=lambda value: int(value, 0), default=0,
+                        help="Opaque selection markers for synthetic engine research only")
     parser.add_argument("--vendor", type=int, choices=(4318, 32902),
                         help="Select one enumerated NVIDIA or Intel GPU and verify the replay device")
     parser.add_argument("--host-graph", action="store_true",
                         help="Record pinned host aliases and manager tables at lifecycle boundaries")
     parser.add_argument("--child", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.contract_selection_seed and not args.synthetic_engine_contract:
+        parser.error('--contract-selection-seed requires --synthetic-engine-contract')
     if not 0 < args.event <= 0xffffffff or not 0 < args.timeout <= 600:
         parser.error("Expected uint32 event and a timeout of at most 600 seconds")
     if args.child:
