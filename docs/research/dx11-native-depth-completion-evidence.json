@@ -1,0 +1,1800 @@
+{
+  "schema": 1,
+  "kind": "native_depth_completion_evidence",
+  "diagnostic_cases": 90,
+  "original_controls": 3,
+  "corrupted_observations_rejected": 720,
+  "count_differences": [
+    {
+      "case": "32902-early-discard-1-0",
+      "reference": 1,
+      "diagnostic": 0
+    },
+    {
+      "case": "32902-early-discard-4-0",
+      "reference": 4,
+      "diagnostic": 0
+    },
+    {
+      "case": "32902-early-discard-4-3",
+      "reference": 4,
+      "diagnostic": 0
+    },
+    {
+      "case": "32902-early-stencil-discard-1-0",
+      "reference": 1,
+      "diagnostic": 0
+    },
+    {
+      "case": "32902-early-stencil-discard-4-0",
+      "reference": 4,
+      "diagnostic": 0
+    },
+    {
+      "case": "32902-early-stencil-discard-4-3",
+      "reference": 4,
+      "diagnostic": 0
+    }
+  ],
+  "original_fragment_eligibility": null,
+  "retained_runs": [
+    {
+      "path": "artifacts/dx11-native/depth-completion-control.txt",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 241
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-final.txt",
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 14877
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-first.txt",
+      "passed": 24,
+      "failed": 8,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3844
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-geometry.txt",
+      "passed": 257,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 81103
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-msaa.txt",
+      "passed": 64,
+      "failed": 28,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 25801
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-om.txt",
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3732
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-order.txt",
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3764
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-reference.txt",
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3730
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-regression.txt",
+      "passed": 129,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 20126
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-second.txt",
+      "passed": 30,
+      "failed": 2,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3404
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-triage.txt",
+      "passed": 2,
+      "failed": 1,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3762
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-typeless.txt",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 282
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-verified.txt",
+      "passed": 95,
+      "failed": 1,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 15120
+    }
+  ],
+  "files": [
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance.txt",
+      "sha256": "6617b2c17d97630b2230b10f827578a686cb9f32f842579e1aad12ff76ea122d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-1-0.json",
+      "sha256": "46b32cc3a4eca39b3e02c4a9ee2e2cebd9cfd05fa9e016afabbefc9837a7c6c8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-0.json",
+      "sha256": "80eaf8aa48517c71686e421b02f20546310823796c2e25e743ac0ce97cd9e1be"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-pass-4-3.json",
+      "sha256": "d5a46e4c08158ac15bd86eea572e40b0ded9e7cab63dea7a5a1c5ceabc2e2342"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-1-0.json",
+      "sha256": "0a3026d6f57a6a17662f7eebeaaf96fad768c4dae4cbfd7a73b4ad6a9fead074"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-0.json",
+      "sha256": "d872db63b665a176ab257dbeeaa84e3e4716c70ae877019063b4d727f6c34a6b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-depth-fail-4-3.json",
+      "sha256": "fe9d843aa412dffde35f494f00d1a1eee49fc326823b6e46f3380857476182a4"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-1-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-1-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-1-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-1-0.json",
+      "sha256": "6647a3ed070622e1a504f9bc5d30fef16a17b752d47c3cc260e011ee625efc69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-0.json",
+      "sha256": "b1f6a3607d4f764ce695a44146e48942bb12d12b1abbf87892576027e44af4ee"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-3.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-3.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-3.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-discard-4-3.json",
+      "sha256": "885797b15089592bb827bdc6ab0134938d943f6aa0c137ab780fb67d1a4e71fd"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-1-0.json",
+      "sha256": "cf3d16bc0821c89c2703d4860dd9bfecad6b9957eb6106a376f3666a9667f085"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-0.json",
+      "sha256": "cdcb1a62288bb9bf30f61fa59c33ea40e90eaeffec8d3f0f4e23a9360c80e444"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-discard-4-3.json",
+      "sha256": "05fe74257e1a50644dcad7566bc9510c3268fa2c2478c273c67c8485fad5ffe8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-1-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-1-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-1-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-1-0.json",
+      "sha256": "b01fde25026b9a951e8751c03084e3533bdda682bc0d87b80903e2c02acffc94"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-0.json",
+      "sha256": "e56bf4a95b9991e147779a4919545f42c16d49dea650f2cb71980130060e8f64"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-3.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-3.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-3.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-shader-depth-4-3.json",
+      "sha256": "59e0c85783888aa62e61311f79645093fa4472ff765fab219073011ccf36cd53"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-1-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-1-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-1-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-1-0.json",
+      "sha256": "5c036282f34bf2742e683d3dc6b3ec8dab95b11180391153822ed204a6826ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-0.json",
+      "sha256": "12f9917e746c9b1d75b24a2092203e11f2ef3d4802d264edf06b9cfc24d9a011"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-3.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-3.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-3.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-coverage-4-3.json",
+      "sha256": "8e50a7bddd8dff4c78ca233a513b8f7c16d9a38006626244e1112fd1541cc8b7"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-1-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-1-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-1-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-1-0.json",
+      "sha256": "9255ca47f4d760b2649f54916ba5eef4aa0d72d997a07fd825b7a3790fa8ab69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-0.json",
+      "sha256": "297fb026abe5ba1974be2fff671f3a5f8acddf468a9563f23c51f4cb8ed36aab"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-3.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-3.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-3.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-null-4-3.json",
+      "sha256": "b1f0ae7ddfa1ed6f6954dc3a5f05c32a0145b055ca19fe6d59d179b31bfde849"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-1-0.json",
+      "sha256": "8e840b451c67bea62243ef4b96abdd1c1944c34ea1724424b152a8c6e6514b63"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-0.json",
+      "sha256": "2e4f177b06411814446501f02fc96badcd615f1afea99713f9533f40a1219cff"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-pass-4-3.json",
+      "sha256": "a19601efa6b7aeaa6cff6e2a69515c5a15615e3b4bae0cdd1295af7c1f7f0c91"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-1-0.json",
+      "sha256": "fe96a34a807861a9fb42aef9a87a958a9cb9ce01170dc50eca979bbb69c62a79"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-0.json",
+      "sha256": "d9b44983d80f91db843714fdefc698caf6acbf8207c4b3a36e1dbd5ec408e55a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-stencil-fail-4-3.json",
+      "sha256": "e5eb7cd958dfddf94ce71e8505e3b8147dc93ddad38a54731a17e5f254b374a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-1-0.json",
+      "sha256": "f4e2c439e6f824e5a6895bd149dc2c2e7e06d309047ad546b11dca07cb53601e"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-0.json",
+      "sha256": "3ad778dbeeb909e903432694b465a0ac8300b52b2daeb540fbb50415d796faea"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-early-stencil-discard-4-3.json",
+      "sha256": "0e6e0690612be50920ef64db13ee7744757c97fad870bc45e99efbce9fd860e3"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-0-original-control-4-0.json",
+      "sha256": "da0180f9072eb3b1660fdb650c493fd664467e1299b7e5d00c5acb86a25dd6e4"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-1-0.json",
+      "sha256": "e0d9c25006a243afeca6d73bfbd7e7f2884fb9026a660dbef0d6fdc67045b238"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-0.json",
+      "sha256": "85033fd96523428a6adf0fc43321277f5396d888e39116a39ffe4ec5b278d67b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-pass-4-3.json",
+      "sha256": "03d7f08a96f6b2863259f07c3ad158d825896098139f20cf30c66a58779e7c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-1-0.json",
+      "sha256": "9d1a17de41e23c317fa1a2f57a982a6a4e22ae509060f2f8aa37de7c9276dca7"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-0.json",
+      "sha256": "5c4427d5e6de293a4463d95d68b0c713cc401173e88388d33fd89fe19204f53d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-depth-fail-4-3.json",
+      "sha256": "8e5057430a33393f33cd07ed7f3140a612ec989d97ad15fd34262defdc7005d1"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-1-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-1-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-1-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-1-0.json",
+      "sha256": "be0664fe9e7796a02da97b1276df64cf73e7ef061d36607ad7908fea370f22e0"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-0.json",
+      "sha256": "c6f3c695a6c9488995b636b1cce996918821a33abe8991fa3386ad82550d17af"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-3.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-3.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-3.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-discard-4-3.json",
+      "sha256": "4d0a0478829f48acbd10dfac475ad11560f6b25fec3f1a564999132e12b1684d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-1-0.json",
+      "sha256": "fb04387b9a6ecc6f071d8c656b7ebe45a9a666ec7897f541c765e7225db1a00c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-0.json",
+      "sha256": "33c480dad29d5ddacc4cdfb9002f9f2735424432dcc8f1346e5a1732e444fa2e"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-discard-4-3.json",
+      "sha256": "d10792937b378c4ca82b653007ccb58f229f636e647d77f234a29e0158bcced6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-1-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-1-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-1-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-1-0.json",
+      "sha256": "e545b02a087cd77fd120eea6c212fd4348e28b8fced4a8edb2705316f57ce472"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-0.json",
+      "sha256": "d9f924f823750da9ac6d25f947f727746662b82f7c723fa66831e67bbb8f5aba"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-3.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-3.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-3.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-shader-depth-4-3.json",
+      "sha256": "b847540cdc52a42454bd376d19bbb2c9fe503d954f80ac774b01b85762b88a9d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-1-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-1-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-1-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-1-0.json",
+      "sha256": "ef7509fa870019678c53e6a51cb2aac94d25b091599114ec4e4454b63c4cc609"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-0.json",
+      "sha256": "862561e3705dc7a5ec3fa59a452bae48da6338a109d3d7f430e5cd045013cbb6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-3.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-3.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-3.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-coverage-4-3.json",
+      "sha256": "c4025ae92f46af681d2141d45e9cadbe93c5c46e7641f52cd2e52ee4dfda7e6a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-1-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-1-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-1-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-1-0.json",
+      "sha256": "92bfd76a930522e45ee651806f169188cc42fc4445bbcd36fd45c1b2775c88c0"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-0.json",
+      "sha256": "0f1c9db1a5580d3d503100cf91f9ad6826580f5118001c238df203c7b2894ab2"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-3.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-3.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-3.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-null-4-3.json",
+      "sha256": "3e68db5ce06a175f45b6e0fc5a49efd5d274a5feaf59137ff317ee9e784f0e33"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-1-0.json",
+      "sha256": "7c81893e663fc5f0cf1e27bb8e4587b4ba940ad4a03cf010bb0209185a361fd6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-0.json",
+      "sha256": "7c99e687b9f0841252e9cfea250eb99558b467a3faeea606e4ab7cc40b761987"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-pass-4-3.json",
+      "sha256": "410e71e5298afa32f161c12f03ce9bcb0076fb4a836414f638fafa6ef8c887f9"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-1-0.json",
+      "sha256": "7dccc0acc3e34c3aa9bd86b444b786f55ea2b2e4aa21d1af72e7cd3ed9f386ed"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-0.json",
+      "sha256": "9bea889f8bb0c042d3ed05cfc09bce9889693e8fac7a824e54e8200ee81ea7dc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-stencil-fail-4-3.json",
+      "sha256": "0bc5cc5f941347d14029d561a1e487eca339720208c933dadfc5110439f4990b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-1-0.json",
+      "sha256": "e2b9769370e8a9a65f076f0e7c030885cebfaa592c88b779297326d421482f21"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-0.json",
+      "sha256": "53e9bde0d66851bd24f9714f6f93974cebfe441c5ac64d1ba6558b38d872c29f"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-early-stencil-discard-4-3.json",
+      "sha256": "c6df909c2cb0e5d26f7fd554e6dececa1ad1d30dcfabb1e040ffd5e7b5c14642"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-4318-original-control-4-0.json",
+      "sha256": "58606b8ae78320e9942065a8ba3a5725bb4b2144937a2bfffdb9b0cd687ee73d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-1-0.json",
+      "sha256": "a1f6c8fb7ed2e5fc8c4743faa4f58778cc8d0d029f4b9eb4ef9309a0a49ddc7f"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-0.json",
+      "sha256": "af93d4d253123a79371e0a807ca5e28ff68696fb7d82ff2f965156979abdfa43"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-pass-4-3.json",
+      "sha256": "7c865f4c91dd167c55dbe0d1a058b80464fa9f42147a9c02ae3984584d693e1e"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-1-0.json",
+      "sha256": "f6c221f107252184740aea7db103dc7afdb5f891ce50c1d0dcb2a938b4895231"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-0.json",
+      "sha256": "5f1a4722219230fde62d3a459eb72872d352d6980aec022c267272e297678605"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-depth-fail-4-3.json",
+      "sha256": "c385ded273376e369c71990af42af79132eeb7e04c7717cc9c662e2217c03874"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-1-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-1-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-1-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-1-0.json",
+      "sha256": "c2686b516ee38b0cf46f3ea3750870f19facfce71db539d83a466d05472adab1"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-0.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-0.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-0.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-0.json",
+      "sha256": "64ad16acbb44e3f08a505563abd17540554cd4bcc3d81469c1616341ece2b45b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-3.json.original.dxbc",
+      "sha256": "3db3aeeaa1cdd77a40b88e2587fb6f28a4b8ff1727791bcd9b0417aaecc14a06"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-3.json.prepared.dxbc",
+      "sha256": "ca0250b2b306845df06fc8f51fcac51a371b22dc4b69d0c0a630343c677ca331"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-3.json.marked.dxbc",
+      "sha256": "c689b5c89a5f3445f01206f37257fa6be5a6e1c2538a17e9cc11adbf5094d9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-discard-4-3.json",
+      "sha256": "027446d59d801f142d10a612bbbf4006d58143a3a9e65074d5bf9901a0f06ac4"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-1-0.json",
+      "sha256": "7f73ba05bf657aeb85f18412e7f2e581fcd0efe9d8c6ef434e797fcddf261003"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-0.json",
+      "sha256": "47303a0c2b451e9b63d83f60aeb6284267b57f35c805a21154708113e7c1cbd5"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-discard-4-3.json",
+      "sha256": "95c11348fb86e311cf77f3b9462761e8fe1e83496eab9096cf4e9153719e92a0"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-1-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-1-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-1-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-1-0.json",
+      "sha256": "6e70c92e9287cd0554558d7a3f6bab3891da2d449592fa5d58ad7ce14c6af8f1"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-0.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-0.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-0.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-0.json",
+      "sha256": "3104e224e41096f60a7e99d1bb1b2c010da5d552a33ce2ac844326581a842939"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-3.json.original.dxbc",
+      "sha256": "d6bb920b9816f1f04541f9fd0026a2efc812dab2709c3399267a84f73f5c7aa6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-3.json.prepared.dxbc",
+      "sha256": "0ca704b984ed77a59c174e98512013f0db14d4189de39cdce8c8e41dbad1832a"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-3.json.marked.dxbc",
+      "sha256": "ea3dff7e891f9df56b3bc01fe3f1b55587c4e315bc43f63c692e3f4e76732e69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-shader-depth-4-3.json",
+      "sha256": "176f7dafeb5bff4d981dcf5201b542cc6da42e8ce8dad6cc322d180ddf9e401f"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-1-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-1-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-1-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-1-0.json",
+      "sha256": "4ce9629b44874017bf478ef1c41e634b2f31c6a9d62e4d83c72da661746f76e4"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-0.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-0.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-0.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-0.json",
+      "sha256": "98d49f8752c1dd9d27d8a4b1bd5d59fc3e7d4cb3069b1d0f3e395a081b020004"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-3.json.original.dxbc",
+      "sha256": "cb84060cce70057e3823790be3d82c6e0246a4bdbb4c67230957dda4230a4a8c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-3.json.prepared.dxbc",
+      "sha256": "b965daa8b39998afbd5bf6b33b0a4e6e1d83b09918d55217e34aa927b6b302eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-3.json.marked.dxbc",
+      "sha256": "3a61bdaa9c2d72a6f67a26da3211f5cbc280d7ed9a196eaac231f8b277be4ad8"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-coverage-4-3.json",
+      "sha256": "5fb60f26de90e51fa6cf772dcb4a39131ae5d449e1f2931cfe8fddba3bd70052"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-1-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-1-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-1-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-1-0.json",
+      "sha256": "39cb68c48fc8d1b86f1d1b3f5bc50f1abb89b1f6a43873480a8aae36a677e2d5"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-0.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-0.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-0.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-0.json",
+      "sha256": "5e6a383f22a1a6b70df8c4921d4a4ec25da8fa9fc8d2bd9e3f974001de102623"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-3.json.original.dxbc",
+      "sha256": "6e0a06c16f841f612a7c1aee171bd6727f8a022af65f4b00d46cd4fceb989553"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-3.json.prepared.dxbc",
+      "sha256": "3dd07b1bc3d2ae8ae7ff43227d2043066ec3908c01811e9717db5fae594101eb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-3.json.marked.dxbc",
+      "sha256": "3240dd848b724717e27d13b0046dcb52aefad31c7a923351b989b20d6c06f433"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-null-4-3.json",
+      "sha256": "11d2b87f85b28c9e493d706c8f33ed316dd4d7437e61f466f05e73cff830ad8e"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-1-0.json",
+      "sha256": "97582523c4ab796d0091b349369411a1c3c58d9c05a8b30c3e6c965b6dfa1825"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-0.json",
+      "sha256": "ea25c07845cc705cf21c4862876da88827f91be518c90f3229f9f1e149bff402"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-pass-4-3.json",
+      "sha256": "6deba188c31eece14c7960f5a39cc8519c94f742c697c8272a03b05f365dfce5"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-1-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-1-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-1-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-1-0.json",
+      "sha256": "e6d894bb175e97d2173f84d3bc838c8fccd4bf1f167318a3b2d4304a882b7e03"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-0.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-0.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-0.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-0.json",
+      "sha256": "a91c6361b7205e21f1e69f86dc8befe44f95507b221d41b2659c6668230f21bf"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-3.json.original.dxbc",
+      "sha256": "32e2d85d3d06005183a4b69df73e5a376ef7399b1fd0e4c29afcedb818337964"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-3.json.prepared.dxbc",
+      "sha256": "fcfe9d6a858fd8c0656bc3d45bff3227c7d35627921520a487cbaa5403aea1bc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-3.json.marked.dxbc",
+      "sha256": "5b3ac0ee1614d7c8bed61e16b6dd08ac8d6b34ab1c85a6bd3704816582052c11"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-stencil-fail-4-3.json",
+      "sha256": "682b1e0673de998305533a572599cedd446b8fbbfa7423e603905688d55c3d57"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-1-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-1-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-1-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-1-0.json",
+      "sha256": "e014a2e82fdcf427d49fb28c3ca2ea776c3da8f873d18651155c6b902473f9f1"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-0.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-0.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-0.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-0.json",
+      "sha256": "3d48b6142ad852a1b27f78511ad1b251880029773cb7591a9a599ea9b8d82567"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-3.json.original.dxbc",
+      "sha256": "54dc0ad38113c30b1de23b6c74d421bec4a00d29b015f2eb4e8b0c2a67943415"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-3.json.prepared.dxbc",
+      "sha256": "0936d6a896f48c45e0efcb4c951f14e50a0c43f26126cde7bc52dfeddb6f2fde"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-3.json.marked.dxbc",
+      "sha256": "a5f55313a09ad264c6f1f42581bd9a7c1a0991ccfc4b1242982091f2e529a72b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-early-stencil-discard-4-3.json",
+      "sha256": "c4cec99873d7d5d82b382b9d34ebf6fd6f83396992d77ac15294dd9ec379e6df"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance/depthTransport-32902-original-control-4-0.json",
+      "sha256": "2b90ee86f30578633a784b8027d9ff6be4c620bd1db17f9158ba2fee349a4833"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance-validation.json",
+      "sha256": "b5a8a5f0b2db274872ae06df4205a943c4c2821ebccf962192977c1fd5b1fd7c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-acceptance.stdout",
+      "sha256": "4daf7a294d225ac75089f7cc2c19f803302d8b3665f2afd075faa42ade4d935b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-adapters.json",
+      "sha256": "0e61d0e36963abe61bbcd445d34ba74ea0519df627b34649c0340b2c57d06a7d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-budget-build.log",
+      "sha256": "215697d527a7dc28266437ae549f8c22e56af81e85edbfa62027f3d8f89a6ffb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-build1.log",
+      "sha256": "571aaddbaa5f1ab3f05897e7da6b194383808b79c7a8ffa587fa5d44f0252348"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-build2.log",
+      "sha256": "f3f91ade8b5abd5e6ddae35d6659d36a6a681c1842a5a4233bc447b3f9b18a5f"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-build3.log",
+      "sha256": "8f926fca8a3ae447ab8ac95f5d89b7584447a9dfc7268f65dc4c5a9731b682d0"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-build4.log",
+      "sha256": "215697d527a7dc28266437ae549f8c22e56af81e85edbfa62027f3d8f89a6ffb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-control-build.log",
+      "sha256": "215697d527a7dc28266437ae549f8c22e56af81e85edbfa62027f3d8f89a6ffb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-control.stdout",
+      "sha256": "df36622366c80600dc75c7ddd648a097246b122c6f8233eb7a01a67c4999d96b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-control.txt",
+      "sha256": "4be08f8926326df7b90d6d7cdc7d907442fda8097b4e76ed09f6eb9456c4bb9f"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-final.stdout",
+      "sha256": "c746f9e5c10d07c3e461622beb33af9c09893d695ef4dc14a0f397c38296252d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-final.txt",
+      "sha256": "f44104baf396b67550c16171382209cc7ea68cf5db2985c8184c578d6305559d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-first.stdout",
+      "sha256": "61af371ab2bd73f4df9ae395c65c3b63222d47a4813327e7bb48a840309e981d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-first.txt",
+      "sha256": "c3466e46b88b5a2660ce361e1950b3cd104736a9436f6c0141964a8a6c34d3fc"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-geometry-build.log",
+      "sha256": "e68a88f0b46b6f80681b5a9b246179a951ad8ba859fd8d4ae63a7361990aab52"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-geometry-validation.json",
+      "sha256": "e2ec573a77edc3edff6ba277936df78f5fb94a636bd097324fc9ca98ff2c1c01"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-geometry.stdout",
+      "sha256": "cb1565ffa0bc9ca02da64514600dd5f2ba82e284320ed633b11150696c3204a7"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-geometry.txt",
+      "sha256": "ecbfd64e328ef2a166da2c3ca7aa579d1e909b6caf25790ae296d402ebc5ca78"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-implementation.txt",
+      "sha256": "bfd2ad895c42daaa45562560cb4e9467cea32a9dd52ceab8481a746c05d887f0"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-msaa.stdout",
+      "sha256": "91baa7d262980813ccffdfa9afa30367dfa1a0b1f11cba6e2639c811c35a5722"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-msaa.txt",
+      "sha256": "d86f851ec1b6e776620213c0c30b68b11c6afa3f8f909ecfc6c6ba5aab95993d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-om-build.log",
+      "sha256": "cbb6b51bf74e28bc3fa86b2e8b5352b7208cbff653325b20125b353883338ffa"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-om.stdout",
+      "sha256": "7087a72b247580740ecb9438c6b3a0af78fc055672f58d2251b6630acdece15b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-om.txt",
+      "sha256": "1839b957d2bdf84d074a5cf12fbf9474e19c163c73cb9b1957b926eb4a8de206"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-order-build.log",
+      "sha256": "eb6bcf17ca7ec0957c5757b0397f5a3f0c8abe3914840239a9801bb4eb71fcd7"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-order.stdout",
+      "sha256": "7087a72b247580740ecb9438c6b3a0af78fc055672f58d2251b6630acdece15b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-order.txt",
+      "sha256": "98ac3dfe91e1ed79498604da02ef7107e8fda2acb17610d71be2d6b23582cf36"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-products-build.log",
+      "sha256": "72496af30e5befb8c39573ece4c890077decbbed5c9f7b1e024f1f02c76fb114"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-reference.stdout",
+      "sha256": "535bfa0bb26ee98832bffd24d52a3b8744c1802683ab8960825279644f0ae7e3"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-reference.txt",
+      "sha256": "4bb6c1aa00341a139c18e171957f6adb10fccf68c73ff8e20b0010c6b1c0dd69"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-regression.stdout",
+      "sha256": "55180b3376fb1ebf959e8fb74b798beabc6c20b3c21b8b97abe8254bb0b74f3b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-regression.txt",
+      "sha256": "75aff0c9c8f25eb8ea61137f5ac8b966aa1f216579d2a9877ff7acf609afcfb3"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-second.stdout",
+      "sha256": "82ab9e436ff1dcf223538dd1e6cb51ed7a0eea17c7ca6d791d8193f37e04027c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-second.txt",
+      "sha256": "0f9f7346cac3b6f3e9a9d982e0d0a978b937624235e22d06ecdbea2a138144d6"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-triage-build.log",
+      "sha256": "215697d527a7dc28266437ae549f8c22e56af81e85edbfa62027f3d8f89a6ffb"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-triage.stdout",
+      "sha256": "7087a72b247580740ecb9438c6b3a0af78fc055672f58d2251b6630acdece15b"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-triage.txt",
+      "sha256": "e99bf6d986d05ca8096bde524a5275294114159365b719c54cda612f474b960c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-typeless-build.log",
+      "sha256": "cbb6b51bf74e28bc3fa86b2e8b5352b7208cbff653325b20125b353883338ffa"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-typeless.stdout",
+      "sha256": "08bfaa261321da83892de7b6292ddf6fde83a60ba4e97f0d4505e34c125dc18c"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-typeless.txt",
+      "sha256": "e2061876671b300e6dff46223c227307f0bc01da243687f0f58326565767818d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-verified.stdout",
+      "sha256": "c746f9e5c10d07c3e461622beb33af9c09893d695ef4dc14a0f397c38296252d"
+    },
+    {
+      "path": "artifacts/dx11-native/depth-completion-verified.txt",
+      "sha256": "46b91fa2f8879028bba1d4e016d74395f104334a901b9aa0f201696909c22a0d"
+    },
+    {
+      "path": "src/application/DxbcPixelCompletion.cpp",
+      "sha256": "00386f99ad1ee78c1acffa933dbfad9fc3a3aac013ad49eb190d7434cfa1530c"
+    },
+    {
+      "path": "src/application/DxbcPixelCompletion.h",
+      "sha256": "79d12e1ab7cb7b1b2b7cdb553571f29a3525e74382dcd60a5153c31d90139fd8"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.cpp",
+      "sha256": "5d8e655b30f41f140b4283b2224b8ab6a40f3ca5a4ff4b0660ba012cbc55087c"
+    },
+    {
+      "path": "src/application/NativePixelGeometryReplay.h",
+      "sha256": "ecaf0871c885330b4504c1d6dc64ea62ad5a07771577bcfa11d4085884a32811"
+    },
+    {
+      "path": "tests/DxbcPixelCompletionTests.cpp",
+      "sha256": "4a5a5858ae6c45179ee3aac020a09ed2854bdde8d13d4cde6fa2d13ff3387203"
+    },
+    {
+      "path": "tools/validate_native_depth_completion.py",
+      "sha256": "63f1728ccbb25357d319e3f11d5e4de081fd0e292c04906582e289a24425b8ce"
+    }
+  ]
+}

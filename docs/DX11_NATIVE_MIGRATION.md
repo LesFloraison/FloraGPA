@@ -1475,3 +1475,17 @@ This closes specific resource lookup/output contracts and prevents conflating a
 resource-number callback with the debugger engine. It does not recover that engine
 or qualify original pixel invocations. Product behavior is unchanged and all
 remaining debugger, history, dependency-removal and release gates still apply.
+
+### Depth-only completion transport
+
+An internal native diagnostic now adds a private color transport to depth-only
+draws, retaining original depth/coverage/discard instructions and explicit sample
+selection. Unmodified and diagnostic counts have separate provenance because six
+Intel early-discard selections produce different counts despite matching depth
+bytes. Typeless MSAA allocation fixes a device-hung path found during development.
+
+The complete completion suite passes 222 entries without skips; byte-level
+validation covers ninety new selections, three original controls and 720 rejected
+corruptions. See [depth completion evidence](research/DX11_NATIVE_DEPTH_COMPLETION.md)
+for limits and retained failures. Original fragment identity/order, public history
+and debugger parity, RenderDoc deletion and standalone release remain incomplete.
