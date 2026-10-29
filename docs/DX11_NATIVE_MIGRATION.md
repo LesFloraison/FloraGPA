@@ -1612,3 +1612,15 @@ existing GPU matrix retains 15 successes and three explicit dependency gates.
 Qt regressions record 118 passes, zero failures and three unchanged missing-fixture
 skips. See `research/DX11_NATIVE_MESH_POSITION_CHANNELS.md`. Sparse GPU signature
 qualification, full P3 parity and default cutover remain open.
+
+Terminal DS instance boundaries now allow resource reads and live atomic values
+when every written UAV owner is excluded from upstream count dependencies and
+no GS follows. Selected data remains a slice of the full captured vertices;
+private prefix data does not replace it. Analysis identity is `dx11-native/9`.
+The unchanged DS-read fixture now succeeds on all three adapters. Upstream-alias
+and downstream-GS controls retain rejection. Five serial suites pass 271 cases
+without failures or skips; independent geometry, UI and channel verifiers reject
+291, 90 and 204 corruptions respectively. Historical verifier modes still accept
+their unchanged evidence. See `research/DX11_NATIVE_TERMINAL_DOMAIN_COUNTS.md`.
+Full geometry/workflow parity, original fragment qualification, the original GPA
+debugger engine, RenderDoc removal and standalone release acceptance remain open.

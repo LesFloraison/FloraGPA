@@ -1,0 +1,4026 @@
+{
+  "schema": 1,
+  "implementation_commit": "981ab46b16f33c151eadf7738d3301f3c7820998",
+  "main": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "status": "terminal_ds_counts_verified_full_geometry_parity_open",
+  "backend": "dx11-native/9",
+  "qt_suites": {
+    "GeometryUavDependency": {
+      "passed": 69,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/domain-counts-release-GeometryUavDependency.log"
+    },
+    "NativeReplayMeshUi": {
+      "passed": 72,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/domain-counts-release-NativeReplayMeshUi.log"
+    },
+    "NativeAnalysis": {
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/domain-counts-release-NativeAnalysis.log"
+    },
+    "PostTransform": {
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/domain-counts-release-PostTransform.log"
+    },
+    "NativeComputeDebug": {
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/domain-counts-release-NativeComputeDebug.log"
+    }
+  },
+  "geometry_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 42,
+    "corruption_controls": 291,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "mesh_validation": {
+    "successful_cases": [
+      {
+        "case": "0-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 44,
+        "peak_working_set_bytes": 22265856
+      },
+      {
+        "case": "0-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 30,
+        "peak_working_set_bytes": 22704128
+      },
+      {
+        "case": "0-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 32,
+        "peak_working_set_bytes": 22618112
+      },
+      {
+        "case": "0-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 39,
+        "peak_working_set_bytes": 22159360
+      },
+      {
+        "case": "0-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 44,
+        "peak_working_set_bytes": 22491136
+      },
+      {
+        "case": "0-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 36,
+        "peak_working_set_bytes": 22257664
+      },
+      {
+        "case": "32902-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 115,
+        "peak_working_set_bytes": 59129856
+      },
+      {
+        "case": "32902-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 173,
+        "peak_working_set_bytes": 59555840
+      },
+      {
+        "case": "32902-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 108,
+        "peak_working_set_bytes": 59637760
+      },
+      {
+        "case": "32902-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 117,
+        "peak_working_set_bytes": 58908672
+      },
+      {
+        "case": "32902-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 177,
+        "peak_working_set_bytes": 59584512
+      },
+      {
+        "case": "32902-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 170,
+        "peak_working_set_bytes": 57176064
+      },
+      {
+        "case": "4318-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 252,
+        "peak_working_set_bytes": 102797312
+      },
+      {
+        "case": "4318-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 245,
+        "peak_working_set_bytes": 102866944
+      },
+      {
+        "case": "4318-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 280,
+        "peak_working_set_bytes": 103182336
+      },
+      {
+        "case": "4318-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 267,
+        "peak_working_set_bytes": 102371328
+      },
+      {
+        "case": "4318-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 246,
+        "peak_working_set_bytes": 102916096
+      },
+      {
+        "case": "4318-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 265,
+        "peak_working_set_bytes": 103129088
+      }
+    ],
+    "open_gate_cases": [
+      "0-ds-upstream-alias",
+      "32902-ds-upstream-alias",
+      "4318-ds-upstream-alias"
+    ],
+    "corruption_controls": 90,
+    "default_cutover": false,
+    "full_renderdoc_removal": false
+  },
+  "channel_validation": {
+    "schema": 1,
+    "status": "verified",
+    "cases": 34,
+    "channel_layouts": 17,
+    "corruptions_rejected": 204,
+    "scope": "owned_storage_and_ui",
+    "gpu_sparse_signature_qualified": false,
+    "full_mesh_parity": false
+  },
+  "legacy_geometry_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 12,
+    "corruption_controls": 48,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "legacy_ui_validation": {
+    "open_gate_cases": [
+      "0-ds-uav",
+      "32902-ds-uav",
+      "4318-ds-uav"
+    ],
+    "corruption_controls": 75
+  },
+  "performance_acceptance": false,
+  "full_geometry_parity": false,
+  "original_fragment_qualification": false,
+  "original_debugger_engine_recovered": false,
+  "full_renderdoc_removal": false,
+  "standalone_release_acceptance": false,
+  "sources": [
+    {
+      "path": "src/application/DxbcGeometryDependencies.cpp",
+      "bytes": 11253,
+      "sha256": "abc9a8801f0ce5e09e56919f71a90504ad6a7b5821385988c5aba06d5dc80187"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.h",
+      "bytes": 749,
+      "sha256": "9003c82b2658e682c4150d9f3b31d16d8d6afd138dea5473a44ae26054a137eb"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 960,
+      "sha256": "1976d5db519083b6072a3f3f302a6c9687ed28f9ad8cc2d6fa7a49529e397c88"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 123292,
+      "sha256": "62b5030e5516e2e735614e0a7ccc3b3055dbdafc41e9755e26b716bf3d04eada"
+    },
+    {
+      "path": "tests/GeometryUavDependencyTests.cpp",
+      "bytes": 22124,
+      "sha256": "bedde5b4561c92593b14d80bab3efea0852becb8e9c98a4b3b01c74a0a7f8b3e"
+    },
+    {
+      "path": "tests/NativeAnalysisTests.cpp",
+      "bytes": 31428,
+      "sha256": "6325a227a16a0e6f020cbba0c3ff5c636da76326d3e935efc2432a885a6b5a5b"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "bytes": 28573,
+      "sha256": "32a442aafab050b330de41e42674165c63ca52c6402f62a57fe9c9a918f9470d"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 32152,
+      "sha256": "c6140bd69df6e9e754aa4808280fdf4a6bd4f117628c038aca346fedffa35de8"
+    },
+    {
+      "path": "tests/UavGeometryCapture.h",
+      "bytes": 8434,
+      "sha256": "5c0899c31777353556c7312e68dc835f44bc22312968e9e168c6cccc88121565"
+    },
+    {
+      "path": "tools/validate_geometry_uav_independence.py",
+      "bytes": 11779,
+      "sha256": "2bf8a552679cc9d413f522bd94f955480b8cb12c1c1b041aaa5101b076a227a2"
+    },
+    {
+      "path": "tools/validate_native_compute_captures.py",
+      "bytes": 10198,
+      "sha256": "94f78b2fe728aceddd2885be91906ff7519109b7f8e43b0caa950d1ba9179dd4"
+    },
+    {
+      "path": "tools/validate_native_compute_debug.py",
+      "bytes": 10347,
+      "sha256": "fdfb0603b4bd45941565fd119e12b7a57b134577e9abc380a682f92c8b765c6a"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 12197,
+      "sha256": "aa0ad57cabea78076026fc15806f81dffd36d5b46f9a212ba793e17de372bba7"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/domain-counts-final-geometry-validation.json",
+      "bytes": 162,
+      "sha256": "0c01cb81d88ca239955272d2a4d9d186c3ace8d3355aafdfe4afa3e2ad0d4995"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-final-ui-validation.json",
+      "bytes": 52573,
+      "sha256": "0d0b67078513af2bd16299623d9a9966cf57008de49a26d4217b954d0028ecad"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-analysis.log",
+      "bytes": 3157,
+      "sha256": "bff98001a825442c3d39d2498b81c04edd6a53ca69a94ba298404a70e078a2d6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-ds-atomic.json",
+      "bytes": 15989,
+      "sha256": "87bdaf1d0fb9795867cc4b520a4f8e398ef3f5c19374d9798aa943de913900f1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-ds-gs-alias.json",
+      "bytes": 6657,
+      "sha256": "253a5084a3e27ddf9568bf13c046fb62155506f3767188822d94169b1f3ff08b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-ds-nonfinite.json",
+      "bytes": 16055,
+      "sha256": "22217d8ce30cc3564d6b9a28706db2e7df1a67295c1525fffad32d0499b6fddf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-ds-upstream-alias.json",
+      "bytes": 6612,
+      "sha256": "556ee5699525021410b14f820ca7ccf03bf592e3a4a63846b606f4b995bc5259"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-alias-srv.json",
+      "bytes": 6574,
+      "sha256": "9da36f30e73f9f36740c4faaa6ed5d7bad3fe316f99fe0aea8bd18a3e7ede964"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-alias-uav.json",
+      "bytes": 6578,
+      "sha256": "40049b29cd6a48a9a7b3de2b3bc51fa3cd66a2716ab9f57b8018d04e4997b3ff"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-empty.json",
+      "bytes": 16192,
+      "sha256": "dc29c58e78cfe7706e1e5ffca7f321ddfe53367cbfa4d46d18237b8a694f09c1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-read-srv.json",
+      "bytes": 17186,
+      "sha256": "3d293c8022aabf42eb5d1b95df5b3bf6ff52bc2357d40cd1f7e084941f7066a5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-read-uav.json",
+      "bytes": 17186,
+      "sha256": "588cfe38edb049c8b29444e42591165d1daf13b13f1bb99ab167fa5db1aeffdd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs-unbound.json",
+      "bytes": 17166,
+      "sha256": "fa98a09f408cca3fb0c2c9fbaa565b38410e607f576e2cdd60d4de921f5ba965"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-gs.json",
+      "bytes": 16193,
+      "sha256": "29a5d2c7876350ad7cd16095efbd26a9dad8c27c7c476a92681c069a61f95a5c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-ia-alias.json",
+      "bytes": 6601,
+      "sha256": "27f3825725026300b8b0026237b6e573a098d668c7805d83445f421ad11f5025"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-independent.json",
+      "bytes": 15417,
+      "sha256": "d0b6b574d93d1aabd3be5bbe12519e6f357fae799d856c0512d618f169acdb8e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/0-read.json",
+      "bytes": 16176,
+      "sha256": "9e273c6a7905f56d6fd33257e8a580966007977661e5dbf5f5a0909d9e8a787c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-ds-atomic.json",
+      "bytes": 15993,
+      "sha256": "55025edb39c928cf9d95a565d63ce8ad3466b926384958fb2610b7bf0e64de09"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-ds-gs-alias.json",
+      "bytes": 6661,
+      "sha256": "ff0960f92586f7a748235747fb7ce9b0e52c371421ba094c2702b40620cfc391"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-ds-nonfinite.json",
+      "bytes": 16059,
+      "sha256": "dd87894e1a78616c828724f2782e3f7b8fd227612279d13b15f5d675e07fb600"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-ds-upstream-alias.json",
+      "bytes": 6616,
+      "sha256": "d1b39eaa60e2bc11e100826a354a629093dce8632321a18a28c563c7e15ca21d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-alias-srv.json",
+      "bytes": 6578,
+      "sha256": "7e6b5216cae8db74627bdfc97c0ac7a9979fffc31f07ca8c65e0d7f6d4d23d6b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-alias-uav.json",
+      "bytes": 6582,
+      "sha256": "0abaee9c3da6530bcda79ebc01c0e3ebd46a4dc0cdd2b6a566da1e18a2abaf52"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-empty.json",
+      "bytes": 16196,
+      "sha256": "f63f82656ac4dc87d1899f8bba0ef46b3c35c61fffe97eace3606bc4f1a34d80"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-read-srv.json",
+      "bytes": 17190,
+      "sha256": "491c296e5ff2526a9c97a279e8e5baa2af8682aa49917e7281b81f4d1aaa94e3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-read-uav.json",
+      "bytes": 17190,
+      "sha256": "88198a32116cdfa062f5357f963438ed8b99bad47c0f84b4bdb98836de959f39"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs-unbound.json",
+      "bytes": 17170,
+      "sha256": "4909d21f02999694726b47db9129fce7b0e388f642c8fb8b4866e2a3d2631c38"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-gs.json",
+      "bytes": 16197,
+      "sha256": "8833510cb5acf876285224fc8d0758fd11a82a433b65277d6e389c1adaa0e1e7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-ia-alias.json",
+      "bytes": 6605,
+      "sha256": "1ebffc86b277aaf171698d35e14239b9ccb1009e826a6b63487f8a63c75a8e08"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-independent.json",
+      "bytes": 15421,
+      "sha256": "1c1065a439696bca3b4523d7674721bdddab84cc1c37867f0da7d9e9fa30aa56"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/32902-read.json",
+      "bytes": 16180,
+      "sha256": "62db219dc5f54ae1502ccb0015afc8eea1f55d992ceeb8cfd958d09a5546538d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-ds-atomic.json",
+      "bytes": 15992,
+      "sha256": "d677bb6cef73721c9abb4a6ff75b595e12208eafafd3fd70b6e4cc7251eac812"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-ds-gs-alias.json",
+      "bytes": 6669,
+      "sha256": "2077203a8daff784479b9a0608a46d7069c617b40ba06130408b747ad935fa60"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-ds-nonfinite.json",
+      "bytes": 16058,
+      "sha256": "d861e40c485965b012b7f493ba15407d012a8889fad1b707399c2f70c37cd519"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-ds-upstream-alias.json",
+      "bytes": 6615,
+      "sha256": "ba8bfb67d5834f0b3046135894cc405960884080a54d206cd1e9ea35d8842138"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-alias-srv.json",
+      "bytes": 6577,
+      "sha256": "b8695400154a6d13df8bc8b5dfc521567f6e803da45e0f7b3c853bb4c0f8368c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-alias-uav.json",
+      "bytes": 6577,
+      "sha256": "40de13717cc2823e801c2a3fc99d4ecd649ca4db82c4ad91a847105175ccfcb1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-empty.json",
+      "bytes": 16195,
+      "sha256": "43caba07725f6954c8afd85c84ab231948d7b76d42d50d7a2fc1af0e48e9b7cb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-read-srv.json",
+      "bytes": 17189,
+      "sha256": "a4dbef74169b6d330c4319d2e6de090cba2bf88effb769824fc8830f07b53133"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-read-uav.json",
+      "bytes": 17189,
+      "sha256": "38e44bb9d405ddf394ce83d3456d9edc56b4122f98fd9eadb963f5fdce25eb15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs-unbound.json",
+      "bytes": 17169,
+      "sha256": "50abd9b9c07c1574a46d8f6dc1c516e21d1ebe7b5954fb90006867cf12a933cb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-gs.json",
+      "bytes": 16196,
+      "sha256": "a31a46d480f40b65e63a3704135006761fa25ea71358642e22c937db7847de21"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-ia-alias.json",
+      "bytes": 6604,
+      "sha256": "0c68248eeedde311ea01b4d00dabebf9054c6d220d68ba505812286d3df81457"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-independent.json",
+      "bytes": 15420,
+      "sha256": "014d51c278118ae94a15afa80d6c31ce30792f7a9730841c5360efabdd1120fc"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry/4318-read.json",
+      "bytes": 16179,
+      "sha256": "6d03dc5f317736a9d28923f6d41e3a94b189ec9214a3871ff12dea676c95bd5b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry-validation.json",
+      "bytes": 162,
+      "sha256": "b671dd9b848bce0f39e880ab628c1623a8cafd06e067a135d2c037e9db82dec9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-geometry.log",
+      "bytes": 5015,
+      "sha256": "879c9bfdca20154e8d5d00f37492c28fcd1850cbdb6b6c2becdab4bac2a88533"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-first-ui.log",
+      "bytes": 4955,
+      "sha256": "4d3d6e8749959c979ba15809ae074d819fd53ff30a5848ee92d23a65b4e7ea0e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-initial-build.log",
+      "bytes": 6420,
+      "sha256": "6ed2010dc313d58d83efec53c1578f10b747bbd3d0f6be7e081a5c22b54bc663"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-legacy-geometry-validation.json",
+      "bytes": 161,
+      "sha256": "b526503778dd2bd84289ab4b2e31fc928c40e7db7db2b6a0b306c16a65374227"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-legacy-ui-validation.json",
+      "bytes": 44791,
+      "sha256": "b4c5531b008a55541888cf68099a4704e2f39736c5fb934019c08196725a9437"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-performance-observations.json",
+      "bytes": 11798,
+      "sha256": "9e3b673274209f7d6a8d0224c7da1b054a7386d3f70f2225e6e6bcb3db22702d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraGeometryUavDependencyTests.exe",
+      "bytes": 1983488,
+      "sha256": "a5c103d6ab48f509af6fccad5d6ea0d7c22718c6acbfc5c52b8e59e2351d9dfa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraGPA.Cli.exe",
+      "bytes": 6151680,
+      "sha256": "e65c830732040afc56004260b03abb5e24e7fbd04952e467ee4b7510316418e0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraGPA.exe",
+      "bytes": 5147136,
+      "sha256": "e8ddd7a8db2cce39b424c2ec760d9d9ea9c4ed64dec534aa3f424c2e41fa4215"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraGPA.Worker.exe",
+      "bytes": 6151680,
+      "sha256": "9a7b5be55510e9eca5122dd81bc7d37e09ecd7f01a9cb7d86a21f19792d07aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1524224,
+      "sha256": "76ff6dab1e6f1a74eb2bd939cc47accecb16f4fc48201316abce272879c55ec1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraNativeComputeDebugTests.exe",
+      "bytes": 3041792,
+      "sha256": "e0724a9d6386b04c5bd75fb24971755bcb445425996db976c91b41accb7d0b04"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5280768,
+      "sha256": "106c7b3df59bf29b120b03ceb090d12d28bd8df8e7435a445867ecb37e132855"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-binaries/FloraPostTransformTests.exe",
+      "bytes": 6174720,
+      "sha256": "71e3fb0c2a5d6df7d9cad37588715c659c0bf39bc1c7dd0734a05ed595efb25b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-build.log",
+      "bytes": 12055,
+      "sha256": "bf4de21bc91431df269d84d66d6fbfd2335864d2e252185e3ef959869da4de51"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channel-validation.json",
+      "bytes": 230,
+      "sha256": "889c165a9836dea6a265ce6fffccf73109af62c9f8e2afdbd57a7068d6994c93"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "29e1c1791f392d7248123fceef36c661a145d4747fb0e76e09100136508dc14d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "186f7a768952dff9cc75ad18678ce86ab7389ca9ec258f0a83883160a5535079"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "bdb946476055c6fba4bf48ae6f64522d3dd015205d32c81632726d1068527c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "ae13ee99423121f8af601d9f6356522e460f51822b2294f33275e194a8f812e0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "427da45bd43e3a35ccdb6835e50d6e86a9a8df0c061f137eec0ba6bfd5f7a46b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "24aeb393f12f3c55b924b4e4b97c20eacd4ce275a6b064806077d786adee82ea"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "29e1c1791f392d7248123fceef36c661a145d4747fb0e76e09100136508dc14d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "186f7a768952dff9cc75ad18678ce86ab7389ca9ec258f0a83883160a5535079"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "bdb946476055c6fba4bf48ae6f64522d3dd015205d32c81632726d1068527c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "ae13ee99423121f8af601d9f6356522e460f51822b2294f33275e194a8f812e0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "427da45bd43e3a35ccdb6835e50d6e86a9a8df0c061f137eec0ba6bfd5f7a46b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/w-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "24aeb393f12f3c55b924b4e4b97c20eacd4ce275a6b064806077d786adee82ea"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/geometry-ui.json",
+      "bytes": 443,
+      "sha256": "1deb5f56258e3b110d8ebc80a7ee6d2dad0fd3a97b117f0db7b693afa7a6e805"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/geometry.json",
+      "bytes": 747,
+      "sha256": "a9cd174a27bc8fd78621535eb029c5e3c8c239fa40d72d4b65e468e0d4ce92cb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b17a653b6aa6e740fb80a17a92c55b8b1c92ed903de4230fbbb75f3e8ae1c345"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ae6afdfc638a919e3c8e0d49048470ce2c2fb8670942ee73ade5d243e28b3a75"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "ee038b1ca2f0937a3c16d417be912c5f532d1f4c5f4bd2abdd6b37d178e631c3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/presentation.json",
+      "bytes": 2726,
+      "sha256": "e717a7234aa83e0f8f6ce43aaceebe00c2dc591342da786c6b59f6901e7c12da"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "5d0d92721d64c6dc6fc8b383012a67a8a699b47197daba152f8e60d23b19e185"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/result.json",
+      "bytes": 1301,
+      "sha256": "5a832fc2023af129fbbcc4067293d1b1da8b66e33ca8af7fa43b0d40cbf86b31"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "ae6afdfc638a919e3c8e0d49048470ce2c2fb8670942ee73ade5d243e28b3a75"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-0/vertices.csv",
+      "bytes": 155,
+      "sha256": "e0d72fe9cd66b558212913c4749bde82fda7d992d87465e1a9ca9b8cc335316f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/geometry-ui.json",
+      "bytes": 445,
+      "sha256": "8f25cca7f53b67bb48607d9cb295f5bf9c15d05d5943505016dabeeeef4356dd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/geometry.json",
+      "bytes": 747,
+      "sha256": "9672d43e5780d620d964b3bcffc48ce9befaf1390830282b990c291b7062f7f4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "cd845e74bd522f313b849cb326f2e6ddbb32f16e270c413d393ae0e5b8929013"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d1314a9a582b43364092f32788a0b62e4afa3e5d83dcab6065e139445652ea8f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "9ceb577af5317cc61c360f2d691f8046978e798f06076339deaf68de350f2ff5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/presentation.json",
+      "bytes": 2728,
+      "sha256": "406f04c09356d7dc87ab351e5b6c9211d17a81d46776894c928db03bcf9c2f46"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/result.json",
+      "bytes": 1301,
+      "sha256": "1f8e7b5670d723af91a07aa25771ec252e4c25754ffb472d6e05ae0762173c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "d1314a9a582b43364092f32788a0b62e4afa3e5d83dcab6065e139445652ea8f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/wzxy-special-1/vertices.csv",
+      "bytes": 155,
+      "sha256": "b15a86b8d0dab9e8a383d3927189135ad5ad5e0e3cf546d5d0cec20e67b35e86"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/geometry-ui.json",
+      "bytes": 356,
+      "sha256": "b2ce89d7717334cc6525086d04465af8dd7e8e2ff50b658dc73aa73da503090c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "0c468bba97430059a2a8303032d5841fe5aeb30bfeb135a81fef672ff0af76d9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/post_geometry.obj",
+      "bytes": 105,
+      "sha256": "bd07f1bd9fc7a82414f5d4dea5bdb2b0561e865a14c6d1bd145c87e6c3b90b0d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "1dd1f8fa9915b59354027f43bb543293c36e1c3b4c92b4720ad5a967f2d55035"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/post_vertices.csv",
+      "bytes": 32,
+      "sha256": "ad069b073c11cb156ccaae1867d19bbaf1a7878688e9e93e168e19b3a15e5065"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/presentation.json",
+      "bytes": 2417,
+      "sha256": "918344e8dbf6e076b3011cec6c56af9b35d6d7c4c0d7eea9c166b6f9a81702f1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "0eb1457587c92824400c740c3c050407fdfc64b2eb8a0fbbac30a684591145cd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "1dd1f8fa9915b59354027f43bb543293c36e1c3b4c92b4720ad5a967f2d55035"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-0/vertices.csv",
+      "bytes": 74,
+      "sha256": "a3fe7592f5161c77fecc413deabc9e976f79ea7236ef74c5763172d4f1ff076e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/geometry-ui.json",
+      "bytes": 358,
+      "sha256": "f0c2ca745f6a1d052ca7a6c11216a5f1490e64e4bc29b4571187c8b25defc9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "168bbb6cbd5a949715283d554d9eb879719a5310790123fd5fe0e49a42b67c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/post_geometry.obj",
+      "bytes": 105,
+      "sha256": "5f06208c3dc3fc297a0059d732c9aefde6d65f9b4ad4b8c8b6405df3f2c33f34"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "f9b8fdfe3baa4709749d63b7ac2d9f676e9f649093c98d1a141bcec903ce9088"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/post_vertices.csv",
+      "bytes": 32,
+      "sha256": "4912fde408deba6c2e6113fc8ae9e9c3f53bc093f4e755c49752cb309ca635f1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/presentation.json",
+      "bytes": 2419,
+      "sha256": "042d60e08d40f84ffa278f22325d4c37fc4cc398d48514313976a33f073ca5c5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "bae057052c62cf5b542f7951ab97d48953c7e117b08622ecd8f2cdd4d1c05425"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "f9b8fdfe3baa4709749d63b7ac2d9f676e9f649093c98d1a141bcec903ce9088"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/x-special-1/vertices.csv",
+      "bytes": 74,
+      "sha256": "8d4ec6f4b49266b1e8d44c7bac9ea64bfea87e0540db93a0e7ad80ebeb505c8d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "74f76de78e7742cb3564b3e72bf00bd4934de016ee71d70413abbd651cf5d2a2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "47ac1439eca366bfb1cca3c0bf44346dae89c8a407f86a95a8cd8a8b8010c23f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "85f127a689e583f49fb0c645431a476cd9896d7e797c060c86295290662710aa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "bf1b8fb8b6bda9a9bc1fc8b078d5668abd66873b49da005fd7aade71ab669992"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/presentation.json",
+      "bytes": 2582,
+      "sha256": "b7796f0bde2c92d5f04440759f7f94c4126fe9c5708874b45d2f03ae55958c49"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "f4a274e5fae9e1e528b137d4eb8dfc9c7685e80a00dac0b9e8432fe75b278f19"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "85f127a689e583f49fb0c645431a476cd9896d7e797c060c86295290662710aa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "2047dacc196cbc4ce054dd8798d3c542843f6883eb7253c3e2dad1c3b7187f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "270cca0b43c8dc944aff1da9f28a2997c337927b0060d9176e86616f44de5992"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "a7adf9507699f7f480df41dfb1598ff482deb444986027ac9205ba575a7acdc7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "f138e77008ca8f850baabd81e44ab7eea1ce510abca167bbd0feff1843d76cc1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "df537f23cf93303d2277da1e61ca725ed50299d49d70e39601718b0c2af467a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/presentation.json",
+      "bytes": 2584,
+      "sha256": "14d75279b54a5c4db406aaf6b8d19472ceaf03f2d1c950462506893de8fc79e3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "e31df46ee01b5f9dd57dd5d58ba7416659ffb566cdc70e6bb9b621e7cb6f7580"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "f138e77008ca8f850baabd81e44ab7eea1ce510abca167bbd0feff1843d76cc1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xw-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "bd80c612539f33ef83ec50a5a4695d2e21615a848e20fbf7b632f1d62223c2d1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "1254deed8d1755a683c6a9b508d85e3831786b1e5ea06965aa65e1e082054948"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "09552916069d160d0a99068fa4aa008572a1662af6224f7be1f27d10af367479"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/post_geometry.obj",
+      "bytes": 117,
+      "sha256": "a61b681e79cb9e2260cb6b19b05168c0d7e5bcb1137ec79efbda136d3ac1e3bd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a0bb251417f73a7a0c9373c415ba2b9f3d7fc11a923edacbcf38658612208599"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "5a4b43d4911735eb071c0ea1adcaa471536c5ce2dda19da8600e76ff3f74c769"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/presentation.json",
+      "bytes": 2520,
+      "sha256": "90f48d2be2a4709272eee077f49f3f17ad0362066c0bb8427f30bffbef563e78"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "2ab0f147f8bf40f7364e0e2becdfe82597c2e17f836ca5e08018d078a7f09179"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "a0bb251417f73a7a0c9373c415ba2b9f3d7fc11a923edacbcf38658612208599"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "a83e77e2d2db72203eaecdd7d328a676676fe2523ffc51f898dd8cd005138674"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "6d17aa377a910d58a2a881f82e22c45c7748864109ccdeaf5cc104f6683a6ccf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "877f86661ba626a338dcb770c0f9f92b56f25aafe83d35d7452ce60f021ec4a9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/post_geometry.obj",
+      "bytes": 117,
+      "sha256": "ea6187b0ee358f9d50664b963552db895c11be1a83ec44f235079561133702f9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ef94adb98e91837f317166bb1a155285bb33869cd102392a55e834b03732bad8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "eba752d24fd9326100a3845aaf71b9b221ad870bb04804c25920c08049080ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/presentation.json",
+      "bytes": 2522,
+      "sha256": "9f56c88d5f6c89c30c98052c30c02432cd6ce468ce8d1173658533d23a0d256c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "86d5f9c476abcfde088194aaaca28e24a557472e9588cb5010ebcd0243de14b1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "ef94adb98e91837f317166bb1a155285bb33869cd102392a55e834b03732bad8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xy-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "8058225fb1c3d045b27b184c3416c9904eab598b2e841e89fa16a51f8fe62885"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "3e9cde31be48658a8a18406cd6aca551a927cc95bb9de025fef549234fa9dc03"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "f0a59f705a5c4583707b52b1cd4c669e08cff9bfd239934952665758b0470560"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "74bb7ef6dbb40c511eea1e80e1686acc7f1ae7dfe5b062b6ff14190ff27913e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "8ee9c952c7c9bf8b24001bb0ed7aabd7646547c0cb3850016233ee3840a1fc08"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/presentation.json",
+      "bytes": 2685,
+      "sha256": "4d0fa73917a137e2672ac47c2580ce43698f9c5b387f4fd72e551db3105329b4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "eb41c644549a5a25565c20e9cac1822de4ce7f871c2c400e4d525bf855b619fe"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "74bb7ef6dbb40c511eea1e80e1686acc7f1ae7dfe5b062b6ff14190ff27913e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "e570d342d0b438923af0552ad240bc581c1ffa72bccfe56178c66b13a8331767"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "334131757d952285812ff45930fcaca9b241f6b8c21334b4fd574b116b21bd51"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "4fc1a05d9fa2239a308208c21d91cb5ffeb51e1f2ce984d5e4a209ac6dade49b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "776dbfed4dbc3ee924767034f560be3ee8bea384bfb8e77ff7b3bd1a1f51b987"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "d3ec40623fdca8d5882298f70522912bc181b23ce604df1979e01c0f867a9b86"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/presentation.json",
+      "bytes": 2687,
+      "sha256": "14a881116b6b20d169ed7965007a1b073e98ade4c47e4811db2c62f86959ab6f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "9415914ed2a8a54340dc7890a98c3da761e8ecb2d2198e576bc9c9c451b859a3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "776dbfed4dbc3ee924767034f560be3ee8bea384bfb8e77ff7b3bd1a1f51b987"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyw-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "530e9faea6bba5e7842a2b224888e60a3b6b83abad47c03f6a53c2e651df6f90"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "68aeb81f23ea8e6137a7d3ee9bcdaa1a439e7803334a29518aff37263ae701c4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "b23b4bb418df3ed5cc4d9422e8f12c240148d15c59e7c91afdb5914d4f88c51b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b8dc406e702f1de087515c6eec7318afbd4a3070616fe703afeab50a40d82d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a267f9943240554daec5d6f2f93cdea8501f13fe40472d92cfbede98d6f7c732"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "c9a7a04b7069253da7e37e9b97c3061ce9762bb0fe4e5cf5058a8c1a2469d42b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/presentation.json",
+      "bytes": 2623,
+      "sha256": "563b7ff7035b22fd5a7bf11bd4894244ebd5fff486ec7be72de329c071c79161"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "f83031c6cc3c133e4a1597aaa8d46aca9bce948e41eae22d28e77e64d1c0cde6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "6fc5b32d3dab3012b21c5582f95d52ce52ab492f99de5d5085153592cbc9f494"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "a267f9943240554daec5d6f2f93cdea8501f13fe40472d92cfbede98d6f7c732"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "1951a5a8f74a49bc30df2b0c44efef743e1cf6737cd43731cace38bfb8558aef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "b5b92cc518f5a0708fa04b71006ef853598dcae78daa97b4d0db229878360843"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "21eb3d8adaed3fac4c33c1bcc6a72e8a59d12106ad3f92b4153cd9eaf7c1f154"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "8a50f10ae1a6c8cc87061dd1016473d9b46e0d454aff4287ee50f1af38dad320"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebdb76a4b9f72997ca8a8dea95017f8b0b7bab306f871bf99c1e10031364e13"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "e98b0a1ff8bbff0dc82bb6d6bb2212d9ce4c491c53cea8f5c58ac97ea501588c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/presentation.json",
+      "bytes": 2625,
+      "sha256": "cae6943b32a36837bd715be238740bbf6ed2dd403789ea836f02bfee027ce414"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "056b8d3a5cbe9330ab2670aa7094873be75d461860e73bf9ee80f2578953c2b7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebdb76a4b9f72997ca8a8dea95017f8b0b7bab306f871bf99c1e10031364e13"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyz-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "57a5ff4f807e194e336b8db209644ba7885336fbcfe12026ec94c81d05ab4a20"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/geometry-ui.json",
+      "bytes": 472,
+      "sha256": "cc1458a98fe33958ec203080eeb52d970de871ae7e74ddf997787c63a5e5fc62"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/geometry.json",
+      "bytes": 776,
+      "sha256": "02c66f5d7e2e883b3094bd82606f38a19a604fdeff45820963551cab7c324da9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b17a653b6aa6e740fb80a17a92c55b8b1c92ed903de4230fbbb75f3e8ae1c345"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ed5fffd6e2b7e0a20fe1307c4c8a21afff3c22c6f956c33d3dfeec26b6863217"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "a5adf9f6114b41fd0420609520d7a5c3a4ba300ee77f77bac1f56992e47968f5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/presentation.json",
+      "bytes": 2784,
+      "sha256": "bf91516068cc838d6932c304a401da67f510fb096d3148b9113b662b4787e997"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "5d0d92721d64c6dc6fc8b383012a67a8a699b47197daba152f8e60d23b19e185"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/result.json",
+      "bytes": 1330,
+      "sha256": "f6d9af04073c3f01393cbc7865a4a34f3f39ed3b18d68913f664a9b425246319"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "ed5fffd6e2b7e0a20fe1307c4c8a21afff3c22c6f956c33d3dfeec26b6863217"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-0/vertices.csv",
+      "bytes": 155,
+      "sha256": "6e64540df8885c86e7331abe1eadb5471877773f7d2e79adea131091caa3861f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/geometry-ui.json",
+      "bytes": 474,
+      "sha256": "663d211f725f883fe9dbd762558a29191248577a4ca0df53b5871ee4f269aca8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/geometry.json",
+      "bytes": 776,
+      "sha256": "f26edc6fa719c303cd5a64e9093ce489e5c0f299c585581d689fc79adf2afb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "cd845e74bd522f313b849cb326f2e6ddbb32f16e270c413d393ae0e5b8929013"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "2d03fa998c4051e7330727010e0c67accf1237bf203c09911df7c8eddb2b1aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "c894c3c5ccab6f3829f389a51809b911f22218daf4f6a44078852fe67bba0f79"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/presentation.json",
+      "bytes": 2786,
+      "sha256": "033bcc9a16c12f7cc556c8dad80eb1124d37fca983ef5c2e61abdc2d6ae00b48"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/result.json",
+      "bytes": 1330,
+      "sha256": "19fec406b6e7439e5daddf6e49d863b0547798faaf7c16d8b8231ae42f8a2b56"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "2d03fa998c4051e7330727010e0c67accf1237bf203c09911df7c8eddb2b1aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xyzw-special-1/vertices.csv",
+      "bytes": 155,
+      "sha256": "593a1adcd1ca9c182fa3af2d6322b6cd2acbd598f941a713739dc0535e9c360d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "7266fe7dad6b23ff41c832459798f1c51816c254fd0188dd5bc1c082ebc2fb08"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "fb8b7f26e9379167a0372205ee0e12fd805a40072b5a8d6f10bb8423d10fa05d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "e941977e540afb5b4f279fe292ecf0592acbc5181dab3c5e1452eacb21ffca58"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "fe7c8f3a95a390f3b615b0b57931283eac165f4e506766c5abfcddff7bad2045"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/presentation.json",
+      "bytes": 2582,
+      "sha256": "23f62f72af0d73627cb5fc275e4f5c1a4043623b5f521e259faf3e28ddfebc09"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "2681f63ed023f869c48d98ac1d07821600eefa0f403391351b8c624ffc44432b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "e941977e540afb5b4f279fe292ecf0592acbc5181dab3c5e1452eacb21ffca58"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "b6e6b45f6328ce9cadce05f6300528e2c7ef4a55937208601a4c71b37494f4c8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "fbaa8663cc6925b212eb90f4ab62299c75ebffe2804e027dc488f2a381ac70e0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "b2abe4ab6d67c11723b08ff2098f149293e7df60bb94689cafd0950f312400eb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a5a13d4151e378f0e971e5022b91bfbd420e89a742a2ad9b33048819ac50d199"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "60b02e9ab72dd39e607e0861b83b62173eb4ac6551adf5b813399fc19886e1be"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/presentation.json",
+      "bytes": 2584,
+      "sha256": "ef8cb02ae69c4bf9df8fbcb7a7d1e729fd0dbb83d542d8a8da4817868d348202"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "fe31cb750cc92d8eabed4d83d4d35181daf54b519786f2b32478a7b330f7b077"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "a5a13d4151e378f0e971e5022b91bfbd420e89a742a2ad9b33048819ac50d199"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xz-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "164a791ba164ede5c584ad2281a2f41368736ffa83ec36600059a5a2f174d0d2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "6d621cd30c999b712eb656e6628a9bc4f0bfec016977c354e93849db1dad6474"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "366a7ff4d1362f4a735642f28c3952bb5e65c55115d3b072c61569b9816d7408"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4fe7134b4c01f6b0f0947f5848c0e713038eac815b15445dbed15bae937d8838"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "b1c47e5d4fe80b8a16fcdb19fdb4e572a3e888f675cfa79a6ff20a5951335712"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/presentation.json",
+      "bytes": 2685,
+      "sha256": "426be0dd366c619d59b8ea53d85ac103a3eae282963f8fa49a827c190f897bfd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "acb7f0c68b5079d0567203522c3e525a0c3446d38a8b4c1485e485ae16912289"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "4fe7134b4c01f6b0f0947f5848c0e713038eac815b15445dbed15bae937d8838"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "466eac73bf8c6da31ff29617b5d042b4eb1f4dd377b4ca76f3c1e96632ecbcbb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "116e1baf0560f81a9d4f5fc443c301156d1c4c21badeb7231617605a58086924"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "a20abdf9dc15c78bb212264b6bc99893e2c36ed7dca50f453fcfed9e9328d22f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "0f71ec0d39389465c3e2e0cb0f9c8983178f77dda3ca40ac57111ee055b0d847"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "ee49193a5eed943806c64c6aece67201417820daa6e4b0577deb55ed15d4e6ad"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/presentation.json",
+      "bytes": 2687,
+      "sha256": "368e4f199ac2228cb183347986fdf4b994b49f4455b7d89ee10f724e7cbe66a3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "5d198dffae43d92a8dbbe3ce8cef5cd17cef815317d2cec728a9c966005cf95b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "0f71ec0d39389465c3e2e0cb0f9c8983178f77dda3ca40ac57111ee055b0d847"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/xzw-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "f97cdc2ad6054ecb23793fe79cfa7b80be412e7d87ec213cfa55b8f767c04d13"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "f2708e6156344cf74978da7f884449ad53a4dddd78e107b648cfcc618213e5a1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "2b5532a87ad6ed90c0512b5918c21cea18e912f0a2b46b174a1f05c341f816e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "f39fa4d69a16b8eb1c26b010af00fe2f963f46bf5860a7293b8e846cc4533c89"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "33ed4ddac9caea7a4d1baff4e116f9567f5ae20f84697072a8f1b6e8ac278ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "9999d2603ff66984d25999cbb3cfec1f9f12996d7b7008c60f42de49b9fa04ad"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "c3f6a3a12bdb698455ac7a03b200e9dd928bb80ae3660308d8df9e039fd27d18"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "f2708e6156344cf74978da7f884449ad53a4dddd78e107b648cfcc618213e5a1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "2b5532a87ad6ed90c0512b5918c21cea18e912f0a2b46b174a1f05c341f816e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "f39fa4d69a16b8eb1c26b010af00fe2f963f46bf5860a7293b8e846cc4533c89"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "33ed4ddac9caea7a4d1baff4e116f9567f5ae20f84697072a8f1b6e8ac278ec5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "9999d2603ff66984d25999cbb3cfec1f9f12996d7b7008c60f42de49b9fa04ad"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/y-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "c3f6a3a12bdb698455ac7a03b200e9dd928bb80ae3660308d8df9e039fd27d18"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "c1a2ce70624d39756ed38d563c6bcd5e8675fda420a0a30ef9b5113be19a2248"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "12d13d2665a830fecc32e622cc74c301feab715da07782afe1fa88aa9061dc1a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "87cd15f5ad4e9f51712e73166b447a8fe3b0b2de540e64c38bc22cabf60f1eaf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "88713970c71fdeaafe904569109dcb3cf1f760df1501ccc98804c5d611764d7d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "36db6ae3014a86dba686d70d29511ddb82118bd2fe8e73ed789517e70cda2473"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "681d7ba80816abfe8717fffc609ab2333bc28524c38ccaa164d7b88a4bba0b5d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "c1a2ce70624d39756ed38d563c6bcd5e8675fda420a0a30ef9b5113be19a2248"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "12d13d2665a830fecc32e622cc74c301feab715da07782afe1fa88aa9061dc1a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "87cd15f5ad4e9f51712e73166b447a8fe3b0b2de540e64c38bc22cabf60f1eaf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "88713970c71fdeaafe904569109dcb3cf1f760df1501ccc98804c5d611764d7d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "36db6ae3014a86dba686d70d29511ddb82118bd2fe8e73ed789517e70cda2473"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yw-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "681d7ba80816abfe8717fffc609ab2333bc28524c38ccaa164d7b88a4bba0b5d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "2c36ad927e5fe5c017f4d97b65879ba631a425e7ac0cad4cffb6631b55ee5ba0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "e7cd2939eebe7e5d1d7cba6fcbde7896bf5b71f098ef008a9f6c11cb64eab396"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "77a563f4d600ffa9de0aa5b1e3ec8424d910032346989848f3b8e2035bbbfbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "00c454a403dfdc6ef77bbfa34cf907d16071ac0f72b2a7cc5bb09a6ac8cae743"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "5391c9d68a2ac0321396c2986b6117a8fe7fa046e1434e130f866a4bed07214c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "6e727fad4053296616be983120731a9f1a9f8a6124fa4c5feac365f4fb80be4f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "2c36ad927e5fe5c017f4d97b65879ba631a425e7ac0cad4cffb6631b55ee5ba0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "e7cd2939eebe7e5d1d7cba6fcbde7896bf5b71f098ef008a9f6c11cb64eab396"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "77a563f4d600ffa9de0aa5b1e3ec8424d910032346989848f3b8e2035bbbfbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "00c454a403dfdc6ef77bbfa34cf907d16071ac0f72b2a7cc5bb09a6ac8cae743"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "5391c9d68a2ac0321396c2986b6117a8fe7fa046e1434e130f866a4bed07214c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yz-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "6e727fad4053296616be983120731a9f1a9f8a6124fa4c5feac365f4fb80be4f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/geometry-ui.json",
+      "bytes": 413,
+      "sha256": "dd01035c101c2f7687fe2b9d1291884664aa744eb76a5da77ca0bb13702a7c94"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "9900ea87a3d500d22bb03c0c8c9f24e0c99479db0267783a64d33ddc54ff59ed"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/post_vertices.csv",
+      "bytes": 59,
+      "sha256": "30a20d232ea52298c2394053f7a6fda4055a16779fb3319a8ee5c1bd42cc5c89"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/presentation.json",
+      "bytes": 2684,
+      "sha256": "f2a39c619c86325cd3543c6d15e44f267a1027b49b00ebb3c4e5da5d85044f1d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "f2852450f954b76d7c4198999a794fe95c637fe752c5e63d6683d63c7f009d1d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-0/vertices.csv",
+      "bytes": 127,
+      "sha256": "e2ec0787bf38ce5ac6dba9af3264b5e522e226a6a4318604702425accd89ee03"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/geometry-ui.json",
+      "bytes": 413,
+      "sha256": "dd01035c101c2f7687fe2b9d1291884664aa744eb76a5da77ca0bb13702a7c94"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "9900ea87a3d500d22bb03c0c8c9f24e0c99479db0267783a64d33ddc54ff59ed"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/post_vertices.csv",
+      "bytes": 59,
+      "sha256": "30a20d232ea52298c2394053f7a6fda4055a16779fb3319a8ee5c1bd42cc5c89"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/presentation.json",
+      "bytes": 2684,
+      "sha256": "f2a39c619c86325cd3543c6d15e44f267a1027b49b00ebb3c4e5da5d85044f1d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "f2852450f954b76d7c4198999a794fe95c637fe752c5e63d6683d63c7f009d1d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/yzw-special-1/vertices.csv",
+      "bytes": 127,
+      "sha256": "e2ec0787bf38ce5ac6dba9af3264b5e522e226a6a4318604702425accd89ee03"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "dd8404d302b07b36c734ee1be084ecf77892005ad4e607206c9d6ca889eb9b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "ec939b7a229505bfbe923fe88b0c34335384bba15dfece8be694cba688b11be2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "95808e2b25562e93b33f7a5d29df30ec355379c8410b0b12d00ab0cb852d9354"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "d392d9fd2b4ce599c6c33c1934da944499eef155f83dc80137083e4ccf795a85"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "416f715d9eba81c5b37c0985966740fae9a21a9b3f1d4384746622ec6d295dd8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "ca5e33dfe60785c4847fc9f2e7c3c143d6685e97305f79a25be14a7fed4fb5af"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "dd8404d302b07b36c734ee1be084ecf77892005ad4e607206c9d6ca889eb9b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "ec939b7a229505bfbe923fe88b0c34335384bba15dfece8be694cba688b11be2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "95808e2b25562e93b33f7a5d29df30ec355379c8410b0b12d00ab0cb852d9354"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "d392d9fd2b4ce599c6c33c1934da944499eef155f83dc80137083e4ccf795a85"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "416f715d9eba81c5b37c0985966740fae9a21a9b3f1d4384746622ec6d295dd8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/z-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "ca5e33dfe60785c4847fc9f2e7c3c143d6685e97305f79a25be14a7fed4fb5af"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "a81868e1bf638468c0a3d6eb359cf1ea8bec16f343267df481d097ffb3d9b350"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "015105ccbdf767a8618468b41d7ead9d0c96314bfc56a2996795daa9e52c6e5a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "da9bc2180dd767592708cbc5201f567ffa3b8c252bf35987917f9e5a4a3ef739"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "4844a5851085764650b40592feba7b033735798e9c8564d4d0b9e190f25d79b1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "bc477ef5fec6129655f232d7e244ddc7553a8162b637e07b84fa1c8b4f49c0ba"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "fa8bf7b30476ff192d480f416b0f30f448de52975e96c5ea858ceb0c98211730"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "a81868e1bf638468c0a3d6eb359cf1ea8bec16f343267df481d097ffb3d9b350"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "015105ccbdf767a8618468b41d7ead9d0c96314bfc56a2996795daa9e52c6e5a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "da9bc2180dd767592708cbc5201f567ffa3b8c252bf35987917f9e5a4a3ef739"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "4844a5851085764650b40592feba7b033735798e9c8564d4d0b9e190f25d79b1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "bc477ef5fec6129655f232d7e244ddc7553a8162b637e07b84fa1c8b4f49c0ba"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zw-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "fa8bf7b30476ff192d480f416b0f30f448de52975e96c5ea858ceb0c98211730"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "777e5dd791e3a5dbf30e351620da32ada3fadf1933c08fbdb61d6901a6e49660"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "b835dc781dd9751a26c9e8dee76b5845e2dfea3b78ef052966870661e1557792"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b8dc406e702f1de087515c6eec7318afbd4a3070616fe703afeab50a40d82d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "6d3c4c6f350db1cd82ab92fdb99a30b8794ad8a71be0e675a58f8ddfb2493c35"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "217958f1796d2193fc641eec9c5127862b42fb6d7fed38ef526eedf70b7461eb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/presentation.json",
+      "bytes": 2623,
+      "sha256": "0b775e8db87d545c4435881f5b7876e74d873fc2b3eb4a5d9f6c4dd59a86629b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "f83031c6cc3c133e4a1597aaa8d46aca9bce948e41eae22d28e77e64d1c0cde6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "df8802dd0ad8e58169ebd55e9c65aebe3fc737772883cc6fce9662a99abfe1f5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "6d3c4c6f350db1cd82ab92fdb99a30b8794ad8a71be0e675a58f8ddfb2493c35"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "79270c642e5d61c8bf495899c2903179bd550d7b984deacbb0ff2635e24bfc94"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "2cd338bbf9b20f06f5c7a6bde08d4a7fcd091cebd41a3e9f4b21ab14f4300353"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "5d683a763fd55da36906b75fc98ad7768c0683782d797ee2f66b976422de117c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "21031aeffcd18d363349b0e31a0197db39abb758c358fa3724db2b2719bc3c15"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "8a50f10ae1a6c8cc87061dd1016473d9b46e0d454aff4287ee50f1af38dad320"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "fd797bcf4ebd71ecb3805e7f34d26a65e29c1af453bbb9b0ea493be11f578ce9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "521ebc0440e18975cd6964608a257b71f7a2eccd95290a554c461925d5cf0db0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/presentation.json",
+      "bytes": 2625,
+      "sha256": "d4c3c445332cc303fc1af10a6998ba2019d1a96cad5047f5ae81260692093fa9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "bd2113fb286565612ce618693759d96466fcb85fdf961fda3a073d312c8be898"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "fd797bcf4ebd71ecb3805e7f34d26a65e29c1af453bbb9b0ea493be11f578ce9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-channels/zxy-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "8bca77f0d769d99628dcc1a58c8a4dda5c03ad8640f7c2a6fb0e138e6281f4e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-ds-atomic.json",
+      "bytes": 16923,
+      "sha256": "f10be1bedc04a3ee1a3100e0017e14e624c5301ddb75fa8a50b1851c87516575"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-ds-gs-alias.json",
+      "bytes": 8493,
+      "sha256": "776460fae43980afa83e6bcd7f4ba9f1ee733e58c80b12733c6a50213e40660a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-ds-nonfinite.json",
+      "bytes": 16989,
+      "sha256": "e50bed0a3dcea2c6456392fed4a00253db380fddfee326859356f80effa499ed"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-ds-upstream-alias.json",
+      "bytes": 7752,
+      "sha256": "735056c8cf3a4ae6ba9218ded3e9117d68eb1852e004406fd7fcb1c7cf0a9374"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-alias-srv.json",
+      "bytes": 7654,
+      "sha256": "f029908da3937d957897a7ca10964181b80d6e77fdbe2a03275e7fe9defc1a1d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-alias-uav.json",
+      "bytes": 7796,
+      "sha256": "ee59869e39268e1efede9250182c7c96301081a894e7061b8330601662c8df55"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-empty.json",
+      "bytes": 17000,
+      "sha256": "807f2240dd9bec849043de81118c36e7b3c35fed3e9fc1a4473baaf4459dfa7f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-read-srv.json",
+      "bytes": 18453,
+      "sha256": "b2ee4983673a3263f58f8276eeb0e920f63ad74d0d5cd6c6aaa1fd268b68c5b8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-read-uav.json",
+      "bytes": 18453,
+      "sha256": "e5fce04464a520fbf6af5dd5a5aed8a9428a603f24cd934323b5ded46d120825"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs-unbound.json",
+      "bytes": 17938,
+      "sha256": "75b7f7979e7329511ef4454e8c6d29d41db624b27a1044b9a7b16fe06b7ea4d5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-gs.json",
+      "bytes": 17460,
+      "sha256": "04827b799a5bd3dd44d5b13add261cad660a7202712f24b51bf2783eb71cfba5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-ia-alias.json",
+      "bytes": 7719,
+      "sha256": "34f99a40c77201b1267783e80bf75317d96a821b4cd8e81427de6f3bf55512e7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-independent.json",
+      "bytes": 16333,
+      "sha256": "24d5007b878b5bd4bc36f52acb9594dbe244272f9f8e5367133857612959a0dc"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/0-read.json",
+      "bytes": 17110,
+      "sha256": "cbe8f03226c9bf1d2b4f0e2528af48df157f5dac94d6ee057fa7919bc76323e5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-ds-atomic.json",
+      "bytes": 16927,
+      "sha256": "d931009fde2a7f5895b3e1f717bc6e558c0857f14e4ba22bc266467b1cbb1982"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-ds-gs-alias.json",
+      "bytes": 8497,
+      "sha256": "0e4c6ac71030ac3b97c914cca3ed5e6721e00be26d19f9282dff5eadb5a262ac"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-ds-nonfinite.json",
+      "bytes": 16993,
+      "sha256": "c69d0c0ad314a8dc5382ebca1bd953bdcdfe29419835bc7df7ad798cfe980c0d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-ds-upstream-alias.json",
+      "bytes": 7756,
+      "sha256": "7814e45bed7fb2d93d763cbb7562e21535786572c51a7a91c75000633bbeb249"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-alias-srv.json",
+      "bytes": 7658,
+      "sha256": "8ad9d925ff10917f8c8c91e88d7a0af2dd69eabb23db70b658074b770c181fd5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-alias-uav.json",
+      "bytes": 7938,
+      "sha256": "dbcd21fd1fa5c5af28e3dd21b9c0d178b2d87d8fa0e468766ffae5d58e2165c3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-empty.json",
+      "bytes": 17004,
+      "sha256": "3919c57928110573882175ef27cb080f317c259c4d535d50ad974903ab183a18"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-read-srv.json",
+      "bytes": 18457,
+      "sha256": "a8acb50ef33d130dd9e8e926f2912f3c7a8977f856e5f84b28844a471f1acdee"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-read-uav.json",
+      "bytes": 18457,
+      "sha256": "2192328fe91092de2c6832ec5199b46d699ef96ec1ffe90711f04883935bf740"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs-unbound.json",
+      "bytes": 17942,
+      "sha256": "344d006810d43048520601cdd67a15689691973c1f688c50c47ec97e4ec754ef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-gs.json",
+      "bytes": 17464,
+      "sha256": "a4e7cb72730df655401277a3fee1e14d72675945e5d54efa30c4d72cc160af11"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-ia-alias.json",
+      "bytes": 7723,
+      "sha256": "5db89d6b80f7936555c0302cef3c820d78c01c8660733e1cc5dd958cbc23572a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-independent.json",
+      "bytes": 16337,
+      "sha256": "c107ab5e3d65c66101c88a24c26bab30b4d5a24400404672810aaf26f911a018"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/32902-read.json",
+      "bytes": 17114,
+      "sha256": "c4f8ad51a0aa8ef2d5e6bee654bef9475c678f5432b27b11e847b63dba794384"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-ds-atomic.json",
+      "bytes": 16926,
+      "sha256": "f5fce68742fb784353963c59c0a6709b6bcde5d4f892cc328e55e7b575b52a10"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-ds-gs-alias.json",
+      "bytes": 9201,
+      "sha256": "5ad26144791c7b6ba59db9121382287a8e5cdc5d2b9fbca73f2d06c5a3256646"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-ds-nonfinite.json",
+      "bytes": 16992,
+      "sha256": "e7c7d7e0418bb20dc08fd843c3c90dda98d7c4e23023789bbe4db76b1dc0590d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-ds-upstream-alias.json",
+      "bytes": 7755,
+      "sha256": "6fb27c4c788b73399055bb32d1a4f85f903d6246585bed82bcb910f7f1b032b4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-alias-srv.json",
+      "bytes": 7657,
+      "sha256": "332bb6701d814b53160c704a093cf35a5ca8628ae9673037235dc91f4d3da7c5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-alias-uav.json",
+      "bytes": 7657,
+      "sha256": "141d71a73c7494d3e3dd289b394e9ed808b5ee9f4bb8836f1857598bc28a207c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-empty.json",
+      "bytes": 17003,
+      "sha256": "2ce86e864d502a94d809dd82edad11f85b83d32724e58f1267f8a13108c91857"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-read-srv.json",
+      "bytes": 18456,
+      "sha256": "5f37e9652262d4961629b514f8be243b907b873e88af8902cc3938ecdb58063f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-read-uav.json",
+      "bytes": 18456,
+      "sha256": "dc60163c691f34fea6027df5410060f03acf7c50fc65fb4c7ad32eac0422c552"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs-unbound.json",
+      "bytes": 17941,
+      "sha256": "a7ac15d7fdf5a8bf04718657e2c8e2c00693c9ad345075a478199f866d29464a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-gs.json",
+      "bytes": 17463,
+      "sha256": "01fdc77200741a5d3386e3e87d5cda95b0e0ae0031d25fcbe5fe10f08b5d2e45"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-ia-alias.json",
+      "bytes": 7722,
+      "sha256": "95ca89578d66ef5af006d985bcb267a1f5b9a5e9424eff2c3449d668f83faff9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-independent.json",
+      "bytes": 16336,
+      "sha256": "c2a803b65f8ce270ed8d89f2045314fff5468278a77ed12d5699ed23b5bdc440"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry/4318-read.json",
+      "bytes": 17113,
+      "sha256": "36ea1b61ccb66f38d9cb197910522bc5db9aea47993494329180a6073eededc1"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-geometry-validation.json",
+      "bytes": 162,
+      "sha256": "0c01cb81d88ca239955272d2a4d9d186c3ace8d3355aafdfe4afa3e2ad0d4995"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-GeometryUavDependency.log",
+      "bytes": 5015,
+      "sha256": "76c6a9c2be050732c5aab69a3fc16a728a07d24ad092006d5617a483b3cd12a2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-NativeAnalysis.log",
+      "bytes": 3157,
+      "sha256": "351cc712a99d31caddce7f145b3e030570ffd638aba25778528a641dcdfb5abf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-NativeComputeDebug.log",
+      "bytes": 4340,
+      "sha256": "270c16a7ffdd143d042f0ae69a1afa3f9ad5c7604326afb1ab372fc8ee76e05c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-NativeReplayMeshUi.log",
+      "bytes": 5243,
+      "sha256": "1daaee60d39af82f0cc72369a776cec25fe6a8a7cb69ee0b9e755d43d35bb722"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-PostTransform.log",
+      "bytes": 6187,
+      "sha256": "3a61e878e080c6cbe7f00f7b40260407f6a8e7d50cb2262be06e2dd2c6c57284"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-test-exits.json",
+      "bytes": 329,
+      "sha256": "920881c52e7b87c1804b979dfd6fe7f0d1a86fee735a15136b3d7e59c098d122"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/job.json",
+      "bytes": 624,
+      "sha256": "2b8fa0c68ccc90581eca2f4e1f65fcfdd08a15ee10eafe0ac8c0e78d65d31afa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/result.json",
+      "bytes": 7897,
+      "sha256": "939eec46c0d9a783b0e542f9d761b9f811421a88d890503ad903a3a689afe30b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/geometry-ui.json",
+      "bytes": 595,
+      "sha256": "45b45c2fcf31536d199cb95c876d2e93455a90b8b03447571f7afef4a6ba57dd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/geometry.json",
+      "bytes": 5545,
+      "sha256": "1726a417565499cad128b8dbd1d1453a95c340589c54ca559e8182444f0f5bb8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/geometry.obj",
+      "bytes": 140,
+      "sha256": "96c27626a839642b52c8d1063373ac6fab8c791bc4c397321fdd979227b29d24"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/job.json",
+      "bytes": 624,
+      "sha256": "8930977a6edd30e314e1049f3571ba1e09969493d8f61f07282fee67fe20dfe0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/post_geometry.obj",
+      "bytes": 190,
+      "sha256": "a70767f0f4ad8b1695c8bbcbb9a81a61b128fb3d8eef5186ecf5053f0c02179d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "eadc39910e34f38aea48763e22999b2282676169f885a6105973dde296f2e2ef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/post_vertices.csv",
+      "bytes": 138,
+      "sha256": "709dc587ca57db770939bf3acb44c7081b5ac5fa30dbcb54f34c908726bfdada"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/result.json",
+      "bytes": 10401,
+      "sha256": "7519e75918c9358bce80b66aa799d0ff4de3a8de26997332bab822b369d7ec6f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/vertices.bin",
+      "bytes": 96,
+      "sha256": "eadc39910e34f38aea48763e22999b2282676169f885a6105973dde296f2e2ef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav/vertices.csv",
+      "bytes": 231,
+      "sha256": "53c558ff1c6759623cdc15e7c2b32c8a7df9d7dd35e398d9c2cfac0a28327150"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/geometry.json",
+      "bytes": 5309,
+      "sha256": "4585417d4fc5fe1e4d941c4a83aaec1466f553b50ae64622d4265302353dee28"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/job.json",
+      "bytes": 624,
+      "sha256": "5cf48e13ab3ede543f63897bbd1825ca05b82e933e83c10616bd855880f56e18"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/result.json",
+      "bytes": 10141,
+      "sha256": "761b17e65276227d2ab1083024c6134eebdc1db8a655af18b73f21af325bb9fe"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-upstream-alias/job.json",
+      "bytes": 624,
+      "sha256": "bab152d8c5d5c7e6f41b9eb9b6f33db84e95d1ba486262ce1a2a591e8583dd6b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-upstream-alias/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-ds-upstream-alias/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/job.json",
+      "bytes": 624,
+      "sha256": "982a46740c3c569d45420d4e7ee00959ae7a3186e8589a49853a2a89925d62ed"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/result.json",
+      "bytes": 7517,
+      "sha256": "3c03fbb7cd91df8dac7791d787b03d4308f7cb252fc40f1c0e99c48d5da40ddb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/geometry.json",
+      "bytes": 4831,
+      "sha256": "0e80f84b07a675b8a97ecc15a9527a0f1cc4c871fd251c381d85058e9a28c1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/job.json",
+      "bytes": 624,
+      "sha256": "175b191631e952df7d569420abe3742af9711d8ad4692c647737ce28c267f2ad"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/result.json",
+      "bytes": 9644,
+      "sha256": "01f0f9d50850b65b7f94e2ea7c26e5df1fa28f92116d22c7ac687c30a7036b6e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/job.json",
+      "bytes": 629,
+      "sha256": "b1fed945b3de6c6834839cc437f7051c99cc4c7513c7b7bbf253d52bd1682e16"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/result.json",
+      "bytes": 9086,
+      "sha256": "e525dc32b84e0b978c4195f6f6099387a475b700c55471ff8c464465de8f9897"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/0-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/job.json",
+      "bytes": 631,
+      "sha256": "c37a5f075fbc96911f564f076bf45b0d0fa045bfaff8887910511506aa761eee"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/result.json",
+      "bytes": 8313,
+      "sha256": "0b7ecb9435e15b0a41a8ae40c38ac44d13591b72bedddcd78768e6bcea8793d9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/geometry-ui.json",
+      "bytes": 595,
+      "sha256": "45b45c2fcf31536d199cb95c876d2e93455a90b8b03447571f7afef4a6ba57dd"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/geometry.json",
+      "bytes": 5545,
+      "sha256": "1726a417565499cad128b8dbd1d1453a95c340589c54ca559e8182444f0f5bb8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/geometry.obj",
+      "bytes": 140,
+      "sha256": "96c27626a839642b52c8d1063373ac6fab8c791bc4c397321fdd979227b29d24"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/job.json",
+      "bytes": 631,
+      "sha256": "520a8e5d690de0db52ade7fa294a9a87e00fee536733265801c92264bb518e9d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/post_geometry.obj",
+      "bytes": 190,
+      "sha256": "a70767f0f4ad8b1695c8bbcbb9a81a61b128fb3d8eef5186ecf5053f0c02179d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "eadc39910e34f38aea48763e22999b2282676169f885a6105973dde296f2e2ef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/post_vertices.csv",
+      "bytes": 138,
+      "sha256": "709dc587ca57db770939bf3acb44c7081b5ac5fa30dbcb54f34c908726bfdada"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/result.json",
+      "bytes": 10817,
+      "sha256": "f5be0af0df1948d36bb1702a0c936642db47cb6f98e5988154f827553f94db58"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/vertices.bin",
+      "bytes": 96,
+      "sha256": "eadc39910e34f38aea48763e22999b2282676169f885a6105973dde296f2e2ef"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav/vertices.csv",
+      "bytes": 231,
+      "sha256": "53c558ff1c6759623cdc15e7c2b32c8a7df9d7dd35e398d9c2cfac0a28327150"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/geometry.json",
+      "bytes": 5309,
+      "sha256": "4585417d4fc5fe1e4d941c4a83aaec1466f553b50ae64622d4265302353dee28"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/job.json",
+      "bytes": 631,
+      "sha256": "3c981e9cefeb3979edef404584eb99b75827035dfc4d1c3e9f484dc5fee40cb6"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/result.json",
+      "bytes": 10557,
+      "sha256": "9aef358cfeb221068e2dadc95e5bef4f8124a4694aa78431eac886fa2b0ea67a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-upstream-alias/job.json",
+      "bytes": 631,
+      "sha256": "936563319d2d4daed24053820f335163cc8ba915a6ae13dcefa931fb8dff3ccb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-upstream-alias/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-ds-upstream-alias/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/job.json",
+      "bytes": 631,
+      "sha256": "6d654a0f7a3d8c6b749e9c9d7d168e1e4a37a03b8e92723597f8395ed5c7890e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/result.json",
+      "bytes": 7933,
+      "sha256": "74fd7dcfa616c811a16c60c8bcb6fe9832d45e4c0d40f5378b8bed1dae93cb8e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/geometry.json",
+      "bytes": 4831,
+      "sha256": "0e80f84b07a675b8a97ecc15a9527a0f1cc4c871fd251c381d85058e9a28c1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/job.json",
+      "bytes": 631,
+      "sha256": "7f6f65883b01335d9c8a6e3692dc501b0a4ae2512400d203d7e3972b849cf666"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/result.json",
+      "bytes": 10060,
+      "sha256": "e3c7a15bfcfd70558314d5ca4cd459f0a0693a616613f5870e41a33e4ae4a73b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/job.json",
+      "bytes": 636,
+      "sha256": "6329efdcce763bdffde5e68e5d69ac4065f3347eb4df2b7fb3e73125f9da4d00"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/result.json",
+      "bytes": 9502,
+      "sha256": "b222d6bc4840805bc12081cdaf6f2f96f44d5db72c989e9058958c7d48aab378"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/32902-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "70c36c80d3d67f49773d3b69a555dfe6297b956a32344b31c07c1f69a06ae0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "c4ed4d80c4bd1204c2b0a0e819abc69436afdb96906b6b5004dea161a6187e29"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "b308a606cba9ecd0a97aa634b8bed20d7882b90ec3dd25ff7a0a7ea240d1e21c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/job.json",
+      "bytes": 630,
+      "sha256": "8a0f99ce243d9fa3aff80e89c3a53d395e51cb6da19f3f9f7508b7f9be01cb7e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "aea58ac3b3c0a8f392690a0d389bce0cd1f8e7d62e3004deceb9581a8573b313"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "eb162b5e8629798b1ca2adb8caae1dddb500873ca5500bc3b6af65ad05d5d9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/result.json",
+      "bytes": 8699,
+      "sha256": "3747508af3ec260efb15ccb42c5aa9d9bae6b906516a2f4ae21185d22ccb628c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "6328e6e88ce6fe6c0b610f685d8e6af12302b3482319eac15e45e6af66dfc1d0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/geometry-ui.json",
+      "bytes": 595,
+      "sha256": "ae745dcc0d2ee41ec716ab9a341e09e313ab06658dcc98b45689c91424946982"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/geometry.json",
+      "bytes": 5545,
+      "sha256": "4f2bc67ccf6b901f329a756128abb32f65ab2c4d5f9f07268060e1e6153a2ba8"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/geometry.obj",
+      "bytes": 140,
+      "sha256": "3ffaebdede2e5f2de7f4902a2df0241c588e8d4a5ae11f34da48b8c000dfbb0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/job.json",
+      "bytes": 630,
+      "sha256": "a9bdcfaa795be0941c040641ec63b1b98efec4de503ce557466bc2b0d191ce16"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/post_geometry.obj",
+      "bytes": 190,
+      "sha256": "ec5a1359dfbb46ad64424563d9cddd802842cd9b01c7404f9f1cf006ad5bea8e"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "3ea42440af0afd4836a2a991ecf5442b6d916f9fff2a373269728e8fdf257e64"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/post_vertices.csv",
+      "bytes": 138,
+      "sha256": "2c34e4dff2b5d70379354e931b538692f22a178c31d6e869a279342de3e5d4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/result.json",
+      "bytes": 11203,
+      "sha256": "25792f8c9080992060ddc1215357c3d792b7d7b1f7404acd380b79b207f5733c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/vertices.bin",
+      "bytes": 96,
+      "sha256": "3ea42440af0afd4836a2a991ecf5442b6d916f9fff2a373269728e8fdf257e64"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav/vertices.csv",
+      "bytes": 231,
+      "sha256": "d7da83d1a868f3030a6078030335a9048f28f6083d0852d28dbb09bc5e14b1a0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "f053b9bbe12dc4bc6482013a96d15226b4eebd1e657363e638a19f242ddbad85"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/geometry.json",
+      "bytes": 5309,
+      "sha256": "52708c8232ea853cfee3542d80a85f9d4e6ae1ce90d2f58d858847b967ebeed9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "a05923bd59d8e714248121d13e3f7d53f8501d05093fb72c7057cc4e70b5fcaa"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/job.json",
+      "bytes": 630,
+      "sha256": "36f8e85216a9c6fadfd6cbc7d410bf3563e3287a45fe4a807ac9460c026507e3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "7ac1aeb4c99baacea4c74508e6cc2b063bf5254a0cd7fc0436a03b48cb16e019"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "88f3ce972981cd3a55468ddb45357d54c41dbfbc52bd95ba6662a4d760c8a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/result.json",
+      "bytes": 10943,
+      "sha256": "6d2f0c3f5269a6eaa6c4f98603fb7a495969872e1a04590f536536565ded388a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "df924d15f920dc3133ae8b58461122c4649deb3774484eff3b35987ae8c08ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-upstream-alias/job.json",
+      "bytes": 630,
+      "sha256": "a12d2eabe5199f5cee79b69c4736e843e66abd432f3df1d0ee8756721edc772f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-upstream-alias/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-ds-upstream-alias/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/job.json",
+      "bytes": 630,
+      "sha256": "3debd4e9d493aeab289d0246853191048444b802d50c888e1e0a8eaffd41e135"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/result.json",
+      "bytes": 8319,
+      "sha256": "2f0cff31c47ed6568426850394387617494e68083ebef045f1f470f4ca0c0d3b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/geometry.json",
+      "bytes": 4831,
+      "sha256": "0e80f84b07a675b8a97ecc15a9527a0f1cc4c871fd251c381d85058e9a28c1b0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/job.json",
+      "bytes": 630,
+      "sha256": "fadb512144f89c93c4358ed28ae9e1a1334ded48709ce91e7b2791705174e056"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/result.json",
+      "bytes": 10446,
+      "sha256": "b13bf691edbeeaabdd2b23c9837935d6cb766bebd8385a3292abf18f2518fffc"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/job.json",
+      "bytes": 635,
+      "sha256": "3181f101aa3fa06b50523de028781e5e4006bb8a461c15967ce67a70ce7f9fc4"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/result.json",
+      "bytes": 9888,
+      "sha256": "3a0bfc9ec858c9e8a049aa29c284874d0baf4872c626b77c6ed96873d5cf6051"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui/4318-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/domain-counts-release-ui-validation.json",
+      "bytes": 52573,
+      "sha256": "0d0b67078513af2bd16299623d9a9966cf57008de49a26d4217b954d0028ecad"
+    }
+  ],
+  "build": {
+    "configuration": "Release",
+    "log": "artifacts/dx11-native/domain-counts-release-build.log",
+    "targets": [
+      "FloraGPA",
+      "FloraGPA.Cli",
+      "FloraGPA.Worker",
+      "FloraGeometryUavDependencyTests",
+      "FloraNativeAnalysisTests",
+      "FloraNativeReplayMeshUiTests",
+      "FloraPostTransformTests",
+      "FloraNativeComputeDebugTests"
+    ]
+  }
+}

@@ -115,7 +115,9 @@ sources, binaries, logs and the retained validation report.
 At the initial preview commit, instanced HS/DS/GS with UAV access lacked verified
 per-instance boundaries. Subsequent independent-write support is documented in
 `DX11_NATIVE_GEOMETRY_UAV_INDEPENDENCE.md`; the original negative fixture is now
-retained as an explicit success case, with actual UAV reads retaining rejection.
+retained as an explicit success case. Terminal DS UAV reads are subsequently
+supported by `DX11_NATIVE_TERMINAL_DOMAIN_COUNTS.md`; upstream count dependencies
+and DS data feeding GS still require the conservative proof.
 The initial three negative rows were not three supported cases. At that revision,
 noncontiguous position components were rejected by the presentation path; subsequent
 support is documented in `DX11_NATIVE_MESH_POSITION_CHANNELS.md`, without claiming
