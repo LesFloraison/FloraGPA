@@ -1685,3 +1685,13 @@ pass. Eight suites record 3,036 passes, no skips and thirteen unchanged Intel
 research failures, including identical original null-shader creation evidence.
 See `research/DX11_EXPLICIT_SAMPLING_PRECISION.md`. Minimum-precision gradients,
 original PS qualification, full P6 parity and P7/P8 remain open.
+
+Explicit native VS/PS sampling now preserves output-register precision, partial
+write masks and unwritten component validity. The 864-program output matrix
+matches 3,456 original GPU vectors on three adapters and checks 1,728 unknown
+input results. Twenty-four pre-change baseline groups remain unchanged; twelve
+additional float32-output groups have direct GPU validation. Independent checks
+reject 216 corruptions. Six suites record 929 passes, one unchanged Intel clamp
+failure and no skips; GUI/CLI/Worker builds pass. See
+`research/DX11_SAMPLING_OUTPUT_PRECISION.md`. Implicit minimum-precision outputs,
+minimum-precision gradients, full P6 parity and P7/P8 remain open.
