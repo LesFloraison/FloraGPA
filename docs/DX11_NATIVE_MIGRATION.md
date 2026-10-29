@@ -1445,3 +1445,19 @@ for exact selection, provenance, performance measurements and scope.
 These checks do not establish original multi-group scheduling, source-level or
 full debugger parity. NVIDIA assist cost and large-capture working sets remain
 performance work, and all P1/P5/P7/P8 completion gates remain open.
+
+### Bounded texture-load result reuse
+
+Native default-precision SRV loads now reuse exact GPU-observed results for one
+bounded byte version, with component validity reapplied on every request. The
+helper identity advances to `dxbc-gpu/28`. Mutation, rollback, view selection,
+cancellation, failed-helper rejection and capacity limits pass targeted tests;
+the complete texture-load regression passes 1,634 entries without skips.
+
+The [cache evidence](research/DX11_NATIVE_TEXTURE_LOAD_CACHE.md) records twelve
+captured BF1 event 325 comparisons on three adapters. Physical GPU assists fall
+from 3,072 to 2,688 while the same-adapter inputs, final resource bytes and public
+instruction journal remain unchanged. The public job/session workflow passes
+and 38 corrupted observations are rejected. Timing improvements are observations
+with an Intel reversal in the second round; this does not close the remaining
+performance, full debugger, history, dependency-removal or release gates.

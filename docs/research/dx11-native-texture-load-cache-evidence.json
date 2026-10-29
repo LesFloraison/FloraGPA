@@ -1,0 +1,1146 @@
+{
+  "schema": 1,
+  "passed": true,
+  "full_release_acceptance": false,
+  "pairs": [
+    {
+      "repeat": 0,
+      "vendor": 0,
+      "controls": [
+        {
+          "vendor": 0,
+          "adapter_luid": 74655,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "native_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "native_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 295,
+          "comparison_ms": 71
+        },
+        {
+          "vendor": 0,
+          "adapter_luid": 74655,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "native_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "native_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 265,
+          "comparison_ms": 66
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 295,
+      "after_ms": 265
+    },
+    {
+      "repeat": 0,
+      "vendor": 4318,
+      "controls": [
+        {
+          "vendor": 4318,
+          "adapter_luid": 69256,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "native_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "native_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 12116,
+          "comparison_ms": 101
+        },
+        {
+          "vendor": 4318,
+          "adapter_luid": 69256,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "native_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "native_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 10010,
+          "comparison_ms": 94
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 12116,
+      "after_ms": 10010
+    },
+    {
+      "repeat": 0,
+      "vendor": 32902,
+      "controls": [
+        {
+          "vendor": 32902,
+          "adapter_luid": 74756,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "native_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "native_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 2403,
+          "comparison_ms": 98
+        },
+        {
+          "vendor": 32902,
+          "adapter_luid": 74756,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "native_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "native_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 1267,
+          "comparison_ms": 87
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 2403,
+      "after_ms": 1267
+    },
+    {
+      "repeat": 1,
+      "vendor": 0,
+      "controls": [
+        {
+          "vendor": 0,
+          "adapter_luid": 74655,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "native_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "native_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 276,
+          "comparison_ms": 62
+        },
+        {
+          "vendor": 0,
+          "adapter_luid": 74655,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "native_sha256": "fa4273eb63af4d74331c1ea5e3e3b427b78f6ee586579372a01ca9030c266ab3",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "native_sha256": "f9e76edb0302c76d681c2a32929ef18489588cd249469172f71c6f37169914f9",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 241,
+          "comparison_ms": 58
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 276,
+      "after_ms": 241
+    },
+    {
+      "repeat": 1,
+      "vendor": 4318,
+      "controls": [
+        {
+          "vendor": 4318,
+          "adapter_luid": 69256,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "native_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "native_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 12329,
+          "comparison_ms": 96
+        },
+        {
+          "vendor": 4318,
+          "adapter_luid": 69256,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "native_sha256": "c3dca04a748d35e000db3dd8042aad87d8cb445f10455b8f417da81f9a863c32",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "native_sha256": "fc26ad61890e913ea59bacdcc5762013a578496a0955d6ea1972e845b092dfac",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 10415,
+          "comparison_ms": 104
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 12329,
+      "after_ms": 10415
+    },
+    {
+      "repeat": 1,
+      "vendor": 32902,
+      "controls": [
+        {
+          "vendor": 32902,
+          "adapter_luid": 74756,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "native_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "native_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 1793,
+          "comparison_ms": 97
+        },
+        {
+          "vendor": 32902,
+          "adapter_luid": 74756,
+          "resources": [
+            {
+              "bytes": 1048576,
+              "equal": true,
+              "expected_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "native_sha256": "d9804167f321caa8ef6780def5e1e5e3a95ccfa9e30143696729d2334e59ea42",
+              "resource": 35
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "native_sha256": "aebafd4d2f1a2b1341ee68cda5ce9902b1773a6aaeae7ee1a5973abef033d590",
+              "resource": 193
+            },
+            {
+              "bytes": 8192,
+              "equal": true,
+              "expected_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "native_sha256": "1b95042045049108bf422a5f886486650b2813842fd0b48beb2a806ab79f4765",
+              "resource": 273
+            }
+          ],
+          "execution_ms": 2141,
+          "comparison_ms": 91
+        }
+      ],
+      "before_operations": 3072,
+      "after_operations": 2688,
+      "before_ms": 1793,
+      "after_ms": 2141
+    }
+  ],
+  "negative_checks": 24,
+  "workflow": {
+    "journal": {
+      "schema": 1,
+      "passed": true,
+      "complete_release_acceptance": false,
+      "scope": "native_cli_identity_and_captured_group_trace_continuity",
+      "result_sha256": "33ded6343a35ba51ae43fe3625bd847fa3fa281b37ca0fb12c1836ea98675b3f",
+      "context_id": "5efb7a56321f6be08e8fcffa1ec7890098462578bc44fcef1b5bf76e5376b484",
+      "invocation": {
+        "argument_buffer": 0,
+        "argument_offset": null,
+        "dispatch_groups": [
+          1,
+          1,
+          1
+        ],
+        "dispatch_kind": "direct",
+        "gpa_event": 325,
+        "group": [
+          0,
+          0,
+          0
+        ],
+        "group_size": [
+          16,
+          16,
+          1
+        ],
+        "predicate": {
+          "allows_execution": true,
+          "comparison": 0,
+          "flags": 0,
+          "original_query_recovered": false,
+          "query_value": null,
+          "resource": 0,
+          "source": "unbound"
+        },
+        "status": "eligible_in_observed_replay",
+        "thread": [
+          0,
+          0,
+          0
+        ]
+      },
+      "execution": {
+        "elapsed_ms": 11418,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 1756217344
+      },
+      "trace_validation": {
+        "format": "flora.execution-trace-validation",
+        "version": 1,
+        "passed": true,
+        "scope": "serialization_and_reversible_state_continuity",
+        "complete_release_acceptance": false,
+        "trace_sha256": "c1235e0d5fd2fce170317c3496542b96e4adb137b017087f4e8ddee627da68bb",
+        "trace_bytes": 17474255,
+        "header": {
+          "adapter": {
+            "device": 11352,
+            "luid": 69256,
+            "vendor": 4318
+          },
+          "captured_gpu_schedule": false,
+          "class_bindings": [],
+          "constant_buffer_lengths": [
+            {
+              "elements": 16,
+              "slot": 0
+            },
+            {
+              "elements": 0,
+              "slot": 1
+            },
+            {
+              "elements": 0,
+              "slot": 2
+            },
+            {
+              "elements": 0,
+              "slot": 3
+            },
+            {
+              "elements": 0,
+              "slot": 4
+            },
+            {
+              "elements": 0,
+              "slot": 5
+            },
+            {
+              "elements": 0,
+              "slot": 6
+            },
+            {
+              "elements": 0,
+              "slot": 7
+            },
+            {
+              "elements": 0,
+              "slot": 8
+            },
+            {
+              "elements": 0,
+              "slot": 9
+            },
+            {
+              "elements": 0,
+              "slot": 10
+            },
+            {
+              "elements": 0,
+              "slot": 11
+            },
+            {
+              "elements": 0,
+              "slot": 12
+            },
+            {
+              "elements": 0,
+              "slot": 13
+            }
+          ],
+          "execution_model": "bounded-sampling-rendezvous/3",
+          "format": "flora.dxbc-execution-trace",
+          "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+          "gpa_event": 325,
+          "gpa_shader": 318,
+          "group": [
+            0,
+            0,
+            0
+          ],
+          "group_size": [
+            16,
+            16,
+            1
+          ],
+          "input_source": "independent-replay-resource-inputs/10",
+          "invocation_eligibility": "not_established_by_trace_writer",
+          "max_bytes": 268435456,
+          "max_steps": 1000000,
+          "record": "header",
+          "replay_generation": 1,
+          "resource_observation": "before_event_replay",
+          "scope": "one_cooperative_group",
+          "selected_lane": 0,
+          "shader_sha256": "175c8eeae7c90bfaf29b3a57bf8d33570573bf6499c7fef954a214b947b70822",
+          "stage": "cs",
+          "thread": [
+            0,
+            0,
+            0
+          ],
+          "version": 1
+        },
+        "steps": 22272,
+        "selected_steps": 87,
+        "texture_writes": 512,
+        "texture_write_bytes": 4096,
+        "storage_bytes": 1064960,
+        "rewound": true
+      }
+    },
+    "negative": {
+      "passed": true,
+      "cases": [
+        {
+          "case": "backend",
+          "rejected": true,
+          "reason": "Invalid native result"
+        },
+        {
+          "case": "request",
+          "rejected": true,
+          "reason": "Request identity mismatch"
+        },
+        {
+          "case": "context_digest",
+          "rejected": true,
+          "reason": "Context digest mismatch"
+        },
+        {
+          "case": "adapter",
+          "rejected": true,
+          "reason": "Actual adapter mismatch"
+        },
+        {
+          "case": "worker_digest",
+          "rejected": true,
+          "reason": "Worker binary mismatch"
+        },
+        {
+          "case": "trace_path",
+          "rejected": true,
+          "reason": "Unexpected native trace path"
+        },
+        {
+          "case": "query_claim",
+          "rejected": true,
+          "reason": "Invalid captured query claim"
+        },
+        {
+          "case": "shader",
+          "rejected": true,
+          "reason": "Shader identity mismatch"
+        },
+        {
+          "case": "eligibility",
+          "rejected": true,
+          "reason": "Missing eligibility evidence"
+        },
+        {
+          "case": "external_module",
+          "rejected": true,
+          "reason": "External analysis module loaded"
+        },
+        {
+          "case": "artifact_bytes",
+          "rejected": true,
+          "reason": "Artifact digest mismatch"
+        },
+        {
+          "case": "shader_path",
+          "rejected": true,
+          "reason": "Unexpected native shader path"
+        },
+        {
+          "case": "shader_digest",
+          "rejected": true,
+          "reason": "Effective shader artifact identity mismatch"
+        },
+        {
+          "case": "shader_bytes",
+          "rejected": true,
+          "reason": "Effective shader artifact identity mismatch"
+        }
+      ]
+    },
+    "archive": {
+      "schema": 1,
+      "passed": true,
+      "complete_release_acceptance": false,
+      "archive_sha256": "5e426dcc6c8a340befed871fe4537e73dbf8b8ec02e5bbcafce3212e509b4195",
+      "context_id": "5efb7a56321f6be08e8fcffa1ec7890098462578bc44fcef1b5bf76e5376b484",
+      "entries": [
+        "debug.json",
+        "job.json",
+        "result.json",
+        "shader.dxbc",
+        "state.json",
+        "trace.jsonl"
+      ],
+      "original_artifacts_compared": true,
+      "position": 0,
+      "watches": [],
+      "reload": {
+        "context_id": "5efb7a56321f6be08e8fcffa1ec7890098462578bc44fcef1b5bf76e5376b484",
+        "format": "flora.native-debug-session-probe",
+        "load_ms": 2015,
+        "mapped_steps": 0,
+        "passed": true,
+        "register_round_trip": true,
+        "resumed": true,
+        "selected_steps": 87,
+        "terminal": {
+          "global_step": 22272,
+          "instruction": null,
+          "state_boundary": "terminal_group"
+        },
+        "total_ms": 3535,
+        "version": 1
+      }
+    },
+    "identical_nonterminal_records": 24110,
+    "baseline_trace_sha256": "eeb0db3ad527ac0f4952faa94d41839b1588ec7cde3de11ee4067eb6810eba6a"
+  },
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/compute-capture-binaries/FloraDxbcInputProbe.exe",
+      "bytes": 1854464,
+      "sha256": "ec77979d773ac8bb9313bafc2dd0a08b6abdb0fb0d9c045296b72d4464766a04"
+    },
+    {
+      "path": "artifacts/dx11-native/compute-capture-expansion/1/trace.jsonl",
+      "bytes": 17474255,
+      "sha256": "eeb0db3ad527ac0f4952faa94d41839b1588ec7cde3de11ee4067eb6810eba6a"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/debug.json",
+      "bytes": 1561,
+      "sha256": "8163d96349a73580d9ee83923b4575bd099e1b3f33ed2ce55be4feb6923c2cc3"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/job.json",
+      "bytes": 672,
+      "sha256": "4264efc04ca976d3cfeb122985ff394ab214aed854ba85db73e54b2645ba7b8d"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/result.json",
+      "bytes": 6840,
+      "sha256": "33ded6343a35ba51ae43fe3625bd847fa3fa281b37ca0fb12c1836ea98675b3f"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/shader.dxbc",
+      "bytes": 4048,
+      "sha256": "175c8eeae7c90bfaf29b3a57bf8d33570573bf6499c7fef954a214b947b70822"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/trace.jsonl",
+      "bytes": 17474255,
+      "sha256": "c1235e0d5fd2fce170317c3496542b96e4adb137b017087f4e8ddee627da68bb"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/0.stdout",
+      "bytes": 84,
+      "sha256": "233d769543c38124b8543ac81f29de91f50fa8ea726166d6e415e13557349e46"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-cli/matrix.json",
+      "bytes": 9732,
+      "sha256": "5ef92024faa28bcf17aca00050bbe9458ec31045b982d3ce784134c31f19979f"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-after.json",
+      "bytes": 9938,
+      "sha256": "681f9a2a1eea88eb0ca6c56cadcb348e9777bda4752e0bfd1c2d3ea5aefe9fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-after.stdout",
+      "bytes": 27,
+      "sha256": "39faccee33b7f2ad6a8bfdb0f39ac65ca8ba5e610412cd8fac2af351300cb41c"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-before.json",
+      "bytes": 9938,
+      "sha256": "8f05f2c9e7e136bcfe3998b1620166b9dc16538ccc85193107ee35403f68175b"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-0-before.stdout",
+      "bytes": 27,
+      "sha256": "c8a4658c5e82fd0010ae29c67c5248742cd426985795df6954a192a2eb749142"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-after.json",
+      "bytes": 9950,
+      "sha256": "2266cf045db6155ea16469da58a888d672049605cbd0aa3084d6609c30b056be"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-after.stdout",
+      "bytes": 27,
+      "sha256": "17b6975bc880fb211da54ffa7517283aff616244465eef98d77b2f18495d18f5"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-before.json",
+      "bytes": 9950,
+      "sha256": "9ec445026d6f072738d1199f3ef6ef40dc3a0f868faf67b06d043392c6465910"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-32902-before.stdout",
+      "bytes": 27,
+      "sha256": "786ca234e4e6ed1ef23578945e35772328a06000f306bc119b10f713d3213c56"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-after.json",
+      "bytes": 9949,
+      "sha256": "a4cb6f566884876e506f62901d04c6d9a4b9316026322cf146b653d9a1c468f4"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-after.stdout",
+      "bytes": 28,
+      "sha256": "146b112219e983142534ddc16abca602e19d7c483f94dc2d8fb3fae12cf1640b"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-before.json",
+      "bytes": 9950,
+      "sha256": "a47718b7bf6664979672a57323f252076687b063cd6316224311a6c7f5c5b415"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/0-4318-before.stdout",
+      "bytes": 28,
+      "sha256": "e50db8b3b5d8966ac5941975447030339e23b48b335bf6bc8edfd61d79325825"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-after.json",
+      "bytes": 9938,
+      "sha256": "7b61c7ce2da9a6a2e3309cac5e2309658bebc0093c2be65e79e7d0191c4173e5"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-after.stdout",
+      "bytes": 27,
+      "sha256": "4516ede8f65742c9b2db3019d56500116f7fc39dbfd876a7e251ce4a5148bae2"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-before.json",
+      "bytes": 9938,
+      "sha256": "7e6a6182db2eb6aaa6d0dc0e15ba55f13397f5d6bff1e956f69a3ed968f9ac78"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-0-before.stdout",
+      "bytes": 27,
+      "sha256": "25df59b7a3905157827aed63778fad19a47aab3d940f01fabf92a6e4da4f5199"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-after.json",
+      "bytes": 9950,
+      "sha256": "b270c496f7cf730eab9498e633bb6cb2483b8d7b620496737a667775f3c6c1fa"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-after.stdout",
+      "bytes": 27,
+      "sha256": "70cc31be5183ad62211fe3a065d491f86c59473aca424a04f59a91d5ab28c0cf"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-before.json",
+      "bytes": 9950,
+      "sha256": "71f9fba2a306e4138e008ed33ef3b2097028da8f49a225aaf27d77aeee5042aa"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-32902-before.stdout",
+      "bytes": 27,
+      "sha256": "b4b05d9a774a64f7d4f3094d4db5a78879bc0e6f43617f0d14fc2307bffdd666"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-after.json",
+      "bytes": 9950,
+      "sha256": "b21e1d0d3d9a6511450e921447d1a98caec604aa131530bb504fc6ca317a2f50"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-after.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-after.stdout",
+      "bytes": 28,
+      "sha256": "1901a89d5ff8c6f1d310167f41914b22c44e471a638ff51f7dc0717784382956"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-before.json",
+      "bytes": 9949,
+      "sha256": "5bd74c7e63cbc28e9aab98aeb3e1f02ad3d47e1279ff4d0620959fd0769707b9"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-before.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/1-4318-before.stdout",
+      "bytes": 28,
+      "sha256": "384b931bb45a75cfe5d9e7d80b7d0c64543562b733ed63b5ccc47886bcf684de"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-comparison/matrix.json",
+      "bytes": 51123,
+      "sha256": "b1b53e8422cd40fa0fec8891348b22e4febe3bc5e920434e6374b35f3d0cc125"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.reader.json",
+      "bytes": 18294,
+      "sha256": "e63b6ed21bd1e85787fe642484b6d73c49f2eaa5f5292e838712331d98509f27"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.reader.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.reader.stdout",
+      "bytes": 63,
+      "sha256": "570a6e552e4b5f55e8976bdf7b5f8801a84400809eb5d718573ef4dc223b3173"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.session.json",
+      "bytes": 414,
+      "sha256": "6601315d3b73d20c6e9aaffdcb8d60f11ec6f9df87e5a2de222eedb53accc71b"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.session.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.session.stdout",
+      "bytes": 350,
+      "sha256": "4201e6a4ce1fee39d470543cbd52c10e39b70a5f4a13443bdc30130c112c3a3f"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/0.zip",
+      "bytes": 17527944,
+      "sha256": "5e426dcc6c8a340befed871fe4537e73dbf8b8ec02e5bbcafce3212e509b4195"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-load-cache-sessions/matrix.json",
+      "bytes": 1855,
+      "sha256": "61761e6bd2488b837b3bdc6a17a60f0f759ef3fcc7553a2fc41227ba7d001cdf"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraDxbcInputProbe.exe",
+      "bytes": 1856512,
+      "sha256": "58a70875011de6023612e942728a86240732cb9a977ef310ebe2a1c8620fcff4"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraDxbcTextureLoadTests.exe",
+      "bytes": 1730560,
+      "sha256": "6d6237fa8e81577d6a8031f6816433a47b91a4e78c0b151ee100f042a39eea16"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraDxbcTraceReaderProbe.exe",
+      "bytes": 945152,
+      "sha256": "811efb31238798078a869e54977c3d873cabad2d7b602058c11c5b6a87eb4b1e"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraGPA.Cli.exe",
+      "bytes": 6097920,
+      "sha256": "714359eec777574cdc79fc3f1d6de0eb538c842c6394f9ced0ea4b148bc366fa"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraGPA.exe",
+      "bytes": 5143040,
+      "sha256": "ba8baeb6de343d58f13753be116f6a6832d13539674681c84bd6ba4752455916"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraGPA.Worker.exe",
+      "bytes": 6097920,
+      "sha256": "a362c0478e703b7080b0329243dd31285bfa5ebfbd5ffae1eab6d6e481730795"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-binaries/FloraNativeDebugSessionProbe.exe",
+      "bytes": 1175552,
+      "sha256": "da742ad718a59f7165f3c89922b69a8baed4234111affa0515110bb3e3affe50"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-build1.log",
+      "bytes": 6787,
+      "sha256": "6de50ddf02e65af9cf7ced358ef2ba4bd553d80bf74270c7790b5daa1ef2c6fd"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-build2.log",
+      "bytes": 6787,
+      "sha256": "2ede0d5b2146132441ecc880542f8be5dd18469d824315a3fd6ff5f726267999"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-build3.log",
+      "bytes": 6759,
+      "sha256": "ba573a148e07e6eb67de2a2fc0e2434569a5bea4eac4773b4031b384c90abc1c"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-final-tests.stdout",
+      "bytes": 189024,
+      "sha256": "538f5d6e8a96344c1e6c98fd0ee508edb9bc34b778018c9030687f2074bacfda"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-final-tests.txt",
+      "bytes": 888016,
+      "sha256": "1cf027a28e0dadcc70ae7191045edde53c6cede1e3e06db59ea67295b507acff"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-focused.stdout",
+      "bytes": 66,
+      "sha256": "d2cc13329c7d9dfc52681f66a991dc30ae177de329466ad985c35dcfd036a482"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-focused.txt",
+      "bytes": 976,
+      "sha256": "91e39940819421e3a318c974121c490f75acb986a3353030d10d8def637ae6e5"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/dx11-native/texture-load-cache-tests.txt",
+      "bytes": 889431,
+      "sha256": "0ef4cc0812161c18d7d47a7743c8cf426ca81b9bf80a698edeccd70a4cd54ac6"
+    },
+    {
+      "path": "docs/research/DX11_NATIVE_TEXTURE_LOAD_CACHE.md",
+      "bytes": 7702,
+      "sha256": "f791ffe6cb69d2a201b8c2e641b69b2a4dd8c4c9618ac31e0a12fae5a2185d16"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 120128,
+      "sha256": "163cac948411ae449e66e03121bb4a806a3bf846a139eac218d408999affc0be"
+    },
+    {
+      "path": "tests/DxbcTextureLoadTests.cpp",
+      "bytes": 44545,
+      "sha256": "56886b8dbee6e06ed2168c6378447a24aaa5337fcc9173f9a1e140556bdfb099"
+    },
+    {
+      "path": "tools/probe_native_texture_load_cache.py",
+      "bytes": 3378,
+      "sha256": "b9ba8ee2d885d236f276cfd04bdb6ca076c86deb0767be933accea00c0c77f6c"
+    },
+    {
+      "path": "tools/validate_native_texture_load_cache.py",
+      "bytes": 8768,
+      "sha256": "5a1bdac9ff0f6514a8105ac780062de1ea8aa9ec5d32e3eb7647e4ac4788c4c0"
+    }
+  ]
+}
