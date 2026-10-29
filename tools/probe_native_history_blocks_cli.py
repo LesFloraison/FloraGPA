@@ -1,4 +1,4 @@
-"""Compare bounded native BC history jobs with a retained pre-change native Worker.
+"""Compare bounded native history jobs with a retained pre-change native Worker.
 
 GPU jobs run serially. The reference is this project's native implementation;
 neither command uses RenderDoc or the GPA installation.
@@ -73,6 +73,8 @@ def main():
     parser.add_argument("--qt-bin", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--only-case", action="append", help="Explicit case label for a focused repeat")
+    parser.add_argument("--reference-first", action="store_true", help="Reverse pair order for timing repeats")
     args = parser.parse_args()
     if not args.validate_only:
         require(not args.out.exists(), "use a new output directory")
@@ -82,7 +84,8 @@ def main():
     report = {"schema": 1, "complete_release_acceptance": False, "cli_sha256": digest(args.cli),
               "reference_cli_sha256": digest(args.reference_cli),
               "worker_sha256": digest(args.cli.parent / "FloraGPA.Worker.exe"),
-              "reference_worker_sha256": digest(args.reference_cli.parent / "FloraGPA.Worker.exe"), "cases": []}
+              "reference_worker_sha256": digest(args.reference_cli.parent / "FloraGPA.Worker.exe"),
+              "requested_cases": args.only_case, "reference_first": args.reference_first, "cases": []}
     for vendor in (0, 4318, 32902):
         if args.captures:
             cases = [(f"{vendor}-{label}", args.captures / filename, resource, 0, 0, x, y, budget)
@@ -97,6 +100,8 @@ def main():
                          (71, 0, 1, 1, 5, 9, 8), (95, 0, 2, 1, 2, 4, 16),
                          (99, 0, 2, 1, 2, 4, 16), (71, 1, 3, 5, 0, 0, 8))]
         for name, capture, resource, mip, layer, x, y, budget in cases:
+            if args.only_case and name not in args.only_case:
+                continue
             capture = capture.resolve()
             folder = args.out / name
             record = {"case": name, "ok": False}
@@ -104,7 +109,10 @@ def main():
             try:
                 if not args.validate_only:
                     folder.mkdir()
-                    for mode, cli in (("native", args.cli), ("reference", args.reference_cli)):
+                    order = [("native", args.cli), ("reference", args.reference_cli)]
+                    if args.reference_first:
+                        order.reverse()
+                    for mode, cli in order:
                         command = [str(cli.resolve()), "analyze", str(capture), "history", "--history-scope", "events",
                                    "--resource", str(resource), "--x", str(x), "--y", str(y), "--mip", str(mip),
                                    "--layer", str(layer), "--timeout", "60", "--out", str((folder / mode).resolve())]
@@ -118,6 +126,8 @@ def main():
                 record.update(comparison(folder, capture, vendor, budget, args.captures is None))
             except Exception as error:
                 record["error"] = str(error)
+    require(report["cases"] and (not args.only_case or
+            {case["case"] for case in report["cases"]} == set(args.only_case)), "requested cases exist")
     report["ok"] = all(case["ok"] for case in report["cases"])
     target = args.out / ("revalidation.json" if args.validate_only else "validation.json")
     require(not target.exists(), "preserve previous reports")
