@@ -2,7 +2,7 @@
 import argparse
 import json
 from pathlib import Path
-from validate_native_mesh_captures import CASES, compact_sources, digest, load, require, validate_modules
+from validate_native_mesh_captures import CASE_SETS, compact_sources, digest, load, require, selected_cases, validate_modules
 
 
 def compare(baseline, native, label, event, instance):
@@ -63,13 +63,17 @@ def main():
     parser.add_argument("--native", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--all-instances", type=Path, help="Native jobs without an instance selection for trailing-data cases")
+    parser.add_argument("--case-set", choices=CASE_SETS, default="baseline")
     args = parser.parse_args()
-    records = [compare(args.baseline, args.native, *case) for case in CASES]
+    records = [compare(args.baseline, args.native, *case) for case in selected_cases(args.case_set)]
     if args.all_instances:
         for record in records:
             if not record["baseline_trailing_vertices"]:
                 continue
             folder = args.all_instances / record["case"]
+            if not folder.exists():
+                label = record["case"].rsplit("-", 2)[0]
+                folder = args.all_instances / f"{label}-{record['gpa_event']}-0"
             result, job = load(folder / "result.json"), load(folder / "job.json")
             require(result["ok"] is True and "instance" not in job["options"] and
                     result["context"]["options"] == job["options"], "all-instance request")
@@ -78,6 +82,11 @@ def main():
             require(job["frame_sha256"] == record["native_frame_sha256"] and
                     result["context"]["adapter"]["vendor"] == 4318 and
                     result["context"]["adapter"]["warp"] is False, "all-instance frame and adapter")
+            for key in ("backend", "backend_sha256", "frame_sha256", "experiment_sha256"):
+                require(result["context"][key] == job[key], "all-instance context: " + key)
+            require(result["request_id"] == job["request_id"] and digest(json.dumps(
+                result["context"], sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()) ==
+                result["context_id"], "all-instance result identity")
             validate_modules(result["execution"]["loaded_modules"])
             for name, entry in result["artifacts"].items():
                 require(Path(name).name == name, "artifact name")
@@ -86,12 +95,21 @@ def main():
             raw, data = (folder / "vertices.bin").read_bytes(), result["data"]
             require(digest(raw) == data["sha256"] and data["event"]["id"] == job["options"]["gpa_event"],
                     "all-instance output identity")
-            sources, _ = compact_sources(data, raw, load(folder / "identities.json"))
+            identities = load(folder / "identities.json")
+            sources, _ = compact_sources(data, raw, identities)
             stride = data["stride"]
             compact = b"".join(raw[i * stride:(i + 1) * stride] for i in sources)
+            require(record["instance"] in {i[0] for i in identities}, "selected instance exists in full storage")
+            tail_sources = [i for i in sources if identities[i][0] >= record["instance"]]
+            tail = b"".join(raw[i * stride:(i + 1) * stride] for i in tail_sources)
             record["all_instances"] = {"vertices": len(sources), "sha256": digest(compact),
-                                       "matches_baseline_buffer": digest(compact) == record["baseline_buffer_sha256"]}
-    summary = {"schema": 1, "completed": True,
+                                       "matches_baseline_buffer": digest(compact) == record["baseline_buffer_sha256"],
+                                       "source": folder.as_posix(), "context_id": result["context_id"],
+                                       "backend": result["context"]["backend"],
+                                       "from_selected_instance": {
+                                           "vertices": len(tail_sources), "sha256": digest(tail),
+                                           "matches_baseline_buffer": digest(tail) == record["baseline_buffer_sha256"]}}
+    summary = {"schema": 1, "completed": True, "case_set": args.case_set,
                "strict_exports_equal": all(r["strict_exports_equal"] for r in records),
                "referenced_records_equal": all(r["referenced_records_equal"] for r in records),
                "indices_equal": all(r["indices_equal"] for r in records), "cases": records,

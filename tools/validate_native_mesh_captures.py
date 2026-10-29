@@ -23,6 +23,19 @@ CAPTURES = {
 CASES = [("gf2", 113, 0), ("gf2", 181, 0), ("bf1", 876, 0),
          ("bf1", 1415, 0), ("bf1", 1415, 8), ("bf1", 2010, 0), ("helldivers", 200, 0)]
 
+ADDITIONAL_CASES = [("bf1", 1415, 1), ("bf1", 1415, 4), ("helldivers", 200, 11)]
+CASE_SETS = ("baseline", "additional-instances", "all")
+
+
+def selected_cases(name):
+    if name not in CASE_SETS:
+        raise ValueError("Unknown case set")
+    if name == "baseline":
+        return CASES
+    if name == "additional-instances":
+        return ADDITIONAL_CASES
+    return CASES + ADDITIONAL_CASES
+
 
 def require(value, message):
     if not value:
@@ -69,7 +82,7 @@ def compact_sources(data, raw, identities):
     return [unique[key][1] for key in order], [remap[key] for key in keys]
 
 
-def validate_stage(folder, label, event, instance, vendor, worker_hash, stage):
+def validate_stage(folder, label, event, instance, vendor, worker_hash, stage, position_channels=False):
     result, job = load(folder / "result.json"), load(folder / "job.json")
     data, context = result["data"], result["context"]
     require(result["ok"] is True and result["schema"] == job["schema"] == 1, "schema")
@@ -104,14 +117,18 @@ def validate_stage(folder, label, event, instance, vendor, worker_hash, stage):
     require(attribute["components"] == [0, 1, 2, 3] and attribute["offset"] + 16 <= stride, "position layout")
     presentation = load(folder / "presentation.json")
     mapping = presentation.get("replay_mesh")
+    if position_channels:
+        require(mapping is not None, "missing native semantic position mapping")
     sources, references = list(range(count)), list(range(count))
     if mapping is not None:
         if "vertex_identity" in data:
             sources, references = compact_sources(data, raw, load(folder / "identities.json"))
-        require(mapping == {"schema": 1, "strategy": "sorted_input_identities_and_output_variants"
+        expected_mapping = {"schema": 1, "strategy": "sorted_input_identities_and_output_variants"
                             if "vertex_identity" in data else "expanded_outputs", "vertex_sources": sources,
-                            "reference_vertices": references, "vertex_stride": stride, "index_count": count},
-                "independent compact identity mapping")
+                            "reference_vertices": references, "vertex_stride": stride, "index_count": count}
+        if position_channels:
+            expected_mapping.update(position_components=[0, 1, 2, 3], obj_unavailable_reason=None)
+        require(mapping == expected_mapping, "independent compact identity mapping")
         require((folder / "post_vertices.bin").read_bytes() ==
                 b"".join(raw[i * stride:(i + 1) * stride] for i in sources), "compact vertex records")
     positions = [struct.unpack_from("<4f", raw, i * stride + attribute["offset"]) for i in sources]
@@ -185,7 +202,10 @@ def main():
     parser.add_argument("--captures", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--validate-only", action="store_true", help="Recheck retained output without GPU execution")
+    parser.add_argument("--position-channels", action="store_true", help="Require semantic position metadata added by the channel presentation implementation")
+    parser.add_argument("--case-set", choices=CASE_SETS, default="baseline")
     args = parser.parse_args()
+    cases = selected_cases(args.case_set)
     if args.validate_only:
         require(args.out.is_dir(), "Missing retained evidence directory")
         summary_path = args.out / "revalidation.json"
@@ -201,7 +221,7 @@ def main():
     env["PATH"] = str(args.qt_bin.resolve()) + os.pathsep + env["PATH"]
     records = []
     for vendor in (4318, 32902, 0):
-        for label, event, instance in CASES:
+        for label, event, instance in cases:
             name = f"{vendor}-{label}-{event}-{instance}"
             folder = args.out / name
             command = [str(args.probe.resolve()), str((args.captures / CAPTURES[label][0]).resolve()),
@@ -225,7 +245,7 @@ def main():
                         "probe execution measurements")
                 require([r["stage"] for r in probe["records"]] == ["vs-inputs", "final"] and
                         [r["ui_presented"] for r in probe["records"]] == [True, False], "UI presentation scope")
-                pair = [validate_stage(folder / stage, label, event, instance, vendor, worker_hash, stage)
+                pair = [validate_stage(folder / stage, label, event, instance, vendor, worker_hash, stage, args.position_channels)
                         for stage in ("vs-inputs", "final")]
                 for snapshot, part in zip(probe["records"], pair):
                     context = load(folder / snapshot["stage"] / "result.json")["context_id"]
@@ -261,8 +281,9 @@ def main():
                 record["error"] = str(error)
             records.append(record)
             print(name, "PASS" if record["passed"] else record["error"], flush=True)
-            summary = {"schema": 1, "completed": len(records) == len(CASES) * 3,
-                       "passed": all(r["passed"] for r in records), "worker_sha256": worker_hash,
+            summary = {"schema": 1, "completed": len(records) == len(cases) * 3,
+                       "passed": all(r["passed"] for r in records), "case_set": args.case_set,
+                       "position_channels": args.position_channels, "worker_sha256": worker_hash,
                        "probe_sha256": digest(args.probe.read_bytes()), "cases": records,
                        "renderdoc_parity": False, "full_mesh_parity": False}
             summary_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
