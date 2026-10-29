@@ -218,10 +218,10 @@ Words samplingClamp(Words operation, uint32_t opcode, const Words &clamp) {
 }
 Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32_t mask, uint32_t swizzle,
                     const std::array<int32_t, 3> &offset, bool sampling = false, bool gradient = false,
-                    bool comparison = false, const std::array<uint32_t, 2> &precision = {},
+                    bool comparison = false, const std::array<uint32_t, 3> &precision = {},
                     bool refactoringAllowed = false, bool outputDestination = false,
                     const std::optional<std::array<uint32_t, 4>> &literalAddress = {}, bool clamped = false) {
-    const bool minimum = precision[0] || precision[1];
+    const bool minimum = precision[0] || precision[1] || precision[2];
     const bool preserveOutput = stage != 5 && outputDestination;
     const Words coordinate = literalAddress ? Words{0x4002, (*literalAddress)[0], (*literalAddress)[1],
                                                     (*literalAddress)[2], (*literalAddress)[3]}
@@ -263,12 +263,13 @@ Words textureKernel(uint32_t stage, uint32_t dimension, uint32_t returns, uint32
                                              {0x208e46, 0, 1},
                                              {0x208e46, 0, 2}}));
     else if (sampling)
-        rows.push_back(row((comparison ? 71 : 72) | 0x80000000, {{control},
-                                                                 dest(target, 0, mask),
-                                                                 {0x208e46, 0, 0},
-                                                                 source(7, 0, swizzle),
-                                                                 {0x106000, 0},
-                                                                 {0x20800a, 0, 1}}));
+        rows.push_back(
+            row((comparison ? 71 : 72) | 0x80000000, {{control},
+                                                      withPrecision(dest(target, 0, mask), precision[0]),
+                                                      withPrecision({0x208e46, 0, 0}, precision[1]),
+                                                      source(7, 0, swizzle),
+                                                      {0x106000, 0},
+                                                      withPrecision({0x20800a, 0, 1}, precision[2])}));
     else if (minimum)
         rows.push_back(row(45 | 0x80000000,
                            {{control | 0x80000000u, 2u | (dimension << 6) | 0x80000000u, 3u | (returns << 6)},
@@ -982,11 +983,10 @@ struct GpuOperations::State {
             const auto words =
                 gather  ? gatherKernel(stage, dimension, returns, mask, swizzle, offset, address, *gather)
                 : batch ? samplingGroupKernel(dimension, returns, mask, swizzle, offset, groupSize, clamped)
-                        : textureKernel(stage, dimension, returns, mask, swizzle, offset, sampler != nullptr,
-                                        ddy.has_value(), comparison, {precision[0], precision[1]},
-                                        refactoringAllowed, outputDestination,
-                                        literalAddress ? std::make_optional(address.bits) : std::nullopt,
-                                        clamped);
+                        : textureKernel(
+                              stage, dimension, returns, mask, swizzle, offset, sampler != nullptr,
+                              ddy.has_value(), comparison, precision, refactoringAllowed, outputDestination,
+                              literalAddress ? std::make_optional(address.bits) : std::nullopt, clamped);
             std::vector<std::array<uint32_t, 4>> values{address.bits};
             if (sampler)
                 values.push_back(lodOrDdx.bits);
@@ -1862,13 +1862,15 @@ Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, co
                                    const Value &address, const Value &lodOrDdx,
                                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                                    const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
-                                   bool comparison, const std::optional<Value> &clamp) {
+                                   bool comparison, const std::optional<Value> &clamp,
+                                   const std::array<uint32_t, 3> &precision) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
     return state_
         ->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler,
-                  lodOrDdx, ddy, {}, nullptr, comparison, nullptr, 0, {}, false, false, false, nullptr, clamp)
+                  lodOrDdx, ddy, {}, nullptr, comparison, nullptr, 0, precision, false, false, false, nullptr,
+                  clamp)
         .front();
 }
 std::array<Value, 4> GpuOperations::samplePixelQuad(uint32_t opcode, const TextureInput &input,

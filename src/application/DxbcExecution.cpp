@@ -428,13 +428,16 @@ Program::Program(Bytes dxbc) {
             }
             const bool precisionSampling = [&] {
                 const bool clamped = op == 230 || op == 231 || op == 233;
-                if (data->stage != 0 || (!clamped && op != 69 && op != 70 && op != 74) || args[0].kind == 2)
+                const bool explicitLod = op == 71 || op == 72 || op == 228 || op == 229;
+                const bool feedback = clamped || op == 228 || op == 229;
+                if ((data->stage != 0 && (!explicitLod || (data->stage != 1 && data->stage != 5))) ||
+                    (!explicitLod && !clamped && op != 69 && op != 70 && op != 74) || args[0].kind == 2)
                     return false;
                 // Feedback contributes a separate opaque status destination. The
                 // clamp stays float32; only the sampled value, coordinates and
-                // optional bias/comparison parameter use floating minimum precision.
-                const auto extra = clamped ? 1u : 0u;
-                return (!clamped || (!args[1].precision && !args.back().precision)) &&
+                // optional LOD/bias/comparison parameter use floating minimum precision.
+                const auto extra = feedback ? 1u : 0u;
+                return (!feedback || !args[1].precision) && (!clamped || !args.back().precision) &&
                        !args[2 + extra].precision && !args[3 + extra].precision &&
                        std::all_of(args.begin(), args.end(),
                                    [](const Operand &arg) { return arg.precision <= 2; });
@@ -1554,7 +1557,8 @@ Step Lane::step() {
             value = s.inputs.textures->sampleTexture(
                 p.stage, request.binding, request.sampler, request.dimension, request.returns,
                 request.address, request.lodOrDdx, request.swizzle, request.mask, request.offset,
-                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71, request.clamp);
+                s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71, request.clamp,
+                request.precision);
         if (s.inBounds(target)) {
             const auto before = s.value(target);
             auto after = before;
