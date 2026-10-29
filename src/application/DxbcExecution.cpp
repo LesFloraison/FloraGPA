@@ -431,7 +431,8 @@ Program::Program(Bytes dxbc) {
                 const bool explicitLod = op == 71 || op == 72 || op == 228 || op == 229;
                 const bool feedback = clamped || op == 228 || op == 229;
                 if ((data->stage != 0 && (!explicitLod || (data->stage != 1 && data->stage != 5))) ||
-                    (!explicitLod && !clamped && op != 69 && op != 70 && op != 74) || args[0].kind == 2)
+                    (!explicitLod && !clamped && op != 69 && op != 70 && op != 74) ||
+                    (args[0].kind == 2 && (!explicitLod || data->stage == 5)))
                     return false;
                 // Feedback contributes a separate opaque status destination. The
                 // clamp stays float32; only the sampled value, coordinates and
@@ -1558,7 +1559,7 @@ Step Lane::step() {
                 p.stage, request.binding, request.sampler, request.dimension, request.returns,
                 request.address, request.lodOrDdx, request.swizzle, request.mask, request.offset,
                 s.inputs.gpu.get(), result.memoryGpuAssisted, request.ddy, op == 71, request.clamp,
-                request.precision);
+                request.precision, destination.kind == 2);
         if (s.inBounds(target)) {
             const auto before = s.value(target);
             auto after = before;

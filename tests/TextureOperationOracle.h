@@ -12,9 +12,11 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
                                              const TextureInput &input, const TextureInputView &view,
                                              const std::vector<std::array<uint32_t, 4>> &values,
                                              uint32_t outputPrecision, const SamplerInput *sampler = nullptr,
-                                             uint32_t outputCount = 1, uint32_t outputIndex = 0) {
+                                             uint32_t outputCount = 1, uint32_t outputIndex = 0,
+                                             uint32_t outputSlot = 0) {
     if (!outputCount || outputCount > 1024 || outputIndex >= outputCount ||
-        (stage != 5 && (outputCount != 1 || outputIndex != 0)))
+        (stage != 5 && (outputCount != 1 || outputIndex != 0)) || outputSlot >= 8 ||
+        (stage != 0 && outputSlot))
         throw std::runtime_error("Invalid independent texture output range");
     Com<ID3D11DeviceContext> context;
     auto shaderCheck = [&](HRESULT status, const char *message) {
@@ -129,7 +131,8 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
         check(device->CreateTexture2D(&td, nullptr, &target), "Create independent precision target");
         Com<ID3D11RenderTargetView> rtv;
         check(device->CreateRenderTargetView(target.Get(), nullptr, &rtv), "Create oracle RTV");
-        auto *rt = rtv.Get();
+        std::array<ID3D11RenderTargetView *, 8> targets{};
+        targets[outputSlot] = rtv.Get();
         const D3D11_VIEWPORT viewport{0, 0, 1, 1, 0, 1};
         D3D11_RASTERIZER_DESC raster{};
         raster.FillMode = D3D11_FILL_SOLID;
@@ -143,7 +146,7 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
         context->PSSetShaderResources(3, 1, &source);
         context->RSSetState(rs.Get());
         context->RSSetViewports(1, &viewport);
-        context->OMSetRenderTargets(1, &rt, nullptr);
+        context->OMSetRenderTargets(outputSlot + 1, targets.data(), nullptr);
         context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         context->Draw(3, 0);
     } else {

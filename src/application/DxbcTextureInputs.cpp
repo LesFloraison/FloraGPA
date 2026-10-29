@@ -283,11 +283,12 @@ Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, cons
                                    uint32_t mask, const std::array<int32_t, 3> &offset, GpuOperations *gpu,
                                    bool &assisted, const std::optional<Value> &ddy, bool comparison,
                                    const std::optional<Value> &clamp,
-                                   const std::array<uint32_t, 3> &precision) const {
+                                   const std::array<uint32_t, 3> &precision, bool outputDestination) const {
     assisted = false;
     if (std::any_of(precision.begin(), precision.end(), [](auto p) { return p > 2; }) ||
-        (ddy && std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; })))
-        throw std::runtime_error("Invalid native explicit sampling precision");
+        (ddy && std::any_of(precision.begin(), precision.end(), [](auto p) { return p != 0; })) ||
+        (outputDestination && stage == 5))
+        throw std::runtime_error("Invalid native explicit sampling precision or output stage");
     if (const auto resolved = prepareSample(stage, binding, samplerBinding, dimension, returns, address,
                                             lodOrDdx, swizzle, mask, offset, ddy, comparison))
         return *resolved;
@@ -298,8 +299,9 @@ Value TextureInputs::sampleTexture(uint32_t stage, const Register &binding, cons
         throw std::runtime_error("Native texture sampling requires GPU assistance");
     if (clamp && !(clamp->valid & 1))
         return {};
-    auto result = gpu->sampleTexture(stage, texture, view, sampler->second, dimension, returns, address,
-                                     lodOrDdx, swizzle, mask, offset, ddy, comparison, clamp, precision);
+    auto result =
+        gpu->sampleTexture(stage, texture, view, sampler->second, dimension, returns, address, lodOrDdx,
+                           swizzle, mask, offset, ddy, comparison, clamp, precision, outputDestination);
     result.valid = uint8_t(mask);
     assisted = true;
     return result;

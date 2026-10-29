@@ -1863,14 +1863,14 @@ Value GpuOperations::sampleTexture(uint32_t stage, const TextureInput &input, co
                                    const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                                    const std::array<int32_t, 3> &offset, const std::optional<Value> &ddy,
                                    bool comparison, const std::optional<Value> &clamp,
-                                   const std::array<uint32_t, 3> &precision) {
+                                   const std::array<uint32_t, 3> &precision, bool outputDestination) {
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
     return state_
         ->texture(stage, input, view, dimension, returns, address, selection, mask, offset, &sampler,
-                  lodOrDdx, ddy, {}, nullptr, comparison, nullptr, 0, precision, false, false, false, nullptr,
-                  clamp)
+                  lodOrDdx, ddy, {}, nullptr, comparison, nullptr, 0, precision, false, outputDestination,
+                  false, nullptr, clamp)
         .front();
 }
 std::array<Value, 4> GpuOperations::samplePixelQuad(uint32_t opcode, const TextureInput &input,

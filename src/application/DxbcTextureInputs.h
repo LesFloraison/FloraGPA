@@ -89,8 +89,8 @@ struct TextureInputs {
                         const std::array<uint32_t, 4> &swizzle, uint32_t mask,
                         const std::array<int32_t, 3> &offset, GpuOperations *, bool &assisted,
                         const std::optional<Value> &ddy = {}, bool comparison = false,
-                        const std::optional<Value> &clamp = {},
-                        const std::array<uint32_t, 3> &precision = {}) const;
+                        const std::optional<Value> &clamp = {}, const std::array<uint32_t, 3> &precision = {},
+                        bool outputDestination = false) const;
     std::optional<std::vector<Value>>
     sampleGradBatch(const Register &resource, const Register &sampler, uint32_t dimension, uint32_t returns,
                     const std::array<uint32_t, 3> &groupSize, const std::vector<SamplingInvocation> &,
