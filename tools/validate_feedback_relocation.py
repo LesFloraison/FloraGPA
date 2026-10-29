@@ -99,6 +99,8 @@ def main():
             continue
         require(report["scope"] == "non_tiled_buffer_feedback_relocation" and
                 report["input_unchanged"] and report["debug_errors"] == 0, "GPU diagnostic scope")
+        require(report.get("status_seed") is None and not report.get("status_first", False) and
+                not report.get("batch_bind", False), "Unmodified baseline fixture for acceptance")
         require(report["adapter"]["tiled_resources_tier"] >= 2, "Feedback capability")
         mode = report["mode"]
         values = [102, 0, 0, 1] if mode == 0 else [102] * 4 if mode == 1 else [108, 109, 110, 111]

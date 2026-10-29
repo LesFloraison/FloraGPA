@@ -19,16 +19,60 @@ struct Fixture {
 };
 Fixture fixture(uint32_t mode, bool srv, bool pixel = false, uint32_t inputSlot = 0) {
     const std::array<std::string, 3> types{"Buffer<uint4>", "ByteAddressBuffer", "StructuredBuffer<uint4>"};
+    const std::string storeValue = "outputData[0]=value;";
+    const std::string storeStatus =
+        "outputData[1]=uint4(CheckAccessFullyMapped(status),99u,0x0011e000u,123u);";
+    const auto stores = qEnvironmentVariableIsSet("FLORA_FEEDBACK_STATUS_FIRST") ? storeStatus + storeValue
+                                                                                 : storeValue + storeStatus;
     const auto source = std::string(srv ? "" : "RW") + types.at(mode) + " inputData:register(" +
                         (srv ? "t0" : "u" + std::to_string(inputSlot)) +
                         ");RWStructuredBuffer<uint4> outputData:register(u1);" +
                         (pixel ? "void main(float4 p:SV_Position){" : "[numthreads(1,1,1)]void main(){") +
-                        "uint status;uint4 value=inputData.Load(" + (mode == 1 ? "8" : "2") +
-                        ",status);outputData[0]=value;outputData[1]=uint4("
-                        "CheckAccessFullyMapped(status),99u,0x0011e000u,123u);}";
-    return {compileHlsl(source, pixel ? "ps_5_0" : "cs_5_0").bytecode, mode == 0   ? (srv ? 223u : 225u)
-                                                                       : mode == 1 ? 226u
-                                                                                   : 227u};
+                        "uint status;uint4 value=inputData.Load(" + (mode == 1 ? "8" : "2") + ",status);" +
+                        stores + "}";
+    Fixture result{compileHlsl(source, pixel ? "ps_5_0" : "cs_5_0").bytecode, mode == 0 ? (srv ? 223u : 225u)
+                                                                              : mode == 1 ? 226u
+                                                                                          : 227u};
+    if (qEnvironmentVariableIsSet("FLORA_FEEDBACK_STATUS_SEED")) {
+        bool valid = false;
+        const auto seed = qEnvironmentVariable("FLORA_FEEDBACK_STATUS_SEED").toUInt(&valid);
+        if (!valid || (seed != 0 && seed != UINT32_MAX))
+            throw std::runtime_error("Feedback status seed must be zero or UINT32_MAX");
+        auto parts = readDxbcParts(result.bytes);
+        std::vector<uint8_t> modified;
+        bool inserted = false;
+        for (auto &[tag, bytes] : parts) {
+            if (tag != 0x58454853 && tag != 0x52444853)
+                continue;
+            auto program = readDxbcProgram(bytes);
+            for (auto it = program.instructions.begin(); it != program.instructions.end(); ++it) {
+                const auto &row = *it;
+                if ((row[0] & 2047) != result.opcode)
+                    continue;
+                size_t pos = 1;
+                for (auto extended = row[0] >> 31; extended;)
+                    extended = row.at(pos++) >> 31;
+                std::set<unsigned> unused;
+                pos = dxbc_detail::operand(row, pos, unused, 0, false);
+                const auto end = dxbc_detail::operand(row, pos, unused, 0, false);
+                if (((row[pos] >> 12) & 255) != 0)
+                    throw std::runtime_error("Feedback seed fixture requires a temporary destination");
+                std::vector<uint32_t> move{54};
+                move.insert(move.end(), row.begin() + pos, row.begin() + end);
+                move.insert(move.end(), {0x4001, seed});
+                move[0] |= uint32_t(move.size()) << 24;
+                program.instructions.insert(it, std::move(move));
+                inserted = true;
+                break;
+            }
+            modified = writeDxbcProgram(program);
+            bytes = modified;
+        }
+        if (!inserted)
+            throw std::runtime_error("Feedback seed fixture has no feedback load");
+        result.bytes = makeDxbc(parts);
+    }
+    return result;
 }
 DxbcProgram code(Bytes bytes) {
     for (const auto &[tag, data] : readDxbcParts(bytes))
@@ -347,6 +391,10 @@ class DxbcFeedbackRelocationTests final : public QObject {
                         {"relocated", Json::array()},
                         {"scope", "non_tiled_buffer_feedback_relocation"},
                         {"batch_bind", qEnvironmentVariableIsSet("FLORA_FEEDBACK_BATCH_BIND")}};
+            report["status_first"] = qEnvironmentVariableIsSet("FLORA_FEEDBACK_STATUS_FIRST");
+            report["status_seed"] = qEnvironmentVariableIsSet("FLORA_FEEDBACK_STATUS_SEED")
+                                        ? Json(qEnvironmentVariable("FLORA_FEEDBACK_STATUS_SEED").toUInt())
+                                        : Json(nullptr);
             save("original.dxbc", f.bytes);
             for (auto slot : {7u, 63u}) {
                 auto moved = relocateShaderUavs(f.bytes, {{0, slot}}, 64);
