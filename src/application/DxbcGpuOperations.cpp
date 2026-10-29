@@ -323,6 +323,15 @@ struct GpuOperations::State {
     Com<ID3D11DeviceContext> context;
     std::map<Words, Com<ID3D11ComputeShader>> shaders;
     std::map<Words, Value> textureDimensionResults;
+    // One observed immutable byte version, with bounded exact-request results.
+    // Validity is reapplied by TextureInputs after every load, including cache hits.
+    struct TextureLoadResults {
+        Words resource;
+        std::vector<uint8_t> shadow;
+        std::map<Words, Value> values;
+    } textureLoads;
+    static constexpr size_t textureLoadSnapshotBudget = 4 * 1024 * 1024;
+    static constexpr size_t textureLoadResultBudget = 4096;
     std::map<Words, std::optional<uint64_t>> textureFootprints;
     struct TextureUavOperation {
         Com<ID3D11Resource> texture, staging;
@@ -1255,7 +1264,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/27"}};
+            {"backend", "dxbc-gpu/28"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1722,11 +1731,65 @@ Value GpuOperations::loadTexture(uint32_t stage, const TextureInput &input, cons
     uint32_t selection = 0;
     for (unsigned c = 0; c < 4; ++c)
         selection |= swizzle[c] << (2 * c);
-    return state_
-        ->texture(stage, input, view, dimension, returns, originalAddress, selection, mask, offset, nullptr,
+    auto &s = *state_;
+    if (s.failed)
+        throw std::runtime_error("Recreate the native GPU assist after a failed operation");
+    const bool cacheable = !precision[0] && !precision[1] && !input.storage.bytes.empty() &&
+                           input.storage.bytes.size() <= State::textureLoadSnapshotBudget;
+    Words resourceKey, requestKey;
+    bool sameVersion = false;
+    if (cacheable) {
+        resourceKey = {input.resource.type,
+                       uint32_t(input.resource.id),
+                       uint32_t(input.resource.id >> 32),
+                       uint32_t(view.resource.value_or(0)),
+                       uint32_t(view.resource.value_or(0) >> 32),
+                       uint32_t(input.resource.desc.size())};
+        resourceKey.insert(resourceKey.end(), input.resource.desc.begin(), input.resource.desc.end());
+        resourceKey.insert(resourceKey.end(), view.nativeDescriptor.begin(), view.nativeDescriptor.end());
+        resourceKey.insert(resourceKey.end(),
+                           {std::bit_cast<uint32_t>(input.minLod), view.planeSlice.value_or(UINT32_MAX)});
+        auto coordinates = originalAddress.bits;
+        // ld ignores z for 1D/2D/1DArray and y for a non-array 1D texture.
+        if (dimension == 2 || dimension == 3 || dimension == 7)
+            coordinates[2] = 0;
+        if (dimension == 2)
+            coordinates[1] = 0;
+        requestKey = {stage,
+                      dimension,
+                      returns,
+                      selection,
+                      mask,
+                      uint32_t(refactoringAllowed),
+                      uint32_t(outputDestination),
+                      uint32_t(literalAddress)};
+        requestKey.insert(requestKey.end(), coordinates.begin(), coordinates.end());
+        for (auto component : offset)
+            requestKey.push_back(uint32_t(component));
+        sameVersion = s.textureLoads.resource == resourceKey && s.textureLoads.shadow == input.storage.bytes;
+        if (sameVersion)
+            if (const auto found = s.textureLoads.values.find(requestKey);
+                found != s.textureLoads.values.end()) {
+                checkCancellation(s.cancelled);
+                return found->second;
+            }
+    }
+    const auto result =
+        s.texture(stage, input, view, dimension, returns, originalAddress, selection, mask, offset, nullptr,
                   {}, {}, {}, nullptr, false, nullptr, 0, {precision[0], precision[1], 0}, refactoringAllowed,
                   outputDestination, literalAddress)
-        .front();
+            .front();
+    if (cacheable) {
+        if (!sameVersion) {
+            s.textureLoads.values.clear();
+            s.textureLoads.resource = std::move(resourceKey);
+            s.textureLoads.shadow = input.storage.bytes;
+        }
+        if (s.textureLoads.values.size() >= State::textureLoadResultBudget)
+            s.textureLoads.values.clear();
+        s.textureLoads.values.emplace(std::move(requestKey), result);
+    }
+    return result;
 }
 Value GpuOperations::gatherTexture(uint32_t stage, const TextureInput &input, const TextureInputView &view,
                                    const SamplerInput &sampler, uint32_t dimension, uint32_t returns,

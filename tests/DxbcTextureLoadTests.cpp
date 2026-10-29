@@ -84,6 +84,120 @@ void validation(Replay &replay) {
 class DxbcTextureLoadTests final : public QObject {
     Q_OBJECT
   private slots:
+    void loadResultCache_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("stage");
+        for (auto vendor : {0u, 4318u, 32902u})
+            for (auto stage : {0u, 1u, 5u})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage))) << vendor << stage;
+    }
+    void loadResultCache() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, stage);
+        try {
+            QTemporaryDir temporary;
+            const auto path = temporary.filePath("cache.gpa_frame");
+            testing::computeCapture(true).save(path);
+            Frame frame(path.toStdWString());
+            Replay replay(frame, options(vendor));
+            unsigned cancelAfter = 0, checks = 0;
+            auto gpu = std::make_shared<GpuOperations>(
+                replay.nativeDevice(), !vendor, [&] { return cancelAfter && ++checks >= cancelAfter; });
+            TextureInputs inputs;
+            auto &texture = inputs.resources[4];
+            texture.resource.id = 4;
+            texture.resource.type = 0x85;
+            texture.resource.desc = {4, 4, 2, 1, 16, 1, 0, 0, 8, 0, 0};
+            texture.subresources = textureSubresources(texture.resource);
+            texture.storage = Buffer::known(std::vector<uint8_t>(160));
+            for (uint32_t i = 0; i < 40; ++i) {
+                const uint32_t word = 0x3f800000 + i * 1024;
+                std::memcpy(texture.storage.bytes.data() + i * 4, &word, 4);
+            }
+            auto &view = inputs.views[{7, {0}}];
+            view.resource = 4;
+            view.format = 16;
+            view.dimension = 4;
+            view.mipCount = 2;
+            view.nativeDescriptor = {16, 4, 0, 2, 0, 0};
+            auto address = Value::known({1, 1, 0, 0});
+            std::array<uint32_t, 4> swizzle{0, 1, 2, 3};
+            bool assisted = false;
+            auto load = [&] {
+                return inputs.load(stage, {7, {0}}, 3, 0x5555, address, swizzle, 15, {}, gpu.get(), assisted);
+            };
+            const auto reference = load();
+            const auto first = gpu->operations();
+            QCOMPARE(first, uint64_t(1));
+            for (unsigned i = 0; i < 8; ++i) {
+                address.bits[2] = i * 7919;
+                QCOMPARE(load(), reference);
+                QVERIFY(assisted);
+            }
+            QCOMPARE(gpu->operations(), first);
+            texture.storage.valid[40] = 0;
+            QCOMPARE(load().valid, uint8_t(14));
+            QCOMPARE(gpu->operations(), first);
+            texture.storage.valid[40] = 1;
+            QCOMPARE(load(), reference);
+            const auto original = texture.storage.bytes;
+            texture.storage.bytes[40] ^= 1;
+            const auto changed = load();
+            QVERIFY(changed.bits != reference.bits);
+            QCOMPARE(gpu->operations(), first + 1);
+            texture.storage.bytes = original;
+            QCOMPARE(load(), reference);
+            QCOMPARE(gpu->operations(), first + 2);
+            swizzle = {1, 0, 3, 2};
+            const auto routed = load();
+            QCOMPARE(routed.bits, (std::array<uint32_t, 4>{reference.bits[1], reference.bits[0],
+                                                           reference.bits[3], reference.bits[2]}));
+            QCOMPARE(gpu->operations(), first + 3);
+            view.firstMip = 1;
+            view.mipCount = 1;
+            view.nativeDescriptor[2] = 1;
+            view.nativeDescriptor[3] = 1;
+            QVERIFY(load().bits != routed.bits);
+            QCOMPARE(gpu->operations(), first + 4);
+            // A hit still observes cancellation; a GPU failure poisons earlier cached results.
+            cancelAfter = 1;
+            checks = 0;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled, load());
+            cancelAfter = 0;
+            load();
+            QCOMPARE(gpu->operations(), first + 4);
+            address.bits[0] = 0;
+            cancelAfter = 3;
+            checks = 0;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled, load());
+            cancelAfter = 0;
+            address.bits[0] = 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, load());
+            gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), !vendor);
+            QCOMPARE(load().valid, uint8_t(15));
+            if (!vendor && stage == 5) {
+                const auto count = gpu->operations();
+                for (unsigned i = 0; i <= 4096; ++i) {
+                    address.bits[0] = i + 16;
+                    QCOMPARE(load().valid, uint8_t(15));
+                }
+                address.bits[0] = 1;
+                load();
+                QCOMPARE(gpu->operations(), count + 4098);
+                texture.resource.desc = {1024, 1025, 1, 1, 16, 1, 0, 0, 8, 0, 0};
+                texture.subresources = textureSubresources(texture.resource);
+                texture.storage = Buffer::known(std::vector<uint8_t>(1024 * 1025 * 8));
+                view.firstMip = 0;
+                view.nativeDescriptor[2] = 0;
+                const auto large = gpu->operations();
+                load();
+                load();
+                QCOMPARE(gpu->operations(), large + 2);
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void minimumPrecision_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("dimension");
