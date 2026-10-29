@@ -21,7 +21,7 @@ remain open; no migration gate is waived by those measurements.
 | P0 | Reproduce baseline, enumerate dependencies and retain reports/performance | Clean full build passed; 314/317 baseline tests pass with three reproduced historical failures; detailed end-to-end feature parity remains open |
 | P1 | Close GPA history, geometry, query and debugger implementations with independent probes | Static history/geometry/query call paths identified; original debugger requests observed on three captures with null engine and no result callback; concrete engine remains unresolved |
 | P2 | Versioned analysis requests, context identity, Worker isolation and GUI scheduling | Native CLI/Worker infrastructure and artifact verification tested; Replay Metrics uses asynchronous native scheduling; remaining consumers pending |
-| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; VS identities and selected meshes tested on three adapters; explicit remaining-instance storage matches ten saved NVIDIA exports exactly; full parity matrix and default cutover pending |
+| P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; native CLI and GUI mesh publication tested on three adapters; explicit remaining-instance storage matches ten saved NVIDIA exports exactly; full parity matrix and default cutover pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker, typed values and narrow ordinary-texture readback; full format/semantic matrix and special-format performance remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
 | P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS and explicit private-primitive PS jobs, sessions and UI are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad jobs complete on three adapters; original fragment qualification, full typed-format/precision coverage, unscoped PS selection and source parity remain open |
@@ -1646,3 +1646,14 @@ reject 210 real-data and nine additional corruptions. Six regression suites reco
 302 Qt passes, zero failures and two unchanged missing-source-fixture skips.
 See `research/DX11_NATIVE_MESH_STORAGE_RETENTION.md`. CLI presentation-file parity,
 full geometry/workflow coverage, default cutover and P1/P5/P6/P7/P8 remain open.
+
+The Worker now publishes the native mesh position binary, CSV, eligible OBJ and
+presentation metadata directly. The CLI uses the shared application-library
+renderer; consumers reject publication inconsistent with the captured raw data.
+Explicit availability preserves raw no-position and hull-phase inspection.
+Backend identity is `dx11-native/11`. Twelve synthetic CLI selections and thirty
+real CLI calls pass across three adapters, with ten exact saved NVIDIA export
+comparisons. Six regression suites record 314 Qt passes, zero failures and the
+same two missing-source-fixture skips. See
+`research/DX11_NATIVE_MESH_CLI_PUBLICATION.md` for the eleven independent corruption
+controls, real GUI readback, import checks and remaining migration gates.

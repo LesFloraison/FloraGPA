@@ -10,7 +10,7 @@ import struct
 import tempfile
 
 from validate_native_mesh_cli import context, verify
-from validate_native_mesh_captures import digest, load, require, selected_cases
+from validate_native_mesh_captures import compare, digest, load, require, selected_cases, validate_modules, validate_stage
 
 
 def synthetic(folder, vendor, mode, worker_hash):
@@ -71,6 +71,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("synthetic", "real", "reference", "logs", "out"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--ui", type=Path, help="Retained Helldivers/200/0 NVIDIA GUI probe")
     args = parser.parse_args()
     require(not args.out.exists(), "Evidence report must be new")
     validation = load(args.real / "validation.json")
@@ -122,9 +123,30 @@ def main():
         require(match and tuple(map(int, match.groups())) == expected and "Finished testing" in text,
                 "regression: " + suite)
         regression[suite] = dict(zip(("passed", "failed", "skipped"), expected))
+    ui = None
+    if args.ui:
+        pair = []
+        for stage in ("vs-inputs", "final"):
+            context(args.ui / stage, "dx11-native/11", worker_hash)
+            pair.append(validate_stage(args.ui / stage, "helldivers", 200, 0, 4318, worker_hash, stage, True))
+        ui = compare(*pair, 0)
+        probe = load(args.ui / "probe.json")
+        require(probe["completed"] is True and probe["event"] == 200 and probe["instance"] == 0 and
+                probe["vendor"] == 4318 and [r["ui_presented"] for r in probe["records"]] == [True, False],
+                "GUI probe selection and display")
+        validate_modules(probe["process"]["loaded_modules"])
+        ui["probe"] = probe
+    imports = {}
+    for name in ("worker", "cli", "prior-worker"):
+        text = (args.logs / f"mesh-cli-{name}-imports.txt").read_text(encoding="utf-8-sig")
+        imports[name] = sorted(re.findall(r"^\s+([\w.-]+\.dll)\s*$", text, re.M | re.I))
+    require(imports["worker"] == imports["cli"] == imports["prior-worker"] and len(imports["worker"]) == 19 and
+            not any("renderdoc" in n.lower() or "qt6widgets" in n.lower() for n in imports["worker"]),
+            "unchanged direct PE dependencies")
     args.out.write_text(json.dumps({"schema": 1, "completed": True, "passed": True, "synthetic": records,
                                    "corruption_controls": controls, "real_cli_cases": 30,
-                                   "strict_saved_exports": 10, "regression": regression}, indent=2) + "\n",
+                                   "strict_saved_exports": 10, "regression": regression, "ui": ui,
+                                   "direct_imports": imports}, indent=2) + "\n",
                         encoding="utf-8")
     print("12 synthetic CLI cases, 30 real CLI cases and 10 saved exports verified")
 
