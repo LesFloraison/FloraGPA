@@ -200,14 +200,12 @@ bool samplePositionPadding(const std::vector<uint32_t> &row, size_t end) {
 std::set<unsigned> uavSlots(const DxbcProgram &program, Parts &parts) {
     std::set<unsigned> declared, used;
     const std::map<unsigned, unsigned> counts{
-        {61, 3},  {121, 2}, {156, 1}, {157, 1}, {158, 1}, {163, 3}, {164, 3}, {165, 3},
-        {166, 3}, {167, 4}, {168, 4}, {169, 3}, {170, 3}, {171, 3}, {172, 4}, {173, 3},
-        {174, 3}, {175, 3}, {176, 3}, {177, 3}, {178, 2}, {179, 2}, {180, 4}, {181, 4},
-        {182, 4}, {183, 4}, {184, 4}, {185, 5}, {186, 4}, {187, 4}, {188, 4}, {189, 4}};
+        {61, 3},  {121, 2}, {156, 1}, {157, 1}, {158, 1}, {163, 3}, {164, 3}, {165, 3}, {166, 3},
+        {167, 4}, {168, 4}, {169, 3}, {170, 3}, {171, 3}, {172, 4}, {173, 3}, {174, 3}, {175, 3},
+        {176, 3}, {177, 3}, {178, 2}, {179, 2}, {180, 4}, {181, 4}, {182, 4}, {183, 4}, {184, 4},
+        {185, 5}, {186, 4}, {187, 4}, {188, 4}, {189, 4}, {223, 4}, {225, 4}, {226, 4}, {227, 5}};
     for (const auto &row : program.instructions) {
         const auto op = row[0] & 2047;
-        if (op >= 225 && op <= 227)
-            throw std::runtime_error("UAV feedback inspection is not implemented");
         auto count = counts.find(op);
         if (count == counts.end())
             continue;
