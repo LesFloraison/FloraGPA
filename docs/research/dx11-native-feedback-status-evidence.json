@@ -1,0 +1,1877 @@
+{
+  "schema": 1,
+  "implementation_commit": "cc87036a5f074e96715f676a50bb92058b93a5f3",
+  "status": "buffer_feedback_model_validated_full_parity_open",
+  "qt_suites": {
+    "dxbc-execution-trace-reader": {
+      "passed": 65,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-execution-trace-reader.txt"
+    },
+    "dxbc-execution-trace": {
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-execution-trace.txt"
+    },
+    "dxbc-execution": {
+      "passed": 1212,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-final-execution.txt"
+    },
+    "dxbc-group": {
+      "passed": 182,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-group.txt"
+    },
+    "dxbc-input-snapshot": {
+      "passed": 82,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-input-snapshot.txt"
+    },
+    "dxbc-memory": {
+      "passed": 248,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-memory.txt"
+    },
+    "dxbc-pixel-memory": {
+      "passed": 650,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-dxbc-pixel-memory.txt"
+    },
+    "native-analysis": {
+      "passed": 46,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-native-analysis.txt"
+    },
+    "native-compute-debug": {
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-worker.txt"
+    },
+    "native-execution-debug-model": {
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-native-execution-debug-model.txt"
+    },
+    "native-execution-debug-ui": {
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/feedback-native-regression-native-execution-debug-ui.txt"
+    }
+  },
+  "qt_passed": 2618,
+  "qt_failed": 0,
+  "qt_skipped": 0,
+  "synthetic_traces": 36,
+  "worker_captures": 3,
+  "distinct_shaders": 6,
+  "corruptions_rejected": 864,
+  "trace_version": 2,
+  "legacy_trace_version_read": 1,
+  "backend": "dx11-native/4",
+  "input_source": "independent-replay-resource-inputs/11",
+  "final_worker_sha256": "ca70e4a9c3806e82ba72a5740b7c296f828ae7ce5d5cf3f0e7e5436e1cbd87f9",
+  "products_built": [
+    "FloraGPA",
+    "FloraGPA.Cli",
+    "FloraGPA.Worker"
+  ],
+  "hardware_feedback_failures_waived": false,
+  "renderdoc_removed": false,
+  "standalone_release_accepted": false,
+  "evidence": [
+    {
+      "path": "artifacts/dx11-native/class-workflow-run1/4318-1-2/base/trace.jsonl",
+      "bytes": 96347,
+      "sha256": "ebda36377a04e121428a5b7456c202e054ba42ac7ab798db5b61b981d5cd3ff6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-assisted-build.log",
+      "bytes": 4075,
+      "sha256": "3d2aba453f491c86ed5b34fb143306f502582439b1cbd6d580778d57d90dd647"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-assisted.txt",
+      "bytes": 9604,
+      "sha256": "a7225321162aad21b11648b17b098fad78edfc7ce4ab8872d3f7fab305a71cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-build.log",
+      "bytes": 5113,
+      "sha256": "c8cce1e04b83468d1ebbbcabfb0866b0d9e625a4d1d549ae9d58495c0112a052"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-diagnostics-build.log",
+      "bytes": 1013,
+      "sha256": "998fbf8f3226cc03e2f5ed6ef53812ba5f378e61ab3691a89bc724c759f21188"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-diagnostics.txt",
+      "bytes": 1565,
+      "sha256": "0971d962efab03d2e3cf29df0e604dce98da8bd2af2ce9ec539eac74b231c7af"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-evidence-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-evidence.txt",
+      "bytes": 13816,
+      "sha256": "56aa4c69fd6215c87073e03275154f9e397544fe0f36bde9d72bf6004fcfb387"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-execution-ctest.log",
+      "bytes": 536,
+      "sha256": "b61ef061e537c201131b353ca865317d66c44bb59937d8671edbede75c3d2536"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-execution.txt",
+      "bytes": 681123,
+      "sha256": "ea4f3047f4d9b593ff955dd26fa6dce02b250f7445b30b7bcf36219b4234b3cc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-build.log",
+      "bytes": 5276,
+      "sha256": "29cdcda7f128590eb8c7503d2ce9a16963093c9ad8ce891b9dd6d89268f522b0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-evidence.txt",
+      "bytes": 9604,
+      "sha256": "f531fe29a40d2c599664e7f4eeb63da594210cd443529834236a73b55c2c2b6c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-execution-ctest.log",
+      "bytes": 315,
+      "sha256": "7cab5251d1135c9d448a09d8fd213bc530fbfc71d17322427a477ebce21debc0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-execution.txt",
+      "bytes": 681123,
+      "sha256": "51c5a22c43066b27076a5478341e9a01afeab69e1458f29765e02db85308b5b4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/reader.json",
+      "bytes": 4727,
+      "sha256": "c16491cd1487e4a9a69a75e884eb45ea66be4c3123ff62fd040ab21a06cd07af"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/report.json",
+      "bytes": 2080,
+      "sha256": "2f71a050a40511acae6e0636b8f1502e471a58ee2aa2f250d7eb3683e4114195"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/trace.jsonl",
+      "bytes": 9058,
+      "sha256": "b9ffd1a892da3c7788128ab8d83b6ad5b799a2d4cbe91593de5dc83c0f4bb39d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-0/validation.json",
+      "bytes": 1541,
+      "sha256": "07343973937d457d8580b8209c59ff95e024076c180329ea94f18deb136fe473"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/reader.json",
+      "bytes": 4727,
+      "sha256": "793ef31915d177d54890c37ebbfa96ba72139e251e11344e41e817200fb75765"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/report.json",
+      "bytes": 2079,
+      "sha256": "74d1a40c072a404e173473e5bb2fb67f392a0daebd43de99ef157c461445a712"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/trace.jsonl",
+      "bytes": 9076,
+      "sha256": "69da50cb5ed04d4ffa5a71cc8421d37a30ab4ab3737f3ca16d64e4c6f039d224"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-0-1/validation.json",
+      "bytes": 1541,
+      "sha256": "9964dd34366f30ac72c6f4892f9926f017226127e8b68d28db8376db54d99fc1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/reader.json",
+      "bytes": 4727,
+      "sha256": "b468d7ff7a856018bbeb8970546191158d1e453da39eca280901e37177269ace"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/report.json",
+      "bytes": 2079,
+      "sha256": "c77073ac959c1cccec91d04de459c503d082c1980138acfcb7e5c2231e124f92"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/trace.jsonl",
+      "bytes": 9059,
+      "sha256": "b5bdb2d44f2fb453fa7a99f577174e09b1feed273c4c5a1e136f851b02f53f1e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-0/validation.json",
+      "bytes": 1541,
+      "sha256": "25696cf11b74d599c42a5c1531719a432271c66a147e72d6fde58b5d50b9c0b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/reader.json",
+      "bytes": 4727,
+      "sha256": "6b8824367392e58706112bb4f10eb1137efacfa28a47264a86df26d699f1195c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/report.json",
+      "bytes": 2078,
+      "sha256": "575b2adfc1750a263aa353b9f67d95a782c33c342094d3de7e0d040aedcf8a9d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/trace.jsonl",
+      "bytes": 9077,
+      "sha256": "03c65dac63c2f545e1afffe514dc22a65a94d3015231088e3ac5ef456cecc61a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-0-1-1/validation.json",
+      "bytes": 1541,
+      "sha256": "764941ac606b17b0300f81a4f5ec3b45bc69e5301b7583cc577943ed08a86584"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/reader.json",
+      "bytes": 4727,
+      "sha256": "47323ca4ec5393c8b017725eace2dac470222569dfdb13e76dad19bf86997d29"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/report.json",
+      "bytes": 2086,
+      "sha256": "de7b3b03176f195625c5db6ca5aa1d337b1190de0ff6d08c0302a2e7850c6ab7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/trace.jsonl",
+      "bytes": 9042,
+      "sha256": "6f3e92fb6e4b198ada82845bd890705d67722ac1000dd42e578d16c43f2baf54"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-0/validation.json",
+      "bytes": 1541,
+      "sha256": "8dd09fb4047680545adba5bf8f061b0632440edec44cdc2781cb178521f255ff"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/reader.json",
+      "bytes": 4727,
+      "sha256": "4a5400e1c21a8fcd3958602b65fa21ddfa494e625ed34251831f5b9225b4ad02"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/report.json",
+      "bytes": 2085,
+      "sha256": "85ce55eaf62669e732938ff5a57493fe6de3b9de9912bfb855b001e5959c9dc0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/trace.jsonl",
+      "bytes": 9060,
+      "sha256": "3699894700a535543d2484dd908eb50141d963806455af046e83548a3ee74772"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-0-1/validation.json",
+      "bytes": 1541,
+      "sha256": "31487949971b884d60748526de1a3c6a742a20045d562ff7e1a0ca7d5b418a89"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/reader.json",
+      "bytes": 4727,
+      "sha256": "e784d29b611e7d0a96c1af17690262b29a9eebe9d8df64355086801703a0a1e8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/report.json",
+      "bytes": 2085,
+      "sha256": "534001b284f377a7d05189b8b4ffb8f850ced9bb3b9a046a09c95765351a91d2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/trace.jsonl",
+      "bytes": 9042,
+      "sha256": "07f3e25011a06b229d9a9b21e06b07d12781122ab1c075fe531c18e714a35750"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-0/validation.json",
+      "bytes": 1541,
+      "sha256": "9059aba546ff494825c6e7c2b7663b1d5cf2ce540e95afb819677572b6144546"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/reader.json",
+      "bytes": 4727,
+      "sha256": "26a0fc80b9015ae28d459a80787031ebb9d7f68d1f4e30ae5adc4cb01ddb3a98"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/report.json",
+      "bytes": 2084,
+      "sha256": "884038951691a9b7dc2928d48a3679946c4aa07672d85d2d9420aa7480250070"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/trace.jsonl",
+      "bytes": 9060,
+      "sha256": "709cc09d095a93d462ac4c7f3c43f358c02f508fb75939047e0fc8c7148040f6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-1-1-1/validation.json",
+      "bytes": 1541,
+      "sha256": "113898d2fe2793f90dbc3ce251bf00d81b80e94c5a0979ec1fdc77e31ba9ee6c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/reader.json",
+      "bytes": 4727,
+      "sha256": "6a84a25e62100a9d772663facb4048182340fbe96085e907f2338dd4bb656522"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/report.json",
+      "bytes": 2086,
+      "sha256": "f0eff667b6df43382d6a5b99cb7fd613cce59f1b5ceb2722044674bade55315d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/trace.jsonl",
+      "bytes": 9095,
+      "sha256": "6f0a5c8fd0e217edaff5865d45df855aea157bb9f067e4e20391e0537d931bbd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-0/validation.json",
+      "bytes": 1541,
+      "sha256": "283e59d8a1edf83dd1bb2ee072a265b6a58156e7e620f2544e09bf478ff31041"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/reader.json",
+      "bytes": 4727,
+      "sha256": "7d2102cebf4d60f1d02c0940845829a81243a88a15ea6ed8805682970fc32034"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/report.json",
+      "bytes": 2085,
+      "sha256": "fb0ba539df0f1ae2192d777358a12487bdc19f29aa82d89799f12c2d46898028"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/trace.jsonl",
+      "bytes": 9113,
+      "sha256": "d88c2d7564c44421145e5bf508b669693bdfd2459db6018763656d73cd57c197"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-0-1/validation.json",
+      "bytes": 1541,
+      "sha256": "e2d837d4f6680b007488cec761b85dbfefca73dd56e467080d4da0dfd3f56653"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/reader.json",
+      "bytes": 4727,
+      "sha256": "7ec40ebe8eeabaf6c654481a45883a0f9f6b297fd7ffd2dd3a1549de67d9ae16"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/report.json",
+      "bytes": 2085,
+      "sha256": "795941096e4b4740e866af18f79c6ee3dc4cc97f903597734194a24fbc6ffde2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/trace.jsonl",
+      "bytes": 9095,
+      "sha256": "63bac90c07a692e4fd6d36151af8d803bc683e0a9cae44f2f0711b85a71639d3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-0/validation.json",
+      "bytes": 1541,
+      "sha256": "f279f9f73ea6098b1b614a5509c25522900e816ef643a6df1ab0ac0b175ce972"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/reader.json",
+      "bytes": 4727,
+      "sha256": "6c9867c288d80e6e4de7471b997fe3c98316bfa00c6139e7d02218b9b6f72eea"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/report.json",
+      "bytes": 2084,
+      "sha256": "d6aa3a26dbaca848f6e11b68e7118704fbba5d3b804dbc9348d80c520aedbd42"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/trace.jsonl",
+      "bytes": 9113,
+      "sha256": "a8203ac5f9190271896c1d43a57f6378df2eeddd80db49c1fbacdf2190496915"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/0-2-1-1/validation.json",
+      "bytes": 1541,
+      "sha256": "1b08c41a3ac7e4588c12c5d4cdfaaa4d0c0b6f0f235f590029c78f86a8f695c0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/reader.json",
+      "bytes": 4734,
+      "sha256": "1b4b49c9e30ae01d2cf9e72e74732fd5f7f2808c753366531f5ce698e30facd0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/report.json",
+      "bytes": 2084,
+      "sha256": "41a01918ad2f19bb746bbb67043ab704609770e8af04535c0173cc16e57d1d79"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/trace.jsonl",
+      "bytes": 9065,
+      "sha256": "840e78e03b45d1b0a6657cbf00c05fce770a140d9d502332e845a799d408e632"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-0/validation.json",
+      "bytes": 1544,
+      "sha256": "4633a97d17687547d7fe55f48414a67a4dbd6eb1dd0f1baa1817c2c03406b182"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/reader.json",
+      "bytes": 4734,
+      "sha256": "10a9bc1f7b338e58dccac74ed7f6f1d09f70ce8fce04fe12f8aa706a4a17b4ca"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/report.json",
+      "bytes": 2083,
+      "sha256": "e61f3a40122ba96353ad692a812057129aff78cc3c020e3b6db1f5e34870bca7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/trace.jsonl",
+      "bytes": 9083,
+      "sha256": "236bd7beba4ef10f8b01833c584608c5037219d3b238d8c7cc3ed28d6a7b5e78"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-0-1/validation.json",
+      "bytes": 1544,
+      "sha256": "95aa6f03dc8cf80cbf361b1fc7be651f0a5758abf3f9ce0e53aa76490a2ed527"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/reader.json",
+      "bytes": 4734,
+      "sha256": "8e8bd954f8ebed3a98905b47f188af18240f5f483f4c8b914651cf98b54aafcd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/report.json",
+      "bytes": 2083,
+      "sha256": "92e99e20d5ff0993a49b73ac61e98a65c51b13ef7c4a1919fda869bc711e58de"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/trace.jsonl",
+      "bytes": 9066,
+      "sha256": "376e43ea518a467e6835801048bf2da49c1d688cd8cf4c7d5d303fb223685c43"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-0/validation.json",
+      "bytes": 1544,
+      "sha256": "1fe219560cc49faeb9fb4898bb8cda8c207240dc9fc8aaa2d161d95ef88f9d07"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/reader.json",
+      "bytes": 4734,
+      "sha256": "3605ee0ec2ac63a08c3e3e9f0d05f95740c629757dcb8e9d6fc40ca5723748f0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/report.json",
+      "bytes": 2082,
+      "sha256": "e746400c969cfc3a42e1b6c9ff1f06dbfb45229eda5e252d164e5b94cec9c83f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/trace.jsonl",
+      "bytes": 9084,
+      "sha256": "268195f89fad35a5d3e1e72d2c860e81e3ebe1c692958547818d857e65fbd3ea"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-0-1-1/validation.json",
+      "bytes": 1544,
+      "sha256": "ab9625fb895494e217425a0571bd89fa6233cadb81289b6806c499dcdc8b47f3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/reader.json",
+      "bytes": 4734,
+      "sha256": "2ef777bf1c0d8079ff7c8c041d7006d64ba242e892e8b4954d2baa48a95f1ccb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/report.json",
+      "bytes": 2090,
+      "sha256": "e2a9bb9dcd249d0af2225e539a6b2ba12af3371a2034cffcda61e3cc170426cc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/trace.jsonl",
+      "bytes": 9049,
+      "sha256": "f65c95a94edc5b285a566a481f56c556efc1c439acff9d7d4f1d14e80e6efecc"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-0/validation.json",
+      "bytes": 1544,
+      "sha256": "2b0f1e1645e0e4a77defc24bdf9925a51901ae74b929c50eea47d1442d344e15"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/reader.json",
+      "bytes": 4734,
+      "sha256": "2480363ff4cb6c7714ab28b7bed5d5a4bd70cdd688bf795a45636471849e0f0e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/report.json",
+      "bytes": 2089,
+      "sha256": "e471e7684e91919086858036a927f015aa16861aeb371fdce9276a8d3d58953b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/trace.jsonl",
+      "bytes": 9067,
+      "sha256": "809d53042823a3e9ff5ed61cae01f9483de1b4e682d4e9f5ef3092cca5ecf5b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-0-1/validation.json",
+      "bytes": 1544,
+      "sha256": "1299cf7565b3c4e8153282cb55eae027a30a89e67d7230cae6bc862166e86ffa"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/reader.json",
+      "bytes": 4734,
+      "sha256": "2249ba4e014acfde89d8a4d9e1a400b03f13cd1be5db6d89e33a8d9f11bab10a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/report.json",
+      "bytes": 2089,
+      "sha256": "e492d6a91bac361f86e9afd8cda814c0419cd4608dfcf96e92b705f3b19547b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/trace.jsonl",
+      "bytes": 9049,
+      "sha256": "05d99ab6647c509bb7e81181285684579345d44f7c179f0a253f62f3fb5e4971"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-0/validation.json",
+      "bytes": 1544,
+      "sha256": "61f3fbbd189b78c632d6263d851e4b4c7010cc1a0301cd9ba7b9f3c6cde17db8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/reader.json",
+      "bytes": 4734,
+      "sha256": "5ad2b0fdaa59e8a131d3c0dc842ccd3936d78e7ddf29078f98b43a9ca21d466f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/report.json",
+      "bytes": 2088,
+      "sha256": "adac49f13b86b83a8f0bcfe414ff24f04cf0dfb89e22815ca4d54b868e5d2540"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/trace.jsonl",
+      "bytes": 9067,
+      "sha256": "307a2bbc48bf29a4c474d472d4e1a6c94b04661a92acd52247b75c5c426cd462"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-1-1-1/validation.json",
+      "bytes": 1544,
+      "sha256": "7bde3eb35de7723ad08824c21471c3bccf61df8b8420db7fa2e26e9da60f5526"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/reader.json",
+      "bytes": 4734,
+      "sha256": "355d0777ab3a7c12b96356d5c7c8944a016dc294f4a642d1abbd390ecc225683"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/report.json",
+      "bytes": 2090,
+      "sha256": "4f3b9128bf544627d358ab8504f81dcad43f27b5f48b281a41ae0b2d4d8d5f3c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/trace.jsonl",
+      "bytes": 9102,
+      "sha256": "ed1d15a8b474bda0f62bac427bb4ebb1cf6334a2415a7a73e06d7991cb780abf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-0/validation.json",
+      "bytes": 1544,
+      "sha256": "610a5ab05c34be46718a4bb6e90d195512002215069bb215c325e0fabdc6a003"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/reader.json",
+      "bytes": 4734,
+      "sha256": "e93949d6dbc89831588aeddf644b4023413069c6a6d4ff93d5b391823e7a63e4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/report.json",
+      "bytes": 2089,
+      "sha256": "0807eda0ce3d1de9c5ae3a202c972110a75a0b486510e403160b0b60c2a2816a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/trace.jsonl",
+      "bytes": 9120,
+      "sha256": "7d05b607bf795b8a8bd9c4592b9c8bc7209c34d84fbc18675583f67a1caafba7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-0-1/validation.json",
+      "bytes": 1544,
+      "sha256": "ab7cf79bd432fe1ca3cc038f3959dc506da5dea7679b608b947cdac051a0776a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/reader.json",
+      "bytes": 4734,
+      "sha256": "17c5f9bb7442a14b6452c8ac6c424aca3c6af08c76adcc37a4caa5f8bd6c3111"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/report.json",
+      "bytes": 2089,
+      "sha256": "6437a4bd69e460f232af5a51759043ffaf64b4fad471399ef3f83c5bd03b8af8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/trace.jsonl",
+      "bytes": 9102,
+      "sha256": "eab986e469a8f136df3fbb0e99f58ff25d1967bf1f5b779403cfafa6753dcd1f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-0/validation.json",
+      "bytes": 1544,
+      "sha256": "dc6f63c2f924b4f9f79cabf93a87d62ae89c53308a2c8cef432eaacdc17f9a24"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/reader.json",
+      "bytes": 4734,
+      "sha256": "cbb0a8c633d6311902214ff230aa5d63d26b83fe669b357c89335f1351426fc3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/report.json",
+      "bytes": 2088,
+      "sha256": "3ba29a707bf023185175367d8b3505ea21b9c2690e7b9c0d13bed3b151b3898d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/trace.jsonl",
+      "bytes": 9120,
+      "sha256": "074caf41159d6f3eb4bc4a58a5ec31ab45fdc2b7ba1d42501d0ddf7d0295db1a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/32902-2-1-1/validation.json",
+      "bytes": 1544,
+      "sha256": "a123fc5f9e6112c9ba06df5f7ffbde14204483df46a653092222512dd2bb8426"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/reader.json",
+      "bytes": 4732,
+      "sha256": "7c6be1e9bc190a68e056becdef223f50fd895655eeed8deb20a0c07b1661daf6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/report.json",
+      "bytes": 2083,
+      "sha256": "de6d36054c358d39e1134b8509801a1c387ffde5c4ae66496f353a51cd73f3a3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/trace.jsonl",
+      "bytes": 9063,
+      "sha256": "7884e2b5752f386f1f027a164d0be0b306879718c62338ce352f00b22d838919"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-0/validation.json",
+      "bytes": 1543,
+      "sha256": "77a73f89023b48dbca5f91540992ae6bb37142480c097d8b5b6538e9633a1b46"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/reader.json",
+      "bytes": 4732,
+      "sha256": "cf2544e0fa85911528ca390bfc2f1f669dd3ad08caa8e66358455221e5fb1d90"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/report.json",
+      "bytes": 2082,
+      "sha256": "f12800873ee42fbc8647977dcb683d896940cc4a1a1ef41cb5d791f5c61e740d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "c07576fb122b79b800f92182bb2652d261443ccc10dc531784e1e644eb48e9c3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/trace.jsonl",
+      "bytes": 9081,
+      "sha256": "0c1633f42a4486de8c3f31a2012de0af3fed597c2c06ab1aa218f2d9d950b982"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-0-1/validation.json",
+      "bytes": 1543,
+      "sha256": "e4e08498bc4f7be73766971254f9928e9c4c6560f3aa22c5308c2e2bae0bacf4"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/reader.json",
+      "bytes": 4732,
+      "sha256": "b7b9b6fb919b1ec7349ca1a8f697d17953c81fbf098306b6b0a715ad4fb2e2f5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/report.json",
+      "bytes": 2082,
+      "sha256": "2c30ef34572466d897ce31d402b6d9b95306feac59804a19e8b8576214c3192c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/trace.jsonl",
+      "bytes": 9064,
+      "sha256": "085be45fbcb97c106c2362121de1183c3797196dd135d313ef3114eceacda80d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-0/validation.json",
+      "bytes": 1543,
+      "sha256": "1ba898747a2f87367b94402742da682aa223075eee797d460bb897c3b78d0d30"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/reader.json",
+      "bytes": 4732,
+      "sha256": "115a9d826a11c8da5546a15135cb715f9dbb9f044ac26189b6cd7652d2b87eb1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/report.json",
+      "bytes": 2081,
+      "sha256": "83fcba55da057efe5e88e6e6fda2e63ef3840fde20bc876165909a58d2bbf4a1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/shader.dxbc",
+      "bytes": 868,
+      "sha256": "ae022170cf44c5aeebc32357ae9b13c94f010f7654232ec4ccc29defdd83eb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/trace.jsonl",
+      "bytes": 9082,
+      "sha256": "e65b7def8cd52838799081a6cfdd3b269d547b5d722256ece7a4ff649bdc521a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-0-1-1/validation.json",
+      "bytes": 1543,
+      "sha256": "a23f4f070d971a51c9ac1a2c15a99b01c80765008590608e3e7a0c95a0efb6a3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/reader.json",
+      "bytes": 4732,
+      "sha256": "9433d555c2d68ebbf7317db1b913be5a6e8e7279c2176be8f0653c3a834e0106"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/report.json",
+      "bytes": 2089,
+      "sha256": "b17fcef63d923b9353490784ff1b8d9f94ce8de6021a9dc31563e24913d1b0e3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/trace.jsonl",
+      "bytes": 9047,
+      "sha256": "a74e9613e07b268185496c47c5b8ef520a8bd3a29072250a2acea20965609143"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-0/validation.json",
+      "bytes": 1543,
+      "sha256": "dbfe7958bf141e4464f215ee2d052f4dd507df67df29a85e35e96a5c1c4c8000"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/reader.json",
+      "bytes": 4732,
+      "sha256": "3cc3faee7d1a262af5c3e605a90dbaa57ae7cfbd7da8fbae99f14ef2ca369425"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/report.json",
+      "bytes": 2088,
+      "sha256": "4f97605429179ae9837e4fc6ff4cb1654b416e6e04abfa4e1bcdfa3be28796d8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "2540f97608624ec8fbe4d08faf7298092cfefd8d2a45a26dabca71e4161a50cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/trace.jsonl",
+      "bytes": 9065,
+      "sha256": "1bfd134b925b421c3069c551b48ab91d048e821fcdfb8ead00aed8c79fafb991"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-0-1/validation.json",
+      "bytes": 1543,
+      "sha256": "925c4f7a89beea434a5d3cde733122a4aee39c6f2f6b094edb814835eed9380d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/reader.json",
+      "bytes": 4732,
+      "sha256": "0ccaf4851b88e2f0677e4151566a515df75191a921532278d4af390c0581aaa3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/report.json",
+      "bytes": 2088,
+      "sha256": "aee5292563ff5b730bd4d1ba5f12b721c4b71e1e2e59100713b409b6070a83e5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/trace.jsonl",
+      "bytes": 9047,
+      "sha256": "3683ee3034af82695e102dcd1035d3113c59f397ca615534f25710faa17e070c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-0/validation.json",
+      "bytes": 1543,
+      "sha256": "f8e8f25523cbf01f798edddc5d9981383797b531849ad96bdb31b67eba31c508"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/reader.json",
+      "bytes": 4732,
+      "sha256": "ae9ae4befea6ac09d2fd14cb41fc80d8ed75e92990a1c0b20698ed6d57701207"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/report.json",
+      "bytes": 2087,
+      "sha256": "09fd7fea4df783a9b31a2a079b93c5b5ee2632a01fa84f1df9a4b9d08c591819"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/shader.dxbc",
+      "bytes": 852,
+      "sha256": "7b61c4926cfa82e22aa85f851221e4462d3ed55586cecd388460965570248d7f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/trace.jsonl",
+      "bytes": 9065,
+      "sha256": "70778c4601c4a8c34c450bc6d9be9949d9b06b1457cd066537134a65a76cd816"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-1-1-1/validation.json",
+      "bytes": 1543,
+      "sha256": "bc2504e50e39e1e33f8196f037823323f7c022b4d007b90d713797f46d884cad"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/reader.json",
+      "bytes": 4732,
+      "sha256": "d5fc42c8b967fd43916fba26e14ead47bbd276d54b40ee7554f53978c8a51eda"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/report.json",
+      "bytes": 2089,
+      "sha256": "1979571b5d35f3b44a9a0ff5661df4f08d5ecaac9837ffc382ff849ef9786ba8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/trace.jsonl",
+      "bytes": 9100,
+      "sha256": "7b6f409b3fa54d3f254cf6ad550cef00a5672cd3c33ed7acc7fed6a883750646"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-0/validation.json",
+      "bytes": 1543,
+      "sha256": "5f5da2763b2ac66357e52c5298f4b88ecc158e07d33dafed794d36975d8c0e42"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/reader.json",
+      "bytes": 4732,
+      "sha256": "22ddb846a2c94507461a4763a7667dcda2ba76c40e4540a8647c1712c17756ee"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/report.json",
+      "bytes": 2088,
+      "sha256": "0a85680abdfe4156d297e97b874f5d84d12fd1386560f7af7665d639c974904d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b9bdc907b62cb64593ae5771739588fb6085be76d02a40550d408e8988e78bc2"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/trace.jsonl",
+      "bytes": 9118,
+      "sha256": "2116465fd95c0439671aac27672c1b7008b4e2783e9974d5f7ae031dc41568b3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-0-1/validation.json",
+      "bytes": 1543,
+      "sha256": "ca9ea5caaf1f652732112e811e695d43b5ae35cdbb6169c58269d247a8c4184e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/reader.json",
+      "bytes": 4732,
+      "sha256": "fed19d22b2c71e95cd8b06a02b5da6c1cc32d20737b92035c5d547b1409333a3"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/report.json",
+      "bytes": 2088,
+      "sha256": "4e3aceec5c67aa96979c06fd2849863b3c50d5219230d7e822ea7c8ff0dab2ca"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/trace.jsonl",
+      "bytes": 9100,
+      "sha256": "885a724ef2a1ef32ad36c1b39ecdf18919a7ef5c4d28a5531081cc3c5bb0b2ea"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-0/validation.json",
+      "bytes": 1543,
+      "sha256": "6f89b8a8a108f937cddcb4020230f7ca3779262d6c9620eb0548eddd7ac6e80d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/negative.json",
+      "bytes": 1743,
+      "sha256": "c6795f7da83cde9ab72e83bec5a74d91563d1d991044287f809be1e84a252caf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/reader-negative.json",
+      "bytes": 1289,
+      "sha256": "5bfc4a1c54a70e895c1f97c5944ae7c420f4d964ead5df830dfe028c907dccfe"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/reader.json",
+      "bytes": 4732,
+      "sha256": "2fd99d918df419ca18e018b00ec2b5acc6c0ec97c661dbb8894a6a405d2a4675"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/report.json",
+      "bytes": 2087,
+      "sha256": "164b7adf724c83a4a07b0dc25486364acdae017ecaf9fe78ec277c6df6152525"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/shader.dxbc",
+      "bytes": 928,
+      "sha256": "b4a9471f3813dff1cbe3bd0c8108e3b5a025f60b1fccd54650232579d852e133"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/trace.jsonl",
+      "bytes": 9118,
+      "sha256": "f8276fd5ebfce3c6d1b0c430b057c32ea0beb9050115c49081d57673f7f01ff9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-traces/4318-2-1-1/validation.json",
+      "bytes": 1543,
+      "sha256": "dea02ef5cd8d1a351a1cac7d1ed47bb086a640ef8be241bf19b45fa67ffe5ae8"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "138b877f89cf4b8cc88aafa9b23be8d4879e8723dda193136f8ebac72d83f2b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/job.json",
+      "bytes": 827,
+      "sha256": "4dd846cfca48be6d8061b04634da771a37edf81f9562c45725705f53224aec2e"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/result.json",
+      "bytes": 7851,
+      "sha256": "8f7bb7e8017aba04658ae53bddd783fd4f5c23e9af82f56c672a5162dd5fa646"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/trace.jsonl",
+      "bytes": 106620,
+      "sha256": "fd86a51f651f11af24528d25ea4aba2bf536e7a84fad50c16a3ba238a084bb4b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "5bf5e4222c7d2889203b033d3ebf7e87e655770a3eeb5ab0aef1b8e6510cb4eb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/job.json",
+      "bytes": 846,
+      "sha256": "d7c405c2b3793c8edeb2e676a19014577af815ca7c3e986e89ed8ac2a6ebadf1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/result.json",
+      "bytes": 8267,
+      "sha256": "de01d3a8e7019f2878aa8f754d7cea40ef8e750603f92d29f49c4178f4fba47c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/trace.jsonl",
+      "bytes": 106623,
+      "sha256": "07254dc34acd377c3242ddf5dd22844922169ce385e7941c7d35ff96e5c0c13d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/32902/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "b2bdd2913654b7a6e1405be05ebc72f9f9d1ea944dbe3e774bf86295d9103218"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/job.json",
+      "bytes": 842,
+      "sha256": "af4b05863b91fbfeb21d1255394167d99bde481271577f48357994222ca1c348"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/result.json",
+      "bytes": 8653,
+      "sha256": "392a0f79708055817dd4387576f4500b420db4a69aa921cad61efe250add34cd"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/trace.jsonl",
+      "bytes": 106622,
+      "sha256": "3aede2eb1ead55faf749fb45c71cdc8942740777dab1ced8310a2352b11b2171"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker/4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-final-worker.txt",
+      "bytes": 598,
+      "sha256": "1f24dba02a062cdac50325ef19de8be035acd3ceaabcde5d9ee42d939b419568"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-initial.txt",
+      "bytes": 508,
+      "sha256": "f8de03c4aeaca87c17f53688c68fda1c9cd354b99e8d31f3df54fdaaf252ce7c"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-legacy-reader.json",
+      "bytes": 6014,
+      "sha256": "dd6849fcf597a2b48b90b217f32a23fe4042ed471435025e3f2663498df97092"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-precision-build.log",
+      "bytes": 992,
+      "sha256": "d558b85fd22c49c1f8a26334d9cecda1a54cefe0864f1b565a1385284e813b81"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-products-build.log",
+      "bytes": 15855,
+      "sha256": "d90eb6f4ed9d0aca7421b590b5b06ff9ff54553624f15ed1c28d5ae52f6fe8de"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-reader.txt",
+      "bytes": 4565,
+      "sha256": "7014363f4ab77cf65e6da6b8b1fd397b05ead8aca059057435467f000980d40b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-ctest.log",
+      "bytes": 1163,
+      "sha256": "6124f7bdb9b817067efdfc8494491eaf15b76960d6e9988b14dc35955af3fbee"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-execution-trace-reader.txt",
+      "bytes": 4565,
+      "sha256": "0b629a6656f2156d87e6bd45bbeee78add06077228b303710575c1326db1da38"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-execution-trace.txt",
+      "bytes": 2837,
+      "sha256": "9a82d7c451e60bf3ed94a9df314a6e98663b8f1ef42ce7cdfe2f3a6614cf4621"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-execution.txt",
+      "bytes": 681123,
+      "sha256": "e2cfc1cb515222f8f153522377b2856cf5f731b2c50b0342161fb41dad45ebf0"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-group.txt",
+      "bytes": 134384,
+      "sha256": "60b5efc82a5ffe6b01c592d410fa45022e779e777095fe09da1290f7a7829f8d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-input-snapshot.txt",
+      "bytes": 46016,
+      "sha256": "046945434394bd42ba425c6aba5223e348fc6a52a783528b8d767cae43973d5b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-memory.txt",
+      "bytes": 431388,
+      "sha256": "c0f8630bcafdf13648ebc07f53c808900bfa1456b0dbc0121fb274f56226c10a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-dxbc-pixel-memory.txt",
+      "bytes": 36198,
+      "sha256": "b07084d62faa13d21062151aa923cde158d5808266d5aec9d156b4466f01a2d6"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-native-analysis.txt",
+      "bytes": 2952,
+      "sha256": "65ba63e4a230f3318b84d2074027e49d832353ccd97b193b18b5eee3539259f7"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-native-compute-debug.txt",
+      "bytes": 4168,
+      "sha256": "e646a8eb962ac9c941a0ef50b14128551b6b06ea834828a2e1bf4cf81211b27b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-native-execution-debug-model.txt",
+      "bytes": 2236,
+      "sha256": "9458fcd56c6a0e732c2a5963bbc150df5bb1a5368839f5aef436e12ed7edd2af"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-regression-native-execution-debug-ui.txt",
+      "bytes": 1678,
+      "sha256": "7a43642bd93f4a8b80783f3cdc11c3fa793ec084c06657a4d2a3d4e4ababf8ef"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-trace.txt",
+      "bytes": 2837,
+      "sha256": "50dd763073ed0ec8d512168ae27084c39abb60273d5223ab0d6a507102d6b730"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-ui-build.log",
+      "bytes": 3373,
+      "sha256": "b0c41bb841c9689e7aea7e8168deb11d829e939e8c76f2259dc081e227411856"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-ui-ctest.log",
+      "bytes": 428,
+      "sha256": "437844e776fb43f230e2d64d1c54b700dcd1155d811f974fc0a0cc5731eb1edf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-validation.json",
+      "bytes": 10083,
+      "sha256": "5f522ea8d66c1c1aaba35732dab4c604da208fc0c818531e0c5c80956d51023f"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "138b877f89cf4b8cc88aafa9b23be8d4879e8723dda193136f8ebac72d83f2b9"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/job.json",
+      "bytes": 809,
+      "sha256": "15b9de3755374187fde088260b34799f0938d010f669e5c40905d3f58d13757d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/result.json",
+      "bytes": 7853,
+      "sha256": "185586d9c3160389b84d822a9882613e42aa9a4c383b25e163afa725d6d50462"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/trace.jsonl",
+      "bytes": 106620,
+      "sha256": "fd86a51f651f11af24528d25ea4aba2bf536e7a84fad50c16a3ba238a084bb4b"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "5bf5e4222c7d2889203b033d3ebf7e87e655770a3eeb5ab0aef1b8e6510cb4eb"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/job.json",
+      "bytes": 828,
+      "sha256": "f0f8306f980e58dabae07aa6d40b3f601aa7a2ae86ded2fe5b7686ee56cde7af"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/result.json",
+      "bytes": 8267,
+      "sha256": "6606d291bb3e7edfc0e42bca77e38f5346efb6a024b50824144e3d2b9b12c886"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/trace.jsonl",
+      "bytes": 106623,
+      "sha256": "07254dc34acd377c3242ddf5dd22844922169ce385e7941c7d35ff96e5c0c13d"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/32902/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/experiment.json",
+      "bytes": 2309,
+      "sha256": "22e3d3ac72f0be3bdbbaec6bdcefc53b6ece852a5e768ce8264262620e89a9b1"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "b2bdd2913654b7a6e1405be05ebc72f9f9d1ea944dbe3e774bf86295d9103218"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/job.json",
+      "bytes": 824,
+      "sha256": "913129deee994c764a2cf85dace8565791987ae8762d48889fae9ffbac57e697"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/result.json",
+      "bytes": 8653,
+      "sha256": "e8d91bbd3991f1a7c333e27b682cf085ed8b5f873553f20ca632a2e51ffc6793"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/shader.dxbc",
+      "bytes": 1084,
+      "sha256": "2db5b1303752a5c0227c578f75eccb81f7e0c38befca65dc604ca3c5c9e1adaf"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/trace.jsonl",
+      "bytes": 106622,
+      "sha256": "3aede2eb1ead55faf749fb45c71cdc8942740777dab1ced8310a2352b11b2171"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker/4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker-build.log",
+      "bytes": 1694,
+      "sha256": "872f513a798ca1033a148c009ceb3b4a804878a699863fdd01fbc02902a35c7a"
+    },
+    {
+      "path": "artifacts/dx11-native/feedback-native-worker.txt",
+      "bytes": 4340,
+      "sha256": "ca5936407d41136941fa53f2ceea8eb90245f570860a48152589dbc929da363e"
+    }
+  ],
+  "source_git_blobs": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 117672,
+      "git_blob_sha256": "1f1c6a3754145c846af656f220cb4f93a223168045b82314b8083f851228fcd1"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "bytes": 9234,
+      "git_blob_sha256": "b1afd70de467af4814f0c2002b07c096ecd52d9a7cce6925f0e7da8c4a9a423e"
+    },
+    {
+      "path": "src/application/DxbcExecutionTrace.cpp",
+      "bytes": 21718,
+      "git_blob_sha256": "30be92a957fa6413a2f7a3232183feb8ad61bca69f463d3b8a95b03025a8e94b"
+    },
+    {
+      "path": "src/application/DxbcExecutionTraceReader.cpp",
+      "bytes": 31530,
+      "git_blob_sha256": "c40d1ffb4d79f9733b310914b090909724715f0cc616d521a8db14a29cd3e623"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.cpp",
+      "bytes": 44374,
+      "git_blob_sha256": "fc41cca20edebd4021ed207ce189f32042bf299f13cf2e0ee890c09914275674"
+    },
+    {
+      "path": "src/application/DxbcInputSnapshot.h",
+      "bytes": 3418,
+      "git_blob_sha256": "a4962fd16effcdca6dd7d62d0f856e84ddf631683d75083f1300a8997e61db0c"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 960,
+      "git_blob_sha256": "ec2196abddb8555acf118d13cc08af7e486e1d0a87b2f545d146b40a38dda327"
+    },
+    {
+      "path": "src/application/NativeExecutionDebugModel.cpp",
+      "bytes": 17981,
+      "git_blob_sha256": "202f60caef60261aa006cc23a4757f88effa21bc59b64d00c484da5515baaa4d"
+    },
+    {
+      "path": "tests/DxbcExecutionTests.cpp",
+      "bytes": 79394,
+      "git_blob_sha256": "74fa1b44055c637ca00212b01f07929ff9387349b1836c8f391924d177b5606b"
+    },
+    {
+      "path": "tests/DxbcExecutionTraceReaderTests.cpp",
+      "bytes": 24108,
+      "git_blob_sha256": "d7bb0a9f8b3e2d911ea689b38a411d2cbc40b558cb399f0d2d4988c53c35be9d"
+    },
+    {
+      "path": "tests/DxbcExecutionTraceTests.cpp",
+      "bytes": 20967,
+      "git_blob_sha256": "487cd16416e82012673eab04b8576bbbb64bc53e9d8861dd2dad2cef02cd8095"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "bytes": 28573,
+      "git_blob_sha256": "784f49c8c43b91bcd70ab6e3e248f32840e9083d3abf9287f4f516fbea73e4fa"
+    },
+    {
+      "path": "tools/probe_dxbc_trace_reader.cpp",
+      "bytes": 6912,
+      "git_blob_sha256": "d33b6a10f824cbad64435706224eb71840b10caa8c58fa666e7f943cf15fe13e"
+    },
+    {
+      "path": "tools/validate_dxbc_execution_trace.py",
+      "bytes": 23447,
+      "git_blob_sha256": "dcaba8e536388eec3d62591e63438e56890059ba49b289e719ad92edfecf9f9a"
+    },
+    {
+      "path": "tools/validate_native_class_workflow.py",
+      "bytes": 10226,
+      "git_blob_sha256": "e3d48dcf7958b93a1aaa43bb798c7814c04e70c6ef2f746f944ff12cea3f50a2"
+    },
+    {
+      "path": "tools/validate_native_compute_captures.py",
+      "bytes": 10198,
+      "git_blob_sha256": "6076cb2f197fe332d3c25a9b4a36300a3b68c2734999a1413cec8ca84881c57a"
+    },
+    {
+      "path": "tools/validate_native_compute_debug.py",
+      "bytes": 10347,
+      "git_blob_sha256": "3ce3170dfb8552e25fb365baee99050085ddb7749a5ac8ef25e41e9963904dcd"
+    },
+    {
+      "path": "tools/validate_native_feedback_status.py",
+      "bytes": 5852,
+      "git_blob_sha256": "5ed43b7e3d37eeb369d879ad719a789bc3aebde88a37bd3f8b02c3a840c3f0df"
+    }
+  ]
+}

@@ -1536,3 +1536,15 @@ before the feedback load. Zero/all-ones controls cover 180 dispatches and preser
 all original instructions. Mandatory tests clear these research controls and
 still fail; no initialization workaround or failure waiver is enabled. Native
 status modeling must separate mapping knowledge from opaque raw-bit validity.
+
+### Native feedback status execution
+
+The [native status model](research/DX11_NATIVE_FEEDBACK_STATUS.md) now executes
+buffer feedback loads and mapping checks with independent semantic tags. Known
+non-tiled provenance is checked against both captured and native descriptors;
+unknown status never becomes an invented raw token. Version 2 journals preserve
+tags through forward/reverse navigation while retaining version 1 reading.
+Thirty-six synthetic adapter/binding/provenance cases and 864 corruption checks
+pass. Backend identity `dx11-native/4` invalidates earlier cached results.
+The two NVIDIA hardware-oracle failures, tiled/texture feedback coverage and
+full native debugger/release acceptance remain open.
