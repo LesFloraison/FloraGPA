@@ -1676,3 +1676,12 @@ ninety corruptions. The three related suites record 498 passes, no skips and the
 unchanged Intel literal-zero SampleBias clamp-effect failure. See
 `research/DX11_MINIMUM_CLAMP_PRECISION.md` for the retained baseline, exact scope
 and reproduction steps. This increment does not close P6 or authorize P7/P8.
+
+Explicit SampleLevel and SampleCmpLevelZero, including feedback forms, now retain
+floating minimum precision through native VS/PS/CS GPU requests. The 288-case
+matrix closes 252 reproduced parser rejections and preserves 36 full-precision
+controls. Original bytecode/results remain unchanged; 1,728 corruption checks
+pass. Eight suites record 3,036 passes, no skips and thirteen unchanged Intel
+research failures, including identical original null-shader creation evidence.
+See `research/DX11_EXPLICIT_SAMPLING_PRECISION.md`. Minimum-precision gradients,
+original PS qualification, full P6 parity and P7/P8 remain open.
