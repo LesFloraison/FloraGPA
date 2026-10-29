@@ -118,7 +118,10 @@ def main():
     parser.add_argument("--uav-independent", action="store_true", help="Require the expanded 15-row GPU matrix")
     parser.add_argument("--resource-reads", action="store_true", help="Require all 18 GPU rows including immutable reads")
     parser.add_argument("--indexed-presentation", action="store_true", help="Require compact vertex presentation tests")
+    parser.add_argument("--position-channels", action="store_true", help="Require sparse position presentation tests")
     args = parser.parse_args()
+    if args.position_channels:
+        args.indexed_presentation = True
     if args.indexed_presentation:
         args.resource_reads = True
     if args.resource_reads:
@@ -130,6 +133,14 @@ def main():
         expected |= {f"{v}-gs-read" for v in (0, 4318, 32902)}
     require({p.name for p in args.directory.iterdir() if p.is_dir()} == expected, "complete matrix")
     passed = 35 if args.indexed_presentation else 29 if args.resource_reads else 26 if args.uav_independent else 23
+    if args.position_channels:
+        passed += 34
+        layouts = [''.join(c for i, c in enumerate('xyzw') if mask & 1 << i) for mask in range(1, 16)] + ['zxy', 'wzxy']
+        log = args.log.read_text(encoding="utf-8")
+        for layout in layouts:
+            for special in (0, 1):
+                require(log.count(f"PASS   : NativeReplayMeshUiTests::positionChannels({layout}-special-{special})") == 1,
+                        "Missing channel presentation case")
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     records, gates, controls = [], [], 0

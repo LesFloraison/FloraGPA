@@ -33,21 +33,28 @@ void write(const QString &path, const QByteArray &bytes) {
     if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size())
         throw std::runtime_error("Cannot save native mesh test output");
 }
-NativeReplayMesh present(PostTransformGeometry geometry) {
+struct PresentationFixture {
+    Json job, result;
+    NativeArtifactBytes files;
+};
+PresentationFixture presentationFixture(PostTransformGeometry geometry) {
     geometry.report["sha256"] = sha256(geometry.bytes);
     const auto tables = postTransformTables(geometry);
     for (const auto key :
          {"vertex_references", "obj_vertices", "obj_faces", "obj_lines", "obj_points",
           "obj_unavailable_reason", "unique_vertices", "unique_identities", "conflicting_identities"})
-        geometry.report[key] = tables.at(key);
+        if (tables.contains(key))
+            geometry.report[key] = tables.at(key);
     Json job{{"schema", nativeAnalysisSchema},
              {"backend", nativeAnalysisBackend},
              {"backend_sha256", "owned-fixture"},
              {"frame_sha256", "owned-fixture"},
              {"experiment_sha256", nullptr},
              {"action", "mesh"},
-             {"options", {{"gpa_event", 1}, {"stage", "vs-inputs"}}},
+             {"options", {{"gpa_event", 1}, {"stage", geometry.report.at("requested_stage")}}},
              {"request_id", "owned-fixture"}};
+    if (geometry.report.contains("instance_selection"))
+        job["options"]["instance"] = geometry.report.at("instance_selection").at("instance");
     auto context = job;
     context.erase("request_id");
     Json result{{"schema", nativeAnalysisSchema},
@@ -62,7 +69,11 @@ NativeReplayMesh present(PostTransformGeometry geometry) {
     for (const auto &identity : geometry.identities)
         identities.push_back({identity.instance, identity.vertexIndex, identity.vertexId});
     files["identities.json"] = QByteArray::fromStdString(identities.dump());
-    return nativeReplayMesh(job, result, files);
+    return {job, result, files};
+}
+NativeReplayMesh present(PostTransformGeometry geometry) {
+    const auto fixture = presentationFixture(std::move(geometry));
+    return nativeReplayMesh(fixture.job, fixture.result, fixture.files);
 }
 } // namespace
 class NativeReplayMeshUiTests : public QObject {
@@ -247,6 +258,131 @@ class NativeReplayMeshUiTests : public QObject {
             QVERIFY(model.files.value("post_geometry.obj").contains("v 1.0 2.0 3.0\r\n"));
         if (components >= 3 && !nonfinite)
             QVERIFY(model.files.value("post_geometry.obj").contains("v -0.0 1.0 2.0\r\n"));
+    }
+    void positionChannels_data() {
+        QTest::addColumn<QByteArray>("channels");
+        QTest::addColumn<bool>("nonfinite");
+        QList<QByteArray> layouts;
+        for (unsigned mask = 1; mask < 16; ++mask) {
+            QByteArray layout;
+            for (unsigned axis = 0; axis < 4; ++axis)
+                if (mask & (1u << axis))
+                    layout.append("xyzw"[axis]);
+            layouts.push_back(layout);
+        }
+        layouts.append("zxy");
+        layouts.append("wzxy");
+        for (const auto &layout : layouts)
+            for (bool special : {false, true})
+                QTest::newRow(
+                    qPrintable(QString("%1-special-%2").arg(QString::fromLatin1(layout)).arg(special)))
+                    << layout << special;
+    }
+    void positionChannels() {
+        QFETCH(QByteArray, channels);
+        QFETCH(bool, nonfinite);
+        Json indices = Json::array();
+        for (char channel : channels)
+            indices.push_back(QByteArray("xyzw").indexOf(channel));
+        PostTransformGeometry geometry;
+        geometry.report = {{"requested_stage", "vs-inputs"},
+                           {"shader_stage", "vs"},
+                           {"event", {{"id", 1}}},
+                           {"stream", 0},
+                           {"vertices", 3},
+                           {"primitives", 1},
+                           {"vertices_per_primitive", 3},
+                           {"stride", 24},
+                           {"instance_selection", {{"instance", 0}}},
+                           {"attributes",
+                            {{{"system_value", 1},
+                              {"component_type", 3},
+                              {"components", indices},
+                              {"component_count", channels.size()},
+                              {"offset", 4},
+                              {"semantic", "SV_Position"},
+                              {"index", 0}}}}};
+        const std::array<std::array<float, 4>, 3> values{
+            {{2, 4, 6, 2},
+             {-0.f, 1, 2, 0},
+             {nonfinite ? std::numeric_limits<float>::infinity() : 3.f, 2, 1, 1}}};
+        geometry.bytes.resize(72, 0xa5);
+        for (size_t row = 0; row < 3; ++row)
+            for (size_t c = 0; c < size_t(channels.size()); ++c) {
+                const auto value = values[row][indices[c].get<size_t>()];
+                std::memcpy(geometry.bytes.data() + row * 24 + 4 + 4 * c, &value, 4);
+            }
+        auto fixture = presentationFixture(geometry);
+        fixture.files["post_geometry.obj"] = "Untrusted stale presentation";
+        auto mesh =
+            std::make_shared<NativeReplayMesh>(nativeReplayMesh(fixture.job, fixture.result, fixture.files));
+        QCOMPARE(mesh->tables.at("replay_mesh").at("position_components"), indices);
+        QCOMPARE(mesh->files.value("post_vertices.bin"),
+                 QByteArray(reinterpret_cast<const char *>(geometry.bytes.data()), geometry.bytes.size()));
+        const bool xyz = channels.contains('x') && channels.contains('y') && channels.contains('z');
+        const bool prefix = QByteArray("xyzw").startsWith(channels);
+        const bool obj = xyz || prefix;
+        QCOMPARE(mesh->files.contains("post_geometry.obj"), obj);
+        QCOMPARE(mesh->preview.empty(), !xyz || nonfinite);
+        if (xyz && !nonfinite) {
+            QCOMPARE(mesh->preview.at("positions")[0],
+                     channels.contains('w') ? Json::array({1., 2., 3.}) : Json::array({2., 4., 6.}));
+            QCOMPARE(mesh->preview.at("positions")[1], Json::array({-0., 1., 2.}));
+        }
+        ReplayMeshView view;
+        view.setNativeMode(true);
+        view.setContext("owned-channel-fixture", 1);
+        QVERIFY(view.finishNative(view.requestId(), fixture.result, mesh));
+        auto table = view.findChild<QTableView *>("replayMeshPositions")->model();
+        QCOMPARE(table->columnCount(), int(channels.size() + 1));
+        for (int c = 0; c < channels.size(); ++c) {
+            QCOMPARE(table->headerData(c + 1, Qt::Horizontal).toString(), QString(QChar(channels[c])));
+            for (int row = 0; row < 3; ++row)
+                QCOMPARE(table->data(table->index(row, c + 1)).toString(),
+                         QString::fromStdString(replayMeshFloat(values[row][indices[c].get<size_t>()])));
+        }
+        QTemporaryDir directory;
+        view.exportResult(directory.filePath("mesh.csv"));
+        view.exportResult(directory.filePath("mesh.json"));
+        QCOMPARE(read(directory.filePath("mesh.csv")), mesh->files.value("post_vertices.csv"));
+        QCOMPARE(Json::parse(read(directory.filePath("mesh.json")).toStdString())
+                     .at("presentation")
+                     .at("replay_mesh")
+                     .at("position_components"),
+                 indices);
+        if (obj) {
+            view.exportResult(directory.filePath("mesh.obj"));
+            QCOMPARE(read(directory.filePath("mesh.obj")), mesh->files.value("post_geometry.obj"));
+        } else {
+            write(directory.filePath("mesh.obj"), "Keep existing export");
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.exportResult(directory.filePath("mesh.obj")));
+            QCOMPARE(read(directory.filePath("mesh.obj")), QByteArray("Keep existing export"));
+            QVERIFY(!mesh->tables.at("replay_mesh").at("obj_unavailable_reason").is_null());
+        }
+        if (const auto root = qEnvironmentVariable("FLORA_NATIVE_MESH_CHANNEL_EVIDENCE"); !root.isEmpty()) {
+            QDir output(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag())));
+            QVERIFY(output.mkpath("."));
+            write(output.filePath("job.json"), QByteArray::fromStdString(fixture.job.dump(2)));
+            write(output.filePath("result.json"), QByteArray::fromStdString(fixture.result.dump(2)));
+            write(output.filePath("preview.json"), QByteArray::fromStdString(mesh->preview.dump(2)));
+            for (auto it = mesh->files.cbegin(); it != mesh->files.cend(); ++it)
+                write(output.filePath(it.key()), it.value());
+            write(output.filePath("presentation.json"), read(directory.filePath("mesh.json")));
+        }
+        auto empty = geometry;
+        empty.bytes.clear();
+        empty.report["vertices"] = 0;
+        empty.report["primitives"] = 0;
+        const auto emptyFixture = presentationFixture(empty);
+        const auto emptyMesh = nativeReplayMesh(emptyFixture.job, emptyFixture.result, emptyFixture.files);
+        QCOMPARE(emptyMesh.preview.empty(), !xyz);
+        for (const auto &invalid :
+             {Json::array({0, 0}), Json::array({0, 4}), Json::array({0, -1}), Json::array({0, 1.5})}) {
+            auto malformed = geometry;
+            malformed.report["attributes"][0]["components"] = invalid;
+            malformed.report["attributes"][0]["component_count"] = invalid.size();
+            QVERIFY_THROWS_EXCEPTION(std::exception, present(malformed));
+        }
     }
     void pipeline() {
         try {

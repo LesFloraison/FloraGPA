@@ -43,7 +43,8 @@ class ReplayMeshTableModel final : public QAbstractTableModel {
         if (role != Qt::DisplayRole || orientation != Qt::Horizontal || section < 0 ||
             section >= columnCount())
             return {};
-        return section ? QString(QChar("xyzw"[section - 1])) : QString("Vertex");
+        return section ? QString(QChar("xyzw"[mesh_ ? mesh_->componentChannels[section - 1] : section - 1]))
+                       : QString("Vertex");
     }
     QVariant data(const QModelIndex &index, int role) const override {
         if (!index.isValid() || !mesh_ || index.row() >= rowCount() || index.column() >= columnCount() ||
@@ -246,7 +247,7 @@ bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
             .arg(meshData->faces.size()));
     summary_->setToolTip(
         preview.isEmpty()
-            ? "Preview requires three finite position components. Raw values and exports are preserved."
+            ? "Preview requires finite X, Y and Z components. Raw values and CSV/JSON exports are preserved."
             : QString());
     if (!details_->isHidden())
         details_->setPlainText(QString::fromStdString(result_.dump(2)));
@@ -325,6 +326,8 @@ void ReplayMeshView::exportResult(const QString &path) const {
     if (result_.is_null())
         throw std::runtime_error("No mesh to export");
     const auto suffix = QFileInfo(path).suffix().toLower();
+    if (native_ && suffix == "obj" && !files_.contains("post_geometry.obj"))
+        throw std::runtime_error("OBJ requires X, Y and Z for sparse position outputs; export CSV or JSON");
     auto report = result_;
     if (native_ && suffix != "obj" && suffix != "csv")
         report["presentation"] = native_->tables;

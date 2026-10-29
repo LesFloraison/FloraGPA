@@ -101,10 +101,11 @@ ReplayMesh ReplayMesh::decode(const nlohmann::json &m, std::span<const uint8_t> 
     return result;
 }
 std::string ReplayMesh::csv() const {
+    componentOffsets();
     std::string out = "vertex";
     for (uint32_t c = 0; c < components; ++c) {
         out += ',';
-        out += "xyzw"[c];
+        out += "xyzw"[componentChannels[c]];
     }
     out += "\r\n";
     for (size_t i = 0; i < positions.size(); ++i) {
@@ -116,14 +117,17 @@ std::string ReplayMesh::csv() const {
     return out;
 }
 std::string ReplayMesh::obj() const {
+    const auto offsets = componentOffsets();
+    if (!canExportObj())
+        throw std::runtime_error("OBJ requires X, Y and Z for sparse position outputs; export CSV or JSON");
     std::string out = "# Post-shader positions. Perspective divide applied when w is available.\r\n";
     for (const auto &p : positions) {
-        const auto w = components > 3 && p[3] != 0 ? p[3] : 1;
+        const auto w = offsets[3] >= 0 && p[offsets[3]] != 0 ? p[offsets[3]] : 1;
         out += "v ";
         for (uint32_t c = 0; c < (std::min)(components, 3U); ++c) {
             if (c)
                 out += ' ';
-            out += replayMeshFloat(p[c] / w);
+            out += replayMeshFloat(p[offsets[c]] / w);
         }
         out += "\r\n";
     }
@@ -131,5 +135,41 @@ std::string ReplayMesh::obj() const {
         out += "f " + std::to_string(f[0] + 1) + ' ' + std::to_string(f[1] + 1) + ' ' +
                std::to_string(f[2] + 1) + "\r\n";
     return out;
+}
+std::array<int, 4> ReplayMesh::componentOffsets() const {
+    if (components > 4)
+        throw std::runtime_error("Invalid position component count");
+    std::array<int, 4> offsets{-1, -1, -1, -1};
+    for (uint32_t i = 0; i < components; ++i) {
+        const auto channel = componentChannels[i];
+        if (channel > 3 || offsets[channel] >= 0)
+            throw std::runtime_error("Invalid or duplicate position channel");
+        offsets[channel] = int(i);
+    }
+    return offsets;
+}
+bool ReplayMesh::canExportObj() const {
+    const auto offsets = componentOffsets();
+    if (offsets[0] >= 0 && offsets[1] >= 0 && offsets[2] >= 0)
+        return true;
+    // Preserve existing contiguous-prefix exports, including short positions.
+    for (uint32_t i = 0; i < components; ++i)
+        if (componentChannels[i] != i)
+            return false;
+    return true;
+}
+std::optional<std::array<double, 3>>
+ReplayMesh::projectedPosition(const std::array<double, 4> &position) const {
+    const auto offsets = componentOffsets();
+    if (offsets[0] < 0 || offsets[1] < 0 || offsets[2] < 0)
+        return std::nullopt;
+    const auto w = offsets[3] >= 0 && position[offsets[3]] != 0 ? position[offsets[3]] : 1;
+    std::array<double, 3> result{};
+    for (unsigned c = 0; c < 3; ++c) {
+        result[c] = position[offsets[c]] / w;
+        if (!std::isfinite(result[c]))
+            return std::nullopt;
+    }
+    return result;
 }
 } // namespace flora

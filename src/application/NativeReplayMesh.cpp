@@ -18,21 +18,26 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
     const auto count = report.at("vertices").get<uint64_t>(), stride = report.at("stride").get<uint64_t>();
     std::optional<uint64_t> offset;
     uint32_t components = 0;
+    auto &mesh = output.positions;
     for (const auto &field : report.at("attributes"))
         if (field.at("system_value") == 1 && field.at("component_type") == 3 && !offset) {
             const auto &channels = field.at("components");
             if (channels.empty() || channels.size() > 4)
                 throw std::runtime_error("Invalid native position components");
-            for (size_t i = 0; i < channels.size(); ++i)
-                if (channels[i] != i)
-                    throw std::runtime_error("Native position output has noncontiguous components");
+            for (size_t i = 0; i < channels.size(); ++i) {
+                const auto &channel = channels[i];
+                if ((!channel.is_number_integer() && !channel.is_number_unsigned()) || channel < 0 ||
+                    channel > 3)
+                    throw std::runtime_error("Invalid native position channel");
+                mesh.componentChannels[i] = channel.get<uint32_t>();
+            }
             offset = field.at("offset").get<uint64_t>();
             components = uint32_t(channels.size());
         }
     if (!offset || *offset > stride || 4 * components > stride - *offset)
         throw std::runtime_error("Native replay mesh has no bounded float position output");
-    auto &mesh = output.positions;
     mesh.components = components;
+    mesh.componentOffsets();
     mesh.indexCount = count;
     std::vector<uint64_t> sources(count), references(count);
     std::iota(sources.begin(), sources.end(), 0);
@@ -117,11 +122,15 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
     mesh.candidateFaceCount = mesh.faces.size();
     output.preview = primitives;
     output.preview["positions"] = Json::array();
-    bool finite = components >= 3;
+    const auto axes = mesh.componentOffsets();
+    bool finite = axes[0] >= 0 && axes[1] >= 0 && axes[2] >= 0;
     for (const auto &p : mesh.positions) {
-        const auto w = p[3] == 0 ? 1 : p[3];
-        finite &= std::isfinite(p[0] / w) && std::isfinite(p[1] / w) && std::isfinite(p[2] / w);
-        output.preview["positions"].push_back({p[0] / w, p[1] / w, p[2] / w});
+        const auto projected = mesh.projectedPosition(p);
+        if (!projected) {
+            finite = false;
+            break;
+        }
+        output.preview["positions"].push_back(*projected);
     }
     if (!finite)
         output.preview = Json::object();
@@ -132,16 +141,24 @@ NativeReplayMesh nativeReplayMesh(const Json &job, const Json &result, const Nat
         {"vertex_sources", sources},
         {"reference_vertices", references},
         {"vertex_stride", stride},
-        {"index_count", mesh.indexCount}};
+        {"index_count", mesh.indexCount},
+        {"position_components",
+         std::vector<uint32_t>(mesh.componentChannels.begin(), mesh.componentChannels.begin() + components)},
+        {"obj_unavailable_reason",
+         mesh.canExportObj() ? Json(nullptr)
+                             : Json("Sparse positions lack X, Y or Z; raw components remain available")}};
     output.files["post_vertices.bin"] = std::move(compact);
     output.files["post_vertices.csv"] = QByteArray::fromStdString(mesh.csv());
-    std::string obj = mesh.obj();
-    for (const auto &line : primitives.at("lines"))
-        obj += "l " + std::to_string(line[0].get<uint64_t>()) + " " +
-               std::to_string(line[1].get<uint64_t>()) + "\r\n";
-    for (const auto &point : primitives.at("points"))
-        obj += "p " + std::to_string(point.get<uint64_t>()) + "\r\n";
-    output.files["post_geometry.obj"] = QByteArray::fromStdString(obj);
+    output.files.remove("post_geometry.obj");
+    if (mesh.canExportObj()) {
+        std::string obj = mesh.obj();
+        for (const auto &line : primitives.at("lines"))
+            obj += "l " + std::to_string(line[0].get<uint64_t>()) + " " +
+                   std::to_string(line[1].get<uint64_t>()) + "\r\n";
+        for (const auto &point : primitives.at("points"))
+            obj += "p " + std::to_string(point.get<uint64_t>()) + "\r\n";
+        output.files["post_geometry.obj"] = QByteArray::fromStdString(obj);
+    }
     checkCancellation(cancelled);
     return output;
 }
