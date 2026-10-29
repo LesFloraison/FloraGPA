@@ -8,8 +8,12 @@ candidate. It does not establish original capture invocation or fragment order.
 ## Execution and result semantics
 
 `observeNativePixelIdentity` performs a uniform completion reference, 32 bit
-predicates, a full-width equality, a full-width inequality, and a second uniform
-reference. Each pass executes a fresh complete original draw on private writable
+predicates, a full-width equality, a negative neighbor-equality control, and a
+second uniform reference in the implementation recorded here. The neighbor check
+was previously incorrectly described as a full-width inequality: version 1 checks
+only `candidate ^ 1`. The [full-complement correction](DX11_NATIVE_PIXEL_IDENTITY_COMPLEMENT.md)
+adds a version 2 inequality and stronger acceptance evidence. Each pass executes a
+fresh complete original draw on private writable
 resources, retaining original shader work, alpha, depth and coverage. The RGB
 marker words are `3f800001`, `40000001`, `40400001`. The selected private RTV is
 cleared and its blend, logic operation and color write behavior overridden through
@@ -23,7 +27,7 @@ The callback must select the same texel and sample for every pass; the history
 integration uses its existing bounded snapshot implementation.
 
 The candidate is published only after the full equality is positive, the
-inequality is zero and the repeated reference is positive. The resulting status
+neighbor equality is zero and the repeated reference is positive. The resulting status
 is `verified_conditional_replay`. This means the full-width replay witnessed
 that ID; it does not prove identical scheduling across repeated original draws.
 Frame, adapter, shaders and bound target are checked across passes. A single

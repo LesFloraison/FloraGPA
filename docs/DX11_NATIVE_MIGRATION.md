@@ -1489,3 +1489,17 @@ validation covers ninety new selections, three original controls and 720 rejecte
 corruptions. See [depth completion evidence](research/DX11_NATIVE_DEPTH_COMPLETION.md)
 for limits and retained failures. Original fragment identity/order, public history
 and debugger parity, RenderDoc deletion and standalone release remain incomplete.
+
+### Full-complement identity verification
+
+The private pixel identity negative control now tests all IDs unequal to the
+candidate with a DXBC integer inequality. Its previous `candidate ^ 1` comparison
+checked only one neighbor and was overstated as full inequality in the research
+record. Version 2 and an explicit acceptance gate distinguish the corrected result
+from historical evidence. Thirty owned fixtures and nine real capture selections
+pass, and a false candidate separated by multiple bits is rejected on every
+adapter. Existing equality shader bytes remain unchanged.
+
+See the [correction and evidence](research/DX11_NATIVE_PIXEL_IDENTITY_COMPLEMENT.md).
+This strengthens conditional identity observations; it does not close original
+instance/fragment attribution or the remaining migration and release gates.
