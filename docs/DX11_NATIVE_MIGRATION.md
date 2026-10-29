@@ -1603,3 +1603,12 @@ six-suite run records 1,682 passes, 12 failures and no skips. The strict new
 verifier remains failing and rejects 687 corrupted reports. See
 `research/DX11_NATIVE_NULL_FEEDBACK.md`; this does not close full debugger parity
 or the standalone removal/release gates.
+
+Native Replay Mesh presentation now preserves declared semantic position channels
+through tables, CSV and JSON, and maps complete reordered coordinates for preview
+and OBJ. Sparse missing coordinates remain unknown; unavailable OBJ exports do
+not overwrite files. The owned 34-case matrix rejects 204 corruptions; the
+existing GPU matrix retains 15 successes and three explicit dependency gates.
+Qt regressions record 118 passes, zero failures and three unchanged missing-fixture
+skips. See `research/DX11_NATIVE_MESH_POSITION_CHANNELS.md`. Sparse GPU signature
+qualification, full P3 parity and default cutover remain open.

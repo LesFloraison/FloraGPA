@@ -1,0 +1,3041 @@
+{
+  "schema": 1,
+  "implementation_commit": "96375148116485f42a5bb5fd399a586d29fe22a6",
+  "status": "position_presentation_verified_full_mesh_parity_open",
+  "backend": "dx11-native/8",
+  "qt_suites": {
+    "NativeReplayMeshUi": {
+      "passed": 69,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/mesh-channels-release-NativeReplayMeshUi.txt"
+    },
+    "ReplayMeshUi": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 3,
+      "log": "artifacts/dx11-native/mesh-channels-release-ReplayMeshUi.txt"
+    },
+    "NativeAnalysis": {
+      "passed": 46,
+      "failed": 0,
+      "skipped": 0,
+      "log": "artifacts/dx11-native/mesh-channels-release-NativeAnalysis.txt"
+    }
+  },
+  "model_test": {
+    "exit_code": 0,
+    "log": "artifacts/dx11-native/mesh-channels-release-model.txt"
+  },
+  "channel_validation": {
+    "schema": 1,
+    "status": "verified",
+    "cases": 34,
+    "channel_layouts": 17,
+    "corruptions_rejected": 204,
+    "scope": "owned_storage_and_ui",
+    "gpu_sparse_signature_qualified": false,
+    "full_mesh_parity": false
+  },
+  "baseline_comparison": {
+    "schema": 1,
+    "status": "equal",
+    "cases": 136,
+    "differences": [],
+    "executables": {
+      "baseline": {
+        "path": "build/dx11-native-baseline/Release/FloraReplayMeshTests.exe",
+        "sha256": "aec79c608bc41d4513dc6efe881500e0c27c5d715e201af5b783605afaef1318"
+      },
+      "current": {
+        "path": "build/vs2022/Release/FloraReplayMeshTests.exe",
+        "sha256": "bc009dfe643729c2ac8a75eefd7a963f99e20203a3659f34878c6301a5c9dc0b"
+      }
+    },
+    "scope": "contiguous_model_compatibility",
+    "full_workflow_parity": false
+  },
+  "gpu_validation": {
+    "successful_cases": 15,
+    "open_gate_cases": [
+      "0-ds-uav",
+      "32902-ds-uav",
+      "4318-ds-uav"
+    ],
+    "corruption_controls": 75
+  },
+  "sources": [
+    {
+      "path": "src/app/ReplayMeshView.cpp",
+      "bytes": 15422,
+      "sha256": "250cd32cf76b69d34e36aa0c628a02917bec319f9cf8401d250e992dbe40da02"
+    },
+    {
+      "path": "src/application/NativeReplayMesh.cpp",
+      "bytes": 8043,
+      "sha256": "5f17d6b54b26a6e3cf900b0464c1e9b701370bcf3efbb8b7d779d01eed024d45"
+    },
+    {
+      "path": "src/application/ReplayMesh.cpp",
+      "bytes": 7431,
+      "sha256": "d7afc0284a6380fcf12cffaec506484a9e531bbacee1d06146ec4f5be04f974e"
+    },
+    {
+      "path": "src/application/ReplayMesh.h",
+      "bytes": 964,
+      "sha256": "000d9b8b610946ca55661ecabe2007ccd61b7b683a70608982056034ba662693"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 31978,
+      "sha256": "0db6299bb636d023556c8cb700764da7305ac0a6315ee6c05f623dd12fd9d9bf"
+    },
+    {
+      "path": "tools/validate_native_mesh_channels.py",
+      "bytes": 6108,
+      "sha256": "64faab8dfb7b1f483d06cc54764d66b37e15d88d73f744b4ad99eb52a298531c"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 10829,
+      "sha256": "4f0dc52f5e1563705bf2d0db25b52e0b445278afc7e16e099ed8942702c65e1d"
+    },
+    {
+      "path": "tools/compare_replay_mesh_baseline.py",
+      "bytes": 3530,
+      "sha256": "6e744e4ae9c2cc83d0fa50b626cec4aa3c52a35d5f733d5058c481ff4a2b79ca"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 980,
+      "sha256": "5bc8577a5060cb79892217536bcdfedc811788db7d761c2ca17bebdf5c21f293"
+    },
+    {
+      "path": "src/application/NativeMesh.cpp",
+      "bytes": 5044,
+      "sha256": "00668af289dc3c4df860a8e0f649d06c6782c3a299b8e2b016a4e4ee3078509b"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 121458,
+      "sha256": "b0166a3af723fbb84ae357cc48ebfe4d19c73e92b5dac5422c311af2c9b80bef"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "29e1c1791f392d7248123fceef36c661a145d4747fb0e76e09100136508dc14d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "186f7a768952dff9cc75ad18678ce86ab7389ca9ec258f0a83883160a5535079"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "bdb946476055c6fba4bf48ae6f64522d3dd015205d32c81632726d1068527c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "93745450e93b34b8574b6a9c03207da21ef2d4af14f5c79babf6130fda6c1c64"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "b4d765f3ec530d14688cf97652a66cc098ad7bc991b0e6530b71581ead425997"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "24aeb393f12f3c55b924b4e4b97c20eacd4ce275a6b064806077d786adee82ea"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "29e1c1791f392d7248123fceef36c661a145d4747fb0e76e09100136508dc14d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "186f7a768952dff9cc75ad18678ce86ab7389ca9ec258f0a83883160a5535079"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "bdb946476055c6fba4bf48ae6f64522d3dd015205d32c81632726d1068527c6a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "93745450e93b34b8574b6a9c03207da21ef2d4af14f5c79babf6130fda6c1c64"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "b4d765f3ec530d14688cf97652a66cc098ad7bc991b0e6530b71581ead425997"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9109662e7428c1cfd60f91d64e6af3a4e6ba318cd738e1e72c8f2ba694a5ab6c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/w-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "24aeb393f12f3c55b924b4e4b97c20eacd4ce275a6b064806077d786adee82ea"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/geometry-ui.json",
+      "bytes": 443,
+      "sha256": "1deb5f56258e3b110d8ebc80a7ee6d2dad0fd3a97b117f0db7b693afa7a6e805"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/geometry.json",
+      "bytes": 747,
+      "sha256": "a9cd174a27bc8fd78621535eb029c5e3c8c239fa40d72d4b65e468e0d4ce92cb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b17a653b6aa6e740fb80a17a92c55b8b1c92ed903de4230fbbb75f3e8ae1c345"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ae6afdfc638a919e3c8e0d49048470ce2c2fb8670942ee73ade5d243e28b3a75"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "ee038b1ca2f0937a3c16d417be912c5f532d1f4c5f4bd2abdd6b37d178e631c3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/presentation.json",
+      "bytes": 2726,
+      "sha256": "9e431f7a8ea84be5fc277d7632b1e1cc38d27fda3da305c667a152766180f084"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "5d0d92721d64c6dc6fc8b383012a67a8a699b47197daba152f8e60d23b19e185"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/result.json",
+      "bytes": 1301,
+      "sha256": "17e19924a104ddff5917e03043a7d668c0474db3ad54b6dde865e7ff34515f98"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "ae6afdfc638a919e3c8e0d49048470ce2c2fb8670942ee73ade5d243e28b3a75"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-0/vertices.csv",
+      "bytes": 155,
+      "sha256": "e0d72fe9cd66b558212913c4749bde82fda7d992d87465e1a9ca9b8cc335316f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/geometry-ui.json",
+      "bytes": 445,
+      "sha256": "8f25cca7f53b67bb48607d9cb295f5bf9c15d05d5943505016dabeeeef4356dd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/geometry.json",
+      "bytes": 747,
+      "sha256": "9672d43e5780d620d964b3bcffc48ce9befaf1390830282b990c291b7062f7f4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "cd845e74bd522f313b849cb326f2e6ddbb32f16e270c413d393ae0e5b8929013"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d1314a9a582b43364092f32788a0b62e4afa3e5d83dcab6065e139445652ea8f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "9ceb577af5317cc61c360f2d691f8046978e798f06076339deaf68de350f2ff5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/presentation.json",
+      "bytes": 2728,
+      "sha256": "be0b0cd064e599d1f3db8f5e43073f7796168d93a46b671fd1f6208a6959f1fa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/result.json",
+      "bytes": 1301,
+      "sha256": "52ff68fe813a2a935b23aa0cc563d93a24f866a6b52c531fd815575ff2bc4b52"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "d1314a9a582b43364092f32788a0b62e4afa3e5d83dcab6065e139445652ea8f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/wzxy-special-1/vertices.csv",
+      "bytes": 155,
+      "sha256": "b15a86b8d0dab9e8a383d3927189135ad5ad5e0e3cf546d5d0cec20e67b35e86"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/geometry-ui.json",
+      "bytes": 356,
+      "sha256": "b2ce89d7717334cc6525086d04465af8dd7e8e2ff50b658dc73aa73da503090c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "0c468bba97430059a2a8303032d5841fe5aeb30bfeb135a81fef672ff0af76d9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/post_geometry.obj",
+      "bytes": 105,
+      "sha256": "bd07f1bd9fc7a82414f5d4dea5bdb2b0561e865a14c6d1bd145c87e6c3b90b0d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "1dd1f8fa9915b59354027f43bb543293c36e1c3b4c92b4720ad5a967f2d55035"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/post_vertices.csv",
+      "bytes": 32,
+      "sha256": "ad069b073c11cb156ccaae1867d19bbaf1a7878688e9e93e168e19b3a15e5065"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/presentation.json",
+      "bytes": 2417,
+      "sha256": "5c3028552af54e38a3fc08de743b02f8b5411115bf4f9dd2b3640697127ced66"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "2496853eb49cf96d04b4bcba5846ccabc973930e9383ebb9f4de21a46512f355"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "1dd1f8fa9915b59354027f43bb543293c36e1c3b4c92b4720ad5a967f2d55035"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-0/vertices.csv",
+      "bytes": 74,
+      "sha256": "a3fe7592f5161c77fecc413deabc9e976f79ea7236ef74c5763172d4f1ff076e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/geometry-ui.json",
+      "bytes": 358,
+      "sha256": "f0c2ca745f6a1d052ca7a6c11216a5f1490e64e4bc29b4571187c8b25defc9a6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "168bbb6cbd5a949715283d554d9eb879719a5310790123fd5fe0e49a42b67c8c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/post_geometry.obj",
+      "bytes": 105,
+      "sha256": "5f06208c3dc3fc297a0059d732c9aefde6d65f9b4ad4b8c8b6405df3f2c33f34"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "f9b8fdfe3baa4709749d63b7ac2d9f676e9f649093c98d1a141bcec903ce9088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/post_vertices.csv",
+      "bytes": 32,
+      "sha256": "4912fde408deba6c2e6113fc8ae9e9c3f53bc093f4e755c49752cb309ca635f1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/presentation.json",
+      "bytes": 2419,
+      "sha256": "8c380361c8ba8009fe5bdceac3b95dc0fdf1013091a7e1f5e7acdf995cd25ee8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "8a814070c4b95fce7b138f97f8a44047029bc0190159cef576253b6d8bcac547"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "f9b8fdfe3baa4709749d63b7ac2d9f676e9f649093c98d1a141bcec903ce9088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/x-special-1/vertices.csv",
+      "bytes": 74,
+      "sha256": "8d4ec6f4b49266b1e8d44c7bac9ea64bfea87e0540db93a0e7ad80ebeb505c8d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "74f76de78e7742cb3564b3e72bf00bd4934de016ee71d70413abbd651cf5d2a2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "47ac1439eca366bfb1cca3c0bf44346dae89c8a407f86a95a8cd8a8b8010c23f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "85f127a689e583f49fb0c645431a476cd9896d7e797c060c86295290662710aa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "bf1b8fb8b6bda9a9bc1fc8b078d5668abd66873b49da005fd7aade71ab669992"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/presentation.json",
+      "bytes": 2582,
+      "sha256": "7a9e876f3ee418de1f7e2896f0b165d374cd13de7b28a88b558135fe75b5a4c2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "0805a125e6082d7308aabc40df7f04a8d03dd0e10d615e9ecdec607f07ff9789"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "85f127a689e583f49fb0c645431a476cd9896d7e797c060c86295290662710aa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "2047dacc196cbc4ce054dd8798d3c542843f6883eb7253c3e2dad1c3b7187f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "270cca0b43c8dc944aff1da9f28a2997c337927b0060d9176e86616f44de5992"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "a7adf9507699f7f480df41dfb1598ff482deb444986027ac9205ba575a7acdc7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "f138e77008ca8f850baabd81e44ab7eea1ce510abca167bbd0feff1843d76cc1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "df537f23cf93303d2277da1e61ca725ed50299d49d70e39601718b0c2af467a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/presentation.json",
+      "bytes": 2584,
+      "sha256": "1d08bff419623a4a4679d9d730c90f06e3157940ae2a3caea9001e782030fb2c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "eeb80ae495b64794277233a214d0bbc5477872c060e3f7962b6917a0ef4c5116"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "f138e77008ca8f850baabd81e44ab7eea1ce510abca167bbd0feff1843d76cc1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xw-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "bd80c612539f33ef83ec50a5a4695d2e21615a848e20fbf7b632f1d62223c2d1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "1254deed8d1755a683c6a9b508d85e3831786b1e5ea06965aa65e1e082054948"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "09552916069d160d0a99068fa4aa008572a1662af6224f7be1f27d10af367479"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/post_geometry.obj",
+      "bytes": 117,
+      "sha256": "a61b681e79cb9e2260cb6b19b05168c0d7e5bcb1137ec79efbda136d3ac1e3bd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a0bb251417f73a7a0c9373c415ba2b9f3d7fc11a923edacbcf38658612208599"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "5a4b43d4911735eb071c0ea1adcaa471536c5ce2dda19da8600e76ff3f74c769"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/presentation.json",
+      "bytes": 2520,
+      "sha256": "14524402645a02db1ffd12380b2a1484210fde956f8e19c549469bd5a1bbe92a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "347362428e0eb09eff8c606a7dfa49bead26d4c4cb6dfc24cf16881794cd3b12"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "a0bb251417f73a7a0c9373c415ba2b9f3d7fc11a923edacbcf38658612208599"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "a83e77e2d2db72203eaecdd7d328a676676fe2523ffc51f898dd8cd005138674"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "6d17aa377a910d58a2a881f82e22c45c7748864109ccdeaf5cc104f6683a6ccf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "877f86661ba626a338dcb770c0f9f92b56f25aafe83d35d7452ce60f021ec4a9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/post_geometry.obj",
+      "bytes": 117,
+      "sha256": "ea6187b0ee358f9d50664b963552db895c11be1a83ec44f235079561133702f9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ef94adb98e91837f317166bb1a155285bb33869cd102392a55e834b03732bad8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "eba752d24fd9326100a3845aaf71b9b221ad870bb04804c25920c08049080ac1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/presentation.json",
+      "bytes": 2522,
+      "sha256": "2a09afda47e8562c92769cf5b220285facc7569b7509fcdf9aaa3c4f86a69005"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "189fc8d8b59b57c3d487385f18118f30e6eed2af9ef1221ccead814bd35301dd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "ef94adb98e91837f317166bb1a155285bb33869cd102392a55e834b03732bad8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xy-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "8058225fb1c3d045b27b184c3416c9904eab598b2e841e89fa16a51f8fe62885"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "3e9cde31be48658a8a18406cd6aca551a927cc95bb9de025fef549234fa9dc03"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "f0a59f705a5c4583707b52b1cd4c669e08cff9bfd239934952665758b0470560"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "74bb7ef6dbb40c511eea1e80e1686acc7f1ae7dfe5b062b6ff14190ff27913e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "8ee9c952c7c9bf8b24001bb0ed7aabd7646547c0cb3850016233ee3840a1fc08"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/presentation.json",
+      "bytes": 2685,
+      "sha256": "52f3f89f2996475a431bff3fd36326a176fe3b0def6eac391194110bb6e0e100"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "692eb7f7bf1ec158d8a5da4eb623897c1a768e412cd6a5e00e61d18ef2f413e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "74bb7ef6dbb40c511eea1e80e1686acc7f1ae7dfe5b062b6ff14190ff27913e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "e570d342d0b438923af0552ad240bc581c1ffa72bccfe56178c66b13a8331767"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "334131757d952285812ff45930fcaca9b241f6b8c21334b4fd574b116b21bd51"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "4fc1a05d9fa2239a308208c21d91cb5ffeb51e1f2ce984d5e4a209ac6dade49b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "776dbfed4dbc3ee924767034f560be3ee8bea384bfb8e77ff7b3bd1a1f51b987"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "d3ec40623fdca8d5882298f70522912bc181b23ce604df1979e01c0f867a9b86"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/presentation.json",
+      "bytes": 2687,
+      "sha256": "1fdce9c1660a4994213eba24db0b5153a4e85dfcc852e1e0608f696ff52143ce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "67b842975a4c9cdc7703b2064a440d68f799c0844c8067b915ac0d979eb6c67a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "776dbfed4dbc3ee924767034f560be3ee8bea384bfb8e77ff7b3bd1a1f51b987"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyw-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "530e9faea6bba5e7842a2b224888e60a3b6b83abad47c03f6a53c2e651df6f90"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "68aeb81f23ea8e6137a7d3ee9bcdaa1a439e7803334a29518aff37263ae701c4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "b23b4bb418df3ed5cc4d9422e8f12c240148d15c59e7c91afdb5914d4f88c51b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b8dc406e702f1de087515c6eec7318afbd4a3070616fe703afeab50a40d82d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a267f9943240554daec5d6f2f93cdea8501f13fe40472d92cfbede98d6f7c732"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "c9a7a04b7069253da7e37e9b97c3061ce9762bb0fe4e5cf5058a8c1a2469d42b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/presentation.json",
+      "bytes": 2623,
+      "sha256": "e385d47e442e726bb3c8ab6f7089137ef86b2edafc22780fe191030db8c5d4de"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "f83031c6cc3c133e4a1597aaa8d46aca9bce948e41eae22d28e77e64d1c0cde6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "3780ac2ae8e8a3ef9a48bf0e066317c298d858fdc089ac878e91ce4c46335b67"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "a267f9943240554daec5d6f2f93cdea8501f13fe40472d92cfbede98d6f7c732"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "1951a5a8f74a49bc30df2b0c44efef743e1cf6737cd43731cace38bfb8558aef"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "b5b92cc518f5a0708fa04b71006ef853598dcae78daa97b4d0db229878360843"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "21eb3d8adaed3fac4c33c1bcc6a72e8a59d12106ad3f92b4153cd9eaf7c1f154"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "8a50f10ae1a6c8cc87061dd1016473d9b46e0d454aff4287ee50f1af38dad320"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebdb76a4b9f72997ca8a8dea95017f8b0b7bab306f871bf99c1e10031364e13"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "e98b0a1ff8bbff0dc82bb6d6bb2212d9ce4c491c53cea8f5c58ac97ea501588c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/presentation.json",
+      "bytes": 2625,
+      "sha256": "ea55587c2675d250fe77892f6ab8eb39102b9e90f353a31e29b57674d21942c0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "d51046fbd28516c48c51d84e90df2edc57c079dd49e7772b50e51ef1085529d8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebdb76a4b9f72997ca8a8dea95017f8b0b7bab306f871bf99c1e10031364e13"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyz-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "57a5ff4f807e194e336b8db209644ba7885336fbcfe12026ec94c81d05ab4a20"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/geometry-ui.json",
+      "bytes": 472,
+      "sha256": "cc1458a98fe33958ec203080eeb52d970de871ae7e74ddf997787c63a5e5fc62"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/geometry.json",
+      "bytes": 776,
+      "sha256": "02c66f5d7e2e883b3094bd82606f38a19a604fdeff45820963551cab7c324da9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b17a653b6aa6e740fb80a17a92c55b8b1c92ed903de4230fbbb75f3e8ae1c345"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "ed5fffd6e2b7e0a20fe1307c4c8a21afff3c22c6f956c33d3dfeec26b6863217"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "a5adf9f6114b41fd0420609520d7a5c3a4ba300ee77f77bac1f56992e47968f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/presentation.json",
+      "bytes": 2784,
+      "sha256": "e757a3071685c131d1ff8e936e308efb53c0b0b0fbdde8db1fa58b0321abcfd3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "5d0d92721d64c6dc6fc8b383012a67a8a699b47197daba152f8e60d23b19e185"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/result.json",
+      "bytes": 1330,
+      "sha256": "ef40d53353f899eca2e51e890d0292853fcb21f05fa31c26ee1ab3c929b37c24"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "ed5fffd6e2b7e0a20fe1307c4c8a21afff3c22c6f956c33d3dfeec26b6863217"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-0/vertices.csv",
+      "bytes": 155,
+      "sha256": "6e64540df8885c86e7331abe1eadb5471877773f7d2e79adea131091caa3861f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/geometry-ui.json",
+      "bytes": 474,
+      "sha256": "663d211f725f883fe9dbd762558a29191248577a4ca0df53b5871ee4f269aca8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/geometry.json",
+      "bytes": 776,
+      "sha256": "f26edc6fa719c303cd5a64e9093ce489e5c0f299c585581d689fc79adf2afb9e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "cd845e74bd522f313b849cb326f2e6ddbb32f16e270c413d393ae0e5b8929013"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "2d03fa998c4051e7330727010e0c67accf1237bf203c09911df7c8eddb2b1aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/post_vertices.csv",
+      "bytes": 74,
+      "sha256": "c894c3c5ccab6f3829f389a51809b911f22218daf4f6a44078852fe67bba0f79"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/presentation.json",
+      "bytes": 2786,
+      "sha256": "4e17aab50dde5e93930d690a778ac91af1105663ab8e37bd91685edb83418026"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/result.json",
+      "bytes": 1330,
+      "sha256": "cb6c46df6ef16c6b032c8622a9921b2752da195562e7e42055ad76b6dfe963cb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "2d03fa998c4051e7330727010e0c67accf1237bf203c09911df7c8eddb2b1aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xyzw-special-1/vertices.csv",
+      "bytes": 155,
+      "sha256": "593a1adcd1ca9c182fa3af2d6322b6cd2acbd598f941a713739dc0535e9c360d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/geometry-ui.json",
+      "bytes": 385,
+      "sha256": "7266fe7dad6b23ff41c832459798f1c51816c254fd0188dd5bc1c082ebc2fb08"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "fb8b7f26e9379167a0372205ee0e12fd805a40072b5a8d6f10bb8423d10fa05d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "e941977e540afb5b4f279fe292ecf0592acbc5181dab3c5e1452eacb21ffca58"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "fe7c8f3a95a390f3b615b0b57931283eac165f4e506766c5abfcddff7bad2045"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/presentation.json",
+      "bytes": 2582,
+      "sha256": "7e83916bb5b43c63e9813d0c9df983f32d9d78766a8fc0813b5d2141a7c18fc6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "70b63e51514eecf77ccec714f8af103eced59fb8a9d0b92df036143236645425"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "e941977e540afb5b4f279fe292ecf0592acbc5181dab3c5e1452eacb21ffca58"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-0/vertices.csv",
+      "bytes": 101,
+      "sha256": "b6e6b45f6328ce9cadce05f6300528e2c7ef4a55937208601a4c71b37494f4c8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/geometry-ui.json",
+      "bytes": 387,
+      "sha256": "fbaa8663cc6925b212eb90f4ab62299c75ebffe2804e027dc488f2a381ac70e0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "b2abe4ab6d67c11723b08ff2098f149293e7df60bb94689cafd0950f312400eb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "a5a13d4151e378f0e971e5022b91bfbd420e89a742a2ad9b33048819ac50d199"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/post_vertices.csv",
+      "bytes": 46,
+      "sha256": "60b02e9ab72dd39e607e0861b83b62173eb4ac6551adf5b813399fc19886e1be"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/presentation.json",
+      "bytes": 2584,
+      "sha256": "eb384794bd096c2595aba99bf35afd2964c50d0ea7fc092b9953d4a082c9eca3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "4aebc77adde5613919654489b58e050ba9755d3ef6353eff8163583d03b03b47"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "a5a13d4151e378f0e971e5022b91bfbd420e89a742a2ad9b33048819ac50d199"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xz-special-1/vertices.csv",
+      "bytes": 101,
+      "sha256": "164a791ba164ede5c584ad2281a2f41368736ffa83ec36600059a5a2f174d0d2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "6d621cd30c999b712eb656e6628a9bc4f0bfec016977c354e93849db1dad6474"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "366a7ff4d1362f4a735642f28c3952bb5e65c55115d3b072c61569b9816d7408"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4fe7134b4c01f6b0f0947f5848c0e713038eac815b15445dbed15bae937d8838"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "b1c47e5d4fe80b8a16fcdb19fdb4e572a3e888f675cfa79a6ff20a5951335712"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/presentation.json",
+      "bytes": 2685,
+      "sha256": "651f1106882e77682ea2762dbde8f1b4c9f8c558752b8af7ec65721f6d3fcd4f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "23ab784cf08401b4918a3275cd13477950743c7d8f94020cd9c594fc979321f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "4fe7134b4c01f6b0f0947f5848c0e713038eac815b15445dbed15bae937d8838"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "466eac73bf8c6da31ff29617b5d042b4eb1f4dd377b4ca76f3c1e96632ecbcbb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "116e1baf0560f81a9d4f5fc443c301156d1c4c21badeb7231617605a58086924"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "a20abdf9dc15c78bb212264b6bc99893e2c36ed7dca50f453fcfed9e9328d22f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "0f71ec0d39389465c3e2e0cb0f9c8983178f77dda3ca40ac57111ee055b0d847"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "ee49193a5eed943806c64c6aece67201417820daa6e4b0577deb55ed15d4e6ad"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/presentation.json",
+      "bytes": 2687,
+      "sha256": "f5e19212c03562c66236590aa49c3b356150140f5616cdbaf690320aa073364f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "1d9a49bbacdccce03871f537f3e45c629e24d3df35ca1bc0643e3d20768f7f05"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "0f71ec0d39389465c3e2e0cb0f9c8983178f77dda3ca40ac57111ee055b0d847"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/xzw-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "f97cdc2ad6054ecb23793fe79cfa7b80be412e7d87ec213cfa55b8f767c04d13"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "f2708e6156344cf74978da7f884449ad53a4dddd78e107b648cfcc618213e5a1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "2b5532a87ad6ed90c0512b5918c21cea18e912f0a2b46b174a1f05c341f816e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "f39fa4d69a16b8eb1c26b010af00fe2f963f46bf5860a7293b8e846cc4533c89"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "5dc3c07aef254858e4c11c518025eb9045bcd03ebfb1a5135f1e8e5c4a752126"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "81fa7a5135044d63c32db65b0d8a43027598a5d9422843a3bc867029b0383233"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "c3f6a3a12bdb698455ac7a03b200e9dd928bb80ae3660308d8df9e039fd27d18"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "f2708e6156344cf74978da7f884449ad53a4dddd78e107b648cfcc618213e5a1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "2b5532a87ad6ed90c0512b5918c21cea18e912f0a2b46b174a1f05c341f816e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "f39fa4d69a16b8eb1c26b010af00fe2f963f46bf5860a7293b8e846cc4533c89"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "5dc3c07aef254858e4c11c518025eb9045bcd03ebfb1a5135f1e8e5c4a752126"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "81fa7a5135044d63c32db65b0d8a43027598a5d9422843a3bc867029b0383233"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "7a49acfdc3b8321188f08800ba12c460607263f0e5f08d6648cb5fa56c807578"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/y-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "c3f6a3a12bdb698455ac7a03b200e9dd928bb80ae3660308d8df9e039fd27d18"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "c1a2ce70624d39756ed38d563c6bcd5e8675fda420a0a30ef9b5113be19a2248"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "12d13d2665a830fecc32e622cc74c301feab715da07782afe1fa88aa9061dc1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "87cd15f5ad4e9f51712e73166b447a8fe3b0b2de540e64c38bc22cabf60f1eaf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "99dfbad685a34c62e4fb383f6e102e379b4d39834930313121d73e0a3b7a93a5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "4d78e67636538b834beb6c8ad2951b0d136f5ade23b1f8f28b3e50ee03a6179d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "681d7ba80816abfe8717fffc609ab2333bc28524c38ccaa164d7b88a4bba0b5d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "c1a2ce70624d39756ed38d563c6bcd5e8675fda420a0a30ef9b5113be19a2248"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "12d13d2665a830fecc32e622cc74c301feab715da07782afe1fa88aa9061dc1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "87cd15f5ad4e9f51712e73166b447a8fe3b0b2de540e64c38bc22cabf60f1eaf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "99dfbad685a34c62e4fb383f6e102e379b4d39834930313121d73e0a3b7a93a5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "4d78e67636538b834beb6c8ad2951b0d136f5ade23b1f8f28b3e50ee03a6179d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "d7df489727aa76df3c89ade6bd084088911160f71655ef92a9dd1265d822662e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yw-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "681d7ba80816abfe8717fffc609ab2333bc28524c38ccaa164d7b88a4bba0b5d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "2c36ad927e5fe5c017f4d97b65879ba631a425e7ac0cad4cffb6631b55ee5ba0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "e7cd2939eebe7e5d1d7cba6fcbde7896bf5b71f098ef008a9f6c11cb64eab396"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "77a563f4d600ffa9de0aa5b1e3ec8424d910032346989848f3b8e2035bbbfbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "9796572a939a050ddf6d2f4790a2b2d2f58ec874ff487a4fcd834fc9a658a7fc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "00679740899625ec7358de889fb5365cd0f54a0d1274db49d984248326c8a4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "6e727fad4053296616be983120731a9f1a9f8a6124fa4c5feac365f4fb80be4f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "2c36ad927e5fe5c017f4d97b65879ba631a425e7ac0cad4cffb6631b55ee5ba0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "e7cd2939eebe7e5d1d7cba6fcbde7896bf5b71f098ef008a9f6c11cb64eab396"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "77a563f4d600ffa9de0aa5b1e3ec8424d910032346989848f3b8e2035bbbfbf1"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "9796572a939a050ddf6d2f4790a2b2d2f58ec874ff487a4fcd834fc9a658a7fc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "00679740899625ec7358de889fb5365cd0f54a0d1274db49d984248326c8a4b4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "4bbccbf2fcd9c7aab18ef81e96893cd599f513a58f09095d6b783fc7b6a3853e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yz-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "6e727fad4053296616be983120731a9f1a9f8a6124fa4c5feac365f4fb80be4f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/geometry-ui.json",
+      "bytes": 413,
+      "sha256": "dd01035c101c2f7687fe2b9d1291884664aa744eb76a5da77ca0bb13702a7c94"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "9900ea87a3d500d22bb03c0c8c9f24e0c99479db0267783a64d33ddc54ff59ed"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/post_vertices.csv",
+      "bytes": 59,
+      "sha256": "30a20d232ea52298c2394053f7a6fda4055a16779fb3319a8ee5c1bd42cc5c89"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/presentation.json",
+      "bytes": 2684,
+      "sha256": "849bef05de699864e2448e3b805e3e77e2bf812d871a7825009917d18f4693f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "ddffceed3c0d989d08acd944edfeb879b373c1fc266b86c2592101d12bbb8525"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-0/vertices.csv",
+      "bytes": 127,
+      "sha256": "e2ec0787bf38ce5ac6dba9af3264b5e522e226a6a4318604702425accd89ee03"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/geometry-ui.json",
+      "bytes": 413,
+      "sha256": "dd01035c101c2f7687fe2b9d1291884664aa744eb76a5da77ca0bb13702a7c94"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "9900ea87a3d500d22bb03c0c8c9f24e0c99479db0267783a64d33ddc54ff59ed"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/post_vertices.csv",
+      "bytes": 59,
+      "sha256": "30a20d232ea52298c2394053f7a6fda4055a16779fb3319a8ee5c1bd42cc5c89"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/presentation.json",
+      "bytes": 2684,
+      "sha256": "849bef05de699864e2448e3b805e3e77e2bf812d871a7825009917d18f4693f8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "ddffceed3c0d989d08acd944edfeb879b373c1fc266b86c2592101d12bbb8525"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "b715973e5031db0085353ad3fa67d00104437f5556e6eff6fde29ef55faf4cd6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/yzw-special-1/vertices.csv",
+      "bytes": 127,
+      "sha256": "e2ec0787bf38ce5ac6dba9af3264b5e522e226a6a4318604702425accd89ee03"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "dd8404d302b07b36c734ee1be084ecf77892005ad4e607206c9d6ca889eb9b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/geometry.json",
+      "bytes": 714,
+      "sha256": "ec939b7a229505bfbe923fe88b0c34335384bba15dfece8be694cba688b11be2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "95808e2b25562e93b33f7a5d29df30ec355379c8410b0b12d00ab0cb852d9354"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/presentation.json",
+      "bytes": 2478,
+      "sha256": "7b7b12343bd702cc9987f90b40b2ca6547b3e6f10658849809a3440409ca0db0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/result.json",
+      "bytes": 1262,
+      "sha256": "fb3e5eac23f728d3a4ad5220cfde832274d59e809ebb9cc35f35aa80d5fc9e98"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-0/vertices.csv",
+      "bytes": 73,
+      "sha256": "ca5e33dfe60785c4847fc9f2e7c3c143d6685e97305f79a25be14a7fed4fb5af"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/geometry-ui.json",
+      "bytes": 355,
+      "sha256": "dd8404d302b07b36c734ee1be084ecf77892005ad4e607206c9d6ca889eb9b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/geometry.json",
+      "bytes": 714,
+      "sha256": "ec939b7a229505bfbe923fe88b0c34335384bba15dfece8be694cba688b11be2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/post_vertices.csv",
+      "bytes": 31,
+      "sha256": "95808e2b25562e93b33f7a5d29df30ec355379c8410b0b12d00ab0cb852d9354"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/presentation.json",
+      "bytes": 2478,
+      "sha256": "7b7b12343bd702cc9987f90b40b2ca6547b3e6f10658849809a3440409ca0db0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/result.json",
+      "bytes": 1262,
+      "sha256": "fb3e5eac23f728d3a4ad5220cfde832274d59e809ebb9cc35f35aa80d5fc9e98"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "9ebc1f0946bf005a9a01323d5e7ac75d1b847bb8d789402725906796e6e8fee4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/z-special-1/vertices.csv",
+      "bytes": 73,
+      "sha256": "ca5e33dfe60785c4847fc9f2e7c3c143d6685e97305f79a25be14a7fed4fb5af"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "a81868e1bf638468c0a3d6eb359cf1ea8bec16f343267df481d097ffb3d9b350"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/geometry.json",
+      "bytes": 725,
+      "sha256": "015105ccbdf767a8618468b41d7ead9d0c96314bfc56a2996795daa9e52c6e5a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "da9bc2180dd767592708cbc5201f567ffa3b8c252bf35987917f9e5a4a3ef739"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/presentation.json",
+      "bytes": 2581,
+      "sha256": "3a82ff5fbb3c55b48c35c6f84b25dbb83dc05bb853465d1ddf40e8fd5ce1b6fd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/result.json",
+      "bytes": 1275,
+      "sha256": "055b6d29292e212db4d719dd7e83da43c9b967f845691cadd27f366485045c70"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-0/vertices.csv",
+      "bytes": 100,
+      "sha256": "fa8bf7b30476ff192d480f416b0f30f448de52975e96c5ea858ceb0c98211730"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/geometry-ui.json",
+      "bytes": 384,
+      "sha256": "a81868e1bf638468c0a3d6eb359cf1ea8bec16f343267df481d097ffb3d9b350"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/geometry.json",
+      "bytes": 725,
+      "sha256": "015105ccbdf767a8618468b41d7ead9d0c96314bfc56a2996795daa9e52c6e5a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/post_vertices.csv",
+      "bytes": 45,
+      "sha256": "da9bc2180dd767592708cbc5201f567ffa3b8c252bf35987917f9e5a4a3ef739"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/presentation.json",
+      "bytes": 2581,
+      "sha256": "3a82ff5fbb3c55b48c35c6f84b25dbb83dc05bb853465d1ddf40e8fd5ce1b6fd"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/result.json",
+      "bytes": 1275,
+      "sha256": "055b6d29292e212db4d719dd7e83da43c9b967f845691cadd27f366485045c70"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "31b5115f6755ca886e9b78e713178f196dddeffb19551dbfe15cea7e4d35479d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zw-special-1/vertices.csv",
+      "bytes": 100,
+      "sha256": "fa8bf7b30476ff192d480f416b0f30f448de52975e96c5ea858ceb0c98211730"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/geometry-ui.json",
+      "bytes": 414,
+      "sha256": "777e5dd791e3a5dbf30e351620da32ada3fadf1933c08fbdb61d6901a6e49660"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/geometry.json",
+      "bytes": 736,
+      "sha256": "b835dc781dd9751a26c9e8dee76b5845e2dfea3b78ef052966870661e1557792"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "b8dc406e702f1de087515c6eec7318afbd4a3070616fe703afeab50a40d82d5a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "6d3c4c6f350db1cd82ab92fdb99a30b8794ad8a71be0e675a58f8ddfb2493c35"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "217958f1796d2193fc641eec9c5127862b42fb6d7fed38ef526eedf70b7461eb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/presentation.json",
+      "bytes": 2623,
+      "sha256": "71c337ef4b2ada4f0c17c5a04029ed9cfdece30240c9c358cdd6b0ecc28ef078"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/preview.json",
+      "bytes": 246,
+      "sha256": "f83031c6cc3c133e4a1597aaa8d46aca9bce948e41eae22d28e77e64d1c0cde6"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/result.json",
+      "bytes": 1288,
+      "sha256": "8ba2b28abfc4bd029f368b9aff44c20ccb21854e02ab2f53a99cd34071e8b7b5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/vertices.bin",
+      "bytes": 72,
+      "sha256": "6d3c4c6f350db1cd82ab92fdb99a30b8794ad8a71be0e675a58f8ddfb2493c35"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-0/vertices.csv",
+      "bytes": 128,
+      "sha256": "79270c642e5d61c8bf495899c2903179bd550d7b984deacbb0ff2635e24bfc94"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/geometry-ui.json",
+      "bytes": 416,
+      "sha256": "2cd338bbf9b20f06f5c7a6bde08d4a7fcd091cebd41a3e9f4b21ab14f4300353"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/geometry.json",
+      "bytes": 736,
+      "sha256": "5d683a763fd55da36906b75fc98ad7768c0683782d797ee2f66b976422de117c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/identities.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/job.json",
+      "bytes": 285,
+      "sha256": "bbe64e3f8345170d0e5d0b72adcb7c226c8c133ef0e2c5a8469ea6e21ba60088"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/post_geometry.obj",
+      "bytes": 129,
+      "sha256": "8a50f10ae1a6c8cc87061dd1016473d9b46e0d454aff4287ee50f1af38dad320"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/post_vertices.bin",
+      "bytes": 72,
+      "sha256": "fd797bcf4ebd71ecb3805e7f34d26a65e29c1af453bbb9b0ea493be11f578ce9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/post_vertices.csv",
+      "bytes": 60,
+      "sha256": "521ebc0440e18975cd6964608a257b71f7a2eccd95290a554c461925d5cf0db0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/presentation.json",
+      "bytes": 2625,
+      "sha256": "e24c653255edc9fe8bea332d393386f7b7da8b7952eea7cd5f82fcd6090ebca9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/preview.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/result.json",
+      "bytes": 1288,
+      "sha256": "e16f8d25efe4882d27bb472bbef1254d592ddf9ef6f42b8ca71326c375a1f380"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/vertices.bin",
+      "bytes": 72,
+      "sha256": "fd797bcf4ebd71ecb3805e7f34d26a65e29c1af453bbb9b0ea493be11f578ce9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release/zxy-special-1/vertices.csv",
+      "bytes": 128,
+      "sha256": "8bca77f0d769d99628dcc1a58c8a4dda5c03ad8640f7c2a6fb0e138e6281f4e5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-baseline/baseline.json",
+      "bytes": 110080,
+      "sha256": "b044e12a6fe3c94a63a6057738afa08abcf77c92bfa7a46a917a814ebb007363"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-baseline/current.json",
+      "bytes": 110080,
+      "sha256": "b044e12a6fe3c94a63a6057738afa08abcf77c92bfa7a46a917a814ebb007363"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-baseline/jobs.json",
+      "bytes": 90663,
+      "sha256": "81a0ced1046ded8213712869a292fc9232a6acdbdcbca64ea4ff1ac5de79657e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-baseline/validation.json",
+      "bytes": 550,
+      "sha256": "3feab41cc02e24b85f7216fec9bff56fed0e957feaf2b0d22bdf9546ed886d18"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/BaselineReplayMeshTests.exe",
+      "bytes": 298496,
+      "sha256": "aec79c608bc41d4513dc6efe881500e0c27c5d715e201af5b783605afaef1318"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraGPA.Cli.exe",
+      "bytes": 6148608,
+      "sha256": "a99ebd2c87248bc7aabb7c480067abbe80bebca762a2c04c5757afe0accfd1d4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraGPA.exe",
+      "bytes": 5147136,
+      "sha256": "030370f2457f5fb6643da9b292dde47d44055087a7b50f906ccc03cb86fc1dd4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraGPA.Worker.exe",
+      "bytes": 6148608,
+      "sha256": "8b871d21bc8f4db84d5c10033d8e48713d39fc26e4fb4d7618f1396267979ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraNativeAnalysisTests.exe",
+      "bytes": 1517568,
+      "sha256": "5542fc246121383b531e3d528151cc007974523829b03e569c61fc59e4b4b842"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraNativeReplayMeshUiTests.exe",
+      "bytes": 5275136,
+      "sha256": "642a62b9d2adf40e5ed165640eea9fbe44df04c6caa5610f9e1e9165a34b7943"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraReplayMeshTests.exe",
+      "bytes": 299008,
+      "sha256": "bc009dfe643729c2ac8a75eefd7a963f99e20203a3659f34878c6301a5c9dc0b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-binaries/FloraReplayMeshUiTests.exe",
+      "bytes": 5171200,
+      "sha256": "3568b5b03bf107e27c54b6e7e676772110e998275c7fb454f2b31eeb5ffb1c50"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-build.log",
+      "bytes": 9480,
+      "sha256": "d3c162394df99d2a70d7eb35ae9daed0c6c8c59ccf028e0f64bea1c6d0fd9d83"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-exits.json",
+      "bytes": 255,
+      "sha256": "24451c98ad9353af72125138e0586b93dafadb38b4e17b7510a6afdedc3abdbb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/job.json",
+      "bytes": 624,
+      "sha256": "768ff75e650011b7b5cf2c33e7423e3162bbbd6bc5addee71de6057c85a72523"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/result.json",
+      "bytes": 7897,
+      "sha256": "567079a5b97f0d184e432942dc0502ed9d761d6e70b1fff0be825fe83d1bc210"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav/job.json",
+      "bytes": 624,
+      "sha256": "544dc0f08ebe92113a7c1772a5545a24fc0cd3a36a4c3ea690c6a67c7cdc2cf0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "b6e3404baee526d47b36988bab3f6b06e44f451a0c96fc76bf850cf72b679646"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/job.json",
+      "bytes": 624,
+      "sha256": "92bfc78e33c62f4f41e347f169b35cb2acb40ed670e7fe64e834137b45b82576"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/result.json",
+      "bytes": 9997,
+      "sha256": "10b5160b26822ba6b7db34d3416ec3f448f89fb3a7a64a7e879022152faf96e2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/job.json",
+      "bytes": 624,
+      "sha256": "8faf9202a38a4c5bea02e388b75d969a002ebe0faad2119d88a4c80044340b18"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/result.json",
+      "bytes": 7517,
+      "sha256": "2bb474203b6fe7d4fefa5927bea1847825bb20c3339beb792979cdb22f6f5028"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/job.json",
+      "bytes": 624,
+      "sha256": "dd8bcfff8607c6881dc8169d980d179f25277acc2482c2518ceaab27b39091c5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/result.json",
+      "bytes": 9516,
+      "sha256": "b9c7049de2e3f194cf8c3fc64b0074c69d9444dfdee52cd9984966fffb246b2c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/job.json",
+      "bytes": 629,
+      "sha256": "5509faa1a83aaa1c77d6c82fd76ce114bfc2cae422bbf5ffa96277347510144c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/result.json",
+      "bytes": 9086,
+      "sha256": "b6b8253bde62f5814514e6e54a4b814078e3fc37d940599bbc6033d94d3d939c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/0-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "52abe0eb27199f4490457cd79c817c93d0175cf3755337c1c1e283847e1293fe"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "23a7ee2bd472776d9ad83a5dcff42c5929206505e04628ac938b61dd9e434f9b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "cf335c1c6e90ed98d4f0ff8f0e12c98792e7f31a791145f3367aaf554278c50d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/job.json",
+      "bytes": 631,
+      "sha256": "1b1b26cb6a16a284f78cd455b36d7d9b8c83f4a7ee8e2581a59e19e1c0e2a534"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "a50db0ad476c21d00a13e926ef57aefef54eb836546febfed06f4509df7c2bce"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "626d555c1c48660c2a8715c62f532021a072690866c3673ef801599c36edcff8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/result.json",
+      "bytes": 8313,
+      "sha256": "771b88a761d60d3129b101861739b385a0844af9ef9cf70217e4175bba059353"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "3a21fb82e2398009f3cb4f2ae3ea81a20eabbc3cdeb9c7db10cb2c8f6e785215"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "b2d1a9f498d4531d65253a6fed3778b120f513e1224423e98d9425cad8b493db"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav/job.json",
+      "bytes": 631,
+      "sha256": "3e294a0ff61ebf70263994a14a7c27dc19195436f70af5ce86dfaa8f65300f87"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "14d6dc16e7e19129abaf85715ef1aae7b04129fbe6a8f2f7c65ee9c55905c746"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "b6e3404baee526d47b36988bab3f6b06e44f451a0c96fc76bf850cf72b679646"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "722c61d3b2f685f9eb7e170de85a221700747dbc7b50411b0dfcc13ffc3ce7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/job.json",
+      "bytes": 631,
+      "sha256": "4d2f9c9ddd82925b5809fafe0e7e90d8847bc44f995269313d0ee8850d301dbc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "475f529efdcbff5c4c1c52c39f9956899b7cd9eb94dc532c3bf1840d384bb320"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "ce4235d3879d14c2b925d15fc30c2a4005aca03847ed5105d0a19f4a0d66d5a4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/result.json",
+      "bytes": 10413,
+      "sha256": "5d1fa3004be561eafc87515a85183e777200a7fce77631e5278c009ffef125cc"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "0eef61b7f6d5227d162eebb3b855ad2104cbc96bfd50facd1024463097ecee2d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "f5d15d2697a6df42c8332ba22f8d0769851e518964eb3c6e22bde83f3d7f7a06"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/job.json",
+      "bytes": 631,
+      "sha256": "5f3d295abf1d77a3ad29a1771134ecfbc099e70e0a840f9d95e980c12718050e"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/result.json",
+      "bytes": 7933,
+      "sha256": "13bef07a42b6c38a49bad08eb5be56847d2c7afc817cd84107443fb73cc75759"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/job.json",
+      "bytes": 631,
+      "sha256": "ea3b317465a4c76b60ae592f04073dd04f5c16d27c96b1b1bb8b9c9b59587381"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/result.json",
+      "bytes": 9932,
+      "sha256": "0d2dae40df6fcbe9d41319dffe39f7e541b065139c0bd62bf98e71a941046395"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/job.json",
+      "bytes": 636,
+      "sha256": "cdef9442c8999a1ec636321222f84377015acefa0a468e271abeb3a11c284061"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/result.json",
+      "bytes": 9502,
+      "sha256": "167e2485d86bc85abc288d9072f1959447bd4c02d15dc7e2b19a31a4d4b7a1f4"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/32902-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/geometry-ui.json",
+      "bytes": 579,
+      "sha256": "70c36c80d3d67f49773d3b69a555dfe6297b956a32344b31c07c1f69a06ae0c9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/geometry.json",
+      "bytes": 3195,
+      "sha256": "c4ed4d80c4bd1204c2b0a0e819abc69436afdb96906b6b5004dea161a6187e29"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/geometry.obj",
+      "bytes": 124,
+      "sha256": "b308a606cba9ecd0a97aa634b8bed20d7882b90ec3dd25ff7a0a7ea240d1e21c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/job.json",
+      "bytes": 630,
+      "sha256": "01e0853fc2c732d0b62ea3fc7d7633f55d49798d5fe6de2e306d4bc7afbe026c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/post_geometry.obj",
+      "bytes": 182,
+      "sha256": "aea58ac3b3c0a8f392690a0d389bce0cd1f8e7d62e3004deceb9581a8573b313"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/post_vertices.csv",
+      "bytes": 130,
+      "sha256": "eb162b5e8629798b1ca2adb8caae1dddb500873ca5500bc3b6af65ad05d5d9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/result.json",
+      "bytes": 8699,
+      "sha256": "3b66e181a4845147b90dd2673f358341b3162ed98181a65a7c92195fcc225441"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/vertices.bin",
+      "bytes": 96,
+      "sha256": "e0edb68b0e9f54be84aa8cd4ad83c42ee380abb1eb0c637fac3fed6a831e033b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds/vertices.csv",
+      "bytes": 223,
+      "sha256": "6328e6e88ce6fe6c0b610f685d8e6af12302b3482319eac15e45e6af66dfc1d0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav/job.json",
+      "bytes": 630,
+      "sha256": "8203037946ca348846a54179624afbb3779e6b2ba4a4fe56e3445295605a03a9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav/open-gate.json",
+      "bytes": 56,
+      "sha256": "cb4ca3ef688ce81c3d3aed793cc9f03e857fb58d35c12a4f3713ea6954d6108f"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav/worker.log",
+      "bytes": 167,
+      "sha256": "5bd18f8226e1a80e68d787c66f01e3de191aff2e45e27495cb9e19454870318d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/geometry-ui.json",
+      "bytes": 583,
+      "sha256": "f053b9bbe12dc4bc6482013a96d15226b4eebd1e657363e638a19f242ddbad85"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/geometry.json",
+      "bytes": 5171,
+      "sha256": "802e7f87812613f2357a020586a6ca8c10f437fcaaff58dea97704fae9cc9b34"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/geometry.obj",
+      "bytes": 134,
+      "sha256": "a05923bd59d8e714248121d13e3f7d53f8501d05093fb72c7057cc4e70b5fcaa"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/job.json",
+      "bytes": 630,
+      "sha256": "3cb76a809dd226a0af923f52183bb122ab7aeafb5380bf7ea0fc9d5bc1c7b087"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/post_geometry.obj",
+      "bytes": 184,
+      "sha256": "7ac1aeb4c99baacea4c74508e6cc2b063bf5254a0cd7fc0436a03b48cb16e019"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/post_vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/post_vertices.csv",
+      "bytes": 132,
+      "sha256": "88f3ce972981cd3a55468ddb45357d54c41dbfbc52bd95ba6662a4d760c8a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/result.json",
+      "bytes": 10799,
+      "sha256": "b53b4251446c6c8956ff8b8eb6a5c1cc263f18b94091d93c86cfa8b8a2b71f4b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/vertices.bin",
+      "bytes": 96,
+      "sha256": "24c2dc2d303b5be62fa5665c73213c7d7d9ece79d55039a9f90a05238b1bdacb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-ds-uav-independent/vertices.csv",
+      "bytes": 225,
+      "sha256": "df924d15f920dc3133ae8b58461122c4649deb3774484eff3b35987ae8c08ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/geometry-ui.json",
+      "bytes": 465,
+      "sha256": "1a66e7a6f2192b466c551ee6b1141fe032d33d088778f8132d269dc66593254d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/geometry.json",
+      "bytes": 2844,
+      "sha256": "9683f811f0b807d13f630ec35ed11fbd19e8dfd4231f7913e5096a44991fdd0c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/geometry.obj",
+      "bytes": 96,
+      "sha256": "3bce8266bac3fa398980ab63276dfb443bd4542070412922373b538bf917082a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/job.json",
+      "bytes": 630,
+      "sha256": "769e8f3ff0ce938a6d37137d24debd14be16d4b525a00c29fee05e1f1870ab0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/result.json",
+      "bytes": 8319,
+      "sha256": "9f15c564ab86301611cfc6036e142283215d3ed6f0386a90cec537283cc16cd0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs/vertices.csv",
+      "bytes": 158,
+      "sha256": "c21d457f75f534d22266e4b30763c73bc5cd2eb9dcd087bbf2e99bdc2183ab27"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/geometry-ui.json",
+      "bytes": 457,
+      "sha256": "1709077838695440174c0a1008d25a77d042e774507f720d2e37ea62d2d6eb0b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/geometry.json",
+      "bytes": 4709,
+      "sha256": "cb0d197cbfab9e740f1a6372cdac23aaf85111b37f9f7e1a4181b5a9686ce654"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/geometry.obj",
+      "bytes": 92,
+      "sha256": "cb258d3f1befbcaccb1e9e1d9cd2cebedefe8df697e74e40467f7b6b52bdd534"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/job.json",
+      "bytes": 630,
+      "sha256": "fc1e4dcc88d6c288d369d824d179ea581e2931fea3bd16f2c3f23c82955a103d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/post_geometry.obj",
+      "bytes": 128,
+      "sha256": "4bbe64d6f2e1bb684e10d21263907b36c1d99e79aca0a653339d99cad1ded238"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/post_vertices.csv",
+      "bytes": 73,
+      "sha256": "e9078e0ae42bdacd35aa1c64945308a38010dbaa798ecdbe58192316f4aca9f5"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/result.json",
+      "bytes": 10318,
+      "sha256": "c017597788ebeccf8df547af11ec6ed9d428cb2559c69b1304de9ebc3b3c474b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/vertices.bin",
+      "bytes": 48,
+      "sha256": "6413099c6c2395d7ec0b421a04f2bb34166268120836e5a6a031ec13a8276c0a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-gs-read/vertices.csv",
+      "bytes": 154,
+      "sha256": "e6a054aec2b69a5a92595c74a8af98cb15a07b23dcaebe529602923cd71afba2"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/geometry-ui.json",
+      "bytes": 1195,
+      "sha256": "879ed1d1357166e03599847916b16bf16c1a5d00d1e93873f90b5de9afc29c1a"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/geometry.json",
+      "bytes": 3641,
+      "sha256": "12709db47d68eb9851973309ac8f6e159c00ffd0eb65c26e0dd8f7af23e91b99"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/geometry.obj",
+      "bytes": 96,
+      "sha256": "d3dabc056e2c5506b245a355b35b43c9e9f870759b1ffb61cc35ab88297be082"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/identities.json",
+      "bytes": 90,
+      "sha256": "e1b2eaee675069ebd183f940b7937ca3fbbb12631ddff3de1f855faa17cb4cbf"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/input_references.csv",
+      "bytes": 99,
+      "sha256": "ce4f9d21a1f813bf0447559f308c0fc21f21d963b016fed29a673a0b70e987b9"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/job.json",
+      "bytes": 635,
+      "sha256": "3f3f7ac13637bb812dcb82f7570cdd7cd473cb171a7e8e2c85b88851376a7292"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/post_geometry.obj",
+      "bytes": 132,
+      "sha256": "4753d2458b5a9d6e0a789dd66439b662db90a58fde927909071fcf1743e55fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/post_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/post_vertices.csv",
+      "bytes": 77,
+      "sha256": "8e3250834bb718e0f209a2a4fbabc1c023e3a743f528fa0099c01722b3f876a7"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/references.csv",
+      "bytes": 145,
+      "sha256": "01752afd5c09743422a732c5d5c8ffa4129772c170b744a6257476cd5eaa26fb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/result.json",
+      "bytes": 9888,
+      "sha256": "b4812b1f61a29c848f48b6ad214e6f749eac956680dcd77a893088a912358c1b"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/unique_vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/unique_vertices.csv",
+      "bytes": 241,
+      "sha256": "331cd660d2a14ae00c56f0d0503063c3acc97cf2cb8f63bdde943414e8795e6d"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/vertices.bin",
+      "bytes": 48,
+      "sha256": "376bc81ae7d3c34cf06c9c9403f9b1e24451885797edcc1aea0dccc3b16aa272"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu/4318-vs/vertices.csv",
+      "bytes": 158,
+      "sha256": "16f9f166e535ce2e8e2e6c5c2424d2c3c4bb6a4bd660cf98ae27bd1dc430866c"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-gpu-validation.json",
+      "bytes": 44791,
+      "sha256": "b4c5531b008a55541888cf68099a4704e2f39736c5fb934019c08196725a9437"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-model.txt",
+      "bytes": 31,
+      "sha256": "28e9ddfdd01b13c8890fcce56cdd5464a6e7df65a5b00dfc91d589b23d770a61"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-NativeAnalysis-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-NativeAnalysis.txt",
+      "bytes": 2952,
+      "sha256": "3f0596f713ae8c719bdef733c4a99e28ed77a481edf039c35145235dab8226fb"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-NativeReplayMeshUi-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-NativeReplayMeshUi.txt",
+      "bytes": 5041,
+      "sha256": "866198d5340d048a903c85da8d1cd74ff19d5bac829da39f837bb5d3005de314"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-ReplayMeshUi-console.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-ReplayMeshUi.txt",
+      "bytes": 1297,
+      "sha256": "f3de98429e7f7c17548dc67ef8f1d5bd4bbf08e7a95e83403e12305f451e5712"
+    },
+    {
+      "path": "artifacts/dx11-native/mesh-channels-release-validation.json",
+      "bytes": 230,
+      "sha256": "889c165a9836dea6a265ce6fffccf73109af62c9f8e2afdbd57a7068d6994c93"
+    }
+  ]
+}

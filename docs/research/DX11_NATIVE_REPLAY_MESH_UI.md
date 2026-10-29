@@ -116,8 +116,10 @@ At the initial preview commit, instanced HS/DS/GS with UAV access lacked verifie
 per-instance boundaries. Subsequent independent-write support is documented in
 `DX11_NATIVE_GEOMETRY_UAV_INDEPENDENCE.md`; the original negative fixture is now
 retained as an explicit success case, with actual UAV reads retaining rejection.
-The initial three negative rows were not three supported cases. Noncontiguous position
-components are explicitly rejected by this presentation path. Full real-capture,
+The initial three negative rows were not three supported cases. At that revision,
+noncontiguous position components were rejected by the presentation path; subsequent
+support is documented in `DX11_NATIVE_MESH_POSITION_CHANNELS.md`, without claiming
+arbitrary sparse GPU signature qualification. Full real-capture,
 format, stream, deferred-context and workflow parity remains to be established.
 The artifact byte budget does not bound JSON/model overhead or total peak memory.
 
