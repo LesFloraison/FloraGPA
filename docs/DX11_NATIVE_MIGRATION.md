@@ -1593,3 +1593,13 @@ WARP/NVIDIA/Intel GPU cases compare compiler controls, constructed OR variants a
 native execution. Five regression suites pass 1,423 cases without failures or
 skips. See `research/DX11_NATIVE_FEEDBACK_AGGREGATION.md`. Actual tiled residency,
 null feedback data destinations and the full debugger/removal gates remain open.
+
+Native feedback loads and sampling now accept discarded data destinations while
+retaining mapping provenance and operand validation. Analysis identity advances
+to `dx11-native/8`. Nine buffer cases and 126 native texture cases pass independent
+checks; original null-output shader creation still fails in 12 Intel texture
+cases, with isolated fresh-device probes reporting a driver internal error. The
+six-suite run records 1,682 passes, 12 failures and no skips. The strict new
+verifier remains failing and rejects 687 corrupted reports. See
+`research/DX11_NATIVE_NULL_FEEDBACK.md`; this does not close full debugger parity
+or the standalone removal/release gates.
