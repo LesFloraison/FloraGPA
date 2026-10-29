@@ -1,4 +1,4 @@
-"""Independently replay and rewind a version-one native execution journal.
+"""Independently replay and rewind a version-one or version-two native journal.
 
 This validates serialization and state continuity, not DXBC instruction semantics
 or invocation eligibility. The companion probe report supplies storage digests
@@ -31,9 +31,15 @@ def register(value):
     return integer(value["dxbc_operand_kind"], 255), tuple(integer(v, (1 << 32) - 1) for v in value["indices"])
 
 
-def value(raw):
-    require(set(raw) == {"bits", "valid_components"} and len(raw["bits"]) == 4, "Invalid register value")
-    return tuple(integer(v, (1 << 32) - 1) for v in raw["bits"]), integer(raw["valid_components"], 15)
+def value(raw, version):
+    keys = {"bits", "valid_components"} | ({"mapping_status"} if version == 2 else set())
+    require(set(raw) == keys and len(raw["bits"]) == 4, "Invalid register value")
+    bits = tuple(integer(v, (1 << 32) - 1) for v in raw["bits"])
+    valid = integer(raw["valid_components"], 15)
+    mapping = tuple(integer(v, 3) for v in raw.get("mapping_status", [0] * 4))
+    require(len(mapping) == 4 and all(not tag or (not bits[i] and not (valid & (1 << i)))
+                                    for i, tag in enumerate(mapping)), "Invalid opaque status representation")
+    return bits, valid, mapping
 
 
 def binary(text, validity=False):
@@ -69,8 +75,9 @@ def validate(path, report, reader_report=None):
 
     def projected_state():
         register_rows = [{"lane": lane, "dxbc_operand_kind": kind, "indices": list(indices),
-                          "bits": list(bits), "valid_components": valid}
-                         for (lane, (kind, indices)), (bits, valid) in sorted(registers.items())]
+                          "bits": list(bits), "valid_components": valid,
+                          **({"mapping_status": list(mapping)} if header["version"] == 2 else {})}
+                         for (lane, (kind, indices)), (bits, valid, mapping) in sorted(registers.items())]
         spaces = {"buffer": 0, "shared": 1, "texture": 2}
         storage_rows = [{"space": space, "resource": resource, "bytes": len(data),
                          "sha256": digest(data), "validity_sha256": digest(valid)}
@@ -96,8 +103,8 @@ def validate(path, report, reader_report=None):
             return items if forward else reversed(items)
         for change in ordered(row["register_changes"]):
             key = row["lane"], register(change["register"])
-            prior, following = value(change[before]), value(change[after])
-            require(registers.get(key, ((0, 0, 0, 0), 0)) == prior, "Register delta chain mismatch")
+            prior, following = value(change[before], header["version"]), value(change[after], header["version"])
+            require(registers.get(key, ((0, 0, 0, 0), 0, (0, 0, 0, 0))) == prior, "Register delta chain mismatch")
             registers[key] = following
             changed_registers.add(key)
         for change in ordered(row["counter_changes"]):
@@ -133,7 +140,7 @@ def validate(path, report, reader_report=None):
             if header is None:
                 require(kind == "header", "Missing trace header")
                 header = row
-                require(row["format"] == "flora.dxbc-execution-trace" and row["version"] == 1, "Unsupported trace schema")
+                require(row["format"] == "flora.dxbc-execution-trace" and row["version"] in (1, 2), "Unsupported trace schema")
                 pixel = row["stage"] == "ps"
                 require((pixel and row["scope"] == "one_pixel_quad") or
                         (row["stage"] == "cs" and row["scope"] == "one_cooperative_group"), "Unexpected trace scope")
@@ -210,7 +217,7 @@ def validate(path, report, reader_report=None):
                 elif kind == "register":
                     key = integer(row["lane"], count - 1), register(row["register"])
                     require(key not in registers, "Duplicate initial register")
-                    registers[key] = value(row["value"])
+                    registers[key] = value(row["value"], header["version"])
                 elif kind == "counter":
                     key = integer(row["view"])
                     require(key not in counters, "Duplicate initial counter")
@@ -256,7 +263,7 @@ def validate(path, report, reader_report=None):
         require(storage_hashes() == initial_hashes, "Rewind storage mismatch")
         require(counters == initial_counters, "Rewind counter mismatch")
         for key in changed_registers | initial_registers.keys():
-            require(registers[key] == initial_registers.get(key, ((0, 0, 0, 0), 0)), "Rewind register mismatch")
+            require(registers[key] == initial_registers.get(key, ((0, 0, 0, 0), 0, (0, 0, 0, 0))), "Rewind register mismatch")
     return {"format": "flora.execution-trace-validation", "version": 1, "passed": True,
             "scope": "serialization_and_reversible_state_continuity", "complete_release_acceptance": False,
             "trace_sha256": digest(path.read_bytes()), "trace_bytes": path.stat().st_size,
@@ -273,22 +280,36 @@ def negative_checks(path, report):
     results = []
     with tempfile.TemporaryDirectory(prefix="flora-trace-negative-") as temporary:
         candidate = Path(temporary) / "trace.jsonl"
-        for name in ("version", "shader_identity", "sequence", "register_before", "invalid_mask",
-                     "missing_chunk", "missing_completion", "truncated_record", "final_digest", "completion_steps"):
+        cases = ["version", "shader_identity", "sequence", "register_before", "invalid_mask",
+                 "missing_chunk", "missing_completion", "truncated_record", "final_digest", "completion_steps"]
+        if json.loads(original[0])["version"] == 2:
+            cases += ["status_missing", "status_range", "status_bits", "status_valid"]
+        for name in cases:
             rows = original.copy()
             evidence = copy.deepcopy(report)
             if name in ("version", "shader_identity"):
                 row = json.loads(rows[0])
                 row["version" if name == "version" else "shader_sha256"] = 99 if name == "version" else "0" * 64
                 rows[0] = (json.dumps(row) + "\n").encode()
-            elif name in ("sequence", "register_before", "invalid_mask"):
+            elif name in ("sequence", "register_before", "invalid_mask") or name.startswith("status_"):
                 row = json.loads(rows[step_index])
                 if name == "sequence":
                     row["sequence"] += 1
                 elif name == "register_before":
                     row["register_changes"][0]["before"]["bits"][0] ^= 1
-                else:
+                elif name == "invalid_mask":
                     row["register_changes"][0]["after"]["valid_components"] = 16
+                else:
+                    target = row["register_changes"][0]["after"]
+                    target.update(bits=[0] * 4, valid_components=0, mapping_status=[2, 0, 0, 0])
+                    if name == "status_missing":
+                        del target["mapping_status"]
+                    elif name == "status_range":
+                        target["mapping_status"][0] = 4
+                    elif name == "status_bits":
+                        target["bits"][0] = 1
+                    else:
+                        target["valid_components"] = 1
                 rows[step_index] = (json.dumps(row) + "\n").encode()
             elif name == "missing_chunk":
                 del rows[chunk_index]

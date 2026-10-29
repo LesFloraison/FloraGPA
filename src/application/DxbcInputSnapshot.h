@@ -11,6 +11,7 @@ struct InputBinding {
     uint32_t stride = 0;
     uint32_t format = 0;
     bool experimentalView = false;
+    std::optional<uint32_t> capturedMiscFlags, nativeMiscFlags;
 };
 struct InputSnapshot {
     uint64_t event = 0, shader = 0, replayGeneration = 0;
@@ -28,7 +29,7 @@ struct InputSnapshot {
     std::map<Register, InputBinding> bindings;
     std::map<Register, std::string> unavailable;
     std::map<uint64_t, std::string> unavailableCounters;
-    static constexpr const char *source = "independent-replay-resource-inputs/10";
+    static constexpr const char *source = "independent-replay-resource-inputs/11";
 };
 // Runs a before-event replay and copies the selected stage's actual bindings
 // inside its experiment scope. Resource bytes are observations of this replay,

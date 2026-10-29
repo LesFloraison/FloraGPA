@@ -48,6 +48,77 @@ QString worker() { return QCoreApplication::applicationDirPath() + "/FloraGPA.Wo
 class NativeComputeDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void feedbackWorkflow_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void feedbackWorkflow() {
+        QFETCH(uint32_t, vendor);
+        try {
+            QTemporaryDir temporary;
+            const auto retained = qEnvironmentVariable("FLORA_FEEDBACK_WORKER_EVIDENCE");
+            QDir dir(retained.isEmpty() ? temporary.path()
+                                        : QDir(retained).filePath(QString::number(vendor)));
+            QVERIFY(dir.mkpath("."));
+            const auto capture = dir.filePath("frame.gpa_frame");
+            computeCapture(true).save(capture);
+            Frame frame(capture.toStdWString());
+            const std::string source =
+                "StructuredBuffer<uint> input:register(t0);RWStructuredBuffer<uint> output:register(u0);"
+                "[numthreads(1,1,1)]void main(){uint a,b;uint x=input.Load(1,a);uint y=output.Load(0,b);"
+                "output[0]=x+y;output[1]=CheckAccessFullyMapped(a);output[2]=CheckAccessFullyMapped(b);"
+                "output[3]=123;}";
+            const auto shader = compileHlsl(source, "cs_5_0").bytecode;
+            Experiment project(frame);
+            project.setShader(frame, 15, shader, source, "main");
+            const auto experiment = dir.filePath("experiment.json");
+            project.save(experiment);
+            Json selection{{"gpa_event", 100}, {"max_steps", 1000}, {"max_trace_bytes", 1048576}};
+            selection[vendor ? "gpu_vendor" : "warp"] = vendor ? Json(vendor) : Json(true);
+            const auto job = prepareNativeAnalysisJob(capture, "debug-thread", dir.filePath("worker"),
+                                                      worker(), selection, experiment);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 30));
+            validateNativeAnalysisResult(job, result);
+            dxbc_exec::ExecutionTraceReader trace(dir.filePath("worker/trace.jsonl"),
+                                                  result.at("artifacts").at("trace.jsonl").at("sha256"));
+            QCOMPARE(trace.header().at("version"), Json(2));
+            QCOMPARE(trace.header().at("adapter").at("vendor"), Json(vendor ? vendor : 5140u));
+            unsigned provenance = 0, statuses = 0;
+            for (size_t i = 0; i < trace.observationCount(); ++i) {
+                const auto row = trace.observation(i);
+                if (row.at("record") == "binding" && (row.at("resource") == 4 || row.at("resource") == 7)) {
+                    QCOMPARE(row.at("captured_misc_flags"), Json(D3D11_RESOURCE_MISC_BUFFER_STRUCTURED));
+                    QCOMPARE(row.at("native_misc_flags"), row.at("captured_misc_flags"));
+                    ++provenance;
+                }
+            }
+            QCOMPARE(provenance, 2u);
+            for (uint64_t i = 1; i <= trace.size(); ++i) {
+                trace.moveTo(i);
+                for (const auto &[key, value] : trace.registers())
+                    for (unsigned c = 0; c < 4; ++c)
+                        if (value.mapping[c] != dxbc_exec::MappingStatus::NotStatus) {
+                            QCOMPARE(value.mapping[c], dxbc_exec::MappingStatus::Mapped);
+                            QCOMPARE(value.bits[c], 0u);
+                            QVERIFY(!(value.valid & (1u << c)));
+                            ++statuses;
+                        }
+            }
+            QVERIFY(statuses >= 2);
+            const auto &storage = trace.storage().at({dxbc_exec::TraceSpace::Buffer, 7});
+            std::array<uint32_t, 4> words{};
+            std::memcpy(words.data(), storage.bytes.data(), sizeof(words));
+            QCOMPARE(words, (std::array<uint32_t, 4>{18, 1, 1, 123}));
+            QCOMPARE(storage.valid, std::vector<uint8_t>(16, 1));
+            trace.moveTo(0);
+            std::memcpy(words.data(), trace.storage().at({dxbc_exec::TraceSpace::Buffer, 7}).bytes.data(),
+                        sizeof(words));
+            QCOMPARE(words, (std::array<uint32_t, 4>{10, 0, 0, 0}));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void doubleSourceWorkflow_data() {
         QTest::addColumn<uint32_t>("vendor");
         for (uint32_t vendor : {0u, 4318u})
@@ -401,7 +472,7 @@ RWStructuredBuffer<uint> output:register(u0);
                                                   selection, experiment);
         const auto result = load(runNativeAnalysisJob(job, worker(), 30));
         validateNativeAnalysisResult(job, result);
-        QCOMPARE(result.at("backend"), Json("dx11-native/3"));
+        QCOMPARE(result.at("backend"), Json("dx11-native/4"));
         QCOMPARE(result.at("data").at("invocation").at("dispatch_groups"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("invocation").at("group_size"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("trace_file"), Json("trace.jsonl"));

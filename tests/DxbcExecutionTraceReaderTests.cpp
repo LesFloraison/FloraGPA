@@ -145,6 +145,40 @@ std::string digest(const QString &path) {
 class DxbcExecutionTraceReaderTests : public QObject {
     Q_OBJECT
   private slots:
+    void opaqueStatus() {
+        QTemporaryDir dir;
+        const auto path = dir.filePath("status.jsonl");
+        for (unsigned mapping = 1; mapping <= 3; ++mapping) {
+            auto rows = fixture();
+            rows[0]["version"] = 2;
+            for (auto &row : rows) {
+                if (row.at("record") == "constant" || row.at("record") == "register")
+                    row["value"]["mapping_status"] = {0, 0, 0, 0};
+                if (row.at("record") == "step")
+                    for (auto &change : row["register_changes"])
+                        for (const auto *side : {"before", "after"})
+                            change[side]["mapping_status"] = {0, 0, 0, 0};
+            }
+            auto &initial = rows.at(5).at("value");
+            initial = value();
+            initial["mapping_status"] = {mapping, 0, 0, 0};
+            {
+                ExecutionTraceReader trace(path, save(path, rows));
+                QCOMPARE(trace.registerValue(0, {0, {7}}).mapping[0], MappingStatus(mapping));
+                trace.moveTo(trace.size());
+                trace.moveTo(0);
+                QCOMPARE(trace.registerValue(0, {0, {7}}).mapping[0], MappingStatus(mapping));
+            }
+            initial["valid_components"] = 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, ExecutionTraceReader(path, save(path, rows)));
+            initial["valid_components"] = 0;
+            initial["bits"][0] = 1;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, ExecutionTraceReader(path, save(path, rows)));
+            initial["bits"][0] = 0;
+            initial["mapping_status"][0] = 4;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, ExecutionTraceReader(path, save(path, rows)));
+        }
+    }
     void reversibleGroupState() {
         QTemporaryDir dir;
         const auto path = dir.filePath("trace.jsonl");

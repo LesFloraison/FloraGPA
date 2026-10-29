@@ -50,8 +50,10 @@ Json registerRecord(const dxbc_exec::Register &r, const dxbc_exec::Value &v) {
     Json valid = Json::array();
     for (uint32_t i = 0; i < 4; ++i)
         valid.push_back(bool(v.valid & (1u << i)));
-    return {{"name", registerName(r)}, {"dxbc_operand_kind", r.kind}, {"indices", r.indices},
-            {"bits", v.bits},          {"valid_components", v.valid}, {"written", valid}};
+    return {{"name", registerName(r)},     {"dxbc_operand_kind", r.kind},
+            {"indices", r.indices},        {"bits", v.bits},
+            {"valid_components", v.valid}, {"written", valid},
+            {"mapping_status", v.mapping}};
 }
 } // namespace
 

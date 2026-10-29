@@ -55,7 +55,7 @@ struct Projection {
         for (const auto &c : registersDelta) {
             auto &v = registers[r.at("lane").dump() + ":" + c.at("register").dump()];
             if (v.is_null())
-                v = {{"bits", {0, 0, 0, 0}}, {"valid_components", 0}};
+                v = {{"bits", {0, 0, 0, 0}}, {"valid_components", 0}, {"mapping_status", {0, 0, 0, 0}}};
             if (v != c.at(before))
                 throw std::runtime_error("Trace register chain mismatch");
             v = c.at(after);
@@ -112,6 +112,28 @@ InputSnapshot fixture() {
 class DxbcExecutionTraceTests : public QObject {
     Q_OBJECT
   private slots:
+    void opaqueStatus() {
+        GroupStep group{};
+        Value after;
+        after.mapping = {MappingStatus::Unknown, MappingStatus::Mapped, MappingStatus::Unmapped,
+                         MappingStatus::NotStatus};
+        group.step.changes = {{{0, {0}}, {}, after}};
+        const auto value = executionTraceStep(group).at("register_changes")[0].at("after");
+        QCOMPARE(value.at("mapping_status"), Json({1, 2, 3, 0}));
+        QCOMPARE(value.at("valid_components"), Json(0));
+        QCOMPARE(value.at("bits"), Json({0, 0, 0, 0}));
+        for (unsigned c = 0; c < 3; ++c) {
+            group.step.changes[0].after = after;
+            group.step.changes[0].after.valid = uint8_t(1u << c);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, executionTraceStep(group));
+            group.step.changes[0].after = after;
+            group.step.changes[0].after.bits[c] = UINT32_MAX;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, executionTraceStep(group));
+        }
+        group.step.changes[0].after = after;
+        group.step.changes[0].after.mapping[0] = MappingStatus(4);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, executionTraceStep(group));
+    }
     void losslessStep() {
         GroupStep group{UINT64_MAX, 17, 3, {}, true};
         auto &s = group.step;

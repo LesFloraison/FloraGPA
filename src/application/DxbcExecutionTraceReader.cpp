@@ -38,13 +38,21 @@ Register reg(const Json &v) {
         r.indices.push_back(uint32_t(number(index, UINT32_MAX)));
     return r;
 }
-Value value(const Json &v) {
+Value value(const Json &v, bool statusModel) {
     Value result;
     const auto &bits = array(v.at("bits"));
     require(bits.size() == 4, "Trace register must have four components");
     for (size_t i = 0; i < 4; ++i)
         result.bits[i] = uint32_t(number(bits[i], UINT32_MAX));
     result.valid = uint8_t(number(v.at("valid_components"), 15));
+    require(v.contains("mapping_status") == statusModel, "Trace mapping status disagrees with its version");
+    if (statusModel) {
+        const auto &mapping = array(v.at("mapping_status"));
+        require(mapping.size() == 4, "Trace mapping status must have four components");
+        for (size_t i = 0; i < 4; ++i)
+            result.mapping[i] = MappingStatus(number(mapping[i], unsigned(MappingStatus::Unmapped)));
+    }
+    require(result.wellFormed(), "Trace opaque status cannot contain known or invented raw bits");
     return result;
 }
 Counter counter(const Json &v) {
@@ -176,7 +184,8 @@ struct ExecutionTraceReader::State {
         visit(row.at("register_changes"), [&](const Json &c) {
             const TraceRegisterKey key{laneId, reg(c.at("register"))};
             auto it = registers.find(key);
-            const auto before = value(c.at(prior)), after = value(c.at(next));
+            const auto before = value(c.at(prior), header.at("version") == 2),
+                       after = value(c.at(next), header.at("version") == 2);
             require((it == registers.end() ? Value{} : it->second) == before,
                     "Trace register chain mismatch");
             if (it == registers.end()) {
@@ -277,7 +286,7 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
         const auto kind = row.at("record").get<std::string>();
         if (records == 1) {
             require(kind == "header" && row.at("format") == "flora.dxbc-execution-trace" &&
-                        number(row.at("version")) == 1 &&
+                        (number(row.at("version")) == 1 || number(row.at("version")) == 2) &&
                         ((row.at("stage") == "cs" && row.at("scope") == "one_cooperative_group") ||
                          (row.at("stage") == "vs" && row.at("scope") == "one_vertex") ||
                          (row.at("stage") == "ps" && row.at("scope") == "one_pixel_quad")) &&
@@ -458,7 +467,7 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
             require(s.registers.size() < limits.maxRegisters &&
                         s.registers
                             .emplace(TraceRegisterKey{s.lane(row.at("lane")), reg(row.at("register"))},
-                                     value(row.at("value")))
+                                     value(row.at("value"), s.header.at("version") == 2))
                             .second,
                     "Duplicate or excessive trace registers");
         } else if (kind == "constant") {
@@ -466,7 +475,7 @@ ExecutionTraceReader::ExecutionTraceReader(const QString &path, const std::strin
                         s.constants
                             .emplace(std::make_pair(uint32_t(number(row.at("slot"), UINT32_MAX)),
                                                     uint32_t(number(row.at("element"), UINT32_MAX))),
-                                     value(row.at("value")))
+                                     value(row.at("value"), s.header.at("version") == 2))
                             .second,
                     "Duplicate or excessive trace constants");
         } else if (kind == "counter") {

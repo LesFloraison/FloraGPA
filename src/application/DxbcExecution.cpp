@@ -809,6 +809,8 @@ struct Lane::State {
                 }
             }
             result.bits[i] = bits;
+            if (!op.modifier && !op.precision)
+                result.mapping[i] = original.mapping[op.select[i]];
             if (original.valid & (1u << op.select[i]))
                 result.valid |= uint8_t(1u << i);
         }
@@ -994,7 +996,7 @@ Lane::Lane(const Program &program, Inputs inputs, uint64_t maxSteps) {
         if (slot >= 14 || data.size() > 4096)
             fail("DXBC input constant buffer bounds");
         for (const auto &value : data)
-            if (value.valid > 15)
+            if (!value.wellFormed() || value.mapping != std::array<MappingStatus, 4>{})
                 fail("Invalid DXBC constant buffer validity");
         values += data.size();
     }
@@ -1002,7 +1004,7 @@ Lane::Lane(const Program &program, Inputs inputs, uint64_t maxSteps) {
         fail("DXBC execution input budget exceeded");
     for (const auto &[reg, value] : inputs.registers) {
         if (reg.kind == 0 || reg.kind == 2 || reg.kind == 3 || reg.kind == 8 || reg.kind == 9 ||
-            reg.indices.size() > 3 || value.valid > 15)
+            reg.indices.size() > 3 || !value.wellFormed() || value.mapping != std::array<MappingStatus, 4>{})
             fail("Invalid DXBC execution input register");
     }
     if (inputs.memory) {
@@ -1047,8 +1049,20 @@ Step Lane::step() {
         fail("DXBC execution step budget exceeded");
     const auto &p = *s.program;
     const auto &instruction = p.instructions.at(s.pc);
-    const auto &args = p.operands.at(s.pc);
-    const auto op = instruction.opcode;
+    const auto &originalArgs = p.operands.at(s.pc);
+    const bool feedback =
+        instruction.opcode == 223 || (instruction.opcode >= 225 && instruction.opcode <= 227);
+    std::vector<Operand> loadArgs;
+    if (feedback) {
+        loadArgs = originalArgs;
+        loadArgs.erase(loadArgs.begin() + 1);
+    }
+    const auto &args = feedback ? loadArgs : originalArgs;
+    const auto op = instruction.opcode == 223   ? 45u
+                    : instruction.opcode == 225 ? 163u
+                    : instruction.opcode == 226 ? 165u
+                    : instruction.opcode == 227 ? 167u
+                                                : instruction.opcode;
     const bool derivative = op == 11 || op == 12 || (op >= 122 && op <= 125);
     Step result{s.sequence, s.pc, instruction.wordOffset, {}, s.calls, {}, false};
     uint32_t next = s.pc + 1;
@@ -1088,7 +1102,30 @@ Step Lane::step() {
             index = 1;
         return args.at(index).kind == 30 ? &args[index] : nullptr;
     }();
-    if (suppressedResource) {
+    if (op == 234) {
+        const auto &destination = args[0], &token = args[1];
+        if ((instruction.words[0] & 0x00fff800u) || destination.modifier || destination.precision ||
+            destination.components != 2 || destination.mode != 0 || std::popcount(destination.mask) != 1 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) || token.modifier ||
+            token.precision || token.components != 2 || token.mode != 2)
+            fail("Invalid DXBC mapping status check operands");
+        const auto value = s.source(token, true);
+        if (value.mapping[0] == MappingStatus::NotStatus)
+            fail("DXBC mapping status check requires an opaque feedback token");
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            const auto component = unsigned(std::countr_zero(destination.mask));
+            if (target.kind == 3 && component >= p.arrays.at(target.indices[0]).second)
+                fail("DXBC mapping status destination exceeds its register components");
+            after.bits[component] = value.mapping[0] == MappingStatus::Mapped ? UINT32_MAX : 0;
+            after.valid = uint8_t((after.valid & ~(1u << component)) |
+                                  (value.mapping[0] == MappingStatus::Unknown ? 0u : 1u << component));
+            after.mapping[component] = MappingStatus::NotStatus;
+            result.changes.push_back({target, before, after});
+        }
+    } else if (suppressedResource) {
         // Inactive PS invocations cannot access UAV memory or hidden counters.
         // Returned values are undefined, not an observed zero or a speculative read.
         const auto binding = s.address(*suppressedResource);
@@ -1115,6 +1152,7 @@ Step Lane::step() {
                         if (target.kind == 3 && c >= p.arrays.at(target.indices[0]).second)
                             fail("Suppressed pixel UAV destination exceeds its register components");
                         after.bits[c] = 0;
+                        after.mapping[c] = MappingStatus::NotStatus;
                         after.valid &= uint8_t(~(1u << c));
                     }
                 result.changes.push_back({target, before, after});
@@ -1256,6 +1294,7 @@ Step Lane::step() {
                 if ((destination.mask & (1u << c)) &&
                     (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                     after.bits[c] = value.bits[resource.select[c]];
+                    after.mapping[c] = MappingStatus::NotStatus;
                     after.valid = uint8_t((after.valid & ~(1u << c)) |
                                           (((value.valid >> resource.select[c]) & 1u) << c));
                 }
@@ -1309,6 +1348,7 @@ Step Lane::step() {
                 if ((destination.mask & (1u << component)) &&
                     (target.kind != 3 || component < p.arrays.at(target.indices[0]).second)) {
                     after.bits[component] = value.bits[component];
+                    after.mapping[component] = MappingStatus::NotStatus;
                     after.valid =
                         uint8_t((after.valid & ~(1u << component)) | (value.valid & (1u << component)));
                 }
@@ -1356,6 +1396,7 @@ Step Lane::step() {
                 if ((destination.mask & (1u << c)) &&
                     (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                     after.bits[c] = value.bits[resource.select[c]];
+                    after.mapping[c] = MappingStatus::NotStatus;
                     after.valid = uint8_t((after.valid & ~(1u << c)) |
                                           (((value.valid >> resource.select[c]) & 1u) << c));
                 }
@@ -1441,6 +1482,7 @@ Step Lane::step() {
                 if ((destination.mask & (1u << c)) &&
                     (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                     after.bits[c] = value.bits[c];
+                    after.mapping[c] = MappingStatus::NotStatus;
                     after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                 }
             result.changes.push_back({target, before, after});
@@ -1468,6 +1510,7 @@ Step Lane::step() {
                 if ((destination.mask & (1u << c)) &&
                     (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                     after.bits[c] = value.bits[c];
+                    after.mapping[c] = MappingStatus::NotStatus;
                     after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                 }
             result.changes.push_back({target, before, after});
@@ -1577,6 +1620,7 @@ Step Lane::step() {
                     if ((destination.mask & (1u << c)) &&
                         (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                         after.bits[c] = value.bits[c];
+                        after.mapping[c] = MappingStatus::NotStatus;
                         after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                     }
                 result.changes.push_back({target, before, after});
@@ -1635,6 +1679,7 @@ Step Lane::step() {
                     if ((destination.mask & (1u << c)) &&
                         (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
                         after.bits[c] = value.bits[c];
+                        after.mapping[c] = MappingStatus::NotStatus;
                         after.valid = uint8_t((after.valid & ~(1u << c)) | (value.valid & (1u << c)));
                     }
                 result.changes.push_back({target, before, after});
@@ -1671,6 +1716,7 @@ Step Lane::step() {
             const auto before = s.value(target);
             auto after = before;
             after.bits[component] = value.bits[0];
+            after.mapping[component] = MappingStatus::NotStatus;
             after.valid = uint8_t((after.valid & ~destination.mask) | ((value.valid & 1) << component));
             result.changes.push_back({target, before, after});
         }
@@ -1743,6 +1789,7 @@ Step Lane::step() {
                 const auto before = s.value(target);
                 auto after = before;
                 after.bits[component] = old.bits[0];
+                after.mapping[component] = MappingStatus::NotStatus;
                 after.valid = uint8_t((after.valid & ~destination.mask) | ((old.valid & 1) << component));
                 result.changes.push_back({target, before, after});
             }
@@ -1794,6 +1841,7 @@ Step Lane::step() {
                 known &= (sources[i].valid & required) == required;
             }
             after.bits[component] = native.bits[component];
+            after.mapping[component] = MappingStatus::NotStatus;
             after.valid = uint8_t((after.valid & ~(1u << component)) | (known ? 1u << component : 0u));
         }
         if (s.inBounds(target))
@@ -1852,14 +1900,27 @@ Step Lane::step() {
                 if (op == 55 || op == 142) {
                     // An unknown unselected branch does not taint a known selection.
                     const auto selected = (bool(a) != (op == 142)) ? 1u : 2u;
+                    const auto mapping = [&](unsigned branch) {
+                        if (values[0].valid & (1u << i))
+                            return values[branch].mapping[i];
+                        const auto left = values[1].mapping[i], right = values[2].mapping[i];
+                        if (left != MappingStatus::NotStatus && right != MappingStatus::NotStatus)
+                            return left == right ? left : MappingStatus::Unknown;
+                        return MappingStatus::NotStatus;
+                    };
                     valid = (values[0].valid & values[selected].valid & (1u << i)) != 0;
                     outputs[0].bits[i] = values[selected].bits[i];
+                    outputs[0].mapping[i] = mapping(selected);
                     if (op == 142) {
                         const auto other = 3u - selected;
                         outputs[1].bits[i] = values[other].bits[i];
+                        outputs[1].mapping[i] = mapping(other);
                         if (values[0].valid & values[other].valid & (1u << i))
                             outputs[1].valid |= uint8_t(1u << i);
                     }
+                } else if (op == 54) {
+                    outputs[0].bits[i] = a;
+                    outputs[0].mapping[i] = values[0].mapping[i];
                 } else if (op == 38 || op == 81) {
                     const auto product = op == 38 ? uint64_t(int64_t(signedBits(a)) * int64_t(signedBits(b)))
                                                   : uint64_t(a) * b;
@@ -1891,6 +1952,10 @@ Step Lane::step() {
         const bool literalBorrow = op == 133 && args[2].kind == 4 && args[3].kind == 4;
         const bool minimumPrecision =
             std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; });
+        if (minimumPrecision && std::any_of(values.begin(), values.end(), [](const Value &value) {
+                return value.mapping != std::array<MappingStatus, 4>{};
+            }))
+            fail("Minimum-precision operations cannot consume opaque mapping status");
         if (minimumPrecision && !s.inputs.gpu)
             fail("Minimum-precision arithmetic requires the selected adapter GPU assist");
         const bool nativeFloat = p.stage == 1 && (op == 50 || (op >= 15 && op <= 17));
@@ -1936,8 +2001,42 @@ Step Lane::step() {
                         bits = floatBits(std::isnan(number) ? 0.f : std::clamp(number, 0.f, 1.f));
                     }
                     after.bits[c] = bits;
+                    after.mapping[c] = (instruction.words[0] & (1u << 13)) ? MappingStatus::NotStatus
+                                                                           : outputs[i].mapping[c];
                     after.valid = uint8_t((after.valid & ~(1u << c)) | (outputs[i].valid & (1u << c)));
                 }
+            if (previous == result.changes.end())
+                result.changes.push_back({target, before, after});
+            else
+                previous->after = after;
+        }
+    }
+    if (feedback && originalArgs[1].kind != 13) {
+        const auto &destination = originalArgs[1];
+        if (destination.modifier || destination.precision || destination.components != 2 ||
+            destination.mode != 0 || std::popcount(destination.mask) != 1 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3))
+            fail("Invalid DXBC feedback status destination");
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto component = unsigned(std::countr_zero(destination.mask));
+            if (target.kind == 3 && component >= p.arrays.at(target.indices[0]).second)
+                fail("DXBC feedback status exceeds its register components");
+            if (target == s.address(args[0]) && (args[0].mask & destination.mask))
+                fail("Overlapping DXBC feedback destinations");
+            auto mapping = MappingStatus::Unknown;
+            if (!suppressedResource && s.inputs.memory) {
+                const auto view = s.inputs.memory->views_.find(s.address(args.back()));
+                if (view != s.inputs.memory->views_.end() && view->second.resource && view->second.nonTiled)
+                    mapping = MappingStatus::Mapped;
+            }
+            const auto previous = std::find_if(result.changes.begin(), result.changes.end(),
+                                               [&](const Change &c) { return c.destination == target; });
+            auto after = previous == result.changes.end() ? s.value(target) : previous->after;
+            const auto before = after;
+            after.bits[component] = 0;
+            after.valid &= uint8_t(~(1u << component));
+            after.mapping[component] = mapping;
             if (previous == result.changes.end())
                 result.changes.push_back({target, before, after});
             else

@@ -525,6 +525,10 @@ class Snapshot {
             throw std::runtime_error("Native DXBC buffer view exceeds its storage");
         BufferView storage{metadata.resource, metadata.offset, metadata.size, metadata.stride};
         storage.format = metadata.format;
+        metadata.capturedMiscFlags = replay.frame().resource(metadata.resource).desc.at(4);
+        metadata.nativeMiscFlags = desc.MiscFlags;
+        storage.nonTiled =
+            !((*metadata.capturedMiscFlags | *metadata.nativeMiscFlags) & D3D11_RESOURCE_MISC_TILED);
         if (binding.kind == 30 && (flags & (D3D11_BUFFER_UAV_FLAG_APPEND | D3D11_BUFFER_UAV_FLAG_COUNTER))) {
             storage.counter = viewId;
             if (!counters.contains(viewId)) {

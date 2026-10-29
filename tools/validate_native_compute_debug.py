@@ -17,7 +17,7 @@ def validate_job(directory, reference, expected_groups, worker, reader_report=No
     directory = Path(directory)
     result = json.loads((directory / "result.json").read_text(encoding="utf-8"))
     job = json.loads((directory / "job.json").read_text(encoding="utf-8"))
-    require(result["ok"] is True and result["schema"] == 1 and result["backend"] == "dx11-native/3", "Invalid native result")
+    require(result["ok"] is True and result["schema"] == 1 and result["backend"] == "dx11-native/4", "Invalid native result")
     require(result["request_id"] == job["request_id"], "Request identity mismatch")
     context = result["context"]
     for key in ("schema", "backend", "backend_sha256", "frame_sha256", "experiment_sha256", "action", "options"):

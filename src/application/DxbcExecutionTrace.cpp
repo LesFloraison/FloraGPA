@@ -12,9 +12,9 @@ namespace {
 using Json = nlohmann::json;
 Json reg(const Register &r) { return {{"dxbc_operand_kind", r.kind}, {"indices", r.indices}}; }
 Json value(const Value &v) {
-    if (v.valid > 15)
+    if (!v.wellFormed())
         throw std::runtime_error("Invalid trace register validity mask");
-    return {{"bits", v.bits}, {"valid_components", v.valid}};
+    return {{"bits", v.bits}, {"valid_components", v.valid}, {"mapping_status", v.mapping}};
 }
 std::string hex(Bytes bytes) {
     constexpr char digits[] = "0123456789abcdef";
@@ -190,7 +190,7 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
         constantLengths.push_back({{"slot", slot}, {"elements", values.size()}});
     Json header{{"record", "header"},
                 {"format", "flora.dxbc-execution-trace"},
-                {"version", 1},
+                {"version", 2},
                 {"stage", "cs"},
                 {"scope", "one_cooperative_group"},
                 {"invocation_eligibility", "not_established_by_trace_writer"},
@@ -251,15 +251,18 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
                        {"source", locations.value(key, Json(nullptr))}});
     }
     for (const auto &[binding, b] : snapshot.bindings)
-        journal.write({{"record", "binding"},
-                       {"register", reg(binding)},
-                       {"resource", b.resource},
-                       {"view", b.view},
-                       {"offset", b.offset},
-                       {"size", b.size},
-                       {"stride", b.stride},
-                       {"dxgi_format", b.format},
-                       {"experimental_view", b.experimentalView}});
+        journal.write(
+            {{"record", "binding"},
+             {"register", reg(binding)},
+             {"resource", b.resource},
+             {"view", b.view},
+             {"offset", b.offset},
+             {"size", b.size},
+             {"stride", b.stride},
+             {"dxgi_format", b.format},
+             {"experimental_view", b.experimentalView},
+             {"captured_misc_flags", b.capturedMiscFlags ? Json(*b.capturedMiscFlags) : Json(nullptr)},
+             {"native_misc_flags", b.nativeMiscFlags ? Json(*b.nativeMiscFlags) : Json(nullptr)}});
     for (const auto &[binding, reason] : snapshot.unavailable)
         journal.write({{"record", "unavailable_binding"}, {"register", reg(binding)}, {"reason", reason}});
     for (const auto &[view, reason] : snapshot.unavailableCounters)

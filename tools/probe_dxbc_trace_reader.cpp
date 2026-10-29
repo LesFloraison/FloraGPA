@@ -23,12 +23,15 @@ std::string hash(const Json &value) {
 }
 Json state(const ExecutionTraceReader &trace) {
     Json registers = Json::array(), storage = Json::array(), counters = Json::array();
-    for (const auto &[key, v] : trace.registers())
+    for (const auto &[key, v] : trace.registers()) {
         registers.push_back({{"lane", key.first},
                              {"dxbc_operand_kind", key.second.kind},
                              {"indices", key.second.indices},
                              {"bits", v.bits},
                              {"valid_components", v.valid}});
+        if (trace.header().at("version") == 2)
+            registers.back()["mapping_status"] = v.mapping;
+    }
     for (const auto &[key, b] : trace.storage())
         storage.push_back({{"space", key.first == TraceSpace::Buffer   ? "buffer"
                                      : key.first == TraceSpace::Shared ? "shared"

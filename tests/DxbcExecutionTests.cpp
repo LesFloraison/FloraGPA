@@ -1,5 +1,6 @@
 #include "application/DxbcCheckpointModel.h"
 #include "application/DxbcExecution.h"
+#include "application/DxbcExecutionTrace.h"
 #include "application/DxbcGpuOperations.h"
 #include "application/HlslCompilation.h"
 #include "core/Dxbc.h"
@@ -253,6 +254,196 @@ const Fixture fixtures[]{
 class DxbcExecutionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void feedbackStatusCopies() {
+        const Words token{0x10000a, 2}, replicated{0x100006, 1};
+        for (bool nonTiled : {false, true})
+            for (bool knownCondition : {false, true})
+                for (uint32_t operation : {54u, 55u, 142u}) {
+                    const auto condition = knownCondition ? literal(1) : src(1, 0);
+                    std::vector<Words> rows{op(161, {dst(7, 0)}),
+                                            op(226, {dst(0, 0), dst(0, 1, 1), literal(0), src(7, 0)})};
+                    if (operation == 54)
+                        rows.push_back(op(operation, {dst(0, 2), replicated}));
+                    else if (operation == 55)
+                        rows.push_back(op(operation, {dst(0, 2), condition, replicated, replicated}));
+                    else
+                        rows.push_back(
+                            op(operation, {dst(0, 2), dst(0, 3), condition, replicated, replicated}));
+                    rows.push_back(op(30, {dst(0, 2, 6), literal(7), literal(9)}));
+                    rows.push_back(op(234, {dst(2, 0, 1), token}));
+                    rows.push_back(op(62));
+                    BufferView view{1, 0, 16};
+                    view.nonTiled = nonTiled;
+                    Inputs inputs;
+                    inputs.memory = std::make_shared<Memory>(
+                        std::map<uint64_t, Buffer>{{1, Buffer::known(std::vector<uint8_t>(16))}},
+                        std::map<Register, BufferView>{{{7, {0}}, view}});
+                    const Program program(binary(rows));
+                    Lane lane(program, inputs);
+                    execute(lane);
+                    const auto &copied = lane.registers().at({0, {2}});
+                    QCOMPARE(copied.mapping[0], nonTiled ? MappingStatus::Mapped : MappingStatus::Unknown);
+                    QCOMPARE(copied.mapping[3], copied.mapping[0]);
+                    QCOMPARE(copied.mapping[1], MappingStatus::NotStatus);
+                    QCOMPARE(copied.mapping[2], MappingStatus::NotStatus);
+                    QCOMPARE(copied.valid, uint8_t(6));
+                    const auto &checked = lane.registers().at({2, {0}});
+                    QCOMPARE(checked.valid, uint8_t(nonTiled));
+                    QCOMPARE(checked.bits[0], nonTiled ? UINT32_MAX : 0u);
+                    // Reusing the token register for ordinary data must invalidate its provenance.
+                    rows.insert(rows.end() - 2, op(54, {dst(0, 2, 1), literal(UINT32_MAX)}));
+                    const Program overwritten(binary(rows));
+                    Lane invalid(overwritten, inputs);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(invalid));
+                    auto narrowed = dst(0, 2);
+                    narrowed[0] |= 0x80000000u;
+                    narrowed.insert(narrowed.begin() + 1, 1u | (5u << 14));
+                    rows[2] = op(54, {narrowed, replicated});
+                    const Program precision(binary(rows));
+                    Lane unsafe(precision, inputs);
+                    try {
+                        execute(unsafe);
+                        QFAIL("Opaque status was accepted by minimum-precision arithmetic");
+                    } catch (const std::runtime_error &error) {
+                        QCOMPARE(
+                            QString::fromUtf8(error.what()),
+                            QString("Minimum-precision operations cannot consume opaque mapping status"));
+                    }
+                }
+    }
+    void feedbackStatus_data() {
+        QTest::addColumn<int>("type");
+        QTest::addColumn<bool>("uav");
+        QTest::addColumn<bool>("nonTiled");
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (int type = 0; type != 3; ++type)
+                for (bool uav : {false, true})
+                    for (bool nonTiled : {false, true})
+                        QTest::newRow(
+                            qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(type).arg(uav).arg(nonTiled)))
+                            << type << uav << nonTiled << vendor;
+    }
+    void feedbackStatus() {
+        try {
+            QFETCH(int, type);
+            QFETCH(bool, uav);
+            QFETCH(bool, nonTiled);
+            QFETCH(uint32_t, vendor);
+            const std::string types[]{"Buffer<uint4>", "ByteAddressBuffer", "StructuredBuffer<uint4>"};
+            const auto source = std::string(uav ? "RW" : "") + types[type] + " inputData:register(" +
+                                (uav ? "u0" : "t0") +
+                                ");RWStructuredBuffer<uint4> outputData:register(u1);"
+                                "[numthreads(1,1,1)]void main(){uint status;uint4 value=inputData.Load(" +
+                                (type == 1 ? "8" : "2") +
+                                ",status);outputData[0]=value;"
+                                "outputData[1]=uint4(CheckAccessFullyMapped(status),99,0x0011e000,123);}";
+            const auto bytecode = compileHlsl(source, "cs_5_0").bytecode;
+            const Program program(bytecode);
+            std::vector<uint8_t> bytes(128);
+            for (uint32_t i = 0; i < 32; ++i) {
+                const uint32_t value = 100 + i;
+                std::memcpy(bytes.data() + 4 * i, &value, 4);
+            }
+            BufferView input{1, 0, 128, type == 2 ? 16u : 0u};
+            input.format = type == 0 ? DXGI_FORMAT_R32_UINT : 0;
+            input.nonTiled = nonTiled;
+            Inputs inputs;
+            Device device(vendor);
+            inputs.gpu = std::make_shared<GpuOperations>(device.device.Get(), !vendor);
+            inputs.memory = std::make_shared<Memory>(
+                std::map<uint64_t, Buffer>{{1, Buffer::known(bytes)},
+                                           {2, Buffer::known(std::vector<uint8_t>(32))}},
+                std::map<Register, BufferView>{{{uav ? 30u : 7u, {0}}, input}, {{30, {1}}, {2, 0, 32, 16}}},
+                256 * 1024 * 1024, 16 * 1024 * 1024, inputs.gpu);
+            Lane lane(program, inputs);
+            bool observed = false;
+            for (const auto &step : execute(lane))
+                for (const auto &change : step.changes) {
+                    QVERIFY(change.before.wellFormed());
+                    QVERIFY(change.after.wellFormed());
+                    for (unsigned c = 0; c < 4; ++c)
+                        if (change.after.mapping[c] != MappingStatus::NotStatus) {
+                            observed = true;
+                            QCOMPARE(change.after.mapping[c],
+                                     nonTiled ? MappingStatus::Mapped : MappingStatus::Unknown);
+                            QVERIFY(!(change.after.valid & (1u << c)));
+                            QCOMPARE(change.after.bits[c], 0u);
+                        }
+                }
+            QVERIFY(observed);
+            const auto &output = inputs.memory->buffers().at(2);
+            std::array<uint32_t, 8> words{};
+            std::memcpy(words.data(), output.bytes.data(), output.bytes.size());
+            const std::array<uint32_t, 4> expected = type == 0 ? std::array<uint32_t, 4>{102, 0, 0, 1}
+                                                     : type == 1
+                                                         ? std::array<uint32_t, 4>{102, 102, 102, 102}
+                                                         : std::array<uint32_t, 4>{108, 109, 110, 111};
+            for (unsigned i = 0; i < 4; ++i)
+                QCOMPARE(words[i], expected[i]);
+            if (nonTiled)
+                QCOMPARE(words[4], 1u);
+            for (unsigned i = 0; i < 32; ++i)
+                QCOMPARE(output.valid[i], uint8_t(i >= 16 && i < 20 ? nonTiled : true));
+            QCOMPARE(words[5], 99u);
+            QCOMPARE(words[6], 0x0011e000u);
+            QCOMPARE(words[7], 123u);
+            QCOMPARE(inputs.memory->buffers().at(1).bytes, bytes);
+            const auto root = qEnvironmentVariable("FLORA_FEEDBACK_NATIVE_EVIDENCE");
+            if (!root.isEmpty()) {
+                QDir directory(QDir(root).filePath(QString::fromLatin1(QTest::currentDataTag())));
+                QVERIFY(directory.mkpath("."));
+                InputSnapshot snapshot;
+                snapshot.inputs = inputs;
+                snapshot.stage = 5;
+                snapshot.event = 1;
+                snapshot.shader = 2;
+                snapshot.bytecode = bytecode;
+                snapshot.frameSha256 = std::string(64, '0');
+                snapshot.resourceObservation = "synthetic_feedback_fixture";
+                const auto gpu = inputs.gpu->identity();
+                snapshot.adapterLuid = uint64_t(gpu.at("luid_low").get<uint32_t>()) |
+                                       (uint64_t(gpu.at("luid_high").get<uint32_t>()) << 32);
+                snapshot.adapterVendor = gpu.at("vendor_id");
+                snapshot.adapterDevice = gpu.at("device_id");
+                const auto buffers = [&] {
+                    nlohmann::json result = nlohmann::json::array();
+                    for (const auto &[id, buffer] : inputs.memory->buffers())
+                        result.push_back({{"resource", id},
+                                          {"sha256", sha256(buffer.bytes)},
+                                          {"validity_sha256", sha256(buffer.valid)}});
+                    return result;
+                };
+                nlohmann::json report{{"scope", "synthetic_feedback_fixture"},
+                                      {"event", snapshot.event},
+                                      {"shader", snapshot.shader},
+                                      {"frame_sha256", snapshot.frameSha256},
+                                      {"shader_sha256", sha256(bytecode)},
+                                      {"adapter_luid", snapshot.adapterLuid},
+                                      {"buffers", buffers()},
+                                      {"textures", nlohmann::json::array()},
+                                      {"non_tiled", nonTiled},
+                                      {"type", type},
+                                      {"uav", uav},
+                                      {"words", words},
+                                      {"validity", output.valid}};
+                report["trace"] = exportGroupExecutionTrace(directory.filePath("trace.jsonl"), snapshot);
+                report["trace"]["buffers_after"] = buffers();
+                report["trace"]["textures_after"] = nlohmann::json::array();
+                QFile shader(directory.filePath("shader.dxbc"));
+                QVERIFY(shader.open(QIODevice::WriteOnly));
+                QCOMPARE(shader.write(reinterpret_cast<const char *>(bytecode.data()), bytecode.size()),
+                         qint64(bytecode.size()));
+                shader.close();
+                QFile result(directory.filePath("report.json"));
+                QVERIFY(result.open(QIODevice::WriteOnly));
+                const auto text = QByteArray::fromStdString(report.dump(2) + "\n");
+                QCOMPARE(result.write(text), text.size());
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void doubleInstructions_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("stage");

@@ -5,11 +5,23 @@
 #include <optional>
 
 namespace flora::dxbc_exec {
+enum class MappingStatus : uint8_t { NotStatus, Unknown, Mapped, Unmapped };
 struct Value {
     std::array<uint32_t, 4> bits{};
     uint8_t valid = 0;
+    // Feedback tokens have semantic provenance, not invented hardware bit patterns.
+    std::array<MappingStatus, 4> mapping{};
     auto operator<=>(const Value &) const = default;
     static Value known(std::array<uint32_t, 4> bits) { return {bits, 15}; }
+    bool wellFormed() const {
+        if (valid > 15)
+            return false;
+        for (unsigned i = 0; i < 4; ++i)
+            if (mapping[i] > MappingStatus::Unmapped ||
+                (mapping[i] != MappingStatus::NotStatus && ((valid & (1u << i)) || bits[i])))
+                return false;
+        return true;
+    }
 };
 struct Register {
     uint32_t kind = 0;
@@ -33,6 +45,8 @@ struct BufferView {
     uint32_t stride = 0;             // Zero for raw views, structure size otherwise.
     std::optional<uint64_t> counter; // View identity, independent of backing resource identity.
     uint32_t format = 0;             // A native typed buffer format; zero for raw/structured views.
+    // Must describe the source resource, never inferred from a private copy.
+    bool nonTiled = false;
     auto operator<=>(const BufferView &) const = default;
 };
 enum class CounterKind { Ordered, Append };
