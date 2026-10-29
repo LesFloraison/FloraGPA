@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <cstring>
 using namespace flora;
 class GeometryUavDependencyTests : public QObject {
     Q_OBJECT
@@ -164,8 +165,27 @@ class GeometryUavDependencyTests : public QObject {
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (const auto mode : {"independent", "read", "ia-alias", "gs", "gs-empty", "gs-read-uav",
-                                    "gs-read-srv", "gs-unbound", "gs-alias-uav", "gs-alias-srv"})
+                                    "gs-read-srv", "gs-unbound", "gs-alias-uav", "gs-alias-srv", "ds-atomic",
+                                    "ds-nonfinite", "ds-upstream-alias", "ds-gs-alias"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(mode))) << vendor << QString(mode);
+    }
+    void terminalDomainProof() {
+        QTemporaryDir directory;
+        for (const auto mode : {"ds-atomic", "ds-nonfinite", "ds-upstream-alias"}) {
+            const auto path = directory.filePath("domain.gpa_frame");
+            testing::terminalDomainCapture(mode).save(path);
+            Frame frame(path.toStdWString());
+            const auto code = frame.shader(frame.resource(7004).data);
+            const auto proof = geometryUavIndependence(code, true);
+            QVERIFY2(proof.at("proved") == true, proof.dump().c_str());
+            QCOMPARE(proof.at("scope"), nlohmann::json("terminal_domain_counts"));
+            QCOMPARE(proof.at("write_instructions").size(), size_t(1));
+            QCOMPARE(proof.at("write_instructions")[0].at("result"), nlohmann::json("terminal_domain_value"));
+            QVERIFY(geometryUavIndependence(code).at("proved") == false);
+            for (Id id : {7000, 7002})
+                QVERIFY(geometryUavIndependence(frame.shader(frame.resource(id).data), true).at("proved") ==
+                        false);
+        }
     }
     void isolatedInstances() {
         try {
@@ -174,10 +194,12 @@ class GeometryUavDependencyTests : public QObject {
             QTemporaryDir directory;
             const auto path = directory.filePath("hull.gpa_frame");
             const bool gs = mode.startsWith("gs"), unbound = mode == "gs-unbound";
-            const bool rejectedCase = mode == "read" || mode.contains("alias");
+            const bool rejectedCase = mode.contains("alias");
             auto fixture = mode == "read"                       ? testing::hullUavReadCapture()
                            : mode == "gs" || mode == "gs-empty" ? testing::geometryUavEmissionCapture()
                                                                 : testing::hullCapture();
+            if (mode.startsWith("ds-"))
+                fixture = testing::terminalDomainCapture(mode.toStdString());
             if (gs && mode != "gs" && mode != "gs-empty")
                 fixture = testing::geometryResourceReadCapture(
                     mode != "gs-read-srv" && mode != "gs-alias-srv", mode.contains("alias"), unbound);
@@ -236,16 +258,44 @@ class GeometryUavDependencyTests : public QObject {
             const auto counter = replay.readCounter(12);
             const auto commands = replay.counts;
             const auto full = inspectPostTransform(replay, 200);
+            std::vector<uint32_t> fullWords(full.bytes.size() / 4);
+            QCOMPARE(full.bytes.size() % 4, size_t(0));
+            if (!fullWords.empty())
+                std::memcpy(fullWords.data(), full.bytes.data(), full.bytes.size());
+            if (mode == "ds-nonfinite")
+                for (size_t i = 0; i < fullWords.size(); i += 4)
+                    QCOMPARE(fullWords[i], uint32_t(0x7f800000));
             const auto pixelGeometry = inspectPixelGeometry(replay, 200);
             QCOMPARE(pixelGeometry.bytes, full.bytes);
             const auto partition = validatedPixelGeometryInstances(pixelGeometry);
             QCOMPARE(partition.resolved, !rejectedCase);
+            if (!gs && !rejectedCase) {
+                auto altered = pixelGeometry;
+                altered.report["executed_stages"].push_back("gs");
+                altered.report["geometry_instances"]["uav_independence"]["stages"]["gs"] =
+                    altered.report["geometry_instances"]["uav_independence"]["stages"]["vs"];
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatedPixelGeometryInstances(altered));
+                altered = pixelGeometry;
+                altered.report["geometry_instances"]["uav_independence"]["stages"]["ds"]["scope"] = "wrong";
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatedPixelGeometryInstances(altered));
+                altered = pixelGeometry;
+                altered.report["geometry_instances"]["uav_independence"]["stages"]["ds"]
+                              ["terminal_domain_counts"] = false;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatedPixelGeometryInstances(altered));
+                if (mode == "read") {
+                    altered = pixelGeometry;
+                    altered.report["geometry_instances"]["uav_independence"]["resource_reads"][0]
+                                  ["count_dependency"] = true;
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatedPixelGeometryInstances(altered));
+                }
+            }
             if (!rejectedCase)
                 QCOMPARE(full.report.at("vertices"),
                          nlohmann::json(gs ? (unbound || mode == "gs-empty" ? 9 : 18) : 12));
             else
                 QVERIFY(full.report.at("vertices").get<unsigned>() > 0);
             nlohmann::json selections = nlohmann::json::array();
+            nlohmann::json rejections = nlohmann::json::array();
             for (uint32_t instance = 0; instance < (gs ? 3u : 2u); ++instance) {
                 PostTransformOptions inspect;
                 inspect.instance = instance;
@@ -254,6 +304,7 @@ class GeometryUavDependencyTests : public QObject {
                     try {
                         inspectPostTransform(replay, 200, inspect);
                     } catch (const std::runtime_error &error) {
+                        rejections.push_back({{"instance", instance}, {"reason", error.what()}});
                         rejected = QString::fromUtf8(error.what())
                                        .contains(mode == "ia-alias" ? "IA/CB input aliases a written UAV"
                                                                     : "Read resource aliases a written UAV");
@@ -275,6 +326,7 @@ class GeometryUavDependencyTests : public QObject {
                     QCOMPARE(selected.bytes, std::vector<uint8_t>(full.bytes.begin() + first * 16,
                                                                   full.bytes.begin() + last * 16));
                     selections.push_back(selection);
+                    selections.back()["selected_sha256"] = sha256(selected.bytes);
                     for (uint64_t ordinal = first / 3; ordinal < last / 3; ++ordinal)
                         QCOMPARE(partition.instance(ordinal), std::optional<uint32_t>(instance));
                 }
@@ -308,8 +360,10 @@ class GeometryUavDependencyTests : public QObject {
                                         {"mode", mode.toStdString()},
                                         {"frame_sha256", frame.sha256()},
                                         {"full", full.report},
+                                        {"full_words", fullWords},
                                         {"pixel_geometry", pixelGeometry.report},
                                         {"selections", selections},
+                                        {"selection_rejections", rejections},
                                         {"before_sha256", sha256(before)},
                                         {"after_sha256", sha256(after)},
                                         {"counter_before", counter},

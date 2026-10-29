@@ -17,6 +17,74 @@ inline Capture hullUavReadCapture() {
     capture.add(7005, 9, 0x81, payload);
     return capture;
 }
+inline Capture terminalDomainCapture(const std::string &mode) {
+    auto capture = hullUavReadCapture();
+    const auto replace = [&](Id id, const std::string &source, const char *profile) {
+        std::erase_if(capture.entries, [&](const auto &entry) { return entry.id == id; });
+        const auto code = compileClassProgram(source, profile);
+        auto payload = statePack(uint64_t(code.size()));
+        payload.insert(payload.end(), code.begin(), code.end());
+        append(payload, Id(0));
+        capture.add(id, 9, 0x81, payload);
+    };
+    const std::string declarations =
+        "struct V{float4 p:SV_Position;};"
+        "struct C{float edges[3]:SV_TessFactor;float inside:SV_InsideTessFactor;uint tag:ATTR;};"
+        "RWStructuredBuffer<uint> dst:register(u1);";
+    if (mode == "ds-upstream-alias") {
+        replace(7003,
+                declarations + "C patch(InputPatch<V,3> p,uint pid:SV_PrimitiveID){C c;"
+                               "c.edges[0]=c.edges[1]=c.edges[2]=c.inside=1+(dst[0]%2);c.tag=0;return c;}"
+                               "[domain(\"tri\")][partitioning(\"integer\")][outputtopology(\"triangle_cw\")]"
+                               "[outputcontrolpoints(3)][patchconstantfunc(\"patch\")]"
+                               "V main(InputPatch<V,3> p,uint id:SV_OutputControlPointID){return p[id];}",
+                "hs_5_0");
+    } else {
+        // The HS writes the same first word. This makes cross-replay byte
+        // comparisons deterministic without assuming a graphics UAV schedule.
+        for (const auto &entry : capture.entries)
+            if (entry.id == 11)
+                put(capture.bytes, entry.offset + 4, uint32_t(42));
+    }
+    if (mode == "ds-gs-alias") {
+        const auto code = compileClassProgram(
+            "struct V{float4 p:SV_Position;};[maxvertexcount(9)]"
+            "void main(triangle V v[3],inout TriangleStream<V> output){"
+            "uint count=1+uint(v[0].p.x)%3;for(uint j=0;j<count;++j){"
+            "output.Append(v[0]);output.Append(v[1]);output.Append(v[2]);output.RestartStrip();}}",
+            "gs_5_0");
+        capture.add(8000, 5, 0x91, statePack(Id(0), Id(0), Id(0), Id(0), Id(0), Id(0), Id(8001)));
+        auto payload = statePack(uint64_t(code.size()));
+        payload.insert(payload.end(), code.begin(), code.end());
+        append(payload, Id(0));
+        capture.add(8001, 9, 0x81, payload);
+        State state{};
+        state.sampleMask = UINT32_MAX;
+        state.topology = 35;
+        state.viewports = 22;
+        state.stages[0].shader = 7000;
+        state.stages[1].shader = 7002;
+        state.stages[2].shader = 7004;
+        state.stages[3].shader = 8000;
+        state.rtCount = 2;
+        state.omStart = 1;
+        state.rtv[0] = 21;
+        state.rtv[1] = 12;
+        std::erase_if(capture.entries, [](const auto &entry) { return entry.id == 199; });
+        capture.add(199, 3, 3, snapshot(state));
+        return capture;
+    }
+    replace(7005,
+            declarations +
+                "[domain(\"tri\")]float4 main(C c,float3 loc:SV_DomainLocation,const OutputPatch<V,3> p)"
+                ":SV_Position{uint value;InterlockedOr(dst[0],0,value);"
+                "float4 result=p[0].p*loc.x+p[1].p*loc.y+p[2].p*loc.z;" +
+                (mode == "ds-nonfinite" ? std::string("result.x=asfloat((value&1)?0x7fc00000:0x7f800000);")
+                                        : std::string("if(value)result.x+=value;else result.z+=1;")) +
+                "return result;}",
+            "ds_5_0");
+    return capture;
+}
 inline Capture geometryUavEmissionCapture() {
     auto capture = hullCapture();
     const auto code =

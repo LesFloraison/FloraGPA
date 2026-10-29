@@ -28,9 +28,10 @@ def same_float(a, b):
     return a == b and (a != 0 or math.copysign(1, a) == math.copysign(1, b))
 
 
-def validate(name, job, result, files):
+def validate(name, job, result, files, terminal_domain=False):
     vendor, stage = name.split("-", 1)
-    independent_uav = stage == "ds-uav-independent"
+    domain_read = terminal_domain and stage == "ds-uav"
+    independent_uav = stage == "ds-uav-independent" or domain_read
     resource_read = stage == "gs-read"
     if independent_uav:
         stage = "ds"
@@ -57,15 +58,24 @@ def validate(name, job, result, files):
         proof = data["instance_selection"]["uav_independence"]
         require(proof["input_aliases_excluded"] is True and set(proof["stages"]) == {"vs", "hs", "ds"},
                 "UAV independence input scope")
-        require(all(p["proved"] is True and p["scope"] == "no_uav_results_or_srv_reads"
-                    for p in proof["stages"].values()), "UAV independence proofs")
+        require(all(p["proved"] is True and p["scope"] ==
+                    ("terminal_domain_counts" if terminal_domain and stage == "ds" else "no_uav_results_or_srv_reads")
+                    and p.get("terminal_domain_counts", False) is (terminal_domain and stage == "ds")
+                    for stage, p in proof["stages"].items()), "UAV independence proofs")
         require([p["opcode"] for p in proof["stages"]["hs"]["write_instructions"]] == [178, 168],
                 "original hull writes")
+        if terminal_domain:
+            expected_reads = ([{"stage": "ds", "kind": "uav_slots", "slot": 1, "view": 12,
+                                "aliases_write": True, "count_dependency": False}] if domain_read else [])
+            require(proof["resource_reads"] == expected_reads and proof["write_slots"] == [1], "terminal DS resource reads")
+            require(proof["stages"]["ds"]["read_dependencies"] ==
+                    {"srv_slots": [], "uav_slots": [1] if domain_read else []}, "DS static read dependencies")
     if resource_read:
         proof = data["instance_selection"]["uav_independence"]
         require(proof["input_aliases_excluded"] is True and proof["write_slots"] == [1] and
                 proof["resource_reads"] == [{"stage": "gs", "kind": "srv_slots", "slot": 0,
-                                              "view": 9002, "aliases_write": False}], "immutable mesh inputs")
+                                              "view": 9002, "aliases_write": False,
+                                              **({"count_dependency": True} if terminal_domain else {})}], "immutable mesh inputs")
         require(proof["stages"]["gs"]["scope"] == "immutable_resource_inputs" and
                 proof["stages"]["gs"]["read_dependencies"] == {"srv_slots": [0], "uav_slots": []},
                 "mesh read dependencies")
@@ -119,7 +129,10 @@ def main():
     parser.add_argument("--resource-reads", action="store_true", help="Require all 18 GPU rows including immutable reads")
     parser.add_argument("--indexed-presentation", action="store_true", help="Require compact vertex presentation tests")
     parser.add_argument("--position-channels", action="store_true", help="Require sparse position presentation tests")
+    parser.add_argument("--terminal-domain", action="store_true", help="Require positive DS reads and upstream rejection controls")
     args = parser.parse_args()
+    if args.terminal_domain:
+        args.position_channels = True
     if args.position_channels:
         args.indexed_presentation = True
     if args.indexed_presentation:
@@ -131,6 +144,8 @@ def main():
         expected |= {f"{v}-ds-uav-independent" for v in (0, 4318, 32902)}
     if args.resource_reads:
         expected |= {f"{v}-gs-read" for v in (0, 4318, 32902)}
+    if args.terminal_domain:
+        expected |= {f"{v}-ds-upstream-alias" for v in (0, 4318, 32902)}
     require({p.name for p in args.directory.iterdir() if p.is_dir()} == expected, "complete matrix")
     passed = 35 if args.indexed_presentation else 29 if args.resource_reads else 26 if args.uav_independent else 23
     if args.position_channels:
@@ -141,13 +156,15 @@ def main():
             for special in (0, 1):
                 require(log.count(f"PASS   : NativeReplayMeshUiTests::positionChannels({layout}-special-{special})") == 1,
                         "Missing channel presentation case")
+    if args.terminal_domain:
+        passed += 3
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     records, gates, controls = [], [], 0
     for name in sorted(expected):
         folder = args.directory / name
         job = read_json(folder / "job.json")
-        if name.endswith("-ds-uav"):
+        if name.endswith("-ds-upstream-alias" if args.terminal_domain else "-ds-uav"):
             gate = read_json(folder / "open-gate.json")
             require(gate == {"instance_selection_supported": False, "fallback": False}, "open gate")
             require("Instance boundaries through HS/DS/GS with UAV access" in
@@ -159,7 +176,7 @@ def main():
         files = {p.name: p.read_bytes() for p in folder.iterdir() if p.is_file()}
         if args.indexed_presentation:
             require(files["post_vertices.bin"] == files["vertices.bin"], "unique synthetic vertex records")
-        records.append(validate(name, job, result, files))
+        records.append(validate(name, job, result, files, args.terminal_domain))
         for target in ("request", "module", "vertex", "csv", "obj"):
             altered, changed = copy.deepcopy(result), dict(files)
             if target == "request":
@@ -173,7 +190,7 @@ def main():
             else:
                 changed["post_geometry.obj"] += b"f 999 998 997\n"
             try:
-                validate(name, job, altered, changed)
+                validate(name, job, altered, changed, args.terminal_domain)
             except ValueError:
                 controls += 1
             else:

@@ -90,7 +90,8 @@ class NativeReplayMeshUiTests : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("stage");
         for (auto vendor : {0u, 4318u, 32902u})
-            for (const auto stage : {"vs", "gs", "ds", "ds-uav", "ds-uav-independent", "gs-read"})
+            for (const auto stage :
+                 {"vs", "gs", "ds", "ds-uav", "ds-uav-independent", "ds-upstream-alias", "gs-read"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage)))
                     << vendor << QString(stage);
     }
@@ -395,6 +396,8 @@ class NativeReplayMeshUiTests : public QObject {
                                            : testing::hullCapture();
             if (stage == "ds-uav")
                 fixture = testing::hullUavReadCapture();
+            if (stage == "ds-upstream-alias")
+                fixture = testing::terminalDomainCapture("ds-upstream-alias");
             if (stage == "gs-read")
                 fixture = testing::geometryResourceReadCapture(false, false);
             if (stage == "ds") {
@@ -432,7 +435,7 @@ class NativeReplayMeshUiTests : public QObject {
                 options["warp"] = true;
             const auto worker = QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe";
             const auto job = prepareNativeAnalysisJob(capture, "mesh", output, worker, options);
-            if (stage == "ds-uav") {
+            if (stage == "ds-upstream-alias") {
                 bool rejected = false;
                 try {
                     runNativeAnalysisJob(job, worker, 60);

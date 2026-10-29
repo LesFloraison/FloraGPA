@@ -95,12 +95,13 @@ bool deadAtomicResult(const DxbcProgram &program, size_t at, size_t begin, size_
     return false;
 }
 } // namespace
-nlohmann::json geometryUavIndependence(Bytes bytecode) {
+nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts) {
     using Json = nlohmann::json;
     Json result{{"schema", 1},
                 {"shader_sha256", sha256(bytecode)},
                 {"proved", false},
                 {"scope", "no_uav_results_or_srv_reads"},
+                {"terminal_domain_counts", terminalDomainCounts},
                 {"write_instructions", Json::array()}};
     auto reject = [&](const char *reason) {
         result["reason"] = reason;
@@ -125,6 +126,8 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
         const auto version = program.header[0] & 0xffff, stage = program.header[0] >> 16;
         if ((version != 0x40 && version != 0x41 && version != 0x50) || stage < 1 || stage > 4)
             return reject("Unsupported geometry shader profile");
+        if (terminalDomainCounts && (stage != 4 || version != 0x50))
+            return reject("Terminal domain count proof requires a domain shader");
         if (program.instructions.empty())
             return reject("Empty executable code");
         std::set<uint32_t> srvReads, uavReads;
@@ -165,7 +168,7 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
             const bool atomic = opcode >= 178 && opcode <= 189;
             if (atomic) {
                 const auto [begin, end] = operands.ranges.at(0);
-                if (!deadAtomicResult(program, instruction, begin, end, budget))
+                if (!terminalDomainCounts && !deadAtomicResult(program, instruction, begin, end, budget))
                     return reject("Atomic result may affect geometry");
             }
             for (size_t i = 0; i < operands.ranges.size(); ++i) {
@@ -192,10 +195,12 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
                     uavReads.insert(row[begin + 1]);
                     continue;
                 }
-                result["write_instructions"].push_back({{"token", result["checked_token"]},
-                                                        {"opcode", opcode},
-                                                        {"slot", row[begin + 1]},
-                                                        {"result", atomic ? "proved_dead" : "none"}});
+                result["write_instructions"].push_back(
+                    {{"token", result["checked_token"]},
+                     {"opcode", opcode},
+                     {"slot", row[begin + 1]},
+                     {"result",
+                      atomic ? (terminalDomainCounts ? "terminal_domain_value" : "proved_dead") : "none"}});
             }
         }
         result.erase("checked_token");
@@ -205,6 +210,11 @@ nlohmann::json geometryUavIndependence(Bytes bytecode) {
             result["scope"] = "immutable_resource_inputs";
         result["proved"] = true;
         result["reason"] = "Atomic results are unobservable; resource reads require runtime alias exclusion";
+        if (terminalDomainCounts) {
+            result["scope"] = "terminal_domain_counts";
+            result["reason"] = "DS values do not change tessellator output counts; all writes require "
+                               "upstream alias exclusion";
+        }
         return result;
     } catch (const std::exception &error) {
         result["reason"] = std::string("Unproved bytecode: ") + error.what();

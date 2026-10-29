@@ -276,7 +276,11 @@ class PostTransformCapture {
                 independence = {{"stages", Json::object()}, {"input_aliases_excluded", false}};
                 for (const auto &stage : report.at("executed_stages")) {
                     const auto name = stage.get<std::string>();
-                    const auto proof = geometryUavIndependence(code(state.stages[indices.at(name)].shader));
+                    const bool terminalDomain =
+                        name == "ds" && report.at("shader_stage") == "ds" &&
+                        report.at("executed_stages") == Json::array({"vs", "hs", "ds"});
+                    const auto proof =
+                        geometryUavIndependence(code(state.stages[indices.at(name)].shader), terminalDomain);
                     if (proof.at("proved") != true)
                         fail(name + ": " + proof.at("reason").get<std::string>());
                     independence["stages"][name] = proof;
@@ -323,17 +327,21 @@ class PostTransformCapture {
                             const auto view = std::string_view(kind) == "srv_slots"
                                                   ? state.stages[indices.at(name)].srv.at(slot)
                                                   : outputView(slot);
+                            bool aliasesWrite = false;
                             if (view) {
                                 Com<ID3D11Resource> owner;
                                 r.get<ID3D11View>(view)->GetResource(&owner);
-                                if (writable.contains(owner.Get()))
+                                aliasesWrite = writable.contains(owner.Get());
+                                if (aliasesWrite && !proof.at("terminal_domain_counts").get<bool>())
                                     fail("Read resource aliases a written UAV");
                             }
-                            reads.push_back({{"stage", name},
-                                             {"kind", kind},
-                                             {"slot", slot},
-                                             {"view", view},
-                                             {"aliases_write", false}});
+                            reads.push_back(
+                                {{"stage", name},
+                                 {"kind", kind},
+                                 {"slot", slot},
+                                 {"view", view},
+                                 {"aliases_write", aliasesWrite},
+                                 {"count_dependency", !proof.at("terminal_domain_counts").get<bool>()}});
                         }
                 }
                 independence["write_slots"] = writeSlots;
@@ -1795,9 +1803,27 @@ PixelGeometryInstanceMap validatedPixelGeometryInstances(const PostTransformGeom
             if (!proof.is_object() || proof.at("input_aliases_excluded") != true ||
                 proof.at("stages").size() != geometry.report.at("executed_stages").size())
                 throw std::runtime_error("Geometry instance partition lacks UAV independence");
-            for (const auto &stage : geometry.report.at("executed_stages"))
-                if (proof.at("stages").at(stage.get<std::string>()).at("proved") != true)
+            for (const auto &stage : geometry.report.at("executed_stages")) {
+                const auto &stageProof = proof.at("stages").at(stage.get<std::string>());
+                if (stageProof.at("proved") != true)
                     throw std::runtime_error("Unproved geometry instance UAV dependency");
+                if (stageProof.value("terminal_domain_counts", false) !=
+                    (stageProof.at("scope") == "terminal_domain_counts"))
+                    throw std::runtime_error("Inconsistent terminal domain count scope");
+                if (stageProof.value("terminal_domain_counts", false) &&
+                    (stage != "ds" || geometry.report.at("shader_stage") != "ds" ||
+                     geometry.report.at("executed_stages") != Json::array({"vs", "hs", "ds"}) ||
+                     stageProof.at("scope") != "terminal_domain_counts"))
+                    throw std::runtime_error("Terminal domain count proof applied outside its pipeline");
+            }
+            for (const auto &read : proof.at("resource_reads")) {
+                const bool terminal = proof.at("stages")
+                                          .at(read.at("stage").get<std::string>())
+                                          .value("terminal_domain_counts", false);
+                if (read.value("count_dependency", true) == terminal ||
+                    (read.at("aliases_write") == true && !terminal))
+                    throw std::runtime_error("Geometry read ownership does not prove count independence");
+            }
         }
         uint64_t previous = 0;
         for (uint32_t i = 0; i < total; ++i) {

@@ -214,7 +214,7 @@ class NativeAnalysisTests final : public QObject {
         QTest::addColumn<unsigned>("vendor");
         for (const auto vendor : {0u, 0x10deu, 0x8086u})
             for (const auto scenario : {"vs", "vs-index", "indexed", "tail", "instanced", "ds", "ds-uav",
-                                        "ds-uav-independent", "gs", "gs-read", "auto"})
+                                        "ds-uav-independent", "ds-upstream-alias", "gs", "gs-read", "auto"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(scenario).arg(vendor)))
                     << QString(scenario) << vendor;
     }
@@ -246,6 +246,8 @@ class NativeAnalysisTests final : public QObject {
                                                                     : testing::depthStencilCapture();
             if (scenario == "ds-uav")
                 fixture = testing::hullUavReadCapture();
+            if (scenario == "ds-upstream-alias")
+                fixture = testing::terminalDomainCapture("ds-upstream-alias");
             if (scenario == "gs-read")
                 fixture = testing::geometryResourceReadCapture(false, false);
             const auto event = scenario == "instanced" || scenario.startsWith("ds") || scenario == "auto" ||
@@ -311,7 +313,7 @@ class NativeAnalysisTests final : public QObject {
                 options["gpu_vendor"] = vendor;
             else
                 options["warp"] = true;
-            if (scenario == "ds-uav") {
+            if (scenario == "ds-upstream-alias") {
                 const auto unsupported = prepareNativeAnalysisJob(
                     capture, "mesh", directory.filePath("instance"), worker(), options);
                 bool rejected = false;
@@ -328,10 +330,10 @@ class NativeAnalysisTests final : public QObject {
             const auto result = load(runNativeAnalysisJob(job, worker(), 30));
             const auto mesh = readNativeMesh(job, result, output, 64 * 1024 * 1024);
             // Both original GS draws emit three vertices into the same SO cursor before DrawAuto.
-            const auto expected = scenario == "ds-uav" ? 12u
+            const auto expected = scenario == "ds-upstream-alias" ? 12u
                                   : scenario == "instanced" || scenario == "ds" ||
-                                          scenario == "ds-uav-independent" || scenario == "auto" ||
-                                          scenario == "indexed"
+                                          scenario == "ds-uav-independent" || scenario == "ds-uav" ||
+                                          scenario == "auto" || scenario == "indexed"
                                       ? 6u
                                       : 3u;
             QCOMPARE(mesh.geometry.report.at("vertices").get<unsigned>(), expected);
