@@ -1548,3 +1548,17 @@ Thirty-six synthetic adapter/binding/provenance cases and 864 corruption checks
 pass. Backend identity `dx11-native/4` invalidates earlier cached results.
 The two NVIDIA hardware-oracle failures, tiled/texture feedback coverage and
 full native debugger/release acceptance remain open.
+
+### Native texture feedback execution
+
+The [texture feedback study](research/DX11_NATIVE_TEXTURE_FEEDBACK.md) extends
+opaque mapping status to texture loads, MSAA, typed UAVs, gather variants and
+explicit-level sampling. Both captured and native texture descriptors establish
+non-tiled provenance. Analysis identity is now `dx11-native/5`; input snapshot
+identity is `independent-replay-resource-inputs/12`.
+The independent 126-case matrix checks native execution, original feedback
+shaders, ordinary shaders and computed texel expectations on WARP, NVIDIA and
+Intel. Existing MSAA and typed UAV matrices additionally compare feedback reads
+and original resource state. Clamp feedback, tiled mapping and complete debugger
+qualification remain open, as do the existing NVIDIA buffer oracle failures.
+RenderDoc removal and standalone release acceptance have not been completed.
