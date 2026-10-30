@@ -1,0 +1,401 @@
+{
+  "schema": 1,
+  "implementation_commit": "8d72925f5198873a56238a7b603658b8018c4b8b",
+  "baseline_engine_commit": "c23c2952129fc3b90391500e1ee8aac76739c8eb",
+  "sources_are_git_content": true,
+  "scope": "typed_buffer_output_register_precision",
+  "backend": "dxbc-gpu/30",
+  "renderdoc_removed": false,
+  "complete_release_acceptance": false,
+  "original_fragment_qualification": false,
+  "full_debugger_parity": false,
+  "precision_cases": 11520,
+  "new_direct_output_cases": 4320,
+  "unchanged_temporary_cases": 7200,
+  "unknown_and_cancellation_groups": 864,
+  "exact_components": 46080,
+  "rejected_corruptions": 234,
+  "indexed_artifacts": 46080,
+  "artifact_indexes": [
+    "artifacts/dx11-native/typed-output-precision/validation.json",
+    "artifacts/dx11-native/typed-output-precision/historical-validation.json"
+  ],
+  "adapters": [
+    {
+      "requested_vendor": 0,
+      "device_id": 140,
+      "luid_high": 0,
+      "luid_low": 74655,
+      "vendor_id": 5140
+    },
+    {
+      "requested_vendor": 4318,
+      "device_id": 11352,
+      "luid_high": 0,
+      "luid_low": 69256,
+      "vendor_id": 4318
+    },
+    {
+      "requested_vendor": 32902,
+      "device_id": 32103,
+      "luid_high": 0,
+      "luid_low": 74756,
+      "vendor_id": 32902
+    }
+  ],
+  "suites": [
+    {
+      "role": "compiler_fixture_failure",
+      "log": "artifacts/dx11-native/typed-output-precision/baseline.txt",
+      "passed": 2,
+      "failed": 3,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 66
+    },
+    {
+      "role": "product_baseline",
+      "log": "artifacts/dx11-native/typed-output-precision/direct-baseline.txt",
+      "passed": 2,
+      "failed": 3,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 64
+    },
+    {
+      "role": "product_baseline",
+      "log": "artifacts/dx11-native/typed-output-precision/three-adapter-baseline.txt",
+      "passed": 2,
+      "failed": 9,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 1061
+    },
+    {
+      "role": "stale_binary_attempt",
+      "log": "artifacts/dx11-native/typed-output-precision/focused.txt",
+      "passed": 2,
+      "failed": 18,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 2114
+    },
+    {
+      "role": "focused_initial",
+      "log": "artifacts/dx11-native/typed-output-precision/focused-built.txt",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3515
+    },
+    {
+      "role": "focused_final",
+      "log": "artifacts/dx11-native/typed-output-precision/focused-final.txt",
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3460
+    },
+    {
+      "role": "accepted",
+      "log": "artifacts/dx11-native/typed-output-precision/full.txt",
+      "passed": 2886,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 453248
+    },
+    {
+      "role": "accepted",
+      "log": "artifacts/dx11-native/typed-output-precision/typed-vertex.txt",
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 53639
+    },
+    {
+      "role": "accepted",
+      "log": "artifacts/dx11-native/typed-output-precision/pixel-memory.txt",
+      "passed": 650,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 10448
+    },
+    {
+      "role": "accepted",
+      "log": "artifacts/dx11-native/typed-output-precision/execution.txt",
+      "passed": 1232,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 112450
+    },
+    {
+      "role": "accepted",
+      "log": "artifacts/dx11-native/typed-output-precision/pixel-checkpoint-inputs.txt",
+      "passed": 635,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 122706
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 123463,
+      "sha256": "2111923540da7e10255cc9586a9dbba10c4d83c01d872e4c50687ba49c010d53"
+    },
+    {
+      "path": "src/application/DxbcExecution.h",
+      "bytes": 9286,
+      "sha256": "6909829046f3e2174d18e8096b8d70593a2b896b16feeb2c0e01e874fc4dd82b"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 122056,
+      "sha256": "cf2d9b45d9670c6d5746fdabee8eba633bc16474cab42a0b212b94a6cab9bb9b"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "bytes": 5967,
+      "sha256": "9a55f4bebd4609ac9434c463f9595a224996e945faf32e28108d15d45b600c42"
+    },
+    {
+      "path": "src/application/DxbcTypedBuffer.cpp",
+      "bytes": 6911,
+      "sha256": "492f4fb3d37bd158c63e87a16a578ec1bafc3a4a63090a923e586f37f3e83951"
+    },
+    {
+      "path": "tests/DxbcTypedPixelTests.cpp",
+      "bytes": 46730,
+      "sha256": "d4750955b982d1e44725a0a6aba705473082ad42344d05f52795b9c4bee91770"
+    },
+    {
+      "path": "tools/validate_typed_load_precision.py",
+      "bytes": 10768,
+      "sha256": "0b2fd27d0a0542f79d961698a0831794b5da9653e810bab7b7811cff2bf0091e"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/accepted-build.log",
+      "bytes": 1091,
+      "sha256": "62377dfe9a40e4df0cb784aaae002a6452f51d1a185b61530e68c78abfe77ae3"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline-build.log",
+      "bytes": 1091,
+      "sha256": "b13c4f37df4b1b86b6036278f33e80fe0655bf7c703c2cef241dd781533970c2"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline-comparison.json",
+      "bytes": 132,
+      "sha256": "ce316951ee1c0759ad837ff346fe0222711a3b8b3d659e97fafa8a34e701309d"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline-tests.cpp",
+      "bytes": 43434,
+      "sha256": "24fc1a69d037044cfc8eaae475a4e595b130e5d2cca33a6a419e755eae5c4dcc"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline-tests.exe",
+      "bytes": 589312,
+      "sha256": "c84c02ddadc4ead10ccea70e63ff8b6015e6a869d4c52c695504f89da5a4fe80"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/baseline.txt",
+      "bytes": 1302,
+      "sha256": "71d0017026186b7f75de6c5dc4082db833d3c48f7a83a7f276b58626c97cc65f"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/build.log",
+      "bytes": 3098,
+      "sha256": "1070c661d62f747e5780db3e96ca7a85c9dd26d0c0f5ee89664d58b8c6b63c92"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/direct-baseline-build.log",
+      "bytes": 1091,
+      "sha256": "19c7b297eaf6a3ba1cfe1d6a3931f77029dc4fb4162ff2b5f1b6804c48924252"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/direct-baseline-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/direct-baseline-tests.cpp",
+      "bytes": 45595,
+      "sha256": "996f31d4f25c8731bada7325ace1fe5e4b5989de88fb6c0dce7d2fd738100f3f"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/direct-baseline-tests.exe",
+      "bytes": 595456,
+      "sha256": "f09015d9be0d885c5b6e2e5773352995943ae2e0a4760c1ebc74a251c47c87e7"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/direct-baseline.txt",
+      "bytes": 1060,
+      "sha256": "c5b1ec7c03036bcf27a82e0a55ebeb95ed26558fd58e29d71f0dd7bd6c9f4e10"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/execution.txt",
+      "bytes": 677479,
+      "sha256": "73c6ae63dd51b4f71f3fd247489e1f1a4176650df9b0bd06951f8701ccad0f6a"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/final-build.log",
+      "bytes": 1691,
+      "sha256": "8e18846707a05f25c018d0633d2ec070ccf4af55d6340adcbe9dbf1379f89ef2"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused-built-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused-built.txt",
+      "bytes": 111609,
+      "sha256": "c6cb0af568a9e50f0e59aa0112ae1d4cffa86c90aaee6667bac8fdf249058330"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused-final-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused-final.txt",
+      "bytes": 112680,
+      "sha256": "50b0f7c29cadb4792b546516dab2d14bea15cbc44e51a926464618117334e137"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/focused.txt",
+      "bytes": 4368,
+      "sha256": "da2aa5e7e95a5b697bdf084de2f44082dc8e208390f4e75353f3e0ef442a99cc"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/full-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/full.txt",
+      "bytes": 15147127,
+      "sha256": "5ded1533caf1e67efcd4113d39bc12cd95c30ed2486004e41b6794ecef663cf0"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/historical-validation.json",
+      "bytes": 7266030,
+      "sha256": "7bdf443c20efb4497dad1ca00fef1c6a5a41f842f7a5631ce0e894b79fc37895"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/historical-validator.log",
+      "bytes": 44,
+      "sha256": "8f8c632737843b13236007326e970c04e3ea33826a4f4892a3d91980e54c601d"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/pixel-checkpoint-inputs.txt",
+      "bytes": 49046,
+      "sha256": "e6acd127a04e5065e3da0f0a742feedf01a80510c5c711acb96d6a09b38447d8"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/pixel-memory.txt",
+      "bytes": 36199,
+      "sha256": "d511f793596765885ae1b9bde8dfe46bc551c32e822c6144e37b501bbdae9c84"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/regression-build.log",
+      "bytes": 11350,
+      "sha256": "7032fd1e42b32f593802b967975e66cfda6c25ac9ed7e1ba9149b94325f4d0d4"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/regression-ctest.txt",
+      "bytes": 640,
+      "sha256": "1f097baa114b31a17fa8ce38ea0253a6edaca7a443e12c74dd422d7dfe994bfd"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/three-adapter-baseline-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/three-adapter-baseline.txt",
+      "bytes": 2387,
+      "sha256": "2265484ee8d25f2d27d8717446643b024bba71f57c4d7b7f09aec9f88b31f177"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/typed-vertex.txt",
+      "bytes": 370163,
+      "sha256": "81bc226b85baf51109bce8a7b7c752088b0f54db1b4adbb9458125ff9b64458d"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/unchanged-temporary-matrix.json",
+      "bytes": 458,
+      "sha256": "1382cd7bc212ffecd6ec7ace2e865fc7691e03ae49bf53cc361dad842959e7bd"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/validation.json",
+      "bytes": 11887785,
+      "sha256": "c7054ce028b6ff678ba4f2426e840c55d4c50eb1f9ce975eecfb51bc5cd1f8db"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/validator.log",
+      "bytes": 45,
+      "sha256": "35f958645cb8a080b5032b539166cd23f0e0904a8e14e6b673be255105e3a3ff"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraDxbcExecutionTests.exe",
+      "bytes": 1009664,
+      "sha256": "70891340a96b5ce5062768045489ba9efdaaff85105781b053533c91ca93733e"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraDxbcPixelMemoryTests.exe",
+      "bytes": 576000,
+      "sha256": "210e548774e778d74df1881074a57c7fa7f08e1c872d0f293fddfc27ca3372ea"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraDxbcTypedPixelTests.exe",
+      "bytes": 603648,
+      "sha256": "13488743c07d1ec0e15be7200a8cc79041cea5ad16f08aa8d88052aa2173ad1d"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraDxbcTypedVertexTests.exe",
+      "bytes": 537600,
+      "sha256": "a5b3e7b3bcf481c554b351afd8b09e710f3f8bddd5be256b849b0d79677cb27f"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraGPA.Cli.exe",
+      "bytes": 6217216,
+      "sha256": "936de9d9eca35c6881b33518b9b1203c332e6caeaa20fbd711385cbd6934c458"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraGPA.exe",
+      "bytes": 5181952,
+      "sha256": "ae7514f896350778fd03bce183cad884c7798107d1190764d7749559237334fe"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraGPA.Worker.exe",
+      "bytes": 6217216,
+      "sha256": "2818ab1eb67dfa64ac6bd747bb122dc34beda98994cc3c2ff15f8b848de47175"
+    },
+    {
+      "path": "artifacts/dx11-native/typed-output-precision/binaries/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2846720,
+      "sha256": "f122ee18dcfc564e4a0f6538bb4178a75a77c4deb1e3073b5dd3572d35dddf63"
+    }
+  ]
+}

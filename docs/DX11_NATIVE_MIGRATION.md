@@ -1737,3 +1737,13 @@ three retained pre-fix rejections use the same reference/matrix source after
 formatting. See `research/DX11_PIXEL_UAV_PRECISION.md`. Minimum-precision texture
 UAV reads and output destinations remain separate requirements; this increment
 does not complete P6 parity, original fragment qualification or P7/P8.
+
+Typed-buffer reads now preserve minimum-precision VS/PS output destinations,
+including PS UAV loads, through the owned executor and `dxbc-gpu/30`. Independent
+validation covers 11,520 cases and 46,080 output components, with 234 rejected
+corruptions and 864 unknown/cancellation controls. All prior 7,200 temporary-load
+cases retain identical shader, storage and output evidence. Five suites record
+5,983 passes with no failures or skips; GUI/CLI/Worker builds pass. See
+`research/DX11_TYPED_OUTPUT_PRECISION.md` for retained baseline failures and owned
+fixture provenance. Full P6 parity, original fragment qualification and P7/P8
+remain open.
