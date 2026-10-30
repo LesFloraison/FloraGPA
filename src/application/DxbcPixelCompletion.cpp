@@ -10,8 +10,8 @@ uint32_t word(Bytes bytes, size_t offset) {
     return Reader(bytes.subspan(offset)).read<uint32_t>();
 }
 } // namespace
-PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, uint64_t maxBytes,
-                                               const CancelCheck &cancelled) {
+static PixelCompletionShader addColorTarget(Bytes original, uint32_t target, uint64_t maxBytes,
+                                            const CancelCheck &cancelled, bool allowColor) {
     if (target >= 8 || !maxBytes || original.size() > maxBytes)
         throw std::invalid_argument("Invalid additional pixel completion target or budget");
     checkCancellation(cancelled);
@@ -41,7 +41,7 @@ PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, 
         throw std::runtime_error("Additional pixel target requires an SM4/SM5 pixel shader");
     for (const auto &row : program.instructions) {
         checkCancellation(cancelled);
-        if ((row[0] & 2047) == 101 && row.size() >= 2 && ((row[1] >> 12) & 255) == 2)
+        if (!allowColor && (row[0] & 2047) == 101 && row.size() >= 2 && ((row[1] >> 12) & 255) == 2)
             throw std::runtime_error("Additional pixel target requires a shader without color outputs");
     }
     auto &[tag, output] = parts[signature];
@@ -51,26 +51,32 @@ PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, 
     if (count >= 128 || end > output.size())
         throw std::runtime_error("Additional pixel target signature bounds");
     auto put = [&](size_t offset, uint32_t value) { std::memcpy(output.data() + offset, &value, 4); };
+    uint32_t insertion = 0;
     for (uint32_t i = 0; i < count; ++i) {
         const auto row = 8 + size_t(i) * stride + bias;
         const auto name = word(output, row);
         if (name < end || name >= output.size() ||
-            std::find(output.begin() + name, output.end(), 0) == output.end() || word(output, row + 16) < 8)
+            std::find(output.begin() + name, output.end(), 0) == output.end() ||
+            (!allowColor && word(output, row + 16) < 8) || word(output, row + 16) == target)
             throw std::runtime_error("Additional pixel target conflicts with an output signature");
+        if (word(output, row + 16) < target)
+            insertion = i + 1;
     }
-    // Color registers precede the special depth/coverage signature entries.
-    output.insert(output.begin() + 8, stride, 0);
+    // Keep color registers before special depth/coverage entries and retain
+    // the relative order of every original signature row.
+    const size_t addedRow = 8 + size_t(insertion) * stride;
+    output.insert(output.begin() + addedRow, stride, 0);
     for (uint32_t i = 0; i < count; ++i) {
-        const auto row = 8 + size_t(i + 1) * stride + bias;
+        const auto row = 8 + size_t(i + (i >= insertion)) * stride + bias;
         put(row, word(output, row) + uint32_t(stride));
     }
     put(0, count + 1);
-    put(8 + bias, uint32_t(output.size()));
-    put(8 + bias + 4, target);
-    put(8 + bias + 8, 64);
-    put(8 + bias + 12, 3);
-    put(8 + bias + 16, target);
-    output[8 + bias + 20] = 7;
+    put(addedRow + bias, uint32_t(output.size()));
+    put(addedRow + bias + 4, target);
+    put(addedRow + bias + 8, 64);
+    put(addedRow + bias + 12, 3);
+    put(addedRow + bias + 16, target);
+    output[addedRow + bias + 20] = 7;
     constexpr char name[] = "SV_Target";
     output.insert(output.end(), name, name + sizeof name);
     while (output.size() % 4)
@@ -101,6 +107,10 @@ PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, 
                        {"original_alpha_available", false},
                        {"original_fragment_eligibility", nullptr}};
     return result;
+}
+PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, uint64_t maxBytes,
+                                               const CancelCheck &cancelled) {
+    return addColorTarget(original, target, maxBytes, cancelled, false);
 }
 static PixelCompletionShader markPixelCompletion(Bytes original, uint32_t target,
                                                  std::array<uint32_t, 3> markerBits, uint64_t maxBytes,
@@ -271,6 +281,29 @@ PixelCompletionShader instrumentPixelReturnCount(Bytes original, uint32_t target
     result.identity["requires_private_unblended_target"] = false;
     result.identity["requires_additive_rgb_float32_target"] = true;
     result.identity["alpha_storage_is_original_bits"] = false;
+    return result;
+}
+
+PixelCompletionShader instrumentAuxiliaryPixelReturnCount(Bytes original, uint32_t target, uint64_t maxBytes,
+                                                          const CancelCheck &cancelled) {
+    if (!target || target >= 8 || !maxBytes || original.size() > maxBytes)
+        throw std::invalid_argument("Invalid auxiliary pixel count target or budget");
+    bool declared = false;
+    for (const auto &[tag, part] : readDxbcParts(original)) {
+        checkCancellation(cancelled);
+        if (tag == 0x52444853 || tag == 0x58454853)
+            for (const auto &row : readDxbcProgram(part).instructions)
+                if ((row[0] & 2047) == 101 && row.size() >= 3 && ((row[1] >> 12) & 255) == 2 &&
+                    row.back() == target)
+                    declared = true;
+    }
+    auto prepared = declared ? std::vector<uint8_t>(original.begin(), original.end())
+                             : addColorTarget(original, target, maxBytes, cancelled, true).bytecode;
+    auto result = instrumentPixelReturnCount(prepared, target, maxBytes, cancelled);
+    result.identity["source_sha256"] = sha256(original, cancelled);
+    result.identity["auxiliary_target"] = true;
+    result.identity["output_declaration_added"] = !declared;
+    result.identity["original_rt0_instructions_preserved"] = true;
     return result;
 }
 

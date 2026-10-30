@@ -25,7 +25,7 @@ def sha(path):
 
 def verify(report, vendor, expected=None, alpha=None, component_type=3):
     require(report["schema"] == 1 and report["kind"] == "native_pixel_return_count_observation"
-            and report["backend"] == "native-pixel-return-count/2"
+            and report["backend"] == "native-pixel-return-count/3"
             and report["scope"] == "returning_samples_on_private_additive_target", "Wrong scope")
     require(report["original_fragment_eligibility"] is None and report["original_gpu_schedule"] is False,
             "Unsupported original identity claim")
@@ -47,6 +47,10 @@ def verify(report, vendor, expected=None, alpha=None, component_type=3):
     transport = report["count_transport"]
     require(transport["slot"] == target["slot"] == shader["target"] and transport["view_format"] == 2
             and transport["layer_domain"] == "bound_rtv_view", "Wrong transport identity")
+    require(type(transport["source_slot"]) is int and 0 <= transport["source_slot"] < 8
+            and type(transport["auxiliary_target"]) is bool, "Missing source routing")
+    require((transport["source_slot"] == 0 and transport["slot"] == 1) if transport["auxiliary_target"]
+            else transport["source_slot"] == transport["slot"], "Invalid source routing")
     require(0 <= transport["sample"] < transport["samples"] and 0 <= transport["layer"] < transport["layers"]
             and 0 <= transport["x"] < transport["width"] and 0 <= transport["y"] < transport["height"], "Wrong selection")
     result = report["return_count"]
@@ -152,8 +156,13 @@ def main():
         verify(report, vendor)
         require(report["probe"]["status"] == "ok" and report["probe"]["original_storage_restored"] is True
                 and report["probe"]["count_is_original_fragment_identity"] is False, "Failed real-capture control")
-        require(len({(directory / (n + ".bin")).read_bytes() for n in ("before", "cleared", "marked", "restored")}) == 1,
+        preserved = ("before", "cleared", "restored") if report["count_transport"]["auxiliary_target"] else (
+            "before", "cleared", "marked", "restored")
+        require(len({(directory / (n + ".bin")).read_bytes() for n in preserved}) == 1,
                 "Selected original color storage changed")
+        if report["count_transport"]["auxiliary_target"]:
+            require((directory / "marked.bin").read_bytes() == (directory / "reference.bin").read_bytes(),
+                    "Auxiliary draw changed original RT0 behavior")
         require((directory / "original-draw.bin").read_bytes() == (directory / "reference.bin").read_bytes(),
                 "Original private draw differs from ordinary replay")
         require(sha(directory / "original.dxbc") == report["completion_shader"]["source_sha256"]

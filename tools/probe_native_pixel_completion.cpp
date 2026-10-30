@@ -135,7 +135,11 @@ int main(int argc, char **argv) {
                 PixelPrimitiveInput{report.at("completion_shader").at("input_register").get<uint32_t>(),
                                     report.at("completion_shader").at("input_component").get<uint32_t>()};
         auto rewritten =
-            returnCount         ? instrumentPixelReturnCount(source, slot, 256ull * 1024 * 1024, cancel)
+            returnCount && report.at("count_transport").at("auxiliary_target") == true
+                ? instrumentAuxiliaryPixelReturnCount(source,
+                                                      report.at("count_transport").at("slot").get<uint32_t>(),
+                                                      256ull * 1024 * 1024, cancel)
+            : returnCount       ? instrumentPixelReturnCount(source, slot, 256ull * 1024 * 1024, cancel)
             : args.size() == 12 ? instrumentPixelPrimitivePresence(source, slot, *primitive,
                                                                    256ull * 1024 * 1024, cancel, producer)
             : primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
@@ -163,7 +167,8 @@ int main(int argc, char **argv) {
         if (returnCount) {
             report["probe"].erase("marker_changed_storage");
             report["probe"]["count_is_original_fragment_identity"] = false;
-            report["probe"]["original_target_redirected"] = true;
+            report["probe"]["original_target_redirected"] =
+                !report.at("count_transport").at("auxiliary_target").get<bool>();
         }
         if (primitive) {
             report["probe"].erase("marker_changed_storage");

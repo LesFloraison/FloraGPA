@@ -193,6 +193,7 @@ class NativePixelGeometryReplay {
                     Com<ID3D11Texture2D> diagnosticTransport;
                     Resource transportResource;
                     uint64_t workingBytes = cloneBytes;
+                    bool auxiliaryCount = false;
                     if (depthSelection) {
                         auto *context = r.context_.Get();
                         std::array<ID3D11RenderTargetView *, 8> raw{};
@@ -308,13 +309,39 @@ class NativePixelGeometryReplay {
                             if (raw[i])
                                 count = i + 1;
                         }
-                        const auto target = countSelection->target;
-                        if (!views[target])
+                        const auto sourceTarget = countSelection->target;
+                        auto target = sourceTarget;
+                        if (!views[sourceTarget])
                             throw std::runtime_error("Private pixel count target is not bound");
+                        if (target == 0 && state.stages[4].shader) {
+                            Com<ID3D11BlendState> originalBlend;
+                            context->OMGetBlendState(&originalBlend, nullptr, nullptr);
+                            D3D11_BLEND_DESC desc{};
+                            if (originalBlend)
+                                originalBlend->GetDesc(&desc);
+                            if (desc.AlphaToCoverageEnable) {
+                                const auto output =
+                                    instrumentPixelReturnCount(shader(state.stages[4].shader), 0,
+                                                               request.maxBytes - workingBytes, scoped);
+                                if (output.identity.at("component_type") != 3 &&
+                                    !output.identity.at("coverage_output_declared").get<bool>()) {
+                                    Com<ID3D11UnorderedAccessView> occupied;
+                                    context->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 1,
+                                                                                       1, &occupied);
+                                    if (occupied)
+                                        throw std::runtime_error(
+                                            "Auxiliary pixel count target overlaps UAV slot 1");
+                                    target = 1;
+                                    completionTarget = target;
+                                    auxiliaryCount = true;
+                                    count = std::max(count, target + 1);
+                                }
+                            }
+                        }
                         D3D11_RENDER_TARGET_VIEW_DESC view{};
-                        views[target]->GetDesc(&view);
+                        views[sourceTarget]->GetDesc(&view);
                         Com<ID3D11Resource> resource;
-                        views[target]->GetResource(&resource);
+                        views[sourceTarget]->GetResource(&resource);
                         Com<ID3D11Texture2D> texture;
                         check(resource.As(&texture), "Get 2D pixel count source");
                         D3D11_TEXTURE2D_DESC desc{};
@@ -393,6 +420,8 @@ class NativePixelGeometryReplay {
                                                   0,
                                                   0};
                         report["count_transport"] = {{"slot", target},
+                                                     {"source_slot", sourceTarget},
+                                                     {"auxiliary_target", auxiliaryCount},
                                                      {"source_format", uint32_t(view.Format)},
                                                      {"source_mip", mip},
                                                      {"source_first_layer", firstLayer},
@@ -449,7 +478,10 @@ class NativePixelGeometryReplay {
                                 throw std::runtime_error("Bound GS does not provide a primitive identity");
                         }
                         auto marked =
-                            countSelection
+                            auxiliaryCount
+                                ? instrumentAuxiliaryPixelReturnCount(completionCode, target,
+                                                                      request.maxBytes - workingBytes, scoped)
+                            : countSelection
                                 ? instrumentPixelReturnCount(completionCode, target,
                                                              request.maxBytes - workingBytes, scoped)
                             : accumulatePredicate
@@ -629,7 +661,7 @@ class NativePixelGeometryReplay {
                             {"sample_mask", mask}};
                         if (countSelection) {
                             report["kind"] = "native_pixel_return_count_observation";
-                            report["backend"] = "native-pixel-return-count/2";
+                            report["backend"] = "native-pixel-return-count/3";
                             report["scope"] = "returning_samples_on_private_additive_target";
                             report["completion_target"]["rgb_reduction"] = "add";
                             report["completion_target"]["alpha_reduction"] = "replace";

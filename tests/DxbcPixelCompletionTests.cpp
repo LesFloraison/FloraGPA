@@ -62,7 +62,8 @@ std::array<uint32_t, 4> privatePixel(Replay &r, Id resource, uint32_t sample, ui
     std::memcpy(words.data(), bytes.data(), 16);
     return words;
 }
-void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bool countMarker = false) {
+void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bool countMarker = false,
+                           bool addedTarget = false) {
     auto code = [](Bytes bytes) {
         for (const auto &[tag, part] : readDxbcParts(bytes))
             if (tag == 0x52444853 || tag == 0x58454853)
@@ -75,7 +76,9 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bo
     for (const auto &row : a.instructions)
         if ((row[0] & 2047) == 101 && row.size() >= 3 && ((row[1] >> 12) & 255) == 2 && row.back() == target)
             destination.assign(row.begin() + 1, row.end());
-    QVERIFY(!destination.empty());
+    QVERIFY(addedTarget || !destination.empty());
+    if (addedTarget)
+        destination = {0x00102072, target};
     destination[0] = (destination[0] & ~0xf0u) | (7u << 4);
     if (countMarker)
         destination = {0x00102072, target};
@@ -84,8 +87,14 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bo
     const auto bits = countMarker ? std::array<uint32_t, 3>{0x3f800000, 0x3f800000, 0x3f800000} : marker;
     expectedMarker.insert(expectedMarker.end(), {0x4002, bits[0], bits[1], bits[2], 0});
     size_t output = 0;
+    uint32_t addedDeclarations = 0;
     bool mainBody = true;
     for (const auto &row : a.instructions) {
+        if (addedTarget && output < b.instructions.size() &&
+            b.instructions[output] == std::vector<uint32_t>{0x03000065, 0x00102072, target}) {
+            ++addedDeclarations;
+            ++output;
+        }
         const auto op = row[0] & 2047;
         if (op == 44)
             mainBody = false;
@@ -101,11 +110,50 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bo
         QCOMPARE(observed, row);
     }
     QCOMPARE(output, b.instructions.size());
+    QCOMPARE(addedDeclarations, addedTarget ? 1u : 0u);
 }
 } // namespace
 class DxbcPixelCompletionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void auxiliaryMarker_data() {
+        QTest::addColumn<QString>("kind");
+        QTest::addColumn<QString>("layout");
+        for (const auto *kind : {"float", "uint", "int", "min16float", "min16uint", "min16int"})
+            for (const auto *layout : {"color", "mrt", "depth", "coverage", "sparse"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(kind, layout)))
+                    << QString(kind) << QString(layout);
+    }
+    void auxiliaryMarker() {
+        QFETCH(QString, kind);
+        QFETCH(QString, layout);
+        const auto type = kind.toStdString() + "4";
+        std::string source = "cbuffer C:register(b0){uint4 p;}struct O{" + type + " c:SV_Target0;";
+        if (layout == "mrt" || layout == "sparse")
+            source += type + " d:SV_Target" + (layout == "mrt" ? "1;" : "7;");
+        if (layout == "depth")
+            source += "float z:SV_Depth;";
+        if (layout == "coverage")
+            source += "uint m:SV_Coverage;";
+        source += "};O main(){O o;o.c=" + type + "(7,11,13,p.x);";
+        if (layout == "mrt" || layout == "sparse")
+            source += "o.d=o.c;";
+        if (layout == "depth")
+            source += "o.z=.5;";
+        if (layout == "coverage")
+            source += "o.m=5;";
+        source += "return o;}";
+        const auto original = compileClassProgram(source, "ps_5_0");
+        const auto marked = instrumentAuxiliaryPixelReturnCount(original, 1);
+        unchangedInstructions(original, marked.bytecode, 1, true, layout != "mrt");
+        QCOMPARE(marked.identity["output_declaration_added"], Json(layout != "mrt"));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, instrumentAuxiliaryPixelReturnCount(original, 0));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, instrumentAuxiliaryPixelReturnCount(original, 1, 1));
+        QVERIFY_THROWS_EXCEPTION(
+            OperationCancelled,
+            instrumentAuxiliaryPixelReturnCount(original, 1, 256ull * 1024 * 1024, [] { return true; }));
+        save(marked.identity, original, marked.bytecode);
+    }
     void countMarker_data() {
         QTest::addColumn<QString>("kind");
         for (const auto *kind : {"float", "uint", "int", "min16float", "min16uint", "min16int"})

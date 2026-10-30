@@ -33,6 +33,12 @@ PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
 PixelCompletionShader instrumentPixelReturnCount(Bytes original, uint32_t target,
                                                  uint64_t maxBytes = 256ull * 1024 * 1024,
                                                  const CancelCheck &cancelled = {});
+// Uses an existing nonzero color output or adds one, retaining every original
+// RT0 instruction. The caller must preserve the RT0 binding and provide a
+// private float target without displacing any UAV binding.
+PixelCompletionShader instrumentAuxiliaryPixelReturnCount(Bytes original, uint32_t target,
+                                                          uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                          const CancelCheck &cancelled = {});
 struct PixelPrimitiveMask {
     uint32_t mask = UINT32_MAX, value = 0;
     bool notEqual = false;

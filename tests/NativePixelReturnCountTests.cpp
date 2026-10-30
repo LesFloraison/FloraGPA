@@ -177,7 +177,7 @@ class NativePixelReturnCountTests final : public QObject {
                 QCOMPARE(report.at("return_count").at("valid"), Json(true));
                 QVERIFY(report.at("original_fragment_eligibility").is_null());
                 QCOMPARE(report.at("extra_uav_slots"), Json(0));
-                QCOMPARE(report.at("backend"), Json("native-pixel-return-count/2"));
+                QCOMPARE(report.at("backend"), Json("native-pixel-return-count/3"));
             }
             size_t i = 0;
             for (uint32_t target = 0; target < targets; ++target)
