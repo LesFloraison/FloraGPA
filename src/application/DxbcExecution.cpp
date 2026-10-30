@@ -456,7 +456,7 @@ Program::Program(Bytes dxbc) {
                     return false;
                 const auto dimension = resource->second.first;
                 if (dimension == 1)
-                    return args[0].kind != 2 || !args[0].precision;
+                    return args[0].kind != 2 || data->stage == 0 || data->stage == 1;
                 return op == 45 &&
                        (dimension == 2 || dimension == 3 || dimension == 5 || dimension == 7 ||
                         dimension == 8) &&
@@ -1625,7 +1625,8 @@ Step Lane::step() {
                             ? s.inputs.memory->loadTyped(
                                   p.stage, binding, address.bits[0], declaration.second, resource.select,
                                   destination.mask, args[1].kind == 4, result.memoryGpuAssisted,
-                                  {destination.precision, args[1].precision}, p.refactoringAllowed)
+                                  {destination.precision, args[1].precision}, p.refactoringAllowed,
+                                  destination.kind == 2)
                             : Value{};
             else {
                 if (!multisample && dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 &&

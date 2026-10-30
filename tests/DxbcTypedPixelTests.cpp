@@ -245,7 +245,7 @@ struct Device {
         return result;
     }
     std::array<uint32_t, 4> run(Bytes code, Bytes storage, uint32_t format, uint32_t index,
-                                uint32_t stage = 0, bool typedUav = false) {
+                                uint32_t stage = 0, bool typedUav = false, uint32_t outputPrecision = 0) {
         if (stage != 0)
             return runOtherStage(code, storage, format, index, stage, typedUav);
         const auto vs = compileHlsl("float4 main(uint id:SV_VertexID):SV_Position{"
@@ -285,9 +285,19 @@ struct Device {
         desc = {16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
         initial.pSysMem = values.data();
         check(device->CreateBuffer(&desc, &initial, &constants), "Create pixel reference constants");
-        const D3D11_TEXTURE2D_DESC outputDesc{
-            1, 1, 1, 1, DXGI_FORMAT_R32G32B32A32_UINT, {1, 0}, D3D11_USAGE_DEFAULT, D3D11_BIND_RENDER_TARGET,
-            0, 0};
+        const D3D11_TEXTURE2D_DESC outputDesc{1,
+                                              1,
+                                              1,
+                                              1,
+                                              outputPrecision == 1 || outputPrecision == 2
+                                                  ? DXGI_FORMAT_R32G32B32A32_FLOAT
+                                              : outputPrecision == 4 ? DXGI_FORMAT_R32G32B32A32_SINT
+                                                                     : DXGI_FORMAT_R32G32B32A32_UINT,
+                                              {1, 0},
+                                              D3D11_USAGE_DEFAULT,
+                                              D3D11_BIND_RENDER_TARGET,
+                                              0,
+                                              0};
         check(device->CreateTexture2D(&outputDesc, nullptr, &output), "Create pixel reference output");
         check(device->CreateRenderTargetView(output.Get(), nullptr, &target),
               "Create pixel reference target");
@@ -313,6 +323,44 @@ struct Device {
         return result;
     }
 };
+using Words = std::vector<uint32_t>;
+Words row(uint32_t opcode, std::initializer_list<Words> args) {
+    Words result{opcode};
+    for (const auto &arg : args)
+        result.insert(result.end(), arg.begin(), arg.end());
+    result[0] |= uint32_t(result.size()) << 24;
+    return result;
+}
+Words precisionOperand(Words operand, uint32_t precision) {
+    if (precision) {
+        operand[0] |= 0x80000000u;
+        operand.insert(operand.begin() + 1, 1u | precision << 14);
+    }
+    return operand;
+}
+std::vector<Words> directOutputProgram(uint32_t precision, uint32_t addressPrecision, bool typedUav,
+                                       bool literal, bool partial, bool refactoringAllowed, uint32_t index) {
+    const uint32_t returns = precision < 4 ? 0x5555u : precision == 4 ? 0x3333u : 0x4444u;
+    const uint32_t kind = typedUav ? 30u : 7u;
+    const auto output = [&](uint32_t mask) {
+        return precisionOperand({0x102002u | mask << 4, 0}, precision);
+    };
+    const Words seed = precision < 4 ? Words{0x4002, 0x3e000000, 0xbe800000, 0x3f000000, 0xbf400000}
+                                     : Words{0x4002, 17, 23, 31, 47};
+    const auto address =
+        precisionOperand(literal ? Words{0x4001, index} : Words{0x20800a, 0, 0}, addressPrecision);
+    std::vector<Words> rows{row(106 | (1u << 16) | (refactoringAllowed ? 1u << 11 : 0), {}),
+                            row(89, {{0x208e46, 0, 1}}),
+                            row((typedUav ? 156u : 88u) | 0x800, {{0x1000f2u | kind << 12, 3}, {returns}}),
+                            row(101, {output(15)}), row(54, {output(15), seed})};
+    const auto target = output(partial ? 9u : 15u);
+    const Words resource{0x100006u | kind << 12 | ((partial ? 0x43u : 0x1bu) << 4), 3};
+    rows.push_back(
+        typedUav ? row(163, {target, address, resource})
+                 : row(45 | 0x80000000u, {{0x80000042u, 3u | returns << 6}, target, address, resource}));
+    rows.push_back(row(62, {}));
+    return rows;
+}
 std::vector<uint8_t> storage(uint32_t bytes) {
     const std::array<uint32_t, 4> special{1, 0x80000001, 0x7fc12345, 0x80000000};
     std::vector<uint8_t> result(bytes * 8);
@@ -378,6 +426,7 @@ class DxbcTypedPixelTests final : public QObject {
         QTest::addColumn<bool>("partial");
         QTest::addColumn<bool>("typedUav");
         QTest::addColumn<bool>("refactoringAllowed");
+        QTest::addColumn<bool>("outputDestination");
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (uint32_t stage : {0u, 1u, 5u})
                 for (uint32_t precision : {1u, 2u, 4u, 5u})
@@ -385,21 +434,26 @@ class DxbcTypedPixelTests final : public QObject {
                         for (bool literal : {false, true})
                             for (bool partial : {false, true})
                                 for (bool typedUav : {false, true})
-                                    for (bool refactoringAllowed : {false, true}) {
-                                        if (typedUav && stage != 5 && stage != 0)
-                                            continue;
-                                        QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5-%6-%7-%8")
-                                                                     .arg(vendor)
-                                                                     .arg(stage)
-                                                                     .arg(precision)
-                                                                     .arg(addressPrecision)
-                                                                     .arg(literal)
-                                                                     .arg(partial)
-                                                                     .arg(typedUav)
-                                                                     .arg(refactoringAllowed)))
-                                            << vendor << stage << precision << addressPrecision << literal
-                                            << partial << typedUav << refactoringAllowed;
-                                    }
+                                    for (bool refactoringAllowed : {false, true})
+                                        for (bool outputDestination : {false, true}) {
+                                            if (outputDestination && stage == 5)
+                                                continue;
+                                            if (typedUav && stage != 5 && stage != 0)
+                                                continue;
+                                            QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5-%6-%7-%8")
+                                                                         .arg(vendor)
+                                                                         .arg(stage)
+                                                                         .arg(precision)
+                                                                         .arg(addressPrecision)
+                                                                         .arg(literal)
+                                                                         .arg(partial)
+                                                                         .arg(typedUav)
+                                                                         .arg(refactoringAllowed) +
+                                                                     (outputDestination ? "-output" : "")))
+                                                << vendor << stage << precision << addressPrecision << literal
+                                                << partial << typedUav << refactoringAllowed
+                                                << outputDestination;
+                                        }
     }
     void minimumPrecision() {
         QFETCH(uint32_t, vendor);
@@ -410,9 +464,12 @@ class DxbcTypedPixelTests final : public QObject {
         QFETCH(bool, partial);
         QFETCH(bool, typedUav);
         QFETCH(bool, refactoringAllowed);
+        QFETCH(bool, outputDestination);
         try {
             Device device(vendor);
-            auto gpu = std::make_shared<GpuOperations>(device.device.Get(), vendor == 0);
+            bool cancelled = false;
+            auto gpu =
+                std::make_shared<GpuOperations>(device.device.Get(), vendor == 0, [&] { return cancelled; });
             const std::string type = precision < 4 ? "float" : precision == 4 ? "int" : "uint";
             const auto minimumType = std::string(precision == 2 ? "min10" : "min16") + type;
             const auto format = typedUav         ? precision < 4    ? 41u
@@ -436,19 +493,21 @@ class DxbcTypedPixelTests final : public QObject {
                 const std::string address = literal ? std::to_string(index) + "u" : "p.x";
                 std::string body = addressType + " index=" + addressType + "(" + address + ")+" +
                                    addressType + "(p.y)*" + addressType + "(3);";
-                body += minimumType + "4 value=src[index];uint4 result=uint4(17,23,31,47);";
+                body += minimumType + "4 value=src[index];" + (outputDestination ? minimumType : "uint") +
+                        "4 result=" + (outputDestination ? minimumType : "uint") + "4(17,23,31,47);";
                 const std::string widened = precision < 4    ? "asuint(float4(value))"
                                             : precision == 4 ? "asuint(int4(value))"
                                                              : "uint4(value)";
-                body += partial ? "result.xw=" + widened + ".wy;" : "result=" + widened + ".wzyx;";
+                const auto loaded = outputDestination ? "value" : widened;
+                body += partial ? "result.xw=" + loaded + ".wy;" : "result=" + loaded + ".wzyx;";
                 const auto source =
                     "cbuffer Params:register(b0){uint4 p;}" +
                     std::string(typedUav ? "RWBuffer<" : "Buffer<") + minimumType + "4>src:register(" +
                     (typedUav ? "u3" : "t3") + ");" +
                     (stage == 5
                          ? "RWStructuredBuffer<uint4> output:register(u0);[numthreads(1,1,1)]void main(){"
-                     : stage == 1 ? "uint4 main():TEXCOORD0{"
-                                  : "uint4 main():SV_Target{") +
+                     : stage == 1 ? (outputDestination ? minimumType : "uint") + "4 main():TEXCOORD0{"
+                                  : (outputDestination ? minimumType : "uint") + "4 main():SV_Target{") +
                     body + (stage == 5 ? "output[0]=result;}" : "return result;}");
                 const auto compiled = compileHlsl(source, stage == 5   ? "cs_5_0"
                                                           : stage == 1 ? "vs_5_0"
@@ -459,14 +518,21 @@ class DxbcTypedPixelTests final : public QObject {
                 for (auto &[tag, bytes] : parts)
                     if (tag == 0x58454853 || tag == 0x52444853) {
                         auto program = readDxbcProgram(bytes);
+                        if (outputDestination)
+                            program.instructions =
+                                directOutputProgram(precision, addressPrecision, typedUav, literal, partial,
+                                                    refactoringAllowed, index);
                         for (auto &row : program.instructions)
                             if ((row[0] & 2047) == 106)
                                 row[0] = (row[0] & ~(1u << 11)) | (refactoringAllowed ? 1u << 11 : 0u);
                         programBytes = writeDxbcProgram(program);
                         bytes = programBytes;
                     }
+                if (outputDestination)
+                    std::erase_if(parts, [](const auto &part) { return part.first == 0x54415453; });
                 const auto code = makeDxbc(parts);
-                const auto reference = device.run(code, storageBytes, format, index, stage, typedUav);
+                const auto reference = device.run(code, storageBytes, format, index, stage, typedUav,
+                                                  outputDestination ? precision : 0);
                 const Program program(code);
                 unsigned loads = 0;
                 for (const auto &instruction : program.instructions()) {
@@ -477,6 +543,7 @@ class DxbcTypedPixelTests final : public QObject {
                     const auto first = operands.ranges.at(0).first;
                     QCOMPARE(instruction.words[first] >> 31, 1u);
                     QCOMPARE((instruction.words[first + 1] >> 14) & 7, precision);
+                    QCOMPARE((instruction.words[first] >> 12) & 255, outputDestination ? 2u : 0u);
                     const auto addressFirst = operands.ranges.at(1).first;
                     QCOMPARE(instruction.words[addressFirst] >> 31
                                  ? (instruction.words[addressFirst + 1] >> 14) & 7
@@ -501,6 +568,13 @@ class DxbcTypedPixelTests final : public QObject {
                         256 * 1024 * 1024, 16 * 1024 * 1024, gpu);
                 }
                 Lane lane(program, input);
+                if (outputDestination && index == 0) {
+                    const auto before = gpu->operations();
+                    cancelled = true;
+                    QVERIFY_THROWS_EXCEPTION(OperationCancelled, lane.step());
+                    QCOMPARE(gpu->operations(), before);
+                    cancelled = false;
+                }
                 const auto trace = execute(lane);
                 auto actual = lane.value({2, {0}});
                 if (stage == 5) {
@@ -512,30 +586,58 @@ class DxbcTypedPixelTests final : public QObject {
                                         [](auto b) { return b != 0; }))
                             actual.valid |= uint8_t(1u << c);
                 }
+                uint8_t unknownValidity = 0;
+                if (outputDestination && index == 0) {
+                    auto unknown = input;
+                    auto invalid = Buffer::known(storageBytes);
+                    std::fill(invalid.valid.begin(), invalid.valid.end(), 0);
+                    unknown.memory = std::make_shared<Memory>(
+                        std::map<uint64_t, Buffer>{{1, invalid}},
+                        std::map<Register, BufferView>{
+                            {{typedUav ? 30u : 7u, {3}}, {1, stride, stride * 3, 0, {}, format}}},
+                        256 * 1024 * 1024, 16 * 1024 * 1024, gpu);
+                    Lane unknownLane(program, unknown);
+                    execute(unknownLane);
+                    const auto value = unknownLane.value({2, {0}});
+                    unknownValidity = value.valid;
+                    QCOMPARE(unknownValidity, uint8_t(typedUav ? (partial ? 15 : 7) : (partial ? 6 : 0)));
+                    for (unsigned c = 0; c < 4; ++c)
+                        if (value.valid & (1u << c))
+                            QCOMPARE(value.bits[c], reference[c]);
+                    QCOMPARE(unknown.memory->buffers().at(1).bytes, invalid.bytes);
+                    QCOMPARE(unknown.memory->buffers().at(1).valid, invalid.valid);
+                }
                 const auto name = QString::fromLatin1(QTest::currentDataTag()) + "-" + QString::number(index);
-                nlohmann::json report{{"probe", "typed-load-precision"},
-                                      {"vendor", vendor},
-                                      {"stage", stage},
-                                      {"precision", precision},
-                                      {"address_precision", addressPrecision},
-                                      {"literal", literal},
-                                      {"partial", partial},
-                                      {"typed_uav", typedUav},
-                                      {"refactoring_allowed", refactoringAllowed},
-                                      {"format", format},
-                                      {"index", index},
-                                      {"shader_sha256", hash(code)},
-                                      {"compiler_sha256", hash(compiled)},
-                                      {"reference_adapter",
-                                       {{"vendor_id", device.adapterIdentity.VendorId},
-                                        {"device_id", device.adapterIdentity.DeviceId},
-                                        {"luid_low", device.adapterIdentity.AdapterLuid.LowPart},
-                                        {"luid_high", device.adapterIdentity.AdapterLuid.HighPart}}},
-                                      {"storage_sha256", hash(storageBytes)},
-                                      {"cpu", actual.bits},
-                                      {"gpu", reference},
-                                      {"valid", actual.valid},
-                                      {"helper", gpu->identity()}};
+                nlohmann::json report{
+                    {"probe", "typed-load-precision"},
+                    {"vendor", vendor},
+                    {"stage", stage},
+                    {"precision", precision},
+                    {"address_precision", addressPrecision},
+                    {"literal", literal},
+                    {"partial", partial},
+                    {"typed_uav", typedUav},
+                    {"refactoring_allowed", refactoringAllowed},
+                    {"output_destination", outputDestination},
+                    {"program_origin", outputDestination ? "owned-direct-output" : "compiler"},
+                    {"format", format},
+                    {"index", index},
+                    {"shader_sha256", hash(code)},
+                    {"compiler_sha256", hash(compiled)},
+                    {"reference_adapter",
+                     {{"vendor_id", device.adapterIdentity.VendorId},
+                      {"device_id", device.adapterIdentity.DeviceId},
+                      {"luid_low", device.adapterIdentity.AdapterLuid.LowPart},
+                      {"luid_high", device.adapterIdentity.AdapterLuid.HighPart}}},
+                    {"storage_sha256", hash(storageBytes)},
+                    {"cpu", actual.bits},
+                    {"gpu", reference},
+                    {"valid", actual.valid},
+                    {"helper", gpu->identity()}};
+                if (outputDestination && index == 0) {
+                    report["unknown_validity"] = unknownValidity;
+                    report["cancellation_before_submission"] = true;
+                }
                 report["steps"] = nlohmann::json::array();
                 for (const auto &step : trace) {
                     nlohmann::json changes = nlohmann::json::array();

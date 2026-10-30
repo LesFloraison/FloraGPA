@@ -53,7 +53,8 @@ class GpuOperations {
                                        const std::array<int32_t, 3> &offset);
     Value loadTyped(uint32_t stage, const Buffer &, const BufferView &, uint32_t kind, uint32_t &index,
                     uint32_t returns, const std::array<uint32_t, 4> &, uint32_t mask, bool literal,
-                    const std::array<uint32_t, 2> &precision, bool refactoringAllowed);
+                    const std::array<uint32_t, 2> &precision, bool refactoringAllowed,
+                    bool outputDestination = false);
     std::vector<uint8_t> storeTyped(const Buffer &, const BufferView &, uint32_t index, uint32_t returns,
                                     const Value &, bool literal, uint32_t stage = 5);
     std::vector<Value> instruction(uint32_t stage, const Instruction &, const std::vector<Register> &,

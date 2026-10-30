@@ -75,7 +75,8 @@ class Memory {
     friend class Lane;
     Value loadTyped(uint32_t stage, const Register &, uint32_t index, uint32_t returns,
                     const std::array<uint32_t, 4> &, uint32_t mask, bool literal, bool &assisted,
-                    const std::array<uint32_t, 2> &precision = {}, bool refactoringAllowed = false) const;
+                    const std::array<uint32_t, 2> &precision = {}, bool refactoringAllowed = false,
+                    bool outputDestination = false) const;
     std::vector<MemoryChange> storeTyped(const Register &, uint32_t index, uint32_t returns, const Value &,
                                          bool literal, bool &assisted, uint32_t stage = 5) const;
     Value load(const Register &binding, bool structured, uint32_t index, uint32_t offset,
