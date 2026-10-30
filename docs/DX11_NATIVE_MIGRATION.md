@@ -1835,3 +1835,13 @@ pass validation, and 990 corruptions are rejected. See
 `research/DX11_NATIVE_DEPTH_RETURN_COUNTS.md`. Mixed color/depth bindings and
 other explicit transport restrictions remain open, as do original fragment
 qualification, full debugger parity, P1 closure and P7/P8 removal/release gates.
+
+Depth counting now handles mixed color/depth bindings by checking view extents
+and reusing the native color transport, including integer RT0 coverage protection.
+The effective shader's minimum-precision declarations and separate source-layer
+domains are retained. Five suites pass 713 checks; 180 mixed and 117 depth-only
+observations plus 60 Worker/CLI jobs pass validation, rejecting 2,271 alterations.
+A separate historical color-verifier regression preserves 450 observations and
+1,800 negative controls. See `research/DX11_NATIVE_MIXED_DEPTH_COUNTS.md`.
+Mixed null-PS and other explicit transport boundaries remain, together with
+complete fragment reconstruction, debugger parity, P1 closure and P7/P8 gates.

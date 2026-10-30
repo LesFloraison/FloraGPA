@@ -76,31 +76,37 @@ execution order, helper invocation or instance. Read the scope and validity
 fields before consuming these observations.
 
 `return_count_observation` reports `not_requested`, `not_applicable`, `observed`
-or `unknown`. Depth selections with bound color outputs and color selections
-without a PS remain not applicable and retain a null count. Depth-only draws can accumulate
-counts through a private color transport, including draws without a PS. A
-successful count belongs to the private diagnostic draw; it does not establish original fragment identities, instance,
-order or resource modifications. The complete observation retains the GPA event,
-frame hash, shaders, actual adapter, source view, color routing slots when
-applicable, and raw count words. Absolute resource layers are translated to the selected RTV's relative
-layer. No geometry-record count or occlusion query is substituted for this value.
+or `unknown`. Color selections without a PS, and mixed color/depth bindings
+without a PS, remain not applicable with a null count. Depth-only draws can
+accumulate counts through a private color transport even without a PS. A
+successful count belongs to the diagnostic draw; it does not establish original
+fragment identities, instance, order or original resource modifications. The
+observation retains GPA event/frame/shader identity, actual adapter, source views,
+color routing slots when applicable, and raw count words. No geometry-record
+count or occlusion query is substituted for this value.
 
 Counting adds one complete draw for an applicable color or depth selection. It
-shares the
-history deadline and cancellation signal and bounds transport and retained
-observation payloads with `--max-bytes`. Existing readback telemetry counts
-selected original-storage snapshots; the count transport has its own report.
-Color counts require a 2D RTV, including array and MSAA variants. Depth-only
-counts use a 2D DSV and require no bound RTVs, no occupied UAV slot zero, no
-original color export and disabled alpha-to-coverage. A missing PS is replaced
-with an owned empty shader before adding the diagnostic output. The resulting
-count is not an original PS invocation count. Depth transport records source
-mip and first layer; its selected layer is relative to the DSV. See the
-[depth count evidence](research/DX11_NATIVE_DEPTH_RETURN_COUNTS.md).
-Integer RT0 alpha-to-coverage may use RT1 to preserve RT0 behavior; an application
-UAV at slot 1 prevents that route and fails explicitly. Unsupported requests do
-not publish a successful result or switch backend. See the
-[Worker integration evidence](research/DX11_HISTORY_RETURN_COUNT_JOBS.md).
+shares the history deadline and cancellation signal, with transport and retained
+payloads bounded by `--max-bytes`. Existing readback telemetry counts selected
+original-storage snapshots; the count transport has its own report.
+
+With mixed outputs, depth counting selects a declared and bound PS color output.
+Its 2D view must match the DSV's width, height, layer count, sample count and
+quality. The relative raster layer aligns across the views; their source mips
+and first resource layers remain separate. The route retains the original DSV
+and reuses color accumulation, including integer RT0 coverage protection. See
+[mixed-output verification](research/DX11_NATIVE_MIXED_DEPTH_COUNTS.md).
+
+Without bound RTVs, depth counts use the existing 2D DSV transport and require
+an unused UAV slot zero, no original color export and disabled alpha-to-coverage.
+A missing PS is replaced with an owned empty shader before adding the output;
+the count is not an original PS invocation count. Array/MSAA views are supported.
+See [depth-only evidence](research/DX11_NATIVE_DEPTH_RETURN_COUNTS.md).
+
+Integer RT0 alpha-to-coverage may use RT1 for accumulation; an application UAV
+at slot 1 prevents that route and fails explicitly. Unsupported requests do not
+switch backend. No successful result is published after an execution failure.
+See the [Worker count contract](research/DX11_HISTORY_RETURN_COUNT_JOBS.md).
 
 `primitive_presence_observation` uses RGB maximum accumulation, so a later
 nonmatching return cannot erase an earlier positive marker. Repeated agreement
