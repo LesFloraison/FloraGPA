@@ -16,7 +16,9 @@ using Json = nlohmann::json;
 bool MainWindow::textureMode() const {
     return resourceImages_ && resourceImages_->currentWidget() == texturePane_;
 }
-bool MainWindow::historyBackendReady() const { return historyBackendCompatible(history_->backendPath()); }
+bool MainWindow::historyBackendReady() const {
+    return history_->nativeMode() || historyBackendCompatible(history_->backendPath());
+}
 void MainWindow::clearResourceBinding() {
     selectedBinding_.reset();
     resourceBrowser_->clearSelection();
@@ -319,12 +321,13 @@ void MainWindow::pumpResourceJobs() {
     if (!pendingPixel_.is_null()) {
         auto p = pendingPixel_;
         pendingPixel_ = nullptr;
-        if (p.at("context") != historyContextKey().toStdString())
+        if (p.at("context") != historyContextKey().toStdString() ||
+            p.value("native_events", false) != history_->nativeMode())
             return;
         history_->setWorkerBusy(false);
         history_->queryPixel(p.at("event").get<Id>(), p.at("resource").get<Id>(), p.at("x").get<int>(),
                              p.at("y").get<int>(), p.at("mip").get<int>(), p.at("layer").get<int>(),
-                             p.at("sample").get<int>());
+                             p.at("sample").get<int>(), p.value("slice", 0));
         return;
     }
     if (replayTimer_.isActive() || textureTimer_.isActive() || bufferTimer_.isActive() ||
@@ -395,7 +398,7 @@ void MainWindow::requestHistoryPixel(Id event, Id resource, int x, int y, int mi
         return;
     leftTabs_->setCurrentWidget(history_);
     (textureMode() ? textureImage_ : image_)->setSelectedPixel(QPoint(x, y));
-    if (!historyBackendCompatible(history_->backendPath())) {
+    if (!historyBackendReady()) {
         history_->setNotice("RenderDoc 1.45 required. Select RenderDoc… and retry.");
         return;
     }
@@ -407,13 +410,16 @@ void MainWindow::requestHistoryPixel(Id event, Id resource, int x, int y, int mi
     }
     if (busy())
         cancel();
+    const bool nativeVolume = history_->nativeMode() && frame_->entry(resource).type == 0x86;
     pendingPixel_ = {{"context", historyContextKey().toStdString()},
+                     {"native_events", history_->nativeMode()},
                      {"event", event},
                      {"resource", resource},
                      {"x", x},
                      {"y", y},
                      {"mip", mip},
-                     {"layer", layer},
+                     {"layer", nativeVolume ? 0 : layer},
+                     {"slice", nativeVolume ? layer : 0},
                      {"sample", sample}};
     history_->setNotice(QString("Queued · (%1, %2) · sample %3").arg(x).arg(y).arg(sample));
     resourceTimer_.start();

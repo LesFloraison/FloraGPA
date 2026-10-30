@@ -359,7 +359,13 @@ MainWindow::MainWindow() : loader_(this) {
                 throw std::runtime_error(outcome.error.toStdString());
             if (outcome.result.at("context").at("frame_sha256") != frame_->sha256())
                 throw std::runtime_error("Native analysis frame changed");
-            if (runningNativeMesh_) {
+            if (runningNativeHistory_) {
+                const auto report = outcome.artifacts.value("history.json");
+                if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
+                    throw std::runtime_error("Native history artifact disagrees with the result");
+                accepted = history_->finishNative(nativeRequestId_, outcome.result);
+                statusBar()->showMessage(accepted ? "Event storage history ready" : "Analysis context changed", 3000);
+            } else if (runningNativeMesh_) {
                 accepted = replayMesh_->finishNative(nativeRequestId_, outcome.result, outcome.mesh);
                 statusBar()->showMessage(accepted ? "Replay mesh ready" : "Analysis context changed", 3000);
             } else if (runningNativeDebug_) {
@@ -373,7 +379,9 @@ MainWindow::MainWindow() : loader_(this) {
                 statusBar()->showMessage(accepted ? "Replay metrics ready" : "Analysis context changed", 3000);
             }
         } catch (const std::exception &error) {
-            if (runningNativeMesh_)
+            if (runningNativeHistory_)
+                history_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+            else if (runningNativeMesh_)
                 replayMesh_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}}, {});
             else if (runningNativeDebug_)
                 nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
@@ -388,6 +396,7 @@ MainWindow::MainWindow() : loader_(this) {
         }
         runningNativeDebug_ = false;
         runningNativeMesh_ = false;
+        runningNativeHistory_ = false;
         emit taskFinished(accepted);
     });
     connect(&process_, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
@@ -1330,7 +1339,9 @@ void MainWindow::buildUi() {
         const auto layer =
             textureMetadata_["dimension"].toInt() == 4 ? preview["slice"].toInt() : preview["layer"].toInt();
         const auto sample = textureMetadata_["msaa"].toObject()["selected_sample"].toInt(0);
-        history_->selectPixel(selectedResource_, x, y, preview["mip"].toInt(), layer, sample);
+        const bool nativeVolume = history_->nativeMode() && textureMetadata_["dimension"].toInt() == 4;
+        history_->selectPixel(selectedResource_, x, y, preview["mip"].toInt(), nativeVolume ? 0 : layer,
+                              sample, nativeVolume ? layer : 0);
         replayDebug_[1]->selectPixel(x, y, sample);
         statusBar()->showMessage(QString("History pixel %1, %2 · T:%3").arg(x).arg(y).arg(selectedResource_),
                                  4000);
@@ -1535,6 +1546,10 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
                          : history_->finish(historyRequestId_, result);
 }
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
+    if (!view && kind == RdcAnalysis::History && history_->nativeMode()) {
+        readNativeHistory();
+        return;
+    }
     if (kind == RdcAnalysis::Mesh && replayMesh_->nativeMode()) {
         readNativeMesh();
         return;
@@ -1590,12 +1605,42 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
         emit taskFinished(false);
     }
 }
+void MainWindow::readNativeHistory() {
+    if (busy() || !frame_)
+        return;
+    nativeRequestId_ = history_->requestId();
+    nativeContextKey_ = historyContextKey();
+    runningNativeHistory_ = true;
+    runningNativeMesh_ = false;
+    runningNativeDebug_ = false;
+    try {
+        replayTimer_.stop();
+        textureTimer_.stop();
+        bufferTimer_.stop();
+        auto options = history_->request();
+        options.erase("action");
+        if (adapter_->currentIndex() == 1)
+            options["warp"] = true;
+        else if (const auto vendor = selectedReplayVendor(*adapter_))
+            options["gpu_vendor"] = *vendor;
+        nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
+                              "history", options, experiment_ ? experiment_->document() : nlohmann::json());
+        setBusy(true);
+        statusBar()->showMessage("Reading event storage history…");
+    } catch (const std::exception &error) {
+        runningNativeHistory_ = false;
+        history_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
+        showError(QString::fromUtf8(error.what()));
+        emit taskFinished(false);
+    }
+}
 void MainWindow::readNativeMesh() {
     if (busy() || !frame_)
         return;
     nativeRequestId_ = replayMesh_->requestId();
     nativeContextKey_ = historyContextKey();
     runningNativeMesh_ = true;
+    runningNativeHistory_ = false;
     runningNativeDebug_ = false;
     try {
         replayTimer_.stop();
@@ -1623,6 +1668,7 @@ void MainWindow::readNativeCounters() {
         return;
     nativeRequestId_ = nativeCounters_->requestId();
     runningNativeDebug_ = false;
+    runningNativeHistory_ = false;
     runningNativeMesh_ = false;
     nativeContextKey_ = historyContextKey();
     try {
@@ -1650,6 +1696,7 @@ void MainWindow::readNativeDebug() {
     nativeRequestId_ = nativeDebug_->requestId();
     nativeContextKey_ = historyContextKey();
     runningNativeDebug_ = true;
+    runningNativeHistory_ = false;
     runningNativeMesh_ = false;
     try {
         replayTimer_.stop();
@@ -4220,10 +4267,11 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
         selectedResource_ = resource;
         updateExperimentActions();
         const auto coordinate = entry.type == 0x86 ? display.at("slice") : display.at("layer");
-        history_->selectPixel(resource, x, y, display.at("mip").get<int>(), coordinate.get<int>(),
+        const bool nativeVolume = history_->nativeMode() && entry.type == 0x86;
+        history_->selectPixel(resource, x, y, display.at("mip").get<int>(), nativeVolume ? 0 : coordinate.get<int>(),
                               display.value("sample", nlohmann::json(nullptr)).is_number()
                                   ? display.at("sample").get<int>()
-                                  : 0);
+                                  : 0, nativeVolume ? coordinate.get<int>() : 0);
         replayDebug_[1]->selectPixel(x, y,
                                      display.value("sample", nlohmann::json(nullptr)).is_number()
                                          ? display.at("sample").get<int>()

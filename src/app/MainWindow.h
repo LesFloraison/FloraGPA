@@ -167,11 +167,13 @@ class MainWindow final : public QMainWindow {
     NativeExecutionDebugView *nativeDebug_ = nullptr;
     bool runningNativeDebug_ = false;
     bool runningNativeMesh_ = false;
+    bool runningNativeHistory_ = false;
     bool nativeDebugOperation_ = false;
     NativeAnalysisController nativeAnalysis_;
     void readNativeCounters();
     void readNativeDebug();
     void readNativeMesh();
+    void readNativeHistory();
     uint64_t nativeRequestId_{};
     QString nativeContextKey_;
     ReplayMeshView *replayMesh_ = nullptr;
