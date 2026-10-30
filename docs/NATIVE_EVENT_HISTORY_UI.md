@@ -36,7 +36,25 @@ depth/stencil, unsigned MSAA values and a volume clear at mip 1, slice 1. It als
 checks cancellation/retry, experiment disable/undo, navigation, image picking,
 queued mode changes, stale result rejection and malformed-result rejection.
 The explicit legacy DLL path is nonexistent. Exported native Worker module
-lists contain neither RenderDoc nor private GPA modules.
+lists at completion contain neither RenderDoc nor private GPA modules. This is
+not a lifetime module trace or clean-machine release audit.
+
+Implementation commit: `622d7da8f2604207d8e46628772dd74cc15cfb9d`.
+
+| Suite | Passed | Failed | Skipped |
+| --- | ---: | ---: | ---: |
+| Native history UI | 15 | 0 | 0 |
+| Existing history UI | 4 | 0 | 3 |
+| Native counters UI | 7 | 0 | 0 |
+| Native replay mesh UI | 99 | 0 | 0 |
+| Native execution debugger UI | 17 | 0 | 0 |
+
+The final history suites took 33.249 and 28.152 seconds. The three adjacent
+consumer suites passed serial CTest execution in 61.11 seconds. Release GUI and
+Worker builds passed. Twelve exported native reports cover the four fixture
+kinds on all three adapters, and screenshots were inspected for visible values.
+Source and local artifact identities are pinned in
+`research/dx11-native-event-history-ui-evidence.json`.
 
 ```powershell
 cmake --build build/vs2022 --config Release --parallel 4 --target FloraNativeHistoryUiTests FloraGPA
