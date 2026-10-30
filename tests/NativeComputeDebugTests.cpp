@@ -48,6 +48,123 @@ QString worker() { return QCoreApplication::applicationDirPath() + "/FloraGPA.Wo
 class NativeComputeDebugTests : public QObject {
     Q_OBJECT
   private slots:
+    void maskedSadWorkflow_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void maskedSadWorkflow() {
+        QFETCH(uint32_t, vendor);
+        try {
+            QTemporaryDir temporary;
+            const auto retained = qEnvironmentVariable("FLORA_DXBC_MSAD_EVIDENCE");
+            QDir dir(retained.isEmpty() ? temporary.path()
+                                        : QDir(retained).filePath("workflow-" + QString::number(vendor)));
+            QVERIFY(dir.mkpath("."));
+            const auto capture = dir.filePath("frame.gpa_frame");
+            computeCapture(true).save(capture);
+            Frame frame(capture.toStdWString());
+            const std::string source = R"(cbuffer Constants:register(b0){uint4 c;}
+StructuredBuffer<uint> input:register(t0);
+RWStructuredBuffer<uint> output:register(u0);
+[numthreads(1,1,1)]void main(){
+    uint4 scores = msad4(c.x,uint2(input[0],input[1]),uint4(1,2,3,4));
+    output[0]=scores.x; output[1]=scores.y;
+    output[2]=scores.z; output[3]=scores.w;
+})";
+            Com<ID3DBlob> compiled, errors;
+            check(D3DCompile(source.data(), source.size(), "msad-workflow.hlsl", nullptr, nullptr, "main",
+                             "cs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0, &compiled,
+                             &errors),
+                  "Compile MSAD workflow");
+            const auto begin = static_cast<const uint8_t *>(compiled->GetBufferPointer());
+            std::vector<uint8_t> shader(begin, begin + compiled->GetBufferSize());
+            Experiment project(frame);
+            project.setShader(frame, 15, shader, source, "main");
+            const auto experiment = dir.filePath("experiment.json");
+            project.save(experiment);
+            Json selection{{"gpa_event", 100}, {"max_steps", 1000}, {"max_trace_bytes", 1048576}};
+            selection[vendor ? "gpu_vendor" : "warp"] = vendor ? Json(vendor) : Json(true);
+            const auto job = prepareNativeAnalysisJob(capture, "debug-thread", dir.filePath("worker"),
+                                                      worker(), selection, experiment);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 30));
+            validateNativeAnalysisResult(job, result);
+            auto artifacts = readNativeArtifacts(dir.filePath("worker"), result.at("artifacts"), 1048576);
+            NativeDebugSession session(job, result, artifacts);
+            auto &model = session.model();
+            QVERIFY(!model.files().empty());
+            size_t selected = 0;
+            for (size_t i = 0; i < model.size(); ++i) {
+                try {
+                    if (model.evaluate(i, "scores.x").text() == "6")
+                        selected = i;
+                } catch (const std::exception &) {
+                    // The local variable is unavailable before its assignment.
+                }
+            }
+            QVERIFY(selected > 0);
+            model.move(selected);
+            model.addWatch("scores.x");
+            const auto raw = model.registerValues(), watches = model.watchResults();
+            session.exportArchive(dir.filePath("session.zip"), model.exportReport());
+            NativeDebugSession restored(job, result, artifacts);
+            restored.model().importConfiguration(model.configuration());
+            restored.model().move(selected);
+            QCOMPARE(restored.model().registerValues(), raw);
+            QCOMPARE(restored.model().watchResults(), watches);
+            dxbc_exec::ExecutionTraceReader trace(session.tracePath(),
+                                                  result.at("artifacts").at("trace.jsonl").at("sha256"));
+            trace.moveTo(trace.size());
+            const auto output = trace.storage().at({dxbc_exec::TraceSpace::Buffer, 7});
+            auto replayOptions = options(vendor);
+            replayOptions.before = false;
+            project.apply(frame, replayOptions);
+            Replay replay(frame, replayOptions);
+            replay.run();
+            const auto original = replay.readBuffer(7);
+            const std::array<uint32_t, 4> expected{6, 4, 5, 6};
+            const std::vector<uint8_t> expectedBytes(reinterpret_cast<const uint8_t *>(expected.data()),
+                                                     reinterpret_cast<const uint8_t *>(expected.data() + 4));
+            QCOMPARE(original, expectedBytes);
+            QCOMPARE(output.bytes, original);
+            QCOMPARE(output.valid, std::vector<uint8_t>(16, 1));
+            trace.moveTo(0);
+            const std::array<uint32_t, 4> initial{10, 0, 0, 0};
+            QCOMPARE(trace.storage().at({dxbc_exec::TraceSpace::Buffer, 7}).bytes,
+                     std::vector<uint8_t>(reinterpret_cast<const uint8_t *>(initial.data()),
+                                          reinterpret_cast<const uint8_t *>(initial.data() + 4)));
+            QProcess cli;
+            QStringList arguments{"analyze",      capture,    "debug-thread", "--gpa-event",      "100",
+                                  "--experiment", experiment, "--out",        dir.filePath("cli")};
+            if (vendor)
+                arguments << "--gpu-vendor" << QString::number(vendor);
+            else
+                arguments << "--warp";
+            cli.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", arguments);
+            QVERIFY(cli.waitForFinished(30000));
+            QCOMPARE(cli.exitCode(), 0);
+            const auto cliResult = load(dir.filePath("cli/result.json"));
+            QCOMPARE(cliResult.at("data").at("invocation"), result.at("data").at("invocation"));
+            dxbc_exec::ExecutionTraceReader cliTrace(
+                dir.filePath("cli/trace.jsonl"), cliResult.at("artifacts").at("trace.jsonl").at("sha256"));
+            cliTrace.moveTo(cliTrace.size());
+            QCOMPARE(cliTrace.storage().at({dxbc_exec::TraceSpace::Buffer, 7}).bytes, original);
+            Json report{{"vendor", vendor},
+                        {"selected", selected},
+                        {"watches", watches},
+                        {"location", model.location()},
+                        {"original_output", original},
+                        {"native_output", output.bytes},
+                        {"initial_output", initial},
+                        {"configuration", model.configuration()}};
+            QFile file(dir.filePath("workflow.json"));
+            QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+            const auto data = report.dump(2);
+            QCOMPARE(file.write(data.data(), qint64(data.size())), qint64(data.size()));
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void feedbackWorkflow_data() {
         QTest::addColumn<uint32_t>("vendor");
         for (uint32_t vendor : {0u, 4318u, 32902u})
@@ -472,7 +589,7 @@ RWStructuredBuffer<uint> output:register(u0);
                                                   selection, experiment);
         const auto result = load(runNativeAnalysisJob(job, worker(), 30));
         validateNativeAnalysisResult(job, result);
-        QCOMPARE(result.at("backend"), Json("dx11-native/11"));
+        QCOMPARE(result.at("backend"), Json("dx11-native/17"));
         QCOMPARE(result.at("data").at("invocation").at("dispatch_groups"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("invocation").at("group_size"), Json({2, 2, 1}));
         QCOMPARE(result.at("data").at("trace_file"), Json("trace.jsonl"));

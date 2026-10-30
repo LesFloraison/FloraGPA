@@ -112,6 +112,84 @@ InputSnapshot fixture() {
 class DxbcExecutionTraceTests : public QObject {
     Q_OBJECT
   private slots:
+    void maskedSadRoundTrip_data() {
+        QTest::addColumn<uint32_t>("stage");
+        QTest::addColumn<bool>("overflow");
+        for (uint32_t stage : {0u, 1u, 5u})
+            for (bool overflow : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(stage).arg(overflow))) << stage << overflow;
+    }
+    void maskedSadRoundTrip() {
+        QFETCH(uint32_t, stage);
+        QFETCH(bool, overflow);
+        auto row = [](uint32_t opcode, std::vector<uint32_t> words) {
+            words.insert(words.begin(), opcode | (uint32_t(words.size() + 1) << 24));
+            return words;
+        };
+        InputSnapshot input;
+        input.stage = stage == 0 ? 4 : stage == 1 ? 0 : 5;
+        input.event = 19;
+        input.shader = 17;
+        input.frameSha256 = std::string(64, 'a');
+        input.inputs.constantBuffers[0] = {Value::known({0, 0x010000ff, 0xffffffff, 0x807f0100}),
+                                           Value::known({0xffffffff, 0xff010000, 0, 0x7f8000ff}),
+                                           Value::known({17, 23, 100, overflow ? UINT32_MAX : 100u})};
+        std::vector<std::vector<uint32_t>> rows{row(89, {0x208e46, 0, 3}), row(104, {1})};
+        if (stage == 5)
+            rows.push_back(row(155, {1, 1, 1}));
+        rows.push_back(row(54, {0x1000f2, 0, 0x4002, 19, 31, 47, 59}));
+        rows.push_back(row(213, {0x1000f2, 0, 0x208e46, 0, 0, 0x208e46, 0, 1, 0x208e46, 0, 2}));
+        rows.push_back(row(62, {}));
+        input.bytecode = makeDxbc({{0x58454853, writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows})}});
+        QTemporaryDir directory;
+        const auto path = directory.filePath("trace.jsonl");
+        const auto summary = stage == 0   ? exportPixelExecutionTrace(path, input, {})
+                             : stage == 1 ? exportVertexExecutionTrace(path, input)
+                                          : exportGroupExecutionTrace(path, input);
+        const auto trace = read(path);
+        const Program program(input.bytecode);
+        Projection projection;
+        std::vector<Json> steps;
+        unsigned observations = 0;
+        for (const auto &r : trace) {
+            if (r.at("record") != "step")
+                projection.initial(r);
+            else {
+                projection.apply(r, true);
+                steps.push_back(r);
+                if (program.instructions().at(r.at("instruction").get<size_t>()).opcode == 213) {
+                    const auto &after = r.at("register_changes")[0].at("after");
+                    QCOMPARE(after.at("valid_components"), Json(overflow ? 7 : 15));
+                    QCOMPARE(after.at("bits")[0], Json(17));
+                    QCOMPARE(after.at("bits")[1], Json(532));
+                    QCOMPARE(after.at("bits")[2], Json(1120));
+                    if (!overflow)
+                        QCOMPARE(after.at("bits")[3], Json(103));
+                    ++observations;
+                }
+            }
+        }
+        QCOMPARE(observations, stage == 0 ? 4u : 1u);
+        for (auto it = steps.rbegin(); it != steps.rend(); ++it)
+            projection.apply(*it, false);
+        for (const auto &r : trace)
+            if (r.at("record") == "register")
+                QCOMPARE(projection.registers.at(r.at("lane").dump() + ":" + r.at("register").dump()),
+                         r.at("value"));
+        QVERIFY(summary.at("completed") == true);
+        const auto root = qEnvironmentVariable("FLORA_DXBC_MSAD_EVIDENCE");
+        if (!root.isEmpty()) {
+            QVERIFY(QDir().mkpath(root));
+            QFile shader(QDir(root).filePath(QString("trace-") + QTest::currentDataTag() + ".dxbc"));
+            QVERIFY(shader.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+            QCOMPARE(shader.write(reinterpret_cast<const char *>(input.bytecode.data()),
+                                  qint64(input.bytecode.size())),
+                     qint64(input.bytecode.size()));
+
+            QVERIFY(QFile::copy(path,
+                                QDir(root).filePath(QString("trace-") + QTest::currentDataTag() + ".jsonl")));
+        }
+    }
     void opaqueStatus() {
         GroupStep group{};
         Value after;

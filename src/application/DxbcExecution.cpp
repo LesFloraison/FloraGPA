@@ -118,7 +118,7 @@ bool declaration(uint32_t opcode) {
 }
 bool integerSources(uint32_t op) {
     return op == 1 || op == 30 || (op >= 32 && op <= 43) || op == 59 || op == 60 || (op >= 78 && op <= 87) ||
-           (op >= 132 && op <= 141);
+           (op >= 132 && op <= 141) || op == 213;
 }
 bool precisionArithmetic(uint32_t op) {
     return op <= 1 || (op >= 14 && op <= 17) || (op >= 24 && op <= 30) || (op >= 32 && op <= 43) ||
@@ -2017,6 +2017,18 @@ Step Lane::step() {
                 } else if (op == 132 || op == 133) {
                     outputs[0].bits[i] = op == 132 ? a + b : a - b;
                     outputs[1].bits[i] = op == 132 ? uint32_t((uint64_t(a) + b) >> 32) : uint32_t(a < b);
+                } else if (op == 213) {
+                    // MSAD masks zero reference bytes. The specification permits
+                    // wrapping or saturation on overflow, so no portable value is known.
+                    uint64_t total = c;
+                    for (unsigned shift = 0; shift < 32; shift += 8) {
+                        const auto reference = (a >> shift) & 255u, source = (b >> shift) & 255u;
+                        if (reference)
+                            total += reference > source ? reference - source : source - reference;
+                    }
+                    outputs[0].bits[i] = uint32_t(total);
+                    valid = (values[0].valid & values[2].valid & (1u << i)) &&
+                            (!a || (values[1].valid & (1u << i))) && total <= UINT32_MAX;
                 } else if (op == 140) {
                     const auto width = a & 31, offset = b & 31;
                     const auto mask = width ? ((1u << width) - 1) << offset : 0u;

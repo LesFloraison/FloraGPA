@@ -21,8 +21,9 @@ using namespace flora;
 using namespace flora::dxbc_exec;
 namespace {
 using Words = std::vector<uint32_t>;
-void saveDoubleEvidence(QString name, nlohmann::json report, Bytes native, Bytes oracle = {}) {
-    const auto root = qEnvironmentVariable("FLORA_DXBC_DOUBLE_EVIDENCE");
+void saveArithmeticEvidence(QString name, nlohmann::json report, Bytes native, Bytes oracle = {},
+                            const char *environment = "FLORA_DXBC_DOUBLE_EVIDENCE") {
+    const auto root = qEnvironmentVariable(environment);
     if (root.isEmpty())
         return;
     QDir directory(root);
@@ -324,6 +325,172 @@ const Fixture fixtures[]{
 class DxbcExecutionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void maskedSad_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("stage");
+        QTest::addColumn<uint32_t>("form");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t stage : {0u, 1u, 5u})
+                for (uint32_t form = 0; form < 4; ++form)
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(stage).arg(form)))
+                        << vendor << stage << form;
+    }
+    void maskedSad() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(uint32_t, stage);
+        QFETCH(uint32_t, form);
+        try {
+            Device device(vendor);
+            D3D11_FEATURE_DATA_D3D11_OPTIONS options{};
+            check(device.device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &options, sizeof(options)),
+                  "Read MSAD test support");
+            std::vector<uint8_t> lastCode, lastOracle;
+            for (uint32_t pattern = 0; pattern < 4; ++pattern) {
+                const std::array<uint32_t, 4> reference{0, 0x010000ff, 0xffffffff, 0x807f0100};
+                const std::array<uint32_t, 4> source{0xffffffff, 0xff010000, 0, 0x7f8000ff};
+                const std::array<uint32_t, 4> accum{17, 23, 100,
+                                                    pattern == 0 ? 100u
+                                                                 : UINT32_MAX - (pattern == 1   ? 3u
+                                                                                 : pattern == 2 ? 2u
+                                                                                                : 0u)};
+                const std::array<uint32_t, 4> sentinel{19, 31, 47, 59};
+                const uint32_t mask = form == 1 ? 5 : 15;
+                Inputs inputs;
+                inputs.constantBuffers[0] = {Value::known(reference), Value::known(source),
+                                             Value::known(accum)};
+                if (form == 3) {
+                    inputs.constantBuffers[0][0].valid = 11;
+                    inputs.constantBuffers[0][1].valid = 14;
+                }
+                Words a{0x208e46, 0, 0}, b{0x208e46, 0, 1}, c{0x208e46, 0, 2};
+                if (form == 1) {
+                    a[0] = (a[0] & ~0xff0u) | 0x1b0u;
+                    b[0] = (b[0] & ~0xff0u) | 0x1b0u;
+                    c[0] = (c[0] & ~0xff0u) | 0x1b0u;
+                } else if (form == 2) {
+                    a = vectorLiteral(reference);
+                    b = vectorLiteral(source);
+                    c = vectorLiteral(accum);
+                }
+                const auto operation = op(213, {dst(0, 0, mask), a, b, c});
+                std::vector<Words> rows{op(89, {{0x208e46, 0, 3}}), op(104, {{1}})};
+                if (stage == 5)
+                    rows.push_back(op(155, {{1, 1, 1}}));
+                rows.push_back(op(54, {dst(0, 0), vectorLiteral(sentinel)}));
+                rows.push_back(operation);
+                rows.push_back(op(62));
+                lastCode = makeDxbc({{0x58454853, writeDxbcProgram({{(stage << 16) | 0x50, 0}, rows})}});
+                const Program program(lastCode);
+                Lane lane(program, inputs);
+                lane.step();
+                const auto step = lane.step();
+                QVERIFY(!step.instructionGpuAssisted);
+                QCOMPARE(step.changes.size(), size_t(1));
+                QCOMPARE(step.changes[0].before, Value::known(sentinel));
+                const auto actual = lane.value({0, {0}});
+                QCOMPARE(step.changes[0].after, actual);
+                uint8_t valid = pattern < 2 ? 15 : 7;
+                if (form == 1)
+                    valid = pattern < 2 ? 15 : 14;
+                if (form == 3)
+                    valid &= 11;
+                QCOMPARE(actual.valid, valid);
+                if (form == 1) {
+                    QCOMPARE(actual.bits[1], sentinel[1]);
+                    QCOMPARE(actual.bits[3], sentinel[3]);
+                } else {
+                    QCOMPARE(actual.bits[0], 17u);
+                    QCOMPARE(actual.bits[1], 532u);
+                    if (form != 3)
+                        QCOMPARE(actual.bits[2], 1120u);
+                }
+                nlohmann::json row{{"pattern", pattern},
+                                   {"reference", reference},
+                                   {"source", source},
+                                   {"accum", accum},
+                                   {"input_valid",
+                                    {inputs.constantBuffers[0][0].valid, inputs.constantBuffers[0][1].valid,
+                                     inputs.constantBuffers[0][2].valid}},
+                                   {"mask", mask},
+                                   {"actual", actual.bits},
+                                   {"valid", actual.valid},
+                                   {"gpu", nullptr},
+                                   {"gpu_supported", bool(options.SAD4ShaderInstructions)}};
+                if (options.SAD4ShaderInstructions) {
+                    lastOracle =
+                        gpuBinary({op(89, {{0x208e46, 0, 3}}), op(54, {dst(0, 0), vectorLiteral(sentinel)}),
+                                   operation, op(54, {dst(2, 0), src(0, 0)}), op(62)});
+                    std::vector<uint32_t> constants;
+                    for (const auto &value : inputs.constantBuffers[0])
+                        constants.insert(constants.end(), value.bits.begin(), value.bits.end());
+                    const auto gpu = device.run(lastOracle, constants);
+                    row["gpu"] = gpu;
+                    for (unsigned component = 0; component < 4; ++component)
+                        if (valid & (1u << component))
+                            QCOMPARE(actual.bits[component], gpu[component]);
+                }
+                row.update({{"kind", "native_msad"},
+                            {"vendor", vendor},
+                            {"stage", stage},
+                            {"form", form},
+                            {"oracle_stage", "vs"}});
+                saveArithmeticEvidence(QString("msad-") + QTest::currentDataTag() + "-" +
+                                           QString::number(pattern),
+                                       row, lastCode, lastOracle, "FLORA_DXBC_MSAD_EVIDENCE");
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void compiledMaskedSad_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            QTest::newRow(qPrintable(QString::number(vendor))) << vendor;
+    }
+    void compiledMaskedSad() {
+        QFETCH(uint32_t, vendor);
+        try {
+            Device device(vendor);
+            const auto shader = compileHlsl("cbuffer Params:register(b0){uint4 a,b,c;}"
+                                            "uint4 main():TEXCOORD0{return msad4(a.x,b.xy,c);}",
+                                            "vs_5_0")
+                                    .bytecode;
+            const Program program(shader);
+            QVERIFY(std::any_of(program.instructions().begin(), program.instructions().end(),
+                                [](const auto &instruction) { return instruction.opcode == 213; }));
+            Inputs inputs;
+            inputs.constantBuffers[0] = {Value::known({0xa100b2c3, 0, 0, 0}),
+                                         Value::known({0xd7b0c372, 0x4f57c2a7, 0, 0}),
+                                         Value::known({1, 2, 3, 4})};
+            Lane lane(program, inputs);
+            execute(lane);
+            const auto actual = lane.value({2, {0}});
+            QCOMPARE(actual.valid, uint8_t(15));
+            std::vector<uint32_t> constants;
+            for (const auto &value : inputs.constantBuffers[0])
+                constants.insert(constants.end(), value.bits.begin(), value.bits.end());
+            D3D11_FEATURE_DATA_D3D11_OPTIONS options{};
+            check(device.device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &options, sizeof(options)),
+                  "Read compiled MSAD support");
+            nlohmann::json gpu = nullptr;
+            if (options.SAD4ShaderInstructions) {
+                const auto expected = device.run(shader, constants);
+                QCOMPARE(actual.bits, expected);
+                gpu = expected;
+            }
+            saveArithmeticEvidence(QString("compiled-msad-") + QTest::currentDataTag(),
+                                   {{"kind", "compiled_native_msad"},
+                                    {"vendor", vendor},
+                                    {"constants", constants},
+                                    {"actual", actual.bits},
+                                    {"valid", actual.valid},
+                                    {"gpu", gpu},
+                                    {"gpu_supported", bool(options.SAD4ShaderInstructions)}},
+                                   shader, {}, "FLORA_DXBC_MSAD_EVIDENCE");
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void compiledFeedbackAggregation_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("fields");
@@ -903,7 +1070,7 @@ class DxbcExecutionTests final : public QObject {
                 report["outcome"] = "hardware_unsupported";
                 report["gpu_operations"] = 0;
                 report["state_unchanged"] = true;
-                saveDoubleEvidence(QString("raw-") + QTest::currentDataTag(), report, executable);
+                saveArithmeticEvidence(QString("raw-") + QTest::currentDataTag(), report, executable);
                 qInfo() << "Double hardware unsupported: explicit rejection verified"
                         << doubles.DoublePrecisionFloatShaderOps
                         << extended.ExtendedDoublesShaderInstructions;
@@ -933,7 +1100,7 @@ class DxbcExecutionTests final : public QObject {
             report["expected_valid"] = expectedValid;
             report["gpu_operations"] = inputs.gpu->operations();
             report["oracle_stage"] = 1;
-            saveDoubleEvidence(QString("raw-") + QTest::currentDataTag(), report, executable, shader);
+            saveArithmeticEvidence(QString("raw-") + QTest::currentDataTag(), report, executable, shader);
             qInfo().noquote() << QString::fromStdString(nlohmann::json({{"opcode", opcode},
                                                                         {"stage", stage},
                                                                         {"form", form},
@@ -1155,7 +1322,7 @@ class DxbcExecutionTests final : public QObject {
                 if (!support.DoublePrecisionFloatShaderOps) {
                     QVERIFY_THROWS_EXCEPTION(std::runtime_error, execute(lane));
                     report["outcome"] = "hardware_unsupported";
-                    saveDoubleEvidence(evidenceName, report, shader);
+                    saveArithmeticEvidence(evidenceName, report, shader);
                     qInfo() << "Compiled double hardware unsupported: explicit rejection verified" << dataset;
                     continue;
                 }
@@ -1179,7 +1346,7 @@ class DxbcExecutionTests final : public QObject {
                 report["valid"] = actual.valid;
                 report["gpu_operations"] = inputs.gpu->operations();
                 report["reverse_journal_verified"] = true;
-                saveDoubleEvidence(evidenceName, report, shader, shader);
+                saveArithmeticEvidence(evidenceName, report, shader, shader);
                 qInfo().noquote() << QString::fromStdString(
                     nlohmann::json({{"scenario", scenario.toStdString()},
                                     {"dataset", dataset},
