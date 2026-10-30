@@ -25,6 +25,7 @@ Optional analysis:
 
 | Option | Effect |
 | --- | --- |
+| `--return-count` | Count returning samples at the selected pixel/layer/sample using a private additive target; retain the complete diagnostic report |
 | `--shader-outputs` | Evaluate the original PS with the independent C++ DXBC executor, measured private quad inputs and before-primitive resource snapshots |
 | `--output-merger` | Include shader evaluation and compare the selected-sample merger result with private GPU storage |
 | `--primitive-identity` | Observe conditional system IDs through repeated complete original-PS draws and retain all matching candidate ordinals |
@@ -73,6 +74,25 @@ equality can associate one or more candidates; duplicate IDs remain ambiguous.
 A successful identity predicate does not establish original quad identity,
 execution order, helper invocation or instance. Read the scope and validity
 fields before consuming these observations.
+
+`return_count_observation` reports `not_requested`, `not_applicable`, `observed`
+or `unknown`. Depth selections and draws without a PS are explicitly not
+applicable and retain a null count. A successful count belongs to the private
+diagnostic draw; it does not establish original fragment identities, instance,
+order or resource modifications. The complete observation retains the GPA event,
+frame hash, shaders, actual adapter, source/diagnostic target slots and raw count
+words. Absolute resource layers are translated to the selected RTV's relative
+layer. No geometry-record count or occlusion query is substituted for this value.
+
+Counting adds one complete draw for an applicable color selection. It shares the
+history deadline and cancellation signal and bounds transport and retained
+observation payloads with `--max-bytes`. Existing readback telemetry counts
+selected original-storage snapshots; the count transport has its own report.
+The current count transport requires a 2D RTV, including array and MSAA variants.
+Integer RT0 alpha-to-coverage may use RT1 to preserve RT0 behavior; an application
+UAV at slot 1 prevents that route and fails explicitly. Unsupported requests do
+not publish a successful result or switch backend. See the
+[Worker integration evidence](research/DX11_HISTORY_RETURN_COUNT_JOBS.md).
 
 `primitive_presence_observation` uses RGB maximum accumulation, so a later
 nonmatching return cannot erase an earlier positive marker. Repeated agreement

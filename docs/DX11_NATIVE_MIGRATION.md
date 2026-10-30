@@ -1814,3 +1814,15 @@ independent validators reject 6,120 corruptions. See
 still prevents this route; it is never displaced. Full fragment qualification,
 debugger parity, dependency removal and independent release acceptance remain
 open.
+
+
+Private return counts now flow through the native history CLI and isolated Worker
+with `--return-count`, `dx11-native/13` context identity and
+`native-pixel-draw-history/2` results. Absolute resource layers are translated to
+the bound RTV domain; missing PS/depth selections retain null counts. Three
+suites pass 155 checks, 39 owned jobs and nine real-capture jobs pass independent
+artifact/context/module validation, and 225 corruptions are rejected. Count-enabled
+failure/cancellation/retry and native debug-session regression checks pass.
+See `research/DX11_HISTORY_RETURN_COUNT_JOBS.md`. Counts remain diagnostic
+observations; original fragment qualification, full debugger parity, P1 closure
+and the P7/P8 dependency/package gates remain open.
