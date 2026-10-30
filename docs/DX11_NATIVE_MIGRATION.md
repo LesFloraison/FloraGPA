@@ -1872,3 +1872,11 @@ and 618 rejected alterations. See `research/DX11_NATIVE_ATTRIBUTE_EVALUATION.md`
 for retained failures, original GPU comparisons, and reproduction. Minimum-
 precision eval operands, full debugger/fragment parity, P1 closure, and P7/P8
 removal/release acceptance remain open.
+
+Pixel attribute evaluation now preserves floating minimum precision on both
+operands and uses GPU widening before bit transport. Cache identity advances to
+`/19`. Eight suites pass 2,011 checks, including 180 additional GPU input cases
+and 18 additional Worker jobs. Independent validation covers 378 inputs and
+45 jobs and rejects 1,992 alterations. See
+`research/DX11_NATIVE_ATTRIBUTE_PRECISION.md`. Integer location precision,
+full debugger/fragment parity, P1 closure and P7/P8 acceptance remain open.

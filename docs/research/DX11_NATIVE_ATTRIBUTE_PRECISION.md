@@ -34,3 +34,48 @@ python tools/probe_attribute_precision.py --out artifacts/dx11-native/attribute-
 
 This research does not close GPA debugger recovery, original fragment
 qualification, full debugger parity, or dependency removal/release acceptance.
+
+## Implementation and runtime evidence
+
+Implementation commit: `ffdbb5cbe64d2c751e8cd85e57f5a76528303b97`.
+Native analysis advances to `dx11-native/19`; evaluated raster observations use
+`dxbc-pixel-attribute-evaluation/2`. The ordinary input backend is unchanged.
+The parser and executor accept floating minimum precision on the destination
+and attribute source. GPU helpers preserve both annotations, widen before raw
+bit transport, and include both precisions in requests and cache keys. Undefined
+sample indices retain unknown interpolated values. Constant components requiring
+precision conversion are observed separately rather than narrowed on the CPU.
+
+Eight serial suites pass **2,011 checks**, with no failures or skips:
+pixel inputs 381, DXBC execution 1,272, trace writer 28, trace reader 65,
+pixel outputs 95, pixel Worker debugging 49, debugger sessions 50, and compute
+Worker debugging 71. The input matrix retains the previous 198 GPU cases and
+adds 180 cases across WARP, NVIDIA, Intel, single sample and 4x MSAA. New cases
+cover both precisions, all three operations, nonperspective, constant,
+sample-frequency and partial-coverage inputs. Executor contracts also cover
+all nine source/destination floating precision combinations; those contracts
+alone do not establish hardware numerical parity for every mixed combination.
+
+Independent validation checks 378 input cases and 45 Worker jobs, rejects
+1,992 altered reports, and hashes 14,513 retained artifacts. Comparisons use
+the original GPU shader output, a separate quad oracle, native output and
+reversible execution journals. Worker cases retain watch, breakpoint, project
+configuration, export and artifact rejection checks. Loaded-module checks reject
+RenderDoc and GPA runtime modules. This is scoped to these native test paths,
+not a whole-product dependency audit.
+
+The accepted root is `artifacts/dx11-native/attribute-precision/verified`.
+The initial interrupted run and six parser-guard failures remain retained;
+the repaired targeted run passes before the full accepted run. All 20 recorded
+source identities match the implementation commit after newline normalization.
+See [`dx11-native-attribute-precision-evidence.json`](dx11-native-attribute-precision-evidence.json)
+for binaries, manifests, counts, timings and peak Worker memory.
+
+```powershell
+python tools/run_native_attribute_evaluation.py --binaries build/vs2022/Release --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/dx11-native/attribute-precision/reproduction
+python tools/validate_native_attribute_evaluation.py --root artifacts/dx11-native/attribute-precision/reproduction --out artifacts/dx11-native/attribute-precision/reproduction-summary.json
+```
+
+Minimum-precision integer location operands remain explicitly unsupported.
+Full mixed-interpolation conversion coverage, P1 closure, original fragment
+qualification, full P6 parity and P7/P8 acceptance remain open.
