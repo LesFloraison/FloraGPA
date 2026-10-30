@@ -76,19 +76,27 @@ execution order, helper invocation or instance. Read the scope and validity
 fields before consuming these observations.
 
 `return_count_observation` reports `not_requested`, `not_applicable`, `observed`
-or `unknown`. Depth selections and draws without a PS are explicitly not
-applicable and retain a null count. A successful count belongs to the private
-diagnostic draw; it does not establish original fragment identities, instance,
+or `unknown`. Depth selections with bound color outputs and color selections
+without a PS remain not applicable and retain a null count. Depth-only draws can accumulate
+counts through a private color transport, including draws without a PS. A
+successful count belongs to the private diagnostic draw; it does not establish original fragment identities, instance,
 order or resource modifications. The complete observation retains the GPA event,
-frame hash, shaders, actual adapter, source/diagnostic target slots and raw count
-words. Absolute resource layers are translated to the selected RTV's relative
+frame hash, shaders, actual adapter, source view, color routing slots when
+applicable, and raw count words. Absolute resource layers are translated to the selected RTV's relative
 layer. No geometry-record count or occlusion query is substituted for this value.
 
-Counting adds one complete draw for an applicable color selection. It shares the
+Counting adds one complete draw for an applicable color or depth selection. It
+shares the
 history deadline and cancellation signal and bounds transport and retained
 observation payloads with `--max-bytes`. Existing readback telemetry counts
 selected original-storage snapshots; the count transport has its own report.
-The current count transport requires a 2D RTV, including array and MSAA variants.
+Color counts require a 2D RTV, including array and MSAA variants. Depth-only
+counts use a 2D DSV and require no bound RTVs, no occupied UAV slot zero, no
+original color export and disabled alpha-to-coverage. A missing PS is replaced
+with an owned empty shader before adding the diagnostic output. The resulting
+count is not an original PS invocation count. Depth transport records source
+mip and first layer; its selected layer is relative to the DSV. See the
+[depth count evidence](research/DX11_NATIVE_DEPTH_RETURN_COUNTS.md).
 Integer RT0 alpha-to-coverage may use RT1 to preserve RT0 behavior; an application
 UAV at slot 1 prevents that route and fails explicitly. Unsupported requests do
 not publish a successful result or switch backend. See the

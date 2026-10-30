@@ -1826,3 +1826,12 @@ failure/cancellation/retry and native debug-session regression checks pass.
 See `research/DX11_HISTORY_RETURN_COUNT_JOBS.md`. Counts remain diagnostic
 observations; original fragment qualification, full debugger parity, P1 closure
 and the P7/P8 dependency/package gates remain open.
+
+Depth-only return accumulation now reaches the isolated history Worker, including
+null PS and nonzero mip/array-layer selections. The private DSV remains active;
+counts use additive RGB transport without substituting occlusion queries.
+Five suites pass 638 checks, 117 owned depth observations and 57 Worker/CLI jobs
+pass validation, and 990 corruptions are rejected. See
+`research/DX11_NATIVE_DEPTH_RETURN_COUNTS.md`. Mixed color/depth bindings and
+other explicit transport restrictions remain open, as do original fragment
+qualification, full debugger parity, P1 closure and P7/P8 removal/release gates.
