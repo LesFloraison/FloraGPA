@@ -8,7 +8,6 @@
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
-constexpr UINT extent = 4;
 Com<ID3D11Device> makeDevice(uint32_t vendor) {
     Com<IDXGIAdapter1> selected;
     if (vendor) {
@@ -88,6 +87,15 @@ class NativePixelOrdinalTests final : public QObject {
         QFETCH(uint32_t, samples);
         QFETCH(uint32_t, mode);
         QFETCH(uint32_t, targets);
+        const UINT extent = qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_EXTENT")
+                                ? qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_EXTENT")
+                                : 4;
+        const bool floatOutput = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_FLOAT") != 0;
+        const UINT stencilMip = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_STENCIL_MIP");
+        const bool rasterMultisample = !qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_RASTER_MSAA") ||
+                                       qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_RASTER_MSAA") != 0;
+        QVERIFY(extent == 1 || extent == 4);
+        QVERIFY(stencilMip == 0 || (stencilMip == 2 && samples == 1));
         auto device = makeDevice(vendor);
         Com<ID3D11DeviceContext> context;
         device->GetImmediateContext(&context);
@@ -122,7 +130,8 @@ class NativePixelOrdinalTests final : public QObject {
                 .bytecode;
         std::string pixel = structure + "struct O {";
         for (UINT i = 0; i != targets; ++i)
-            pixel += "uint4 c" + std::to_string(i) + ":SV_Target" + std::to_string(i) + ";";
+            pixel += std::string(floatOutput ? "float4 c" : "uint4 c") + std::to_string(i) + ":SV_Target" +
+                     std::to_string(i) + ";";
         if (mode == 3)
             pixel += "uint coverage:SV_Coverage;";
         pixel += "};";
@@ -137,13 +146,16 @@ class NativePixelOrdinalTests final : public QObject {
             pixel += "o.c" + std::to_string(i) + "=uint4(v.identity.x+1,p,v.identity.y,s);";
         pixel += "return o;}";
         const auto psCode = compileHlsl(pixel, "ps_5_0").bytecode;
+        const std::string type = floatOutput ? "float4" : "uint4";
+        const auto coordinate = std::to_string(extent == 1 ? 0 : 1);
+        const auto load = samples == 1 ? "t.Load(int3(" + coordinate + "," + coordinate + ",0))"
+                                       : "t.Load(int2(" + coordinate + "," + coordinate + "),p.x)";
         const auto csCode =
-            compileHlsl(
-                (samples == 1 ? std::string("Texture2D<uint4>") : std::string("Texture2DMS<uint4,4>")) +
-                    " t:register(t0);RWStructuredBuffer<uint4> o:register(u0);"
-                    "[numthreads(1,1,1)]void main(uint3 p:SV_DispatchThreadID){o[p.x]=" +
-                    (samples == 1 ? "t.Load(int3(1,1,0))" : "t.Load(int2(1,1),p.x)") + ";}",
-                "cs_5_0")
+            compileHlsl((samples == 1 ? "Texture2D<" + type + ">" : "Texture2DMS<" + type + ",4>") +
+                            " t:register(t0);RWStructuredBuffer<uint4> o:register(u0);"
+                            "[numthreads(1,1,1)]void main(uint3 p:SV_DispatchThreadID){o[p.x]=" +
+                            (floatOutput ? "asuint(" + load + ")" : load) + ";}",
+                        "cs_5_0")
                 .bytecode;
         Com<ID3D11VertexShader> vs;
         Com<ID3D11GeometryShader> gs;
@@ -157,7 +169,7 @@ class NativePixelOrdinalTests final : public QObject {
         D3D11_TEXTURE2D_DESC texture{};
         texture.Width = texture.Height = extent;
         texture.MipLevels = texture.ArraySize = 1;
-        texture.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+        texture.Format = floatOutput ? DXGI_FORMAT_R32G32B32A32_FLOAT : DXGI_FORMAT_R32G32B32A32_UINT;
         texture.SampleDesc.Count = samples;
         texture.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
         std::vector<Com<ID3D11RenderTargetView>> views(targets);
@@ -173,10 +185,18 @@ class NativePixelOrdinalTests final : public QObject {
         }
         texture.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
         texture.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+        texture.Width <<= stencilMip;
+        texture.Height <<= stencilMip;
+        texture.MipLevels += stencilMip;
         Com<ID3D11Texture2D> depth;
         Com<ID3D11DepthStencilView> dsv;
         check(device->CreateTexture2D(&texture, nullptr, &depth), "Create ordinal stencil");
-        check(device->CreateDepthStencilView(depth.Get(), nullptr, &dsv), "Create ordinal DSV");
+        D3D11_DEPTH_STENCIL_VIEW_DESC depthView{};
+        depthView.Format = texture.Format;
+        depthView.ViewDimension =
+            samples == 1 ? D3D11_DSV_DIMENSION_TEXTURE2D : D3D11_DSV_DIMENSION_TEXTURE2DMS;
+        depthView.Texture2D.MipSlice = stencilMip;
+        check(device->CreateDepthStencilView(depth.Get(), &depthView, &dsv), "Create ordinal DSV");
         D3D11_DEPTH_STENCIL_DESC ds{};
         ds.DepthFunc = D3D11_COMPARISON_ALWAYS;
         ds.StencilEnable = TRUE;
@@ -192,7 +212,8 @@ class NativePixelOrdinalTests final : public QObject {
         D3D11_RASTERIZER_DESC raster{};
         raster.FillMode = D3D11_FILL_SOLID;
         raster.CullMode = D3D11_CULL_NONE;
-        raster.DepthClipEnable = raster.MultisampleEnable = TRUE;
+        raster.DepthClipEnable = TRUE;
+        raster.MultisampleEnable = rasterMultisample;
         Com<ID3D11RasterizerState> rasterizer;
         check(device->CreateRasterizerState(&raster, &rasterizer), "Create ordinal rasterizer");
         D3D11_BUFFER_DESC buffer{};
@@ -215,7 +236,11 @@ class NativePixelOrdinalTests final : public QObject {
         queryDesc.Query = D3D11_QUERY_OCCLUSION;
         Com<ID3D11Query> occlusion;
         check(device->CreateQuery(&queryDesc, &occlusion), "Create ordinal occlusion");
-        Json report{{"schema", 1},
+        Json report{{"stencil_mip", stencilMip},
+                    {"extent", extent},
+                    {"float_output", floatOutput},
+                    {"raster_multisample", rasterMultisample},
+                    {"schema", 1},
                     {"requested_vendor", vendor},
                     {"actual_vendor", adapterDesc.VendorId},
                     {"actual_device", adapterDesc.DeviceId},
@@ -287,6 +312,12 @@ class NativePixelOrdinalTests final : public QObject {
                                             layout == 1 ? fragment : 0u, sample};
                     }
                 }
+                if (floatOutput)
+                    for (auto &value : expected)
+                        for (auto &component : value) {
+                            const float converted = float(component);
+                            std::memcpy(&component, &converted, 4);
+                        }
                 report["rows"].push_back({{"count", count},
                                           {"rank", rank},
                                           {"outputs", actual},

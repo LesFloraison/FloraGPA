@@ -29,6 +29,22 @@ nlohmann::json replayNativeOriginalDraw(Replay &, Id event,
                                         const std::function<void(Replay &, bool after)> &observe = {},
                                         uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
                                         const CancelCheck &cancelled = {});
+struct NativePixelOrdinalSelection {
+    uint32_t target = 0, ordinal = 0;
+    bool markReturns = false;
+};
+// Replaces depth/stencil with a private, initially zero stencil selector sized
+// to one bound 2D RTV. References 0..254 cannot alias saturated value 255;
+// larger values fail explicitly. Original PS work, coverage, predication and UAV slots
+// remain. markReturns additionally applies the existing RGB completion marker.
+// This is a counterfactual sample population, not original fragment eligibility.
+// The requested ordinal is not a verified identity: driver selection deviations
+// remain under investigation and verified_fragment_ordinal is always unknown.
+// Observed storage retains original blending unless markReturns is requested.
+nlohmann::json replayNativePixelOrdinal(Replay &, Id event, const NativePixelOrdinalSelection &,
+                                        const std::function<void(Replay &, bool after)> &observe = {},
+                                        uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,
+                                        const CancelCheck &cancelled = {});
 // Preserves the original PS body but marks its returning RGB output on one
 // existing private RTV. That RTV is cleared and its blending/writes overridden;
 // alpha-to-coverage, depth/stencil, sample masks and original UAV slots remain.

@@ -11,8 +11,9 @@ int main(int argc, char **argv) {
     try {
         const auto args = app.arguments();
         if (args.size() != 9 && args.size() != 11 && !(args.size() == 12 && args[11] == "--presence"))
-            throw std::runtime_error("Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
-                                     "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE [--presence]]");
+            throw std::runtime_error(
+                "Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
+                "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE [--presence] | --ordinal N]");
         auto number = [&](int i) {
             bool ok = false;
             const auto value = args[i].toULongLong(&ok, 0);
@@ -23,9 +24,13 @@ int main(int argc, char **argv) {
         const Id event = number(2);
         const auto slot = uint32_t(number(3)), x = uint32_t(number(4)), y = uint32_t(number(5));
         const auto sample = uint32_t(number(6)), vendor = uint32_t(number(7));
+        const auto ordinal = args.size() == 11 && args[9] == "--ordinal"
+                                 ? std::optional<uint32_t>(uint32_t(number(10)))
+                                 : std::nullopt;
         const std::optional<PixelPrimitiveMask> primitive =
-            args.size() >= 11 ? std::optional<PixelPrimitiveMask>{{uint32_t(number(9)), uint32_t(number(10))}}
-                              : std::nullopt;
+            args.size() >= 11 && !ordinal
+                ? std::optional<PixelPrimitiveMask>{{uint32_t(number(9)), uint32_t(number(10))}}
+                : std::nullopt;
         if (slot >= 8 || sample)
             throw std::runtime_error("Completion probe currently selects non-MSAA sample zero");
         QDir directory(args[8]);
@@ -90,7 +95,9 @@ int main(int argc, char **argv) {
         const auto before = pixel(replay);
         std::vector<uint8_t> cleared, marked, original;
         const auto observer = [&](Replay &r, bool after) { (after ? marked : cleared) = pixel(r); };
-        auto report = args.size() == 12
+        auto report = ordinal ? replayNativePixelOrdinal(replay, event, {slot, *ordinal, true}, observer,
+                                                         256ull * 1024 * 1024, 60000, cancel)
+                      : args.size() == 12
                           ? replayNativePixelPrimitivePresence(replay, event, slot, *primitive, observer,
                                                                256ull * 1024 * 1024, 60000, cancel)
                       : primitive ? replayNativePixelPrimitiveMask(replay, event, slot, *primitive, observer,
@@ -110,9 +117,10 @@ int main(int argc, char **argv) {
         Replay reference(frame, options);
         reference.run([&](Id, size_t, size_t) { checkCancellation(cancel); });
         const auto expected = pixel(reference);
-        const bool matched = before == restored && before == pixel(replay) && original == expected &&
-                             report.at("passing_samples") == originalReport.at("passing_samples") &&
-                             report.at("passing_samples") == reference.measurementResult()->occlusion;
+        const bool matched =
+            before == restored && before == pixel(replay) && original == expected &&
+            originalReport.at("passing_samples") == reference.measurementResult()->occlusion &&
+            (ordinal || report.at("passing_samples") == originalReport.at("passing_samples"));
         const auto source = frame.shader(frame.resource(shader).data);
         std::optional<PixelPrimitiveInput> producer;
         if (primitive && report.at("primitive_id_source") == "bound_geometry_shader")

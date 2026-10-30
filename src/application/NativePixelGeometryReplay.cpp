@@ -96,7 +96,8 @@ class NativePixelGeometryReplay {
                   std::array<uint32_t, 3> marker = {0x3f800000, 0x40000000, 0x40400000},
                   bool accumulatePredicate = false,
                   NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve,
-                  std::optional<NativeDepthCompletionSelection> depthSelection = {}) {
+                  std::optional<NativeDepthCompletionSelection> depthSelection = {},
+                  std::optional<NativePixelOrdinalSelection> ordinalSelection = {}) {
         checkDeadline();
         const auto overrideName = nativePixelTestOverrideName(testOverride);
         if (testOverride != NativePixelTestOverride::Preserve && !accumulatePredicate)
@@ -111,6 +112,10 @@ class NativePixelGeometryReplay {
             throw std::invalid_argument("Invalid private pixel completion target");
         if (accumulatePredicate && (!completionTarget || !primitiveMask))
             throw std::invalid_argument("Pixel presence requires a target and primitive predicate");
+        if (ordinalSelection &&
+            (ordinalSelection->target >= 8 || ordinalSelection->ordinal >= 255 || depthSelection ||
+             primitiveMask || accumulatePredicate || testOverride != NativePixelTestOverride::Preserve))
+            throw std::invalid_argument("Invalid private pixel ordinal selection; supported range is 0..254");
         const auto state = r.prepareState(event);
         const CancelCheck scoped = [&] {
             checkDeadline();
@@ -125,6 +130,9 @@ class NativePixelGeometryReplay {
                 throw std::runtime_error("Private original draw output payload budget exceeded");
             const auto parameters = resolveDrawParameters(r, event);
             const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
+            if (ordinalSelection && raster.rasterizer.ForcedSampleCount)
+                throw std::runtime_error(
+                    "Private pixel ordinal stencil is incompatible with forced sampling");
             Json shaders = Json::array();
             for (unsigned stage = 0; stage < 5; ++stage) {
                 const auto resource = state.stages[stage].shader;
@@ -316,6 +324,7 @@ class NativePixelGeometryReplay {
                                                             request.maxBytes - workingBytes, scoped);
                         if (marked.bytecode.size() > request.maxBytes - workingBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
+                        workingBytes += marked.bytecode.size();
                         auto *context = r.context_.Get();
                         std::array<ID3D11RenderTargetView *, 8> rawViews{};
                         std::array<Com<ID3D11RenderTargetView>, 8> views;
@@ -474,6 +483,177 @@ class NativePixelGeometryReplay {
                             report["completion_target"]["alpha_reduction"] = "replace";
                             report["completion_target"]["logic_disabled"] = true;
                         }
+                    }
+                    if (ordinalSelection) {
+                        auto *context = r.context_.Get();
+                        std::array<ID3D11RenderTargetView *, 8> raw{};
+                        std::array<Com<ID3D11RenderTargetView>, 8> views;
+                        Com<ID3D11DepthStencilView> originalDepth;
+                        context->OMGetRenderTargets(8, raw.data(), &originalDepth);
+                        UINT count = 0;
+                        for (UINT i = 0; i < 8; ++i) {
+                            views[i].Attach(raw[i]);
+                            if (raw[i])
+                                count = i + 1;
+                        }
+                        const auto target = ordinalSelection->target;
+                        if (!views[target])
+                            throw std::runtime_error("Private pixel ordinal target is not bound");
+                        D3D11_RENDER_TARGET_VIEW_DESC view{};
+                        views[target]->GetDesc(&view);
+                        UINT mip = 0, layer = 0, layers = 1;
+                        bool array = false, multisampled = false;
+                        switch (view.ViewDimension) {
+                        case D3D11_RTV_DIMENSION_TEXTURE2D:
+                            mip = view.Texture2D.MipSlice;
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DARRAY:
+                            mip = view.Texture2DArray.MipSlice;
+                            layer = view.Texture2DArray.FirstArraySlice;
+                            layers = view.Texture2DArray.ArraySize;
+                            array = true;
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DMS:
+                            multisampled = true;
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY:
+                            layer = view.Texture2DMSArray.FirstArraySlice;
+                            layers = view.Texture2DMSArray.ArraySize;
+                            array = multisampled = true;
+                            break;
+                        default:
+                            throw std::runtime_error("Private pixel ordinal requires a 2D target view");
+                        }
+                        Com<ID3D11Resource> resource;
+                        Com<ID3D11Texture2D> color;
+                        views[target]->GetResource(&resource);
+                        check(resource.As(&color), "Get private ordinal target texture");
+                        D3D11_TEXTURE2D_DESC desc{};
+                        color->GetDesc(&desc);
+                        if (mip >= desc.MipLevels || mip >= 32 || !layers || layer >= desc.ArraySize ||
+                            layers > desc.ArraySize - layer)
+                            throw std::runtime_error("Private pixel ordinal view bounds");
+                        desc.Width = std::max(1u, desc.Width >> mip);
+                        desc.Height = std::max(1u, desc.Height >> mip);
+                        desc.MipLevels = 1;
+                        desc.ArraySize = layers;
+                        desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+                        desc.Usage = D3D11_USAGE_DEFAULT;
+                        desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+                        desc.CPUAccessFlags = desc.MiscFlags = 0;
+                        const uint64_t bytes =
+                            uint64_t(desc.Width) * desc.Height * layers * desc.SampleDesc.Count * 4;
+                        if (bytes > request.maxBytes - workingBytes)
+                            throw std::runtime_error("Private pixel ordinal stencil payload budget exceeded");
+                        UINT levels = 0;
+                        check(r.device_->CheckMultisampleQualityLevels(desc.Format, desc.SampleDesc.Count,
+                                                                       &levels),
+                              "Check private ordinal stencil sampling");
+                        if (!levels || (desc.SampleDesc.Quality >= levels &&
+                                        desc.SampleDesc.Quality != D3D11_STANDARD_MULTISAMPLE_PATTERN &&
+                                        desc.SampleDesc.Quality != D3D11_CENTER_MULTISAMPLE_PATTERN))
+                            throw std::runtime_error(
+                                "Private pixel ordinal stencil sample quality is unavailable");
+                        Com<ID3D11Texture2D> stencil;
+                        Com<ID3D11DepthStencilView> selector;
+                        check(r.device_->CreateTexture2D(&desc, nullptr, &stencil),
+                              "Create private ordinal stencil");
+                        D3D11_DEPTH_STENCIL_VIEW_DESC dsView{};
+                        dsView.Format = desc.Format;
+                        if (array) {
+                            dsView.ViewDimension = multisampled ? D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY
+                                                                : D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+                            if (multisampled)
+                                dsView.Texture2DMSArray.ArraySize = layers;
+                            else
+                                dsView.Texture2DArray.ArraySize = layers;
+                        } else {
+                            dsView.ViewDimension = multisampled ? D3D11_DSV_DIMENSION_TEXTURE2DMS
+                                                                : D3D11_DSV_DIMENSION_TEXTURE2D;
+                        }
+                        check(r.device_->CreateDepthStencilView(stencil.Get(), &dsView, &selector),
+                              "Create private ordinal stencil view");
+                        D3D11_DEPTH_STENCIL_DESC previous{};
+                        previous.DepthEnable = TRUE;
+                        previous.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+                        previous.DepthFunc = D3D11_COMPARISON_LESS;
+                        previous.StencilReadMask = previous.StencilWriteMask = 255;
+                        previous.FrontFace =
+                            previous.BackFace = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
+                                                 D3D11_STENCIL_OP_KEEP, D3D11_COMPARISON_ALWAYS};
+                        Com<ID3D11DepthStencilState> oldState;
+                        UINT oldReference = 0;
+                        context->OMGetDepthStencilState(&oldState, &oldReference);
+                        if (oldState)
+                            oldState->GetDesc(&previous);
+                        D3D11_DEPTH_STENCIL_DESC selected{};
+                        selected.DepthFunc = D3D11_COMPARISON_ALWAYS;
+                        selected.StencilEnable = TRUE;
+                        selected.StencilReadMask = selected.StencilWriteMask = 255;
+                        selected.FrontFace =
+                            selected.BackFace = {D3D11_STENCIL_OP_INCR_SAT, D3D11_STENCIL_OP_INCR_SAT,
+                                                 D3D11_STENCIL_OP_INCR_SAT, D3D11_COMPARISON_EQUAL};
+                        check(r.device_->CreateDepthStencilState(&selected, &testDepthState),
+                              "Create private ordinal selector state");
+                        bool early = false;
+                        uint64_t inspectedShaderBytes = 0;
+                        if (state.stages[4].shader) {
+                            auto code = shader(state.stages[4].shader);
+                            if (code.size() > request.maxBytes - workingBytes - bytes)
+                                throw std::runtime_error(
+                                    "Private pixel ordinal shader inspection budget exceeded");
+                            inspectedShaderBytes = code.size();
+                            for (const auto &[tag, part] : readDxbcParts(code)) {
+                                if (tag != 0x52444853 && tag != 0x58454853)
+                                    continue;
+                                for (const auto &instruction : readDxbcProgram(part).instructions) {
+                                    checkDeadline();
+                                    if ((instruction[0] & 0x7ff) == 106)
+                                        early |= (instruction[0] & 0x2000) != 0;
+                                }
+                            }
+                        }
+                        {
+                            Unpredicated clear(context);
+                            context->ClearDepthStencilView(selector.Get(),
+                                                           D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+                        }
+                        context->OMSetRenderTargetsAndUnorderedAccessViews(
+                            count, raw.data(), selector.Get(), 0, D3D11_KEEP_UNORDERED_ACCESS_VIEWS, nullptr,
+                            nullptr);
+                        context->OMSetDepthStencilState(testDepthState.Get(), ordinalSelection->ordinal);
+                        report["kind"] = "native_pixel_ordinal_observation";
+                        report["backend"] = "native-pixel-ordinal/1";
+                        report["scope"] = "original_ps_body_with_counterfactual_stencil_reference";
+                        report["ordinal_selection"] = {{"target", target},
+                                                       {"requested_ordinal", ordinalSelection->ordinal},
+                                                       {"verified_fragment_ordinal", nullptr},
+                                                       {"maximum_supported_ordinal", 254},
+                                                       {"mark_returns", ordinalSelection->markReturns},
+                                                       {"population", !state.stages[4].shader
+                                                                          ? "no_pixel_shader_stencil_updates"
+                                                                      : early ? "early_test_stencil_updates"
+                                                                              : "late_test_survivor_updates"},
+                                                       {"pixel_shader_bound", bool(state.stages[4].shader)},
+                                                       {"force_early_depth_stencil", early},
+                                                       {"stencil_initial_value", 0},
+                                                       {"original_depth_view_bound", bool(originalDepth)},
+                                                       {"original_stencil_reference", oldReference},
+                                                       {"depth_stencil_before", depthIdentity(previous)},
+                                                       {"depth_stencil_after", depthIdentity(selected)},
+                                                       {"mip", mip},
+                                                       {"first_layer", layer},
+                                                       {"layer_count", layers},
+                                                       {"width", desc.Width},
+                                                       {"height", desc.Height},
+                                                       {"samples", desc.SampleDesc.Count},
+                                                       {"sample_quality", desc.SampleDesc.Quality},
+                                                       {"stencil_format", uint32_t(desc.Format)},
+                                                       {"stencil_payload_bytes", bytes},
+                                                       {"application_uav_bindings_retained", true},
+                                                       {"original_depth_stencil_eligibility", nullptr}};
+                        report["diagnostic_working_payload_bytes"] =
+                            workingBytes + bytes + inspectedShaderBytes;
                     }
                     if (observe)
                         observe(r, false);
@@ -766,6 +946,15 @@ Json replayNativeOriginalDraw(Replay &r, Id event, const std::function<void(Repl
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
         .original(observe);
+}
+Json replayNativePixelOrdinal(Replay &r, Id event, const NativePixelOrdinalSelection &selection,
+                              const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                              uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, selection.markReturns ? std::optional<uint32_t>(selection.target) : std::nullopt,
+                  {}, {0x3f800000, 0x40000000, 0x40400000}, false, NativePixelTestOverride::Preserve, {},
+                  selection);
 }
 Json replayNativePixelCompletion(Replay &r, Id event, uint32_t target,
                                  const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
