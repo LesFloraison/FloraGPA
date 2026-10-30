@@ -26,7 +26,7 @@ def main():
     for path in sorted((args.root / "owned").iterdir()):
         vendor = int(path.name.split('-')[1 if path.name.startswith(('boundary-', 'integer-')) else 0])
         job, result = read(path)
-        require(job['backend'] == 'dx11-native/15', 'Backend identity')
+        require(job['backend'] == 'dx11-native/16', 'Backend identity')
         data = validate(job, result, vendor)
         count = data['return_count_observation']
         if path.name.startswith('integer-'):
@@ -41,7 +41,9 @@ def main():
             mode = path.name.split('-', 2)[2]
             require(data['frame_sha256'] == sha(path / 'frame.gpa_frame'), 'Boundary source evidence')
             if mode == 'depth-mixed-null':
-                require(count['status'] == 'not_applicable' and count['count'] is None, 'Mixed null PS boundary')
+                require(count['status'] == 'observed' and count['count'] == 1
+                        and count['observation']['original_null_pixel_shader'] is True
+                        and count['observation']['backend'] == 'native-depth-return-count/3', 'Mixed null PS count')
             elif mode.startswith('depth-'):
                 require(count['count'] == 1 and count['status'] == 'observed', 'Depth Worker count')
                 require(count['observation']['original_null_pixel_shader'] == (mode == 'depth-null'), 'Null PS identity')

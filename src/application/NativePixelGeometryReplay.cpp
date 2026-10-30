@@ -117,7 +117,10 @@ class NativePixelGeometryReplay {
                   std::optional<NativeDepthCompletionSelection> depthSelection = {},
                   std::optional<NativePixelOrdinalSelection> ordinalSelection = {},
                   std::optional<NativePixelReturnCountSelection> countSelection = {},
-                  bool countDepthReturns = false) {
+                  bool countDepthReturns = false, bool addCountOutput = false) {
+        if (addCountOutput && (!countSelection || depthSelection || countDepthReturns || primitiveMask ||
+                               ordinalSelection || accumulatePredicate))
+            throw std::invalid_argument("Invalid added count output request");
         const bool countReturns = countSelection.has_value() || countDepthReturns;
         if (countDepthReturns && (!depthSelection || countSelection || primitiveMask || accumulatePredicate ||
                                   ordinalSelection || testOverride != NativePixelTestOverride::Preserve))
@@ -324,7 +327,17 @@ class NativePixelGeometryReplay {
                         auto target = sourceTarget;
                         if (!views[sourceTarget])
                             throw std::runtime_error("Private pixel count target is not bound");
-                        if (target == 0 && state.stages[4].shader) {
+                        if (addCountOutput) {
+                            Com<ID3D11BlendState> originalBlend;
+                            context->OMGetBlendState(&originalBlend, nullptr, nullptr);
+                            D3D11_BLEND_DESC desc{};
+                            if (originalBlend)
+                                originalBlend->GetDesc(&desc);
+                            if (desc.AlphaToCoverageEnable)
+                                throw std::runtime_error(
+                                    "Added count output has no original alpha-to-coverage value");
+                        }
+                        if (target == 0 && state.stages[4].shader && !addCountOutput) {
                             Com<ID3D11BlendState> originalBlend;
                             context->OMGetBlendState(&originalBlend, nullptr, nullptr);
                             D3D11_BLEND_DESC desc{};
@@ -451,7 +464,7 @@ class NativePixelGeometryReplay {
                     }
                     if (completionTarget) {
                         const auto target = *completionTarget;
-                        if (!state.stages[4].shader && !depthSelection)
+                        if (!state.stages[4].shader && !depthSelection && !addCountOutput)
                             throw std::runtime_error("Private pixel completion requires a pixel shader");
                         std::vector<uint8_t> ownedCode;
                         if (!state.stages[4].shader)
@@ -460,9 +473,13 @@ class NativePixelGeometryReplay {
                                     .bytecode;
                         Bytes completionCode =
                             state.stages[4].shader ? shader(state.stages[4].shader) : Bytes(ownedCode);
-                        if (depthSelection) {
-                            auto added = addPixelCompletionTarget(completionCode, target,
-                                                                  request.maxBytes - workingBytes, scoped);
+                        if (depthSelection || addCountOutput) {
+                            auto added =
+                                addCountOutput
+                                    ? addPixelCountTarget(completionCode, target,
+                                                          request.maxBytes - workingBytes, scoped)
+                                    : addPixelCompletionTarget(completionCode, target,
+                                                               request.maxBytes - workingBytes, scoped);
                             ownedCode = std::move(added.bytecode);
                             completionCode = ownedCode;
                             report["additional_target_shader"] = std::move(added.identity);
@@ -1018,6 +1035,7 @@ class NativePixelGeometryReplay {
             throw std::invalid_argument("Invalid depth count request");
         const auto state = r.prepareState(event);
         std::optional<uint32_t> colorSlot;
+        bool addOutput = false;
         Json depthView;
         r.inspectEventInputs(id, [&] {
             r.bind(state, false);
@@ -1033,13 +1051,13 @@ class NativePixelGeometryReplay {
             }
             if (!anyColor)
                 return;
-            if (!depth || !state.stages[4].shader)
-                throw std::runtime_error("Mixed depth counting requires a DSV and a pixel shader");
-            const auto code = shader(state.stages[4].shader);
+            if (!depth)
+                throw std::runtime_error("Mixed depth counting requires a DSV");
+            const auto code = state.stages[4].shader ? shader(state.stages[4].shader) : Bytes{};
             if (code.size() > request.maxBytes)
                 throw std::runtime_error("Mixed depth count shader inspection budget exceeded");
             std::set<uint32_t> outputs;
-            for (const auto &[tag, bytes] : readDxbcParts(code))
+            for (const auto &[tag, bytes] : code.empty() ? DxbcParts{} : readDxbcParts(code))
                 if (tag == 0x52444853 || tag == 0x58454853)
                     for (const auto &row : readDxbcProgram(bytes).instructions) {
                         checkDeadline();
@@ -1052,6 +1070,13 @@ class NativePixelGeometryReplay {
                     colorSlot = slot;
                     break;
                 }
+            if (!colorSlot)
+                for (uint32_t slot = 0; slot < views.size(); ++slot)
+                    if (views[slot]) {
+                        colorSlot = slot;
+                        addOutput = true;
+                        break;
+                    }
             if (!colorSlot)
                 throw std::runtime_error("Mixed depth counting requires a bound shader color output");
             auto extent = [&](ID3D11View *view, uint32_t mip, uint32_t first, uint32_t layers,
@@ -1132,7 +1157,7 @@ class NativePixelGeometryReplay {
                               {"layer", selection.layer},
                               {"sample", selection.sample},
                               {"layer_domain", "bound_dsv_view"},
-                              {"route", "bound_color_output"},
+                              {"route", addOutput ? "added_bound_color_output" : "bound_color_output"},
                               {"source_color_slot", *colorSlot}});
         });
         if (!colorSlot)
@@ -1141,11 +1166,12 @@ class NativePixelGeometryReplay {
         auto result = original(observe, *colorSlot, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
                                NativePixelTestOverride::Preserve, {}, {},
                                NativePixelReturnCountSelection{*colorSlot, selection.x, selection.y,
-                                                               selection.layer, selection.sample});
+                                                               selection.layer, selection.sample},
+                               false, addOutput);
         result["kind"] = "native_depth_return_count_observation";
-        result["backend"] = "native-depth-return-count/2";
+        result["backend"] = addOutput ? "native-depth-return-count/3" : "native-depth-return-count/2";
         result["depth_transport"] = std::move(depthView);
-        result["original_null_pixel_shader"] = false;
+        result["original_null_pixel_shader"] = !state.stages[4].shader;
         return result;
     }
     Json run() {

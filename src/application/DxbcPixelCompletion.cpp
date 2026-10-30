@@ -108,6 +108,10 @@ static PixelCompletionShader addColorTarget(Bytes original, uint32_t target, uin
                        {"original_fragment_eligibility", nullptr}};
     return result;
 }
+PixelCompletionShader addPixelCountTarget(Bytes original, uint32_t target, uint64_t maxBytes,
+                                          const CancelCheck &cancelled) {
+    return addColorTarget(original, target, maxBytes, cancelled, true);
+}
 PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, uint64_t maxBytes,
                                                const CancelCheck &cancelled) {
     return addColorTarget(original, target, maxBytes, cancelled, false);

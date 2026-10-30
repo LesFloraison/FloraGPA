@@ -18,6 +18,12 @@ PixelCompletionShader normalizeSingleSamplePixelCoverage(Bytes original,
 PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target,
                                                uint64_t maxBytes = 256ull * 1024 * 1024,
                                                const CancelCheck &cancelled = {});
+// Adds an unused RGB output for count transport while retaining existing color
+// exports. The caller must preserve unrelated bindings and reject undefined
+// alpha-to-coverage before using the output as a private diagnostic target.
+PixelCompletionShader addPixelCountTarget(Bytes original, uint32_t target,
+                                          uint64_t maxBytes = 256ull * 1024 * 1024,
+                                          const CancelCheck &cancelled = {});
 // Retains the original PS executable and emits a constant RGB marker before
 // returns. Alpha, depth, coverage, resources and input declarations are retained.
 // The selected existing target must be private, unblended and RGB-writable.

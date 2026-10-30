@@ -383,9 +383,10 @@ class DxbcPixelCompletionTests final : public QObject {
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (uint32_t samples : {1u, 4u})
-                for (const auto *mode : {"ordinary", "depth-fail", "shader-depth", "discard", "early-discard",
-                                         "coverage", "integer-alpha-small", "integer-alpha-one",
-                                         "integer-minimum", "integer-signed", "sparse", "layer"})
+                for (const auto *mode :
+                     {"ordinary", "depth-fail", "shader-depth", "discard", "early-discard", "coverage",
+                      "integer-alpha-small", "integer-alpha-one", "integer-minimum", "integer-signed",
+                      "sparse", "layer", "empty", "null", "empty-depth", "early-empty-discard", "unbound"})
                     QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(samples).arg(mode)))
                         << vendor << samples << QString(mode);
     }
@@ -444,7 +445,7 @@ class DxbcPixelCompletionTests final : public QObject {
             state.rasterizer = 724;
             state.viewports = 22;
             state.stages[0].shader = 30;
-            state.stages[4].shader = 32;
+            state.stages[4].shader = mode == "null" ? 0 : 32;
             c.add(990, 3, 3, snapshot(state));
             c.add(1990, 3, 3, snapshot(state));
             c.add(1000, 7, 0x37, statePack(Id(990), Id(0), Id(1), 9u, 0u));
@@ -467,7 +468,7 @@ class DxbcPixelCompletionTests final : public QObject {
                 source += ",out uint mask:SV_Coverage";
             if (mode == "shader-depth")
                 source += ",out float z:SV_Depth";
-            source += "):SV_Target" + std::to_string(slot) + "{";
+            source += "):SV_Target" + std::to_string(mode == "unbound" ? 7 : slot) + "{";
             if (mode == "discard" || mode == "early-discard")
                 source += "if(id==1)discard;";
             if (mode == "shader-depth")
@@ -476,13 +477,23 @@ class DxbcPixelCompletionTests final : public QObject {
                 source += "mask=5;";
             source += "return " + std::string(type) + "(7,11,13," +
                       std::string(mode == "integer-alpha-one" ? "1065353216" : "1") + ");}";
-            o.shaders[32] = compileClassProgram(source, "ps_5_0");
+            const bool added = mode == "empty" || mode == "null" || mode == "empty-depth" ||
+                               (mode == "early-empty-discard" || mode == "unbound");
+            if (mode == "empty" || mode == "null")
+                source = "void main(){}";
+            if (mode == "empty-depth")
+                source = "float main():SV_Depth{return .75;}";
+            if (mode == "early-empty-discard")
+                source = "[earlydepthstencil] void main(uint id:SV_PrimitiveID){if(id==1)discard;}";
+            o.shaders[32] = mode == "null"
+                                ? compileHlsl(source, "ps_5_0", "main", "native-null-depth-ps.hlsl").bytecode
+                                : compileClassProgram(source, "ps_5_0");
             D3D11_DEPTH_STENCIL_DESC ds{};
             ds.DepthEnable = TRUE;
             ds.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-            ds.DepthFunc = mode == "depth-fail"     ? D3D11_COMPARISON_NEVER
-                           : mode == "shader-depth" ? D3D11_COMPARISON_LESS
-                                                    : D3D11_COMPARISON_ALWAYS;
+            ds.DepthFunc = mode == "depth-fail"                                ? D3D11_COMPARISON_NEVER
+                           : (mode == "shader-depth" || mode == "empty-depth") ? D3D11_COMPARISON_LESS
+                                                                               : D3D11_COMPARISON_ALWAYS;
             ds.StencilEnable = TRUE;
             ds.StencilReadMask = ds.StencilWriteMask = 255;
             ds.FrontFace = ds.BackFace = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
@@ -510,8 +521,8 @@ class DxbcPixelCompletionTests final : public QObject {
                            original = read(reference, 720, sample);
                 const uint32_t stencilDelta =
                     uint32_t(original.at(sub.offset + 3) - initial.at(sub.offset + 3));
-                const uint32_t expected = mode == "early-discard" ? 2 : stencilDelta;
-                if (mode == "early-discard")
+                const uint32_t expected = mode.contains("early") ? 2 : stencilDelta;
+                if (mode.contains("early"))
                     QCOMPARE(stencilDelta, 3u);
                 std::vector<uint8_t> observed;
                 const auto report =
@@ -519,7 +530,8 @@ class DxbcPixelCompletionTests final : public QObject {
                         if (after)
                             observed = read(r, 720, sample);
                     });
-                QCOMPARE(report.at("backend"), Json("native-depth-return-count/2"));
+                QCOMPARE(report.at("backend"),
+                         Json(added ? "native-depth-return-count/3" : "native-depth-return-count/2"));
                 QCOMPARE(report.at("return_count").at("count"), Json(expected));
                 QCOMPARE(report.at("count_transport").at("source_slot"), Json(slot));
                 QCOMPARE(report.at("depth_transport").at("source_first_layer"), Json(depthFirst));
@@ -550,6 +562,19 @@ class DxbcPixelCompletionTests final : public QObject {
             }
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
                                      replayNativeDepthReturnCount(replay, 1000, {1, 0, 0, 0}));
+            if (added) {
+                auto blocked = o;
+                auto blend = defaultBlend();
+                blend.AlphaToCoverageEnable = TRUE;
+                blocked.blendEdits[1000].descriptor = blend;
+                Replay rejection(frame, blocked);
+                rejection.run();
+                const auto before = read(rejection, 720, 0), colorBefore = read(rejection, 20, 0);
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         replayNativeDepthReturnCount(rejection, 1000, {}));
+                QCOMPARE(read(rejection, 720, 0), before);
+                QCOMPARE(read(rejection, 20, 0), colorBefore);
+            }
             save({{"vendor", vendor}, {"samples", samples}, {"mode", mode.toStdString()}, {"rows", rows}},
                  o.shaders[32]);
         } catch (const std::exception &e) {

@@ -10,13 +10,18 @@ from validate_pixel_return_count import require, read, sha
 
 
 def verify(report, vendor, expected=None):
-    if report['backend'] == 'native-depth-return-count/2':
+    if report['backend'] in ('native-depth-return-count/2', 'native-depth-return-count/3'):
         from validate_pixel_return_count import verify as color_count
         color_count(report, vendor, expected, component_type=report['completion_shader']['component_type'], depth_source=True, allow_unknown=True)
         depth = report['depth_transport']; color = report['count_transport']
-        require(depth['route'] == 'bound_color_output' and depth['layer_domain'] == 'bound_dsv_view'
+        added = report['backend'] == 'native-depth-return-count/3'
+        require(depth['route'] == ('added_bound_color_output' if added else 'bound_color_output') and depth['layer_domain'] == 'bound_dsv_view'
                 and depth['source_color_slot'] == color['source_slot']
-                and report['original_null_pixel_shader'] is False and report['shaders'][4]['resource'] != 0, 'Mixed route')
+                and report['original_null_pixel_shader'] == (report['shaders'][4]['resource'] == 0)
+                and (added or report['shaders'][4]['resource'] != 0), 'Mixed route')
+        if added:
+            require(report['completion_shader']['source_sha256'] == report['additional_target_shader']['shader_sha256']
+                    and report['completion_target']['alpha_to_coverage'] is False, 'Added color output')
         for key in ('width','height','layers','samples','sample_quality','x','y','layer','sample'):
             require(depth[key] == color[key], 'Mixed view join: '+key)
         return

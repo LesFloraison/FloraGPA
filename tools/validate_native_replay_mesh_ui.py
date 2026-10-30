@@ -57,7 +57,7 @@ def validate(name, job, result, files, terminal_domain=False):
             "instance identity")
     if fixed_geometry:
         proof = data["instance_selection"]["uav_independence"]
-        require(context["backend"] == "dx11-native/15" and proof["input_aliases_excluded"] is True and
+        require(context["backend"] == "dx11-native/16" and proof["input_aliases_excluded"] is True and
                 proof["stages"]["gs"]["scope"] == "terminal_geometry_counts" and
                 proof["stages"]["gs"]["terminal_geometry_counts"] is True and
                 data["instance_selection"]["first_vertex"] == 3, "fixed GS scope")

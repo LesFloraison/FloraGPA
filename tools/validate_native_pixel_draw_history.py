@@ -24,7 +24,7 @@ def same(a, b):
 
 
 def validate(r, vendor):
-    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/4', 'schema/backend')
+    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/5', 'schema/backend')
     require(r['kind'] == 'private_pixel_draw_history', 'private history kind')
     require(r['order'] == 'captured_geometry_storage' and r['sample_selection_domain'] == 'target_storage', 'order/sample scope')
     require(r['original_fragment_eligibility'] is None, 'original eligibility')

@@ -305,9 +305,10 @@ class NativeDrawHistoryJobsTests final : public QObject {
             QCOMPARE(count.at("requested"), Json(true));
             QVERIFY(count.at("original_fragment_eligibility").is_null());
             if (mode == "depth-mixed-null") {
-                QCOMPARE(count.at("status"), Json("not_applicable"));
-                QCOMPARE(count.at("reason"), Json("selected_depth_target"));
-                QVERIFY(count.at("count").is_null());
+                QCOMPARE(count.at("status"), Json("observed"));
+                QCOMPARE(count.at("count"), Json(1));
+                QCOMPARE(count.at("observation").at("backend"), Json("native-depth-return-count/3"));
+                QCOMPARE(count.at("observation").at("original_null_pixel_shader"), Json(true));
             } else if (mode.startsWith("depth-")) {
                 QCOMPARE(count.at("status"), Json("observed"));
                 QCOMPARE(count.at("count"), Json(1));

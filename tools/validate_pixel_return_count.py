@@ -26,7 +26,7 @@ def sha(path):
 
 def verify(report, vendor, expected=None, alpha=None, component_type=3, depth_source=False, allow_unknown=False):
     require(report["schema"] == 1 and report["kind"] == ("native_depth_return_count_observation" if depth_source else "native_pixel_return_count_observation")
-            and report["backend"] == ("native-depth-return-count/2" if depth_source else "native-pixel-return-count/3")
+            and report["backend"] == (("native-depth-return-count/3" if "additional_target_shader" in report else "native-depth-return-count/2") if depth_source else "native-pixel-return-count/3")
             and report["scope"] == "returning_samples_on_private_additive_target", "Wrong scope")
     require(report["original_fragment_eligibility"] is None and report["original_gpu_schedule"] is False,
             "Unsupported original identity claim")
