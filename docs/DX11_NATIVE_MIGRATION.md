@@ -1767,3 +1767,13 @@ failures or skips; independent validation rejects 102 corruptions. See
 `research/DX11_TEXTURE_UAV_PRECISION.md` for retained failures and evidence.
 Full format/instruction and debugger parity, original fragment qualification,
 RenderDoc removal and independent package acceptance remain open.
+
+An owned MRT-binding probe now isolates Intel ordinal-query discrepancies while
+retaining identical eight-output shaders. The 72-configuration binding matrix and
+144-configuration default regression verify 23,760 selected vectors but retain
+24 strict query-failure groups (202 passes, no skips). Two complete binding runs
+also differ in 43 query observations; a fixed divisor or a single successful
+sparse-binding run is not accepted as a correction. Independent validation rejects
+504 corruptions. See `research/DX11_PIXEL_ORDINAL_BINDINGS.md` for intermediate
+failures, driver identities and replayable evidence. This is P5 research; product
+backend selection, original fragment eligibility and P7/P8 gates are unchanged.
