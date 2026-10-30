@@ -102,9 +102,9 @@ PixelCompletionShader addPixelCompletionTarget(Bytes original, uint32_t target, 
                        {"original_fragment_eligibility", nullptr}};
     return result;
 }
-PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
-                                                std::array<uint32_t, 3> markerBits, uint64_t maxBytes,
-                                                const CancelCheck &cancelled) {
+static PixelCompletionShader markPixelCompletion(Bytes original, uint32_t target,
+                                                 std::array<uint32_t, 3> markerBits, uint64_t maxBytes,
+                                                 const CancelCheck &cancelled, bool fullPrecisionMarker) {
     constexpr uint32_t SHDR = 0x52444853, SHEX = 0x58454853, OSGN = 0x4e47534f, OSG5 = 0x3547534f,
                        OSG1 = 0x3147534f;
     if (target >= 8)
@@ -189,6 +189,10 @@ PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
     }
     if (selectedDeclaration == SIZE_MAX)
         throw std::runtime_error("Pixel completion has no target declaration");
+    // Only the new RGB operation uses full precision. Original declarations and
+    // instructions, including integer alpha precision, retain their own operands.
+    if (fullPrecisionMarker)
+        markerDestination = {0x00102072, target};
     uint32_t returns = 0;
     std::vector<std::vector<uint32_t>> rows;
     std::vector<uint32_t> marker{54};
@@ -246,6 +250,28 @@ PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
                        {"alpha_preserved", true},
                        {"requires_private_unblended_target", true},
                        {"original_fragment_eligibility", nullptr}};
+    if (fullPrecisionMarker)
+        result.identity["coverage_output_declared"] =
+            std::any_of(program.instructions.begin(), program.instructions.end(),
+                        [](const auto &row) { return row == std::vector<uint32_t>{0x02000065, 0x0000f000}; });
     return result;
 }
+PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
+                                                std::array<uint32_t, 3> markerBits, uint64_t maxBytes,
+                                                const CancelCheck &cancelled) {
+    return markPixelCompletion(original, target, markerBits, maxBytes, cancelled, false);
+}
+PixelCompletionShader instrumentPixelReturnCount(Bytes original, uint32_t target, uint64_t maxBytes,
+                                                 const CancelCheck &cancelled) {
+    auto result = markPixelCompletion(original, target, {0x3f800000, 0x3f800000, 0x3f800000}, maxBytes,
+                                      cancelled, true);
+    result.identity["kind"] = "native_pixel_return_count_shader";
+    result.identity["backend"] = "native-pixel-return-count-shader/1";
+    result.identity["marker_precision"] = "full";
+    result.identity["requires_private_unblended_target"] = false;
+    result.identity["requires_additive_rgb_float32_target"] = true;
+    result.identity["alpha_storage_is_original_bits"] = false;
+    return result;
+}
+
 } // namespace flora

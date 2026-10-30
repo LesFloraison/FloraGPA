@@ -23,9 +23,9 @@ def sha(path):
         return hashlib.file_digest(source, "sha256").hexdigest()
 
 
-def verify(report, vendor, expected=None, alpha=None):
+def verify(report, vendor, expected=None, alpha=None, component_type=3):
     require(report["schema"] == 1 and report["kind"] == "native_pixel_return_count_observation"
-            and report["backend"] == "native-pixel-return-count/1"
+            and report["backend"] == "native-pixel-return-count/2"
             and report["scope"] == "returning_samples_on_private_additive_target", "Wrong scope")
     require(report["original_fragment_eligibility"] is None and report["original_gpu_schedule"] is False,
             "Unsupported original identity claim")
@@ -34,7 +34,9 @@ def verify(report, vendor, expected=None, alpha=None):
     require(report["debug_validation"] == "no_errors" and report["extra_uav_slots"] == 0, "Invalid execution")
     require(report["diagnostic_working_payload_bytes"] <= report["payload_limit"], "Payload exceeds budget")
     shader = report["completion_shader"]
-    require(shader["component_type"] == 3 and shader["marker_bits"] == [0x3f800000] * 3
+    require(shader["component_type"] == component_type and shader["marker_bits"] == [0x3f800000] * 3
+            and shader["backend"] == "native-pixel-return-count-shader/1"
+            and shader["marker_precision"] == "full" and shader["alpha_storage_is_original_bits"] is False
             and shader["extra_uav_slots"] == 0 and shader["alpha_preserved"] is True
             and shader["requires_private_unblended_target"] is False
             and shader["requires_additive_rgb_float32_target"] is True, "Wrong shader contract")
@@ -137,7 +139,7 @@ def main():
         require(data["observer_failures_restored"] == data["cancellation_points"] == 2
                 and data["invalid_selections_rejected"] == 5, "Missing recovery controls")
         require(all(data[k] is True for k in ("cancellation_restored", "budget_restored", "timeout_restored",
-                                             "integer_output_rejected")), "Failed recovery")
+                                             "integer_output_supported")), "Failed recovery")
         verify(data["retry"], vendor, 260, 0)
         require([r["skip"] for r in data["predicates"]] == [False, True], "Missing predicate controls")
         for row in data["predicates"]:

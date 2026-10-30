@@ -64,7 +64,7 @@ struct NativePixelReturnCountSelection {
 // Decodes RGB float32 accumulation. Values at the exact-integer limit are
 // unknown because adding one can stop changing the stored value.
 nlohmann::json decodeNativePixelReturnCount(std::array<uint32_t, 4> bits);
-// Redirects one existing float PS output to private RGBA32F storage and adds
+// Redirects one existing PS color output to private RGBA32F storage and adds
 // one RGB unit per returning, surviving sample. Original alpha, depth/stencil,
 // coverage, other outputs and UAV slots remain. Coordinates are relative to the
 // selected 2D RTV view. This measures a diagnostic replay, not original identity.

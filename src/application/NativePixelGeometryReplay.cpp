@@ -449,7 +449,10 @@ class NativePixelGeometryReplay {
                                 throw std::runtime_error("Bound GS does not provide a primitive identity");
                         }
                         auto marked =
-                            accumulatePredicate
+                            countSelection
+                                ? instrumentPixelReturnCount(completionCode, target,
+                                                             request.maxBytes - workingBytes, scoped)
+                            : accumulatePredicate
                                 ? instrumentPixelPrimitivePresence(completionCode, target, *primitiveMask,
                                                                    request.maxBytes - workingBytes, scoped,
                                                                    producer)
@@ -459,12 +462,6 @@ class NativePixelGeometryReplay {
                                                                producer)
                                 : instrumentPixelCompletion(completionCode, target, marker,
                                                             request.maxBytes - workingBytes, scoped);
-                        if (countSelection) {
-                            if (marked.identity.at("component_type") != 3)
-                                throw std::runtime_error("Pixel return count requires a float shader output");
-                            marked.identity["requires_private_unblended_target"] = false;
-                            marked.identity["requires_additive_rgb_float32_target"] = true;
-                        }
                         if (marked.bytecode.size() > request.maxBytes - workingBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
                         workingBytes += marked.bytecode.size();
@@ -495,6 +492,11 @@ class NativePixelGeometryReplay {
                         if (depthSelection && blend.AlphaToCoverageEnable)
                             throw std::runtime_error(
                                 "Depth completion has no original alpha-to-coverage value");
+                        if (countSelection && target == 0 && blend.AlphaToCoverageEnable &&
+                            marked.identity.at("component_type") != 3 &&
+                            !marked.identity.at("coverage_output_declared").get<bool>())
+                            throw std::runtime_error(
+                                "Integer RT0 alpha-to-coverage is not preserved by the float count target");
                         if (accumulatePredicate) {
                             Com<ID3D11DepthStencilState> currentDepth;
                             UINT reference = 0;
@@ -627,7 +629,7 @@ class NativePixelGeometryReplay {
                             {"sample_mask", mask}};
                         if (countSelection) {
                             report["kind"] = "native_pixel_return_count_observation";
-                            report["backend"] = "native-pixel-return-count/1";
+                            report["backend"] = "native-pixel-return-count/2";
                             report["scope"] = "returning_samples_on_private_additive_target";
                             report["completion_target"]["rgb_reduction"] = "add";
                             report["completion_target"]["alpha_reduction"] = "replace";

@@ -26,6 +26,13 @@ PixelCompletionShader instrumentPixelCompletion(Bytes original, uint32_t target,
                                                 std::array<uint32_t, 3> markerBits,
                                                 uint64_t maxBytes = 256ull * 1024 * 1024,
                                                 const CancelCheck &cancelled = {});
+// Full-precision RGB unit marker for additive float32 transport, independent of
+// the original color output's integer/float and minimum-precision annotations.
+// Original alpha instructions are retained; stored alpha still follows float
+// blend arithmetic and is not an exact raw-integer output transport.
+PixelCompletionShader instrumentPixelReturnCount(Bytes original, uint32_t target,
+                                                 uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                 const CancelCheck &cancelled = {});
 struct PixelPrimitiveMask {
     uint32_t mask = UINT32_MAX, value = 0;
     bool notEqual = false;

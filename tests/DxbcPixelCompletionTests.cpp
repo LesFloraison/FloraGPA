@@ -62,7 +62,7 @@ std::array<uint32_t, 4> privatePixel(Replay &r, Id resource, uint32_t sample, ui
     std::memcpy(words.data(), bytes.data(), 16);
     return words;
 }
-void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0) {
+void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0, bool countMarker = false) {
     auto code = [](Bytes bytes) {
         for (const auto &[tag, part] : readDxbcParts(bytes))
             if (tag == 0x52444853 || tag == 0x58454853)
@@ -77,9 +77,12 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0) {
             destination.assign(row.begin() + 1, row.end());
     QVERIFY(!destination.empty());
     destination[0] = (destination[0] & ~0xf0u) | (7u << 4);
+    if (countMarker)
+        destination = {0x00102072, target};
     std::vector<uint32_t> expectedMarker{uint32_t(6 + destination.size()) << 24 | 54u};
     expectedMarker.insert(expectedMarker.end(), destination.begin(), destination.end());
-    expectedMarker.insert(expectedMarker.end(), {0x4002, marker[0], marker[1], marker[2], 0});
+    const auto bits = countMarker ? std::array<uint32_t, 3>{0x3f800000, 0x3f800000, 0x3f800000} : marker;
+    expectedMarker.insert(expectedMarker.end(), {0x4002, bits[0], bits[1], bits[2], 0});
     size_t output = 0;
     bool mainBody = true;
     for (const auto &row : a.instructions) {
@@ -103,6 +106,23 @@ void unchangedInstructions(Bytes original, Bytes marked, uint32_t target = 0) {
 class DxbcPixelCompletionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void countMarker_data() {
+        QTest::addColumn<QString>("kind");
+        for (const auto *kind : {"float", "uint", "int", "min16float", "min16uint", "min16int"})
+            QTest::newRow(kind) << QString(kind);
+    }
+    void countMarker() {
+        QFETCH(QString, kind);
+        const auto type = kind.toStdString() + "4";
+        const auto source = "cbuffer C:register(b0){uint4 p;}" + type + " main():SV_Target7{return " + type +
+                            "(7,11,13,p.x);}";
+        const auto original = compileClassProgram(source, "ps_5_0");
+        const auto marked = instrumentPixelReturnCount(original, 7);
+        unchangedInstructions(original, marked.bytecode, 7, true);
+        QCOMPARE(marked.identity["marker_precision"], Json("full"));
+        QCOMPARE(marked.identity["alpha_storage_is_original_bits"], Json(false));
+        save(marked.identity, original, marked.bytecode);
+    }
     void depthTransport_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");

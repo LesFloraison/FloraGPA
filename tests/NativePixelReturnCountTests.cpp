@@ -177,7 +177,7 @@ class NativePixelReturnCountTests final : public QObject {
                 QCOMPARE(report.at("return_count").at("valid"), Json(true));
                 QVERIFY(report.at("original_fragment_eligibility").is_null());
                 QCOMPARE(report.at("extra_uav_slots"), Json(0));
-                QCOMPARE(report.at("backend"), Json("native-pixel-return-count/1"));
+                QCOMPARE(report.at("backend"), Json("native-pixel-return-count/2"));
             }
             size_t i = 0;
             for (uint32_t target = 0; target < targets; ++target)
@@ -438,7 +438,8 @@ class NativePixelReturnCountTests final : public QObject {
             Replay integer(integerFrame, options(vendor));
             integer.run();
             const auto integerBefore = integer.readTexture(1000);
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayNativePixelReturnCount(integer, 100, {}));
+            const auto integerCount = replayNativePixelReturnCount(integer, 100, {});
+            QCOMPARE(integerCount.at("return_count").at("count"), Json(1));
             QCOMPARE(integer.readTexture(1000), integerBefore);
             Json predicates = Json::array();
             for (bool skip : {false, true}) {
@@ -463,7 +464,7 @@ class NativePixelReturnCountTests final : public QObject {
                   {"cancellation_restored", true},
                   {"cancellation_points", 2},
                   {"timeout_restored", true},
-                  {"integer_output_rejected", true},
+                  {"integer_output_supported", true},
                   {"budget_restored", true},
                   {"invalid_selections_rejected", 5},
                   {"predicates", predicates},

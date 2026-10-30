@@ -135,18 +135,12 @@ int main(int argc, char **argv) {
                 PixelPrimitiveInput{report.at("completion_shader").at("input_register").get<uint32_t>(),
                                     report.at("completion_shader").at("input_component").get<uint32_t>()};
         auto rewritten =
-            args.size() == 12 ? instrumentPixelPrimitivePresence(source, slot, *primitive,
-                                                                 256ull * 1024 * 1024, cancel, producer)
+            returnCount         ? instrumentPixelReturnCount(source, slot, 256ull * 1024 * 1024, cancel)
+            : args.size() == 12 ? instrumentPixelPrimitivePresence(source, slot, *primitive,
+                                                                   256ull * 1024 * 1024, cancel, producer)
             : primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
                                                        producer)
-                        : instrumentPixelCompletion(
-                              source, slot,
-                              returnCount ? std::array<uint32_t, 3>{0x3f800000, 0x3f800000, 0x3f800000}
-                                          : std::array<uint32_t, 3>{0x3f800000, 0x40000000, 0x40400000});
-        if (returnCount) {
-            rewritten.identity["requires_private_unblended_target"] = false;
-            rewritten.identity["requires_additive_rgb_float32_target"] = true;
-        }
+                        : instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
         if (rewritten.identity != report.at("completion_shader"))
             throw std::runtime_error("Completion probe shader identity differs");
         save("original.dxbc", source);
