@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "implementation_commit": "13d7394f8c9ef4d5bbdaf87750a3dc3d9579ff14",
+  "baseline_engine_commit": "f91befc15cb4b8dc5d686f38eed55a48738048a4",
+  "sources_are_git_content": true,
+  "scope": "pixel_typed_buffer_minimum_precision",
+  "backend": "dxbc-gpu/29",
+  "renderdoc_removed": false,
+  "complete_release_acceptance": false,
+  "original_fragment_qualification": false,
+  "precision_cases": 7200,
+  "new_pixel_uav_cases": 1440,
+  "exact_components": 28800,
+  "rejected_corruptions": 120,
+  "indexed_artifacts": 28800,
+  "artifact_index": "artifacts/dx11-native/pixel-uav-precision/validation.json",
+  "adapters": [
+    {
+      "requested_vendor": 0,
+      "device_id": 140,
+      "luid_high": 0,
+      "luid_low": 74655,
+      "vendor_id": 5140
+    },
+    {
+      "requested_vendor": 4318,
+      "device_id": 11352,
+      "luid_high": 0,
+      "luid_low": 69256,
+      "vendor_id": 4318
+    },
+    {
+      "requested_vendor": 32902,
+      "device_id": 32103,
+      "luid_high": 0,
+      "luid_low": 74756,
+      "vendor_id": 32902
+    }
+  ],
+  "suites": [
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/baseline.txt",
+      "passed": 2,
+      "failed": 3,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 482
+    },
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/focused.txt",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 716
+    },
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/full.txt",
+      "passed": 2022,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 306106
+    },
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/pixel-memory.txt",
+      "passed": 650,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 10163
+    },
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/execution.txt",
+      "passed": 1232,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 104248
+    },
+    {
+      "log": "artifacts/dx11-native/pixel-uav-precision/pixel-checkpoint-inputs.txt",
+      "passed": 635,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 127272
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 123388,
+      "sha256": "68c9868dca3c30194d52c74db2d9e5b7ba69cb6f5da390af10d916e73fda850c"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 121160,
+      "sha256": "c9bceef6e0654a5555425ca1f14f2875f7a2d73b0e736d457109a5843448f1ed"
+    },
+    {
+      "path": "src/application/DxbcTypedBuffer.cpp",
+      "bytes": 6844,
+      "sha256": "ce144d869171e400d9a5b5661bbef698704f693335b6f562d11295903cadb937"
+    },
+    {
+      "path": "tests/DxbcTypedPixelTests.cpp",
+      "bytes": 40859,
+      "sha256": "b9a47975b8c51273e6532d1117a4d4a2edbf9b41915c6e63e0a8d93fa28660a2"
+    },
+    {
+      "path": "tools/validate_typed_load_precision.py",
+      "bytes": 7549,
+      "sha256": "efdced0cc5920583f4a795c80329f73c59fb62189d9981b90b11b9fec0abe8bd"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline-build.log",
+      "bytes": 1091,
+      "sha256": "b13c4f37df4b1b86b6036278f33e80fe0655bf7c703c2cef241dd781533970c2"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline-comparison.json",
+      "bytes": 141,
+      "sha256": "4bd61b93cd609438557cd598562cda7099b348c5656cf4cbecb64bfc62d1648a"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline-tests.cpp",
+      "bytes": 40694,
+      "sha256": "69bc7df7827c793eb75a0c26f81c84c262b859cf4f11083210c1faa9d84db81f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline-tests.exe",
+      "bytes": 584704,
+      "sha256": "34e7b160096fb235bcb527e37a3a8cfdcd17b28a73e79e0b6d4a79f91c2bb89c"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/baseline.txt",
+      "bytes": 1049,
+      "sha256": "26a25684308beec92c9b370b6a9401dcad2f7abf3b3f2d3188163ad95db8006d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/build.log",
+      "bytes": 1112,
+      "sha256": "4b29bf65fb7b4b1087259e084d573a01517962c12b1689bcb5aab1ed852f5ac3"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/execution.txt",
+      "bytes": 677479,
+      "sha256": "48926ee56a27048a6457055151d6d83608c6750f9ed18471301416f5639f8549"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/focused-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/focused.txt",
+      "bytes": 18983,
+      "sha256": "be1f1fb8c98f07db3892abe146933d169d5355ff4dc3623ea7176b7b4facdb3d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/full-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/full.txt",
+      "bytes": 9446380,
+      "sha256": "5bc1d51724f2996ecd23dddc1e62458fee0c54e40d4875e76c3d588383018d93"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/pixel-checkpoint-inputs.txt",
+      "bytes": 49046,
+      "sha256": "2566eaca1bb37691cd4a5824319efd6b55c293f2918b7d2e4e2fc7bcd893dc66"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/pixel-memory.txt",
+      "bytes": 36199,
+      "sha256": "ca02a57d633ef50d292e39d5ac99a5c21b99f0981b1612978ec4d3e55084c588"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/regression-build.log",
+      "bytes": 10078,
+      "sha256": "a7a81f3d0582ceaf6c3750210293ffb441df34aef8ecd1a3ffd9cb78d17c78dc"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/regression-ctest.txt",
+      "bytes": 536,
+      "sha256": "6b015afb0db4a7f3d0dc4d10d9244a6db0789114549e3ceb0cfb504c976b19d1"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/validation.json",
+      "bytes": 7265790,
+      "sha256": "560b6f271c1db945bfddbbfc251cae6d895b5e63cddb68f89d40d0b060584e6f"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/validator.log",
+      "bytes": 44,
+      "sha256": "8f8c632737843b13236007326e970c04e3ea33826a4f4892a3d91980e54c601d"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraDxbcExecutionTests.exe",
+      "bytes": 1007616,
+      "sha256": "8e4f6c808e6afa6d034bf3de867839a2da0c6516379256cd22d538700758e95b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraDxbcPixelMemoryTests.exe",
+      "bytes": 574464,
+      "sha256": "de76482964b8356a8996cc44d4356aa4fb0abe288c7a909882099c8b4dfec707"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraDxbcTypedPixelTests.exe",
+      "bytes": 586240,
+      "sha256": "3e47d116d9217e1feabc5cf2c681c05619e36c6a54e843caa5649c55adcac630"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraGPA.Cli.exe",
+      "bytes": 6216192,
+      "sha256": "69a9a33137f1be2d98e32c55dca27be96de66950b1b9d4e14faf4d2bfe07cb34"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraGPA.exe",
+      "bytes": 5181440,
+      "sha256": "c15b4a7fcf66743a291c52eb5d5ac2def21ddfc97b42786c842a8272a1f3055e"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraGPA.Worker.exe",
+      "bytes": 6216192,
+      "sha256": "e5af75a63cb11efd17fd741bf744d8c635ca693798593541e83385b99531fd8b"
+    },
+    {
+      "path": "artifacts/dx11-native/pixel-uav-precision/binaries/FloraNativePixelCheckpointInputsTests.exe",
+      "bytes": 2844160,
+      "sha256": "75a7fe5b572a91518bcad05e691150f26a74d9b5c2fb1374a1feaf712c3370bb"
+    }
+  ]
+}

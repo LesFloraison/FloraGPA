@@ -1728,3 +1728,12 @@ geometry, presence and completion regressions pass, while six original Intel
 query failures remain. See `research/DX11_SINGLE_SAMPLE_COVERAGE.md` for 1,272
 corruption checks, unchanged-input evidence and remaining P5-P8 gates. No fragment
 identity is promoted and no public backend is switched by this increment.
+
+PS typed-buffer UAV reads now admit the minimum-precision operands already
+supported by the private PS GPU helper. The complete typed-pixel suite passes
+2,022 checks, and independent validation covers 7,200 cases, 28,800 exact output
+components and 120 rejected report corruptions on WARP, NVIDIA and Intel. The
+three retained pre-fix rejections use the same reference/matrix source after
+formatting. See `research/DX11_PIXEL_UAV_PRECISION.md`. Minimum-precision texture
+UAV reads and output destinations remain separate requirements; this increment
+does not complete P6 parity, original fragment qualification or P7/P8.
