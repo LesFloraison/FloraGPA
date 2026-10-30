@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QRegularExpression>
 #include <QtTest>
 #include <d3d11sdklayers.h>
 using namespace flora;
@@ -88,6 +89,14 @@ class NativePixelOrdinalTests final : public QObject {
         QFETCH(uint32_t, samples);
         QFETCH(uint32_t, mode);
         QFETCH(uint32_t, targets);
+        const UINT targetMask = qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_TARGET_MASK")
+                                    ? qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_TARGET_MASK")
+                                    : (1u << targets) - 1;
+        QVERIFY(targetMask && !(targetMask & ~((1u << targets) - 1)) && (targetMask & (1u << (targets - 1))));
+        const UINT repetitions = qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_REPETITIONS")
+                                     ? qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_REPETITIONS")
+                                     : 1;
+        QVERIFY(repetitions >= 1 && repetitions <= 16);
         const UINT extent = qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_EXTENT")
                                 ? qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_EXTENT")
                                 : 4;
@@ -199,7 +208,7 @@ class NativePixelOrdinalTests final : public QObject {
             Com<ID3D11Texture2D> color;
             check(device->CreateTexture2D(&texture, nullptr, &color), "Create ordinal color");
             check(device->CreateRenderTargetView(color.Get(), nullptr, &views[i]), "Create ordinal RTV");
-            bindings.push_back(views[i].Get());
+            bindings.push_back(targetMask & (1u << i) ? views[i].Get() : nullptr);
             if (i == targets - 1)
                 check(device->CreateShaderResourceView(color.Get(), nullptr, &source), "Create ordinal SRV");
         }
@@ -272,80 +281,98 @@ class NativePixelOrdinalTests final : public QObject {
                     {"samples", samples},
                     {"mode", mode},
                     {"targets", targets},
+                    {"render_target_mask", targetMask},
+                    {"repetitions", repetitions},
                     {"scope", "owned_draw_stencil_ordinal_probe"},
                     {"original_fragment_eligibility", nullptr},
                     {"rows", Json::array()}};
         for (UINT count : {8u, 260u}) {
             for (int rank : {-1, 0, 1, 2, 6, 7, 8, 127, 253, 254, 255}) {
-                context->ClearState();
-                for (auto *view : bindings) {
-                    const float clear[4]{};
-                    context->ClearRenderTargetView(view, clear);
-                }
-                context->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
-                context->OMSetRenderTargets(targets, bindings.data(), dsv.Get());
-                context->OMSetDepthStencilState(rank < 0 ? referenceState.Get() : ordinalState.Get(),
-                                                UINT(rank));
-                context->RSSetState(rasterizer.Get());
-                const D3D11_VIEWPORT viewport{0, 0, float(extent), float(extent), 0, 1};
-                context->RSSetViewports(1, &viewport);
-                context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-                context->VSSetShader(vs.Get(), nullptr, 0);
-                context->GSSetShader(layout == 2 ? gs.Get() : nullptr, nullptr, 0);
-                context->PSSetShader(ps.Get(), nullptr, 0);
-                context->Begin(occlusion.Get());
-                if (layout == 1)
-                    context->DrawInstanced(3, count, 0, 0);
-                else
-                    context->Draw(3 * (layout == 2 ? count / 2 : count), 0);
-                context->End(occlusion.Get());
-                context->OMSetRenderTargets(0, nullptr, nullptr);
-                context->CSSetShader(cs.Get(), nullptr, 0);
-                auto *read = source.Get();
-                context->CSSetShaderResources(0, 1, &read);
-                auto *write = uav.Get();
-                context->CSSetUnorderedAccessViews(0, 1, &write, nullptr);
-                context->Dispatch(samples, 1, 1);
-                context->CopyResource(staging.Get(), output.Get());
-                context->End(complete.Get());
-                wait(device.Get(), context.Get(), complete.Get());
-                UINT64 passing = 0;
-                check(context->GetData(occlusion.Get(), &passing, sizeof passing, 0),
-                      "Read ordinal occlusion");
-                D3D11_MAPPED_SUBRESOURCE mapped{};
-                check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Map ordinal outputs");
-                std::vector<std::array<uint32_t, 4>> actual(samples);
-                std::memcpy(actual.data(), mapped.pData, 16 * samples);
-                context->Unmap(staging.Get(), 0);
-                std::vector<std::array<uint32_t, 4>> expected(samples);
-                for (UINT sample = 0; sample != samples; ++sample) {
-                    UINT stencil = 0;
-                    for (UINT fragment = 0; fragment != count; ++fragment) {
-                        const bool discard = (mode == 1 || mode == 2) && (fragment & 1);
-                        const bool masked = mode == 3 && ((fragment & 1) != (sample & 1));
-                        const bool matches = rank < 0 || stencil == UINT(rank);
-                        if (mode == 2 || (!discard && !masked))
-                            stencil = std::min(stencil + 1, 255u);
-                        if (!matches || discard || masked)
-                            continue;
-                        expected[sample] = {fragment + 1,
-                                            layout == 2   ? 7u
-                                            : layout == 1 ? 0u
-                                                          : fragment,
-                                            layout == 1 ? fragment : 0u, sample};
+                for (UINT repetition = 0; repetition < repetitions; ++repetition) {
+                    context->ClearState();
+                    for (const auto &view : views) {
+                        const float clear[4]{};
+                        context->ClearRenderTargetView(view.Get(), clear);
                     }
-                }
-                if (floatOutput)
-                    for (auto &value : expected)
-                        for (auto &component : value) {
-                            const float converted = float(component);
-                            std::memcpy(&component, &converted, 4);
+                    context->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+                    context->OMSetRenderTargets(targets, bindings.data(), dsv.Get());
+                    std::array<ID3D11RenderTargetView *, 8> observed{};
+                    context->OMGetRenderTargets(targets, observed.data(), nullptr);
+                    UINT observedMask = 0;
+                    for (UINT slot = 0; slot < targets; ++slot) {
+                        if (observed[slot])
+                            observedMask |= 1u << slot;
+                        const bool matches = observed[slot] == bindings[slot];
+                        if (observed[slot])
+                            observed[slot]->Release();
+                        QVERIFY(matches);
+                    }
+                    QCOMPARE(observedMask, targetMask);
+                    report["observed_render_target_mask"] = observedMask;
+                    context->OMSetDepthStencilState(rank < 0 ? referenceState.Get() : ordinalState.Get(),
+                                                    UINT(rank));
+                    context->RSSetState(rasterizer.Get());
+                    const D3D11_VIEWPORT viewport{0, 0, float(extent), float(extent), 0, 1};
+                    context->RSSetViewports(1, &viewport);
+                    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+                    context->VSSetShader(vs.Get(), nullptr, 0);
+                    context->GSSetShader(layout == 2 ? gs.Get() : nullptr, nullptr, 0);
+                    context->PSSetShader(ps.Get(), nullptr, 0);
+                    context->Begin(occlusion.Get());
+                    if (layout == 1)
+                        context->DrawInstanced(3, count, 0, 0);
+                    else
+                        context->Draw(3 * (layout == 2 ? count / 2 : count), 0);
+                    context->End(occlusion.Get());
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    context->CSSetShader(cs.Get(), nullptr, 0);
+                    auto *read = source.Get();
+                    context->CSSetShaderResources(0, 1, &read);
+                    auto *write = uav.Get();
+                    context->CSSetUnorderedAccessViews(0, 1, &write, nullptr);
+                    context->Dispatch(samples, 1, 1);
+                    context->CopyResource(staging.Get(), output.Get());
+                    context->End(complete.Get());
+                    wait(device.Get(), context.Get(), complete.Get());
+                    UINT64 passing = 0;
+                    check(context->GetData(occlusion.Get(), &passing, sizeof passing, 0),
+                          "Read ordinal occlusion");
+                    D3D11_MAPPED_SUBRESOURCE mapped{};
+                    check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Map ordinal outputs");
+                    std::vector<std::array<uint32_t, 4>> actual(samples);
+                    std::memcpy(actual.data(), mapped.pData, 16 * samples);
+                    context->Unmap(staging.Get(), 0);
+                    std::vector<std::array<uint32_t, 4>> expected(samples);
+                    for (UINT sample = 0; sample != samples; ++sample) {
+                        UINT stencil = 0;
+                        for (UINT fragment = 0; fragment != count; ++fragment) {
+                            const bool discard = (mode == 1 || mode == 2) && (fragment & 1);
+                            const bool masked = mode == 3 && ((fragment & 1) != (sample & 1));
+                            const bool matches = rank < 0 || stencil == UINT(rank);
+                            if (mode == 2 || (!discard && !masked))
+                                stencil = std::min(stencil + 1, 255u);
+                            if (!matches || discard || masked)
+                                continue;
+                            expected[sample] = {fragment + 1,
+                                                layout == 2   ? 7u
+                                                : layout == 1 ? 0u
+                                                              : fragment,
+                                                layout == 1 ? fragment : 0u, sample};
                         }
-                report["rows"].push_back({{"count", count},
-                                          {"rank", rank},
-                                          {"outputs", actual},
-                                          {"expected", expected},
-                                          {"occlusion", passing}});
+                    }
+                    if (floatOutput)
+                        for (auto &value : expected)
+                            for (auto &component : value) {
+                                const float converted = float(component);
+                                std::memcpy(&component, &converted, 4);
+                            }
+                    report["rows"].push_back({{"count", count},
+                                              {"repetition", repetition},
+                                              {"rank", rank},
+                                              {"outputs", actual},
+                                              {"expected", expected},
+                                              {"occlusion", passing}});
+                }
             }
         }
         context->ClearState();
@@ -358,8 +385,15 @@ class NativePixelOrdinalTests final : public QObject {
             std::vector<uint8_t> bytes(size);
             auto *message = reinterpret_cast<D3D11_MESSAGE *>(bytes.data());
             check(queue->GetMessage(i, message, &size), "Get ordinal diagnostic");
-            report["diagnostics"].push_back(
-                {{"severity", uint32_t(message->Severity)}, {"text", message->pDescription}});
+            const auto slot =
+                QRegularExpression("slot ([0-7]),").match(QString::fromUtf8(message->pDescription));
+            const bool expected = message->ID == D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET &&
+                                  message->Severity == D3D11_MESSAGE_SEVERITY_WARNING && slot.hasMatch() &&
+                                  !(targetMask & (1u << slot.captured(1).toUInt()));
+            report["diagnostics"].push_back({{"id", uint32_t(message->ID)},
+                                             {"severity", uint32_t(message->Severity)},
+                                             {"text", message->pDescription},
+                                             {"expected_unbound_output_warning", expected}});
         }
         const auto root = qEnvironmentVariable("FLORA_PIXEL_ORDINAL_EVIDENCE");
         if (!root.isEmpty()) {
@@ -374,7 +408,11 @@ class NativePixelOrdinalTests final : public QObject {
                 save(directory + "/source.ps.dxbc", Bytes(sourcePsCode));
             save(directory + "/readback.dxbc", Bytes(csCode));
         }
-        QVERIFY2(report["diagnostics"].empty(), report["diagnostics"].dump().c_str());
+        if (targetMask == (1u << targets) - 1)
+            QVERIFY2(report["diagnostics"].empty(), report["diagnostics"].dump().c_str());
+        else
+            for (const auto &diagnostic : report["diagnostics"])
+                QVERIFY2(diagnostic.at("expected_unbound_output_warning") == true, diagnostic.dump().c_str());
         for (const auto &row : report["rows"])
             QVERIFY2(row["outputs"] == row["expected"], row.dump().c_str());
         if (mode == 0) {
