@@ -223,7 +223,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode : {"depth", "no-ps", "array", "depth-only", "depth-null", "depth-layer"})
+            for (const auto *mode :
+                 {"depth", "no-ps", "array", "depth-only", "depth-null", "depth-layer", "depth-mixed-null"})
                 QTest::newRow(qPrintable(QString("boundary-%1-%2").arg(vendor).arg(mode)))
                     << vendor << QString(mode);
     }
@@ -248,7 +249,11 @@ class NativeDrawHistoryJobsTests final : public QObject {
                 state.rasterizer = 724;
                 state.viewports = 22;
                 state.stages[0].shader = 30;
-                state.stages[4].shader = mode == "depth-null" ? 0 : 32;
+                state.stages[4].shader = (mode == "depth-null" || mode == "depth-mixed-null") ? 0 : 32;
+                if (mode == "depth-mixed-null") {
+                    state.rtCount = 1;
+                    state.rtv[0] = 21;
+                }
                 fixture.add(990, 3, 3, snapshot(state));
                 fixture.add(1990, 3, 3, snapshot(state));
                 const auto code = compileClassProgram("void main(){}", "ps_5_0");
@@ -299,7 +304,11 @@ class NativeDrawHistoryJobsTests final : public QObject {
             const auto &count = result.at("data").at("return_count_observation");
             QCOMPARE(count.at("requested"), Json(true));
             QVERIFY(count.at("original_fragment_eligibility").is_null());
-            if (mode.startsWith("depth-")) {
+            if (mode == "depth-mixed-null") {
+                QCOMPARE(count.at("status"), Json("not_applicable"));
+                QCOMPARE(count.at("reason"), Json("selected_depth_target"));
+                QVERIFY(count.at("count").is_null());
+            } else if (mode.startsWith("depth-")) {
                 QCOMPARE(count.at("status"), Json("observed"));
                 QCOMPARE(count.at("count"), Json(1));
                 const auto &observation = count.at("observation");
@@ -309,6 +318,11 @@ class NativeDrawHistoryJobsTests final : public QObject {
                 QCOMPARE(transport.at("source_mip"), Json(mode == "depth-layer" ? 1 : 0));
                 QCOMPARE(transport.at("source_first_layer"), Json(mode == "depth-layer" ? 1 : 0));
                 QCOMPARE(transport.at("layer"), Json(0));
+            } else if (mode == "depth") {
+                QCOMPARE(count.at("status"), Json("observed"));
+                QCOMPARE(count.at("count"), Json(1));
+                QCOMPARE(count.at("observation").at("backend"), Json("native-depth-return-count/2"));
+                QCOMPARE(count.at("observation").at("depth_transport").at("source_color_slot"), Json(0));
             } else if (mode == "array") {
                 QCOMPARE(count.at("count"), Json(1));
                 const auto &transport = count.at("observation").at("count_transport");

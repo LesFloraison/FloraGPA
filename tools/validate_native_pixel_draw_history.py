@@ -24,7 +24,7 @@ def same(a, b):
 
 
 def validate(r, vendor):
-    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/3', 'schema/backend')
+    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/4', 'schema/backend')
     require(r['kind'] == 'private_pixel_draw_history', 'private history kind')
     require(r['order'] == 'captured_geometry_storage' and r['sample_selection_domain'] == 'target_storage', 'order/sample scope')
     require(r['original_fragment_eligibility'] is None, 'original eligibility')
@@ -66,9 +66,11 @@ def validate(r, vendor):
         require([transport[k] for k in ('x', 'y', 'sample', 'layer', 'source_mip')]
                 == [selection['x'], selection['y'], selection['sample'],
                     selection['subresource']['relative_layer'], selection['mip']], 'Return count selection')
+        require(transport['source_format'] == selection['subresource']['format']
+                and transport['source_first_layer'] == selection['subresource']['first_layer'], 'Return count source view')
         require(count['count'] == observed['return_count']['count']
                 and observed['original_fragment_eligibility'] is None
-                and observed['backend'] == ('native-depth-return-count/1' if depth else 'native-pixel-return-count/3'), 'Return count contract')
+                and (depth or observed['backend'] == 'native-pixel-return-count/3'), 'Return count contract')
         decoded = observed['return_count']
         if decoded['valid'] is True:
             from validate_pixel_return_count import verify

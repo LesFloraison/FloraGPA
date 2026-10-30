@@ -30,7 +30,7 @@ void pixelInvocation(const Json &data, const Json &options) {
                 invocation.at("resource_boundary") == "before_private_primitive",
             "Private pixel invocation selection or scope mismatch");
     require(history.at("kind") == "private_pixel_draw_history" && history.at("schema") == 1 &&
-                history.at("backend") == "native-pixel-draw-history/3" &&
+                history.at("backend") == "native-pixel-draw-history/4" &&
                 history.at("event") == invocation.at("gpa_event") &&
                 history.at("frame_sha256") == data.at("effective_frame_sha256") &&
                 history.at("original_fragment_eligibility").is_null() &&

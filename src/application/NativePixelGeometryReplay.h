@@ -82,10 +82,12 @@ nlohmann::json replayNativeDepthCompletion(Replay &, Id event, const NativeDepth
                                            const std::function<void(Replay &, bool after)> &observe = {},
                                            uint64_t maxBytes = 256ull * 1024 * 1024,
                                            uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
-// Adds RGB unit accumulation to the depth-only diagnostic transport. The same
-// binding restrictions as depth completion apply. A missing PS is replaced with
-// an owned empty shader; counts describe the diagnostic draw, not original PS
-// invocations. Queries retain their own whole-output domain and are not counts.
+// Counts depth samples through a bound PS color output when its 2D view extent
+// and sampling match the DSV. Relative array layers align; source first layers
+// may differ. The color count route preserves integer RT0 alpha-to-coverage.
+// Without RTVs, uses the depth-only transport and its restrictions. A missing PS
+// is replaced with an owned empty shader only on that route. Counts describe a
+// diagnostic draw, not original PS invocations. Queries keep their own domain.
 nlohmann::json replayNativeDepthReturnCount(Replay &, Id event, const NativeDepthCompletionSelection &,
                                             const std::function<void(Replay &, bool after)> &observe = {},
                                             uint64_t maxBytes = 256ull * 1024 * 1024,

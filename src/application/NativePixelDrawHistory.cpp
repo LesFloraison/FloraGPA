@@ -545,23 +545,21 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                      {"original_fragment_eligibility", nullptr}};
     if (limits.observeReturnCount) {
         const bool depthTarget = target.view.at("slot").is_null();
-        bool colorBound = false;
-        if (depthTarget)
+        const bool noPixelShader = original.at("shaders")[4].at("resource") == 0;
+        bool mixedNullShader = false;
+        if (noPixelShader && depthTarget)
             r.inspectNativeState([&](auto *context, const auto &) {
                 std::array<ID3D11RenderTargetView *, 8> views{};
                 context->OMGetRenderTargets(UINT(views.size()), views.data(), nullptr);
                 for (auto *view : views)
                     if (view) {
-                        colorBound = true;
+                        mixedNullShader = true;
                         view->Release();
                     }
             });
-        if (depthTarget && colorBound) {
+        if (noPixelShader && (!depthTarget || mixedNullShader)) {
             returnCount["status"] = "not_applicable";
-            returnCount["reason"] = "selected_depth_target";
-        } else if (!depthTarget && original.at("shaders")[4].at("resource") == 0) {
-            returnCount["status"] = "not_applicable";
-            returnCount["reason"] = "no_pixel_shader";
+            returnCount["reason"] = depthTarget ? "selected_depth_target" : "no_pixel_shader";
         } else {
             const auto observation =
                 depthTarget
@@ -723,7 +721,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
     return {
         {"schema", 1},
         {"kind", "private_pixel_draw_history"},
-        {"backend", "native-pixel-draw-history/3"},
+        {"backend", "native-pixel-draw-history/4"},
         {"event", event},
         {"frame_sha256", replay.at("frame_sha256")},
         {"adapter", replay.at("adapter")},

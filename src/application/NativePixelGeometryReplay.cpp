@@ -15,6 +15,7 @@
 #include <chrono>
 #include <cmath>
 #include <d3d11sdklayers.h>
+#include <set>
 namespace flora {
 using Json = nlohmann::json;
 Json decodeNativePixelReturnCount(std::array<uint32_t, 4> bits) {
@@ -1006,6 +1007,147 @@ class NativePixelGeometryReplay {
         });
         return report;
     }
+    Json depthCount(const NativeDepthCompletionSelection &selection,
+                    const std::function<void(Replay &, bool)> &observe) {
+        checkDeadline();
+        if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
+            throw std::runtime_error("Depth count requires a completed before-event replay");
+        const auto event = r.frame_.event(id);
+        if (event.type < 0x37 || event.type > 0x3d || !request.maxBytes || !request.timeoutMs ||
+            request.timeoutMs > 60000)
+            throw std::invalid_argument("Invalid depth count request");
+        const auto state = r.prepareState(event);
+        std::optional<uint32_t> colorSlot;
+        Json depthView;
+        r.inspectEventInputs(id, [&] {
+            r.bind(state, false);
+            r.applyGraphicsEdits(event, state);
+            std::array<ID3D11RenderTargetView *, 8> raw{};
+            std::array<Com<ID3D11RenderTargetView>, 8> views;
+            Com<ID3D11DepthStencilView> depth;
+            r.context_->OMGetRenderTargets(8, raw.data(), &depth);
+            bool anyColor = false;
+            for (uint32_t i = 0; i < 8; ++i) {
+                views[i].Attach(raw[i]);
+                anyColor |= bool(views[i]);
+            }
+            if (!anyColor)
+                return;
+            if (!depth || !state.stages[4].shader)
+                throw std::runtime_error("Mixed depth counting requires a DSV and a pixel shader");
+            const auto code = shader(state.stages[4].shader);
+            if (code.size() > request.maxBytes)
+                throw std::runtime_error("Mixed depth count shader inspection budget exceeded");
+            std::set<uint32_t> outputs;
+            for (const auto &[tag, bytes] : readDxbcParts(code))
+                if (tag == 0x52444853 || tag == 0x58454853)
+                    for (const auto &row : readDxbcProgram(bytes).instructions) {
+                        checkDeadline();
+                        if ((row[0] & 2047) == 101 && row.size() >= 3 && ((row[1] >> 12) & 255) == 2 &&
+                            row.back() < 8)
+                            outputs.insert(row.back());
+                    }
+            for (auto slot : outputs)
+                if (views[slot]) {
+                    colorSlot = slot;
+                    break;
+                }
+            if (!colorSlot)
+                throw std::runtime_error("Mixed depth counting requires a bound shader color output");
+            auto extent = [&](ID3D11View *view, uint32_t mip, uint32_t first, uint32_t layers,
+                              DXGI_FORMAT format) {
+                Com<ID3D11Resource> resource;
+                Com<ID3D11Texture2D> texture;
+                view->GetResource(&resource);
+                check(resource.As(&texture), "Get mixed count 2D view resource");
+                D3D11_TEXTURE2D_DESC d{};
+                texture->GetDesc(&d);
+                if (mip >= d.MipLevels || mip >= 32 || !layers || first >= d.ArraySize ||
+                    layers > d.ArraySize - first)
+                    throw std::runtime_error("Mixed count view bounds");
+                return Json{{"source_format", uint32_t(format)},
+                            {"source_mip", mip},
+                            {"source_first_layer", first},
+                            {"width", std::max(1u, d.Width >> mip)},
+                            {"height", std::max(1u, d.Height >> mip)},
+                            {"layers", layers},
+                            {"samples", d.SampleDesc.Count},
+                            {"sample_quality", d.SampleDesc.Quality}};
+            };
+            D3D11_DEPTH_STENCIL_VIEW_DESC ds{};
+            depth->GetDesc(&ds);
+            uint32_t mip = 0, first = 0, layers = 1;
+            switch (ds.ViewDimension) {
+            case D3D11_DSV_DIMENSION_TEXTURE2D:
+                mip = ds.Texture2D.MipSlice;
+                break;
+            case D3D11_DSV_DIMENSION_TEXTURE2DARRAY:
+                mip = ds.Texture2DArray.MipSlice;
+                first = ds.Texture2DArray.FirstArraySlice;
+                layers = ds.Texture2DArray.ArraySize;
+                break;
+            case D3D11_DSV_DIMENSION_TEXTURE2DMS:
+                break;
+            case D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY:
+                first = ds.Texture2DMSArray.FirstArraySlice;
+                layers = ds.Texture2DMSArray.ArraySize;
+                break;
+            default:
+                throw std::runtime_error("Mixed depth count requires a 2D DSV");
+            }
+            depthView = extent(depth.Get(), mip, first, layers, ds.Format);
+            D3D11_RENDER_TARGET_VIEW_DESC rt{};
+            views[*colorSlot]->GetDesc(&rt);
+            mip = first = 0;
+            layers = 1;
+            switch (rt.ViewDimension) {
+            case D3D11_RTV_DIMENSION_TEXTURE2D:
+                mip = rt.Texture2D.MipSlice;
+                break;
+            case D3D11_RTV_DIMENSION_TEXTURE2DARRAY:
+                mip = rt.Texture2DArray.MipSlice;
+                first = rt.Texture2DArray.FirstArraySlice;
+                layers = rt.Texture2DArray.ArraySize;
+                break;
+            case D3D11_RTV_DIMENSION_TEXTURE2DMS:
+                break;
+            case D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY:
+                first = rt.Texture2DMSArray.FirstArraySlice;
+                layers = rt.Texture2DMSArray.ArraySize;
+                break;
+            default:
+                throw std::runtime_error("Mixed depth count requires a 2D RTV");
+            }
+            const auto colorView = extent(views[*colorSlot].Get(), mip, first, layers, rt.Format);
+            for (const auto *key : {"width", "height", "layers", "samples", "sample_quality"})
+                if (colorView.at(key) != depthView.at(key))
+                    throw std::runtime_error("Mixed count color and depth view extents differ");
+            if (selection.x >= depthView.at("width").get<uint32_t>() ||
+                selection.y >= depthView.at("height").get<uint32_t>() ||
+                selection.layer >= depthView.at("layers").get<uint32_t>() ||
+                selection.sample >= depthView.at("samples").get<uint32_t>())
+                throw std::invalid_argument("Mixed count selection exceeds the DSV");
+            depthView.update({{"x", selection.x},
+                              {"y", selection.y},
+                              {"layer", selection.layer},
+                              {"sample", selection.sample},
+                              {"layer_domain", "bound_dsv_view"},
+                              {"route", "bound_color_output"},
+                              {"source_color_slot", *colorSlot}});
+        });
+        if (!colorSlot)
+            return original(observe, 0, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
+                            NativePixelTestOverride::Preserve, selection, {}, {}, true);
+        auto result = original(observe, *colorSlot, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
+                               NativePixelTestOverride::Preserve, {}, {},
+                               NativePixelReturnCountSelection{*colorSlot, selection.x, selection.y,
+                                                               selection.layer, selection.sample});
+        result["kind"] = "native_depth_return_count_observation";
+        result["backend"] = "native-depth-return-count/2";
+        result["depth_transport"] = std::move(depthView);
+        result["original_null_pixel_shader"] = false;
+        return result;
+    }
     Json run() {
         checkDeadline();
         if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
@@ -1236,8 +1378,7 @@ Json replayNativeDepthReturnCount(Replay &r, Id event, const NativeDepthCompleti
                                   uint32_t timeoutMs, const CancelCheck &cancelled) {
     const std::function<void(Replay &, uint64_t)> unused;
     return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
-        .original(observe, 0, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
-                  NativePixelTestOverride::Preserve, selection, {}, {}, true);
+        .depthCount(selection, observe);
 }
 Json replayNativePixelReturnCount(Replay &r, Id event, const NativePixelReturnCountSelection &selection,
                                   const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,

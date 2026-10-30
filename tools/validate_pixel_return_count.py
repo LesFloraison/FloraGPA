@@ -3,6 +3,7 @@ import argparse
 import copy
 import hashlib
 import itertools
+import math
 import json
 from pathlib import Path
 import re
@@ -23,9 +24,9 @@ def sha(path):
         return hashlib.file_digest(source, "sha256").hexdigest()
 
 
-def verify(report, vendor, expected=None, alpha=None, component_type=3):
-    require(report["schema"] == 1 and report["kind"] == "native_pixel_return_count_observation"
-            and report["backend"] == "native-pixel-return-count/3"
+def verify(report, vendor, expected=None, alpha=None, component_type=3, depth_source=False, allow_unknown=False):
+    require(report["schema"] == 1 and report["kind"] == ("native_depth_return_count_observation" if depth_source else "native_pixel_return_count_observation")
+            and report["backend"] == ("native-depth-return-count/2" if depth_source else "native-pixel-return-count/3")
             and report["scope"] == "returning_samples_on_private_additive_target", "Wrong scope")
     require(report["original_fragment_eligibility"] is None and report["original_gpu_schedule"] is False,
             "Unsupported original identity claim")
@@ -57,13 +58,16 @@ def verify(report, vendor, expected=None, alpha=None, component_type=3):
     bits = result["raw_bits"]
     require(len(bits) == 4 and all(type(x) is int and 0 <= x <= 0xffffffff for x in bits), "Invalid raw bits")
     raw = struct.unpack("<f", struct.pack("<I", bits[0]))[0]
-    require(result["valid"] is True and type(result["count"]) is int
-            and 0 <= result["count"] < 2**24 and raw == result["count"]
-            and bits[:3] == [bits[0]] * 3 and result["exclusive_integer_limit"] == 2**24
-            and result["original_fragment_eligibility"] is None
-            and result["reason"] == "exact_float32_integer", "Invalid count decode")
+    integral = math.isfinite(raw) and raw >= 0 and math.floor(raw) == raw
+    valid = bits[:3] == [bits[0]] * 3 and integral and raw < 2**24
+    reason = ('exact_float32_integer' if valid else 'rgb_disagreement' if bits[:3] != [bits[0]] * 3
+              else 'invalid_accumulation' if not integral else 'float32_integer_limit')
+    require(result['valid'] is valid and result['exclusive_integer_limit'] == 2**24
+            and result['original_fragment_eligibility'] is None and result['reason'] == reason, 'Count validity')
+    require((type(result['count']) is int and result['count'] == raw) if valid else
+            (allow_unknown and result['count'] is None), 'Count decode')
     if expected is not None:
-        require(result["count"] == expected, "Count differs from owned geometry model")
+        require(valid and result["count"] == expected, "Count differs from owned geometry model")
     if alpha is not None:
         require(bits[3] == struct.unpack("<I", struct.pack("<f", alpha))[0], "Original alpha changed")
     require(type(report["passing_samples"]) is int and report["passing_samples"] >= 0, "Missing raw query")

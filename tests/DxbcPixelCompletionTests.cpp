@@ -377,6 +377,185 @@ class DxbcPixelCompletionTests final : public QObject {
             QFAIL(qPrintable(QString::fromLatin1(stage) + ": " + QString::fromUtf8(error.what())));
         }
     }
+    void depthColorCount_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("samples");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t samples : {1u, 4u})
+                for (const auto *mode : {"ordinary", "depth-fail", "shader-depth", "discard", "early-discard",
+                                         "coverage", "integer-alpha-small", "integer-alpha-one",
+                                         "integer-minimum", "integer-signed", "sparse", "layer"})
+                    QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(samples).arg(mode)))
+                        << vendor << samples << QString(mode);
+    }
+    void depthColorCount() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, samples);
+            QFETCH(QString, mode);
+            const bool integer = mode.startsWith("integer"), layered = mode == "layer";
+            const uint32_t slot = mode == "sparse" ? 7 : 0, mip = layered && samples == 1 ? 1 : 0;
+            const uint32_t width = mip ? 2 : 1, mips = mip + 1, depthFirst = layered ? 1 : 0,
+                           colorFirst = layered ? 2 : 0;
+            const uint32_t format = mode == "integer-signed" ? 4 : integer ? 3 : 2;
+            auto c = depthStencilCapture();
+            std::erase_if(c.entries, [](const auto &e) {
+                return e.category == 3 || e.id == 20 || e.id == 21 || e.id == 720 || e.id == 722 ||
+                       e.id == 1000;
+            });
+            c.add(20, 5, 0x85,
+                  statePack(Id(0), Id(0), width, width, mips, layered ? 4u : 1u, format, samples, 0u, 0u, 32u,
+                            0u, 0u, Id(0)));
+            c.add(720, 5, 0x85,
+                  statePack(Id(0), Id(0), width, width, mips, layered ? 3u : 1u, 45u, samples, 0u, 0u, 64u,
+                            0u, 0u, Id(0)));
+            if (layered) {
+                c.add(21, 5, 0x8d,
+                      samples == 1 ? statePack(Id(0), Id(0), Id(20), format, 5u, mip, colorFirst, 2u)
+                                   : statePack(Id(0), Id(0), Id(20), format, 7u, colorFirst, 2u, 0u));
+                c.add(722, 5, 0x8e,
+                      samples == 1 ? statePack(Id(0), Id(0), Id(720), 45u, 4u, 0u, mip, depthFirst, 2u)
+                                   : statePack(Id(0), Id(0), Id(720), 45u, 6u, 0u, depthFirst, 2u, 0u));
+            } else {
+                c.add(21, 5, 0x8d,
+                      statePack(Id(0), Id(0), Id(20), format, samples == 1 ? 4u : 6u, 0u, 0u, 0u));
+                c.add(722, 5, 0x8e,
+                      statePack(Id(0), Id(0), Id(720), 45u, samples == 1 ? 3u : 5u, 0u, 0u, 0u, 0u));
+            }
+            // Initialize every depth subresource, including unused array layers,
+            // so whole-resource comparisons do not depend on undefined storage.
+            if (layered) {
+                for (uint32_t level = 0; level < mips; ++level) {
+                    const Id viewId = 760 + level;
+                    c.add(viewId, 5, 0x8e,
+                          samples == 1 ? statePack(Id(0), Id(0), Id(720), 45u, 4u, 0u, level, 0u, 3u)
+                                       : statePack(Id(0), Id(0), Id(720), 45u, 6u, 0u, 0u, 3u, 0u));
+                    c.add(805 + level, 7, 0x31, statePack(Id(0), Id(1), viewId, 3u, .5f, uint8_t(0x53)));
+                }
+            }
+            State state{};
+            state.topology = 4;
+            state.sampleMask = UINT32_MAX;
+            state.omStart = 8;
+            state.rtCount = slot + 1;
+            state.rtv[slot] = 21;
+            state.dsv = 722;
+            state.rasterizer = 724;
+            state.viewports = 22;
+            state.stages[0].shader = 30;
+            state.stages[4].shader = 32;
+            c.add(990, 3, 3, snapshot(state));
+            c.add(1990, 3, 3, snapshot(state));
+            c.add(1000, 7, 0x37, statePack(Id(990), Id(0), Id(1), 9u, 0u));
+            QTemporaryDir directory;
+            const auto path = directory.filePath("mixed.gpa_frame");
+            c.save(path);
+            Frame frame(path.toStdWString());
+            auto o = options(vendor, 1000);
+            o.shaders[30] = compileClassProgram(
+                "float4 main(uint v:SV_VertexID):SV_Position{float2 "
+                "p[3]={float2(-1,-1),float2(-1,3),float2(3,-1)};return float4(p[v%3],.25,1);}",
+                "vs_5_0");
+            const auto type = mode == "integer-minimum"  ? "min16uint4"
+                              : mode == "integer-signed" ? "int4"
+                              : integer                  ? "uint4"
+                                                         : "float4";
+            std::string source = std::string(mode == "early-discard" ? "[earlydepthstencil]" : "") +
+                                 std::string(type) + " main(uint id:SV_PrimitiveID";
+            if (mode == "coverage")
+                source += ",out uint mask:SV_Coverage";
+            if (mode == "shader-depth")
+                source += ",out float z:SV_Depth";
+            source += "):SV_Target" + std::to_string(slot) + "{";
+            if (mode == "discard" || mode == "early-discard")
+                source += "if(id==1)discard;";
+            if (mode == "shader-depth")
+                source += "z=.75;";
+            if (mode == "coverage")
+                source += "mask=5;";
+            source += "return " + std::string(type) + "(7,11,13," +
+                      std::string(mode == "integer-alpha-one" ? "1065353216" : "1") + ");}";
+            o.shaders[32] = compileClassProgram(source, "ps_5_0");
+            D3D11_DEPTH_STENCIL_DESC ds{};
+            ds.DepthEnable = TRUE;
+            ds.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+            ds.DepthFunc = mode == "depth-fail"     ? D3D11_COMPARISON_NEVER
+                           : mode == "shader-depth" ? D3D11_COMPARISON_LESS
+                                                    : D3D11_COMPARISON_ALWAYS;
+            ds.StencilEnable = TRUE;
+            ds.StencilReadMask = ds.StencilWriteMask = 255;
+            ds.FrontFace = ds.BackFace = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
+                                          D3D11_STENCIL_OP_INCR_SAT, D3D11_COMPARISON_ALWAYS};
+            o.depthStencilEdits[1000].descriptor = ds;
+            if (integer) {
+                auto blend = defaultBlend();
+                blend.AlphaToCoverageEnable = TRUE;
+                o.blendEdits[1000].descriptor = blend;
+            }
+            Replay reference(frame, o);
+            reference.run();
+            auto read = [&](Replay &r, Id resource, uint32_t sample) {
+                return samples == 1 ? r.readTexture(resource)
+                                    : r.readMsaa(resource, sample, resource == 720 ? 45 : format).bytes;
+            };
+            o.before = o.prepareBeforeDraw = true;
+            o.measurement.reset();
+            Replay replay(frame, o);
+            replay.run();
+            Json rows = Json::array();
+            const auto sub = textureSubresources(frame.resource(720)).at(mip + depthFirst * mips);
+            for (uint32_t sample = 0; sample < samples; ++sample) {
+                const auto initial = read(replay, 720, sample), colorInitial = read(replay, 20, sample),
+                           original = read(reference, 720, sample);
+                const uint32_t stencilDelta =
+                    uint32_t(original.at(sub.offset + 3) - initial.at(sub.offset + 3));
+                const uint32_t expected = mode == "early-discard" ? 2 : stencilDelta;
+                if (mode == "early-discard")
+                    QCOMPARE(stencilDelta, 3u);
+                std::vector<uint8_t> observed;
+                const auto report =
+                    replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}, [&](Replay &r, bool after) {
+                        if (after)
+                            observed = read(r, 720, sample);
+                    });
+                QCOMPARE(report.at("backend"), Json("native-depth-return-count/2"));
+                QCOMPARE(report.at("return_count").at("count"), Json(expected));
+                QCOMPARE(report.at("count_transport").at("source_slot"), Json(slot));
+                QCOMPARE(report.at("depth_transport").at("source_first_layer"), Json(depthFirst));
+                QCOMPARE(report.at("count_transport").at("source_first_layer"), Json(colorFirst));
+                QCOMPARE(observed, original);
+                QCOMPARE(read(replay, 720, sample), initial);
+                QCOMPARE(read(replay, 20, sample), colorInitial);
+                QVERIFY_THROWS_EXCEPTION(
+                    OperationCancelled,
+                    replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}, [](Replay &, bool after) {
+                        if (after)
+                            throw OperationCancelled();
+                    }));
+                QCOMPARE(read(replay, 720, sample), initial);
+                QCOMPARE(read(replay, 20, sample), colorInitial);
+                QCOMPARE(replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample})
+                             .at("return_count")
+                             .at("count"),
+                         Json(expected));
+                rows.push_back({{"sample", sample},
+                                {"stencil_delta", stencilDelta},
+                                {"expected", expected},
+                                {"stencil_offset", sub.offset + 3},
+                                {"initial_depth", initial},
+                                {"original_depth", original},
+                                {"observed_depth", observed},
+                                {"observation", report}});
+            }
+            QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+                                     replayNativeDepthReturnCount(replay, 1000, {1, 0, 0, 0}));
+            save({{"vendor", vendor}, {"samples", samples}, {"mode", mode.toStdString()}, {"rows", rows}},
+                 o.shaders[32]);
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
     void color_data() {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<uint32_t>("samples");

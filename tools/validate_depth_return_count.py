@@ -10,6 +10,16 @@ from validate_pixel_return_count import require, read, sha
 
 
 def verify(report, vendor, expected=None):
+    if report['backend'] == 'native-depth-return-count/2':
+        from validate_pixel_return_count import verify as color_count
+        color_count(report, vendor, expected, component_type=report['completion_shader']['component_type'], depth_source=True, allow_unknown=True)
+        depth = report['depth_transport']; color = report['count_transport']
+        require(depth['route'] == 'bound_color_output' and depth['layer_domain'] == 'bound_dsv_view'
+                and depth['source_color_slot'] == color['source_slot']
+                and report['original_null_pixel_shader'] is False and report['shaders'][4]['resource'] != 0, 'Mixed route')
+        for key in ('width','height','layers','samples','sample_quality','x','y','layer','sample'):
+            require(depth[key] == color[key], 'Mixed view join: '+key)
+        return
     require(report['schema'] == 1 and report['kind'] == 'native_depth_return_count_observation'
             and report['backend'] == 'native-depth-return-count/1'
             and report['scope'] == 'returning_samples_on_private_additive_target', 'Depth count scope')
