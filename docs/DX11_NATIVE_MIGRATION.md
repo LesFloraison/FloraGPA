@@ -1777,3 +1777,14 @@ sparse-binding run is not accepted as a correction. Independent validation rejec
 504 corruptions. See `research/DX11_PIXEL_ORDINAL_BINDINGS.md` for intermediate
 failures, driver identities and replayable evidence. This is P5 research; product
 backend selection, original fragment eligibility and P7/P8 gates are unchanged.
+
+Native pixel return counting now accumulates completion markers into a private
+RGBA32F target while retaining the original draw, alpha/coverage, other outputs
+and UAV slots. It reads a selected pixel/layer/sample without deriving its count
+from occlusion queries. Five suites pass 885 checks without failures or skips;
+450 owned observations, nine real-capture controls and 1,800 rejected corruptions
+support the new `native-pixel-return-count/1` capability. See
+`research/DX11_NATIVE_PIXEL_RETURN_COUNTS.md` for bounds, preserved query anomalies,
+state recovery and reproducible evidence. Integer shader outputs, additional
+transport types, complete original fragment qualification, full debugger parity
+and P7/P8 remain open. Public history/backend selection is unchanged.
