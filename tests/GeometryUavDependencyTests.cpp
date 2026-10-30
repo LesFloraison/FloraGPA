@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
+#include <bit>
 #include <cstring>
 using namespace flora;
 class GeometryUavDependencyTests : public QObject {
@@ -159,6 +160,157 @@ class GeometryUavDependencyTests : public QObject {
         QVERIFY(!rewritten.empty());
         const auto proof = geometryUavIndependence(makeDxbc({{0x58454853, rewritten}}));
         QVERIFY2(proof.at("proved") == proved, proof.dump().c_str());
+    }
+    void fixedGeometryProof() {
+        for (const auto profile : {"gs_4_0", "gs_4_1", "gs_5_0"}) {
+            const auto bytes = testing::compileClassProgram(
+                "struct V{float4 p:SV_Position;};[maxvertexcount(3)]void main(point V v[1],inout "
+                "TriangleStream<V> output){"
+                "output.Append(v[0]);output.Append(v[0]);output.Append(v[0]);output.RestartStrip();}",
+                profile);
+            const auto proof = geometryUavIndependence(bytes, false, true);
+            QVERIFY2(proof.at("proved") == true, proof.dump().c_str());
+            QCOMPARE(proof.at("terminal_geometry_counts"), nlohmann::json(true));
+            QVERIFY(proof.at("emission_schedule").at("operations").size() >= 3);
+            for (const auto &[tag, body] : readDxbcParts(bytes)) {
+                if (tag != 0x58454853 && tag != 0x52444853)
+                    continue;
+                for (uint32_t op : {2u,  3u,  4u,  5u,  6u,  7u,  8u,  10u,  13u,  18u,  21u,
+                                    22u, 23u, 31u, 44u, 48u, 63u, 76u, 120u, 190u, 2047u}) {
+                    auto program = readDxbcProgram(body);
+                    program.instructions.insert(program.instructions.end() - 1, {op | 0x1000000u});
+                    const auto code = writeDxbcProgram(program);
+                    const auto rejected = geometryUavIndependence(makeDxbc({{tag, code}}), false, true);
+                    QCOMPARE(rejected.at("terminal_geometry_counts"), nlohmann::json(false));
+                }
+            }
+        }
+    }
+    void fixedGeometryInstances_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto mode : {"read", "atomic", "nonfinite", "branch", "upstream"})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(mode))) << vendor << QString(mode);
+    }
+    void fixedGeometryInstances() {
+        QFETCH(uint32_t, vendor);
+        QFETCH(QString, mode);
+        try {
+            QTemporaryDir directory;
+            const auto path = directory.filePath("fixed.gpa_frame");
+            testing::fixedGeometryCapture(mode.toStdString()).save(path);
+            Frame frame(path.toStdWString());
+            ReplayOptions options;
+            options.until = 200;
+            options.before = true;
+            options.warp = !vendor;
+            if (vendor)
+                options.vendor = vendor;
+            Replay replay(frame, options);
+            replay.run();
+            const auto before = replay.readBuffer(10);
+            const auto counter = replay.readCounter(12);
+            const auto commands = replay.counts;
+            const auto full = inspectPostTransform(replay, 200);
+            QCOMPARE(full.bytes.size(), size_t(9 * 16));
+            std::vector<uint32_t> words(full.bytes.size() / 4);
+            std::memcpy(words.data(), full.bytes.data(), full.bytes.size());
+            for (unsigned i = 0; i < 9; ++i) {
+                QCOMPARE(words[i * 4], mode == "nonfinite" ? uint32_t(0x7f800000)
+                                                           : std::bit_cast<uint32_t>(float(42 + i % 3)));
+                QCOMPARE(words[i * 4 + 1], std::bit_cast<uint32_t>(float(i / 3)));
+                QCOMPARE(words[i * 4 + 3], uint32_t(0x3f800000));
+            }
+            const auto geometry = inspectPixelGeometry(replay, 200);
+            QCOMPARE(geometry.bytes, full.bytes);
+            const bool accepted = mode != "branch" && mode != "upstream";
+            const auto partition = validatedPixelGeometryInstances(geometry);
+            QCOMPARE(partition.resolved, accepted);
+            if (accepted) {
+                const auto &proof =
+                    geometry.report.at("geometry_instances").at("uav_independence").at("stages").at("gs");
+                QCOMPARE(proof.at("scope"), nlohmann::json("terminal_geometry_counts"));
+                QVERIFY(proof.at("terminal_geometry_counts").get<bool>());
+                for (unsigned mutation = 0; mutation < 5; ++mutation) {
+                    auto changed = geometry;
+                    auto &item = changed.report["geometry_instances"]["uav_independence"]["stages"]["gs"];
+                    if (mutation == 0)
+                        item["terminal_geometry_counts"] = false;
+                    else if (mutation == 1)
+                        changed.report["shader_stage"] = "ds";
+                    else if (mutation == 2)
+                        item["emission_schedule"]["operations"][0]["opcode"] = uint64_t(0x100000013);
+                    else if (mutation == 3)
+                        item["emission_schedule"]["operations"][0]["stream"] = int64_t(-4294967296LL);
+                    else
+                        item["emission_schedule"]["return_token"] = uint32_t(2);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatedPixelGeometryInstances(changed));
+                }
+            }
+            nlohmann::json selections = nlohmann::json::array();
+            for (uint32_t instance = 0; instance < 3; ++instance) {
+                PostTransformOptions selected;
+                selected.stage = "gs";
+                selected.instance = instance;
+                if (!accepted) {
+                    bool rejected = false;
+                    try {
+                        inspectPostTransform(replay, 200, selected);
+                    } catch (const std::runtime_error &error) {
+                        rejected =
+                            QString::fromUtf8(error.what()).contains("Read resource aliases a written UAV");
+                    }
+                    QVERIFY(rejected);
+                    continue;
+                }
+                const auto result = inspectPostTransform(replay, 200, selected);
+                QCOMPARE(result.bytes, std::vector<uint8_t>(full.bytes.begin() + instance * 48,
+                                                            full.bytes.begin() + (instance + 1) * 48));
+                QCOMPARE(partition.instance(instance), std::optional<uint32_t>(instance));
+                selections.push_back(
+                    {{"instance", instance}, {"sha256", sha256(result.bytes)}, {"report", result.report}});
+            }
+            QCOMPARE(replay.readBuffer(10), before);
+            QCOMPARE(replay.readCounter(12), counter);
+            QVERIFY(replay.counts == commands);
+            replay.inspectNativeState([](auto context, const auto &) { context->DrawInstanced(1, 3, 0, 0); });
+            options.before = false;
+            Replay clean(frame, options);
+            clean.run();
+            QCOMPARE(replay.readBuffer(10), clean.readBuffer(10));
+            QCOMPARE(replay.readCounter(12), clean.readCounter(12));
+            const auto root = qEnvironmentVariable("FLORA_FIXED_GEOMETRY_EVIDENCE");
+            if (!root.isEmpty()) {
+                QVERIFY(QDir().mkpath(root));
+                const auto stem = root + '/' + QString::fromLatin1(QTest::currentDataTag());
+                QVERIFY(QFile::copy(path, stem + ".gpa_frame"));
+                const auto shader = frame.shader(frame.resource(8000).data);
+                QFile binary(stem + ".dxbc");
+                QVERIFY(binary.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                QCOMPARE(binary.write(reinterpret_cast<const char *>(shader.data()), shader.size()),
+                         qint64(shader.size()));
+                const nlohmann::json evidence{{"schema", 1},
+                                              {"vendor", vendor},
+                                              {"mode", mode.toStdString()},
+                                              {"frame_sha256", frame.sha256()},
+                                              {"shader_sha256", sha256(shader)},
+                                              {"full", full.report},
+                                              {"words", words},
+                                              {"pixel_geometry", geometry.report},
+                                              {"resolved", partition.resolved},
+                                              {"selections", selections},
+                                              {"storage_restored", true},
+                                              {"counter_restored", true},
+                                              {"clean_draw_equal", true}};
+                QFile output(stem + ".json");
+                QVERIFY(output.open(QIODevice::WriteOnly | QIODevice::NewOnly));
+                const auto text = QByteArray::fromStdString(evidence.dump(2));
+                QCOMPARE(output.write(text), text.size());
+            }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void isolatedInstances_data() {
         QTest::addColumn<uint32_t>("vendor");

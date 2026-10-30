@@ -3,6 +3,38 @@
 namespace flora {
 namespace {
 using Words = std::vector<uint32_t>;
+// A straight-line GS has a value-independent emission/cut schedule. Unknown
+// instructions and every branch, loop, call or early return keep the old proof.
+nlohmann::json fixedGeometrySchedule(const DxbcProgram &program) {
+    nlohmann::json schedule = nlohmann::json::array();
+    uint32_t token = 2;
+    for (size_t i = 0; i < program.instructions.size(); ++i) {
+        const auto &row = program.instructions[i];
+        const auto op = row.at(0) & 2047;
+        if (op == 62) {
+            if (i + 1 != program.instructions.size() || row.size() != 1)
+                return nullptr;
+            return {{"operations", schedule}, {"return_token", token}};
+        }
+        if (op == 9 || op == 19 || op == 20 || (op >= 117 && op <= 119)) {
+            const bool explicitStream = op >= 117;
+            if (explicitStream ? (row.size() != 3 || row[1] != 0x110000 || row[2] > 3) : row.size() != 1)
+                return nullptr;
+            schedule.push_back({{"token", token}, {"opcode", op}, {"stream", explicitStream ? row[2] : 0u}});
+        } else {
+            const bool declaration = (op >= 88 && op <= 106) || op == 143 || (op >= 147 && op <= 158) ||
+                                     op == 161 || op == 162 || op == 206;
+            const bool value = op <= 1 || (op >= 14 && op <= 17) || (op >= 24 && op <= 30) ||
+                               (op >= 32 && op <= 43) || (op >= 45 && op <= 47) || (op >= 49 && op <= 60) ||
+                               (op >= 64 && op <= 75) || (op >= 77 && op <= 87) || (op >= 129 && op <= 142) ||
+                               (op >= 163 && op <= 189);
+            if (!declaration && !value)
+                return nullptr;
+        }
+        token += uint32_t(row.size());
+    }
+    return nullptr;
+}
 // Inspect actual operand trees, never immediate payload words that resemble tokens.
 size_t visitOperand(const Words &words, size_t pos, const std::function<void(uint32_t, size_t, bool)> &visit,
                     bool nested = false) {
@@ -95,13 +127,15 @@ bool deadAtomicResult(const DxbcProgram &program, size_t at, size_t begin, size_
     return false;
 }
 } // namespace
-nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts) {
+nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts,
+                                       bool terminalGeometryCounts) {
     using Json = nlohmann::json;
     Json result{{"schema", 1},
                 {"shader_sha256", sha256(bytecode)},
                 {"proved", false},
                 {"scope", "no_uav_results_or_srv_reads"},
                 {"terminal_domain_counts", terminalDomainCounts},
+                {"terminal_geometry_counts", false},
                 {"write_instructions", Json::array()}};
     auto reject = [&](const char *reason) {
         result["reason"] = reason;
@@ -130,6 +164,10 @@ nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts
             return reject("Terminal domain count proof requires a domain shader");
         if (program.instructions.empty())
             return reject("Empty executable code");
+        if (terminalGeometryCounts && (terminalDomainCounts || stage != 2))
+            return reject("Terminal geometry count proof requires a geometry shader");
+        const auto schedule = terminalGeometryCounts ? fixedGeometrySchedule(program) : Json(nullptr);
+        const bool fixedGeometry = !schedule.is_null();
         std::set<uint32_t> srvReads, uavReads;
         const auto srvs = shaderSrvDeclarations(bytecode);
         for (uint32_t slot = 0; slot < srvs.size(); ++slot)
@@ -168,7 +206,8 @@ nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts
             const bool atomic = opcode >= 178 && opcode <= 189;
             if (atomic) {
                 const auto [begin, end] = operands.ranges.at(0);
-                if (!terminalDomainCounts && !deadAtomicResult(program, instruction, begin, end, budget))
+                if (!terminalDomainCounts && !fixedGeometry &&
+                    !deadAtomicResult(program, instruction, begin, end, budget))
                     return reject("Atomic result may affect geometry");
             }
             for (size_t i = 0; i < operands.ranges.size(); ++i) {
@@ -199,8 +238,10 @@ nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts
                     {{"token", result["checked_token"]},
                      {"opcode", opcode},
                      {"slot", row[begin + 1]},
-                     {"result",
-                      atomic ? (terminalDomainCounts ? "terminal_domain_value" : "proved_dead") : "none"}});
+                     {"result", atomic ? (terminalDomainCounts ? "terminal_domain_value"
+                                          : fixedGeometry      ? "terminal_geometry_value"
+                                                               : "proved_dead")
+                                       : "none"}});
             }
         }
         result.erase("checked_token");
@@ -214,6 +255,12 @@ nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts
             result["scope"] = "terminal_domain_counts";
             result["reason"] = "DS values do not change tessellator output counts; all writes require "
                                "upstream alias exclusion";
+        }
+        if (fixedGeometry) {
+            result["terminal_geometry_counts"] = true;
+            result["emission_schedule"] = schedule;
+            result["scope"] = "terminal_geometry_counts";
+            result["reason"] = "GS emission schedule is fixed; all writes require upstream alias exclusion";
         }
         return result;
     } catch (const std::exception &error) {

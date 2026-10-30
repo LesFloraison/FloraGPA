@@ -9,5 +9,8 @@ namespace flora {
 // Terminal DS values cannot change tessellator output counts. In that mode the
 // caller must additionally prove no GS follows and exclude all writes from
 // upstream count dependencies; DS resource reads themselves may alias writes.
-nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts = false);
+// A terminal GS with a verified straight-line emission schedule has the same
+// upstream exclusion requirement. Unproved schedules retain the default proof.
+nlohmann::json geometryUavIndependence(Bytes bytecode, bool terminalDomainCounts = false,
+                                       bool terminalGeometryCounts = false);
 } // namespace flora

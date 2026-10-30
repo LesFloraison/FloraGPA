@@ -280,7 +280,8 @@ class PostTransformCapture {
                         name == "ds" && report.at("shader_stage") == "ds" &&
                         report.at("executed_stages") == Json::array({"vs", "hs", "ds"});
                     const auto proof =
-                        geometryUavIndependence(code(state.stages[indices.at(name)].shader), terminalDomain);
+                        geometryUavIndependence(code(state.stages[indices.at(name)].shader), terminalDomain,
+                                                name == "gs" && report.at("shader_stage") == "gs");
                     if (proof.at("proved") != true)
                         fail(name + ": " + proof.at("reason").get<std::string>());
                     independence["stages"][name] = proof;
@@ -332,16 +333,18 @@ class PostTransformCapture {
                                 Com<ID3D11Resource> owner;
                                 r.get<ID3D11View>(view)->GetResource(&owner);
                                 aliasesWrite = writable.contains(owner.Get());
-                                if (aliasesWrite && !proof.at("terminal_domain_counts").get<bool>())
+                                if (aliasesWrite && !proof.at("terminal_domain_counts").get<bool>() &&
+                                    !proof.at("terminal_geometry_counts").get<bool>())
                                     fail("Read resource aliases a written UAV");
                             }
-                            reads.push_back(
-                                {{"stage", name},
-                                 {"kind", kind},
-                                 {"slot", slot},
-                                 {"view", view},
-                                 {"aliases_write", aliasesWrite},
-                                 {"count_dependency", !proof.at("terminal_domain_counts").get<bool>()}});
+                            reads.push_back({{"stage", name},
+                                             {"kind", kind},
+                                             {"slot", slot},
+                                             {"view", view},
+                                             {"aliases_write", aliasesWrite},
+                                             {"count_dependency",
+                                              !proof.at("terminal_domain_counts").get<bool>() &&
+                                                  !proof.at("terminal_geometry_counts").get<bool>()}});
                         }
                 }
                 independence["write_slots"] = writeSlots;
@@ -1865,10 +1868,46 @@ PixelGeometryInstanceMap validatedPixelGeometryInstances(const PostTransformGeom
                      stageProof.at("scope") != "terminal_domain_counts"))
                     throw std::runtime_error("Terminal domain count proof applied outside its pipeline");
             }
+            for (const auto &stage : geometry.report.at("executed_stages")) {
+                const auto &item = proof.at("stages").at(stage.get<std::string>());
+                const bool fixed = item.value("terminal_geometry_counts", false);
+                if (fixed != (item.at("scope") == "terminal_geometry_counts"))
+                    throw std::runtime_error("Inconsistent terminal geometry count scope");
+                if (!fixed)
+                    continue;
+                if (stage != "gs" || geometry.report.at("shader_stage") != "gs" ||
+                    geometry.report.at("executed_stages").back() != "gs" ||
+                    item.value("terminal_domain_counts", false))
+                    throw std::runtime_error("Terminal geometry count proof applied outside its pipeline");
+                const auto &schedule = item.at("emission_schedule");
+                if (!schedule.at("operations").is_array() ||
+                    !schedule.at("return_token").is_number_unsigned())
+                    throw std::runtime_error("Malformed terminal geometry emission schedule");
+                uint64_t previousToken = 1;
+                const auto end = schedule.at("return_token").get<uint64_t>();
+                if (end < 2 || end > UINT32_MAX)
+                    throw std::runtime_error("Invalid geometry return boundary");
+                for (const auto &operation : schedule.at("operations")) {
+                    if (!operation.at("token").is_number_unsigned() ||
+                        !operation.at("opcode").is_number_unsigned() ||
+                        !operation.at("stream").is_number_unsigned() ||
+                        operation.at("opcode").get<uint64_t>() > UINT32_MAX ||
+                        operation.at("stream").get<uint64_t>() > 3)
+                        throw std::runtime_error("Malformed terminal geometry emission operation");
+                    const auto token = operation.at("token").get<uint64_t>();
+                    const auto op = operation.at("opcode").get<uint32_t>();
+                    const auto stream = operation.at("stream").get<uint32_t>();
+                    if (token <= previousToken || token >= end || stream > 3 ||
+                        (op != 9 && op != 19 && op != 20 && op != 117 && op != 118 && op != 119) ||
+                        (op < 117 && stream != 0))
+                        throw std::runtime_error("Invalid terminal geometry emission schedule");
+                    previousToken = token;
+                }
+            }
             for (const auto &read : proof.at("resource_reads")) {
-                const bool terminal = proof.at("stages")
-                                          .at(read.at("stage").get<std::string>())
-                                          .value("terminal_domain_counts", false);
+                const auto &stageProof = proof.at("stages").at(read.at("stage").get<std::string>());
+                const bool terminal = stageProof.value("terminal_domain_counts", false) ||
+                                      stageProof.value("terminal_geometry_counts", false);
                 if (read.value("count_dependency", true) == terminal ||
                     (read.at("aliases_write") == true && !terminal))
                     throw std::runtime_error("Geometry read ownership does not prove count independence");

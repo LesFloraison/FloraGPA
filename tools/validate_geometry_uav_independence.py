@@ -137,6 +137,7 @@ def main():
     parser.add_argument("--resource-reads", action="store_true", help="Require the expanded immutable-read matrix")
     parser.add_argument("--empty-instance", action="store_true", help="Also require variable GS output with an empty first instance")
     parser.add_argument("--terminal-domain", action="store_true", help="Require terminal DS counts and upstream/GS rejection controls")
+    parser.add_argument("--fixed-geometry", action="store_true", help="Require the suite including fixed GS count tests")
     args = parser.parse_args()
     if args.terminal_domain:
         args.resource_reads = args.empty_instance = True
@@ -156,6 +157,8 @@ def main():
         passed += 3
     if args.terminal_domain:
         passed += 13
+    if args.fixed_geometry:
+        passed += 16
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     controls = 0

@@ -30,15 +30,16 @@ def same_float(a, b):
 
 def validate(name, job, result, files, terminal_domain=False):
     vendor, stage = name.split("-", 1)
+    fixed_geometry = stage in ("gs-fixed-read", "gs-fixed-atomic")
     domain_read = terminal_domain and stage == "ds-uav"
     independent_uav = stage == "ds-uav-independent" or domain_read
     resource_read = stage == "gs-read"
     if independent_uav:
         stage = "ds"
-    if resource_read:
+    if resource_read or fixed_geometry:
         stage = "gs"
     vendor = int(vendor)
-    expected_event = 200 if resource_read else {"vs": 1000, "gs": 150, "ds": 200}[stage]
+    expected_event = 200 if resource_read or fixed_geometry else {"vs": 1000, "gs": 150, "ds": 200}[stage]
     expected_stage = "vs-inputs" if stage == "vs" else "final"
     context, data = result["context"], result["data"]
     require(result["ok"] is True and result["schema"] == job["schema"] == 1, "result schema")
@@ -52,8 +53,14 @@ def validate(name, job, result, files, terminal_domain=False):
     require(options["gpa_event"] == data["event"]["id"] == expected_event, "event")
     require(options["stage"] == data["requested_stage"] == expected_stage, "requested stage")
     require(data["shader_stage"] == stage, "executed stage")
-    require(options["instance"] == data["instance_selection"]["instance"] == (1 if stage == "ds" else 0),
+    require(options["instance"] == data["instance_selection"]["instance"] == (1 if stage == "ds" or fixed_geometry else 0),
             "instance identity")
+    if fixed_geometry:
+        proof = data["instance_selection"]["uav_independence"]
+        require(context["backend"] == "dx11-native/12" and proof["input_aliases_excluded"] is True and
+                proof["stages"]["gs"]["scope"] == "terminal_geometry_counts" and
+                proof["stages"]["gs"]["terminal_geometry_counts"] is True and
+                data["instance_selection"]["first_vertex"] == 3, "fixed GS scope")
     if independent_uav:
         proof = data["instance_selection"]["uav_independence"]
         require(proof["input_aliases_excluded"] is True and set(proof["stages"]) == {"vs", "hs", "ds"},
@@ -99,6 +106,8 @@ def validate(name, job, result, files, terminal_domain=False):
     require(components == list(range(len(components))) and 1 <= len(components) <= 4, "position layout")
     require(offset + 4 * len(components) <= stride and len(raw) == count * stride, "position bounds")
     positions = [struct.unpack_from("<" + "f" * len(components), raw, i * stride + offset) for i in range(count)]
+    if fixed_geometry:
+        require(positions == [(42.0 + vertex, 1.0, 0.0, 1.0) for vertex in range(3)], "fixed GS positions")
     rows = list(csv.reader(io.StringIO(files["post_vertices.csv"].decode("utf-8"))))
     require(rows[0] == ["vertex"] + list("xyzw"[:len(components)]) and len(rows) == count + 1, "CSV shape")
     for i, (row, expected) in enumerate(zip(rows[1:], positions)):
@@ -130,7 +139,10 @@ def main():
     parser.add_argument("--indexed-presentation", action="store_true", help="Require compact vertex presentation tests")
     parser.add_argument("--position-channels", action="store_true", help="Require sparse position presentation tests")
     parser.add_argument("--terminal-domain", action="store_true", help="Require positive DS reads and upstream rejection controls")
+    parser.add_argument("--fixed-geometry", action="store_true", help="Require fixed GS instances and the current storage presentation suite")
     args = parser.parse_args()
+    if args.fixed_geometry:
+        args.terminal_domain = True
     if args.terminal_domain:
         args.position_channels = True
     if args.position_channels:
@@ -146,6 +158,8 @@ def main():
         expected |= {f"{v}-gs-read" for v in (0, 4318, 32902)}
     if args.terminal_domain:
         expected |= {f"{v}-ds-upstream-alias" for v in (0, 4318, 32902)}
+    if args.fixed_geometry:
+        expected |= {f"{v}-gs-fixed-{mode}" for v in (0, 4318, 32902) for mode in ("read", "atomic")}
     require({p.name for p in args.directory.iterdir() if p.is_dir()} == expected, "complete matrix")
     passed = 35 if args.indexed_presentation else 29 if args.resource_reads else 26 if args.uav_independent else 23
     if args.position_channels:
@@ -158,6 +172,11 @@ def main():
                         "Missing channel presentation case")
     if args.terminal_domain:
         passed += 3
+    if args.fixed_geometry:
+        passed += 33
+        require(len(re.findall(r"^PASS\s+: NativeReplayMeshUiTests::remainingStorage\(",
+                               args.log.read_text(encoding="utf-8"), re.MULTILINE)) == 27,
+                "complete storage presentation regression")
     require(re.search(rf"Totals: {passed} passed, 0 failed, 0 skipped, 0 blacklisted,",
                       args.log.read_text(encoding="utf-8")), "complete Qt suite")
     records, gates, controls = [], [], 0

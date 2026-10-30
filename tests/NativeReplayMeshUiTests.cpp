@@ -94,8 +94,8 @@ class NativeReplayMeshUiTests : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("stage");
         for (auto vendor : {0u, 4318u, 32902u})
-            for (const auto stage :
-                 {"vs", "gs", "ds", "ds-uav", "ds-uav-independent", "ds-upstream-alias", "gs-read"})
+            for (const auto stage : {"vs", "gs", "ds", "ds-uav", "ds-uav-independent", "ds-upstream-alias",
+                                     "gs-read", "gs-fixed-read", "gs-fixed-atomic"})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(vendor).arg(stage)))
                     << vendor << QString(stage);
     }
@@ -524,6 +524,8 @@ class NativeReplayMeshUiTests : public QObject {
                 fixture = testing::terminalDomainCapture("ds-upstream-alias");
             if (stage == "gs-read")
                 fixture = testing::geometryResourceReadCapture(false, false);
+            if (stage.startsWith("gs-fixed-"))
+                fixture = testing::fixedGeometryCapture(stage.mid(9).toStdString());
             if (stage == "ds") {
                 fixture.entries.erase(std::remove_if(fixture.entries.begin(), fixture.entries.end(),
                                                      [](const auto &entry) { return entry.id == 7003; }),
@@ -548,7 +550,7 @@ class NativeReplayMeshUiTests : public QObject {
             view.setNativeMode(true);
             view.setContext("test", event);
             view.findChild<QComboBox *>("replayMeshStage")->setCurrentIndex(stage == "vs" ? 0 : 1);
-            if (stage.startsWith("ds"))
+            if (stage.startsWith("ds") || stage.startsWith("gs-fixed-"))
                 view.findChild<QLineEdit *>("replayMeshInstance")->setText("1");
             auto options = view.request();
             QCOMPARE(options.at("action"), Json("mesh"));
@@ -598,6 +600,18 @@ class NativeReplayMeshUiTests : public QObject {
             if (stage == "vs" || stage.startsWith("gs")) {
                 QCOMPARE(mesh->positions.positions.size(), size_t(3));
                 QCOMPARE(mesh->positions.faces.size(), size_t(1));
+            }
+            if (stage.startsWith("gs-fixed-")) {
+                QCOMPARE(result.at("data")
+                             .at("instance_selection")
+                             .at("uav_independence")
+                             .at("stages")
+                             .at("gs")
+                             .at("scope"),
+                         Json("terminal_geometry_counts"));
+                for (unsigned vertex = 0; vertex < 3; ++vertex)
+                    QCOMPARE(mesh->positions.positions[vertex],
+                             (std::array<double, 4>{double(42 + vertex), 1, 0, 1}));
             }
             if (stage == "gs") {
                 QCOMPARE(mesh->positions.positions[0], (std::array<double, 4>{-1, -1, 0, 1}));

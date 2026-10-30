@@ -166,4 +166,38 @@ inline Capture geometryResourceReadCapture(bool uav, bool alias, bool unbound = 
     capture.add(199, 3, 3, snapshot(state));
     return capture;
 }
+inline Capture fixedGeometryCapture(const std::string &mode) {
+    auto capture = geometryUavEmissionCapture();
+    const auto replace = [&](Id id, const std::string &source, const char *profile) {
+        std::erase_if(capture.entries, [&](const auto &entry) { return entry.id == id; });
+        const auto code = compileClassProgram(source, profile);
+        auto payload = statePack(uint64_t(code.size()));
+        payload.insert(payload.end(), code.begin(), code.end());
+        append(payload, Id(0));
+        capture.add(id, 9, 0x81, payload);
+    };
+    for (const auto &entry : capture.entries)
+        if (entry.id == 11)
+            put(capture.bytes, entry.offset + 4, uint32_t(42));
+    const std::string declarations =
+        "struct V{float4 p:SV_Position;};RWStructuredBuffer<uint> dst:register(u1);";
+    std::string body = mode == "atomic" ? "uint value;InterlockedOr(dst[0],2,value);" : "uint value=dst[0];";
+    body += "InterlockedAdd(dst[1],1);";
+    if (mode == "branch")
+        body += "[branch]if(value==0)return;";
+    body += "V o;o.p=v[0].p;o.p.x=float(value);";
+    if (mode == "nonfinite")
+        body += "o.p.x=asfloat(0x7f800000);o.p.z=float(value);";
+    body += "output.Append(o);o.p.x+=1;output.Append(o);o.p.x+=1;output.Append(o);output.RestartStrip();}";
+    replace(8001,
+            declarations + "[maxvertexcount(3)]void main(point V v[1],inout TriangleStream<V> output){" +
+                body,
+            "gs_5_0");
+    if (mode == "upstream")
+        replace(7001,
+                declarations + "V main(uint id:SV_VertexID,uint inst:SV_InstanceID){V "
+                               "o;o.p=float4(dst[0],inst,0,1);return o;}",
+                "vs_5_0");
+    return capture;
+}
 } // namespace flora::testing
