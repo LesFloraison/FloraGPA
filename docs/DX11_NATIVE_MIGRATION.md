@@ -24,7 +24,7 @@ remain open; no migration gate is waived by those measurements.
 | P3 | Resource, counter and geometry parity | Native inventory/events/texture/mesh and all-event counters exposed; native CLI and GUI mesh publication tested on three adapters; explicit remaining-instance storage matches ten saved NVIDIA exports exactly; full parity matrix and default cutover pending |
 | P4 | Event history including writes without changed values | Explicit event-storage CLI/Worker and desktop view, typed values and bounded ordinary/2D BC storage reads; full format/semantic and performance matrix remain open |
 | P5 | Fragment history, failure reasons and shader outputs | Selected-region occlusion, batched pre-depth candidates, compact private outputs, multisample private merging, observed primitive IDs and original-PS private checkpoints with raster-input/current-resource shader-output joins are tested on three adapters; original fragment qualification, complete instance/identity coverage, ordering and full reconstruction remain open |
-| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS and explicit private-primitive PS jobs, sessions and UI are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad jobs complete on three adapters; original fragment qualification, full typed-format/precision coverage, unscoped PS selection and source parity remain open |
+| P6 | Independent DXBC VS/PS/CS execution with source/debugger parity | Native VS/CS and explicit private-primitive PS jobs, sessions and UI are integrated; private PS inputs, journals, minimum-precision sampling, typed-buffer/texture-UAV loads, outputs and helper memory suppression are tested; GF2/BF1/Helldivers selected private quad jobs complete on three adapters; original fragment qualification, full typed-format/precision coverage, unscoped PS selection and source parity remain open |
 | P7 | All consumers switched; runtime/build/package/test dependencies removed | Blocked by P4-P6 and GUI parity |
 | P8 | Independent clean builds, portable package and module/performance audit | Pending; no standalone package claimed |
 
@@ -1757,3 +1757,13 @@ failures or skips. Independent geometry/UI validation rejects 513 corruptions.
 See `research/DX11_NATIVE_FIXED_GEOMETRY_COUNTS.md` for baseline evidence,
 SM4/4.1 compatibility and the `dx11-native/12` cache boundary. Arbitrary GS count
 dependencies, original fragment qualification, full P6 parity and P7/P8 remain open.
+
+PS/CS texture UAV loads now preserve minimum-precision coordinates and
+destinations, including PS output-register transport, with `dxbc-gpu/31`.
+The extended five-dimension matrix has 11,520 direct GPU comparisons, including
+4,320 new UAV observations and 360 cancellation/recovery controls. All 7,200
+historical SRV records remain identical. Four suites pass 4,401 checks without
+failures or skips; independent validation rejects 102 corruptions. See
+`research/DX11_TEXTURE_UAV_PRECISION.md` for retained failures and evidence.
+Full format/instruction and debugger parity, original fragment qualification,
+RenderDoc removal and independent package acceptance remain open.

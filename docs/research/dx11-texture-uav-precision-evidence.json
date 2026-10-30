@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "implementation_commit": "f4fdf3f5ffb912f06744611865f243e1b0c3e860",
+  "baseline_engine_commit": "69b016fd2781745f9e5b412748b9462d11d1de8f",
+  "main_baseline": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "scope": "native_minimum_precision_texture_uav_loads",
+  "backend": "dxbc-gpu/31",
+  "sources_are_git_content": true,
+  "renderdoc_removed": false,
+  "full_debugger_parity": false,
+  "original_fragment_qualification": false,
+  "complete_release_acceptance": false,
+  "configurations": 300,
+  "direct_gpu_comparisons": 11520,
+  "new_uav_observations": 4320,
+  "unchanged_srv_records": 7200,
+  "raw_components": 46080,
+  "unknown_storage_observations": 11520,
+  "cancellation_recovery_controls": 360,
+  "rejected_corruptions": 102,
+  "suites": [
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/baseline.txt",
+      "role": "baseline_product",
+      "passed": 2,
+      "failed": 6,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 789
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/focused.txt",
+      "role": "focused_1d",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3687
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/DxbcTextureLoad.txt",
+      "role": "fixture_failure",
+      "passed": 1730,
+      "failed": 24,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 383970
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/three-dimensional.txt",
+      "role": "focused_3d",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 3724
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/final/DxbcTextureLoad.txt",
+      "role": "final",
+      "passed": 1754,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 383460
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/final/DxbcTextureUav.txt",
+      "role": "final",
+      "passed": 765,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 108727
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/final/DxbcPixelMemory.txt",
+      "role": "final",
+      "passed": 650,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 10798
+    },
+    {
+      "log": "artifacts/dx11-native/texture-uav-precision/final/DxbcExecution.txt",
+      "role": "final",
+      "passed": 1232,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 109824
+    }
+  ],
+  "final_passes": 4401,
+  "adapters": [
+    {
+      "backend": "dxbc-gpu/31",
+      "completion_wait": "fence-event/1",
+      "device_id": 140,
+      "driver_version": 2814751477605871,
+      "feature_level": 45312,
+      "luid_high": 0,
+      "luid_low": 74655,
+      "vendor_id": 5140,
+      "warp": true
+    },
+    {
+      "backend": "dxbc-gpu/31",
+      "completion_wait": "fence-event/1",
+      "device_id": 11352,
+      "driver_version": 9007199255791310,
+      "feature_level": 45312,
+      "luid_high": 0,
+      "luid_low": 69256,
+      "vendor_id": 4318,
+      "warp": false
+    },
+    {
+      "backend": "dxbc-gpu/31",
+      "completion_wait": "fence-event/1",
+      "device_id": 32103,
+      "driver_version": 9007199261368954,
+      "feature_level": 45312,
+      "luid_high": 0,
+      "luid_low": 74756,
+      "vendor_id": 32902,
+      "warp": false
+    }
+  ],
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "bytes": 123651,
+      "sha256": "e9e217d94dbfc7fd6456c8130c253885c2793fd57ead54a05230b22bedcdaf66"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.cpp",
+      "bytes": 123199,
+      "sha256": "3cfe20b18bc7601ccc73a6bd8e5385ca734a4bf651f75e41c33f37f66063b4ef"
+    },
+    {
+      "path": "src/application/DxbcGpuOperations.h",
+      "bytes": 5902,
+      "sha256": "ce501541f4d9ad09c35bd3f3b3e84551fdde5a82d70cf4385a18da96c00e34af"
+    },
+    {
+      "path": "src/application/DxbcTextureInputs.h",
+      "bytes": 8011,
+      "sha256": "d622d424aa9ea91aa56e60e3d7d8a0c8ebd7c1f3f411c35089103a729c7cc744"
+    },
+    {
+      "path": "src/application/DxbcTextureUav.cpp",
+      "bytes": 14366,
+      "sha256": "a0226a5329dfca12d42f393cf140b60757c9b461a9bd969cca50be50c9816e36"
+    },
+    {
+      "path": "tests/DxbcTextureLoadTests.cpp",
+      "bytes": 46707,
+      "sha256": "aade2c3b16e6bbd2715392d28575cea6051fb46a7844f1ff319964d1441ef0b8"
+    },
+    {
+      "path": "tests/TextureOperationOracle.h",
+      "bytes": 12874,
+      "sha256": "1af4a6bd10ed943812f11b6db31dc92a1a6bced09879b3fb4f094efb47a2d33c"
+    },
+    {
+      "path": "tools/validate_texture_precision.py",
+      "bytes": 11048,
+      "sha256": "e4782fb34464b9be9ae811ebf809ba745127442bef66f9c072df80bf995cf3df"
+    }
+  ],
+  "artifact_index": {
+    "path": "artifacts/dx11-native/texture-uav-precision/artifact-index.json",
+    "bytes": 128259,
+    "sha256": "ac5bbed5dc8ee8d9e00dd0d4ec6863535892a8bc6492a85f9de25d3de5daf588"
+  },
+  "indexed_artifacts": 610,
+  "validation_indexes": [
+    {
+      "path": "artifacts/dx11-native/texture-uav-precision/final/validation.json",
+      "bytes": 132292,
+      "sha256": "054f0fc569e5fd0568cb7dc160f399318af7c324697ce33297ed193a798be65a"
+    },
+    {
+      "path": "artifacts/dx11-native/texture-uav-precision/final/historical-validation.json",
+      "bytes": 52611,
+      "sha256": "5f320267ad5d253b965bfb77965e6cc51f286bd3d2ae86b1ec7723372282b929"
+    }
+  ]
+}
