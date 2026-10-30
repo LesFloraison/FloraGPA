@@ -1,5 +1,9 @@
 # Native pixel counts with integer shader outputs
 
+This records the `/2` increment. The subsequent
+[auxiliary-target path](DX11_NATIVE_AUXILIARY_PIXEL_COUNTS.md) preserves integer
+RT0 coverage when output-merger slot 1 is available.
+
 ## Implementation and explicit boundary
 
 `native-pixel-return-count/2` accepts integer color outputs when private float

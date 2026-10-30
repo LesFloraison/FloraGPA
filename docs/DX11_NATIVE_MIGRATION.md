@@ -1801,3 +1801,16 @@ explicit; they remain an open capability boundary, not completed features.
 See `research/DX11_NATIVE_PIXEL_INTEGER_COUNTS.md`. Full original fragment
 qualification, debugger parity, RenderDoc removal and standalone release
 acceptance remain open.
+
+The `/3` return-count increment preserves integer RT0 and uses RT1 for private
+float accumulation when alpha-to-coverage requires the original RT0 format.
+It adds a color output only when needed and records source and diagnostic slots
+separately. The expanded owned matrix passes 1,800 sample observations across
+720 configurations, including the prior RT0 coverage discrepancies. Actual RT0
+format/storage, all original color resources and append/counter UAV restoration
+are checked. Six suites pass 1,655 checks; nine real-capture controls pass and
+independent validators reject 6,120 corruptions. See
+`research/DX11_NATIVE_AUXILIARY_PIXEL_COUNTS.md`. An application UAV at OM slot 1
+still prevents this route; it is never displaced. Full fragment qualification,
+debugger parity, dependency removal and independent release acceptance remain
+open.
