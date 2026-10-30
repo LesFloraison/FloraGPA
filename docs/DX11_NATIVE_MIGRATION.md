@@ -1747,3 +1747,13 @@ cases retain identical shader, storage and output evidence. Five suites record
 `research/DX11_TYPED_OUTPUT_PRECISION.md` for retained baseline failures and owned
 fixture provenance. Full P6 parity, original fragment qualification and P7/P8
 remain open.
+
+Terminal GS instance boundaries now use a verified fixed emission schedule when
+UAV-dependent values cannot change counts. Upstream/IA/constant-buffer alias
+exclusions remain in force; selected bytes come from the full private capture.
+Nine formerly unresolved fixtures now resolve on WARP, NVIDIA and Intel, while
+six dependency controls retain rejection. Five suites pass 286 checks without
+failures or skips. Independent geometry/UI validation rejects 513 corruptions.
+See `research/DX11_NATIVE_FIXED_GEOMETRY_COUNTS.md` for baseline evidence,
+SM4/4.1 compatibility and the `dx11-native/12` cache boundary. Arbitrary GS count
+dependencies, original fragment qualification, full P6 parity and P7/P8 remain open.

@@ -1,0 +1,617 @@
+{
+  "schema": 1,
+  "implementation_commit": "fcab4d420725ba04be41f916ced3caf852107481",
+  "baseline_engine_commit": "4e82fc25cbb04ec557116f539cde28d69d760ffa",
+  "main_baseline": "3c71b0af1cd1fce395c05b1f6ddc6a41d3e13b28",
+  "sources_are_git_content": true,
+  "backend": "dx11-native/12",
+  "gpu_helper": "dxbc-gpu/30",
+  "scope": "terminal_geometry_fixed_emission_counts",
+  "renderdoc_removed": false,
+  "full_geometry_parity": false,
+  "original_fragment_qualification": false,
+  "full_debugger_parity": false,
+  "complete_release_acceptance": false,
+  "suites": [
+    {
+      "suite": "full",
+      "role": "final",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/full.txt",
+      "passed": 85,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 11218
+    },
+    {
+      "suite": "NativeReplayMeshUi",
+      "role": "final",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/NativeReplayMeshUi.txt",
+      "passed": 105,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 20303
+    },
+    {
+      "suite": "NativeAnalysis",
+      "role": "final",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/NativeAnalysis.txt",
+      "passed": 61,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 23668
+    },
+    {
+      "suite": "PostTransform",
+      "role": "final",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/PostTransform.txt",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 12205
+    },
+    {
+      "suite": "GeometryExport",
+      "role": "final",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/GeometryExport.txt",
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 391
+    },
+    {
+      "suite": "baseline",
+      "role": "baseline",
+      "log": "artifacts/dx11-native/fixed-geometry-counts/baseline.txt",
+      "passed": 8,
+      "failed": 9,
+      "skipped": 0,
+      "blacklisted": 0,
+      "elapsed_ms": 2102
+    }
+  ],
+  "final_passes": 286,
+  "fixed_geometry_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 15,
+    "resolved": 9,
+    "rejected": 6,
+    "corruption_controls": 102,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "existing_geometry_validation": {
+    "schema": 1,
+    "status": "ok",
+    "cases": 42,
+    "corruption_controls": 291,
+    "full_uav_instance_support": false,
+    "full_renderdoc_removal": false
+  },
+  "ui_validation": {
+    "successful_cases": 24,
+    "rejection_cases": 3,
+    "corruption_controls": 120,
+    "records": [
+      {
+        "case": "0-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 43,
+        "peak_working_set_bytes": 22638592
+      },
+      {
+        "case": "0-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 35,
+        "peak_working_set_bytes": 22532096
+      },
+      {
+        "case": "0-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 49,
+        "peak_working_set_bytes": 22904832
+      },
+      {
+        "case": "0-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 45,
+        "peak_working_set_bytes": 22290432
+      },
+      {
+        "case": "0-gs-fixed-atomic",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 38,
+        "peak_working_set_bytes": 22769664
+      },
+      {
+        "case": "0-gs-fixed-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 41,
+        "peak_working_set_bytes": 22712320
+      },
+      {
+        "case": "0-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 42,
+        "peak_working_set_bytes": 22720512
+      },
+      {
+        "case": "0-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Microsoft Basic Render Driver",
+          "device": 140,
+          "driver_version": 2814751477605871,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74655,
+          "revision": 0,
+          "subsystem": 0,
+          "vendor": 5140,
+          "warp": true
+        },
+        "elapsed_ms": 38,
+        "peak_working_set_bytes": 22102016
+      },
+      {
+        "case": "32902-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 166,
+        "peak_working_set_bytes": 73211904
+      },
+      {
+        "case": "32902-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 181,
+        "peak_working_set_bytes": 73764864
+      },
+      {
+        "case": "32902-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 175,
+        "peak_working_set_bytes": 73768960
+      },
+      {
+        "case": "32902-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 188,
+        "peak_working_set_bytes": 72851456
+      },
+      {
+        "case": "32902-gs-fixed-atomic",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 191,
+        "peak_working_set_bytes": 82857984
+      },
+      {
+        "case": "32902-gs-fixed-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 187,
+        "peak_working_set_bytes": 82718720
+      },
+      {
+        "case": "32902-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 162,
+        "peak_working_set_bytes": 73596928
+      },
+      {
+        "case": "32902-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 74756,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "elapsed_ms": 224,
+        "peak_working_set_bytes": 71356416
+      },
+      {
+        "case": "4318-ds",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 242,
+        "peak_working_set_bytes": 102715392
+      },
+      {
+        "case": "4318-ds-uav",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 242,
+        "peak_working_set_bytes": 102957056
+      },
+      {
+        "case": "4318-ds-uav-independent",
+        "vertices": 6,
+        "faces": 2,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 244,
+        "peak_working_set_bytes": 103288832
+      },
+      {
+        "case": "4318-gs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 242,
+        "peak_working_set_bytes": 102100992
+      },
+      {
+        "case": "4318-gs-fixed-atomic",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 258,
+        "peak_working_set_bytes": 108126208
+      },
+      {
+        "case": "4318-gs-fixed-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 254,
+        "peak_working_set_bytes": 108142592
+      },
+      {
+        "case": "4318-gs-read",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 235,
+        "peak_working_set_bytes": 103288832
+      },
+      {
+        "case": "4318-vs",
+        "vertices": 3,
+        "faces": 1,
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 69256,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "elapsed_ms": 250,
+        "peak_working_set_bytes": 103010304
+      }
+    ]
+  },
+  "artifact_index": {
+    "path": "artifacts/dx11-native/fixed-geometry-counts/artifact-index.json",
+    "bytes": 86965,
+    "sha256": "6207a52cf771175f121f1f116f874bbbdee461b2b77a95a19a9035a7fdb6405e"
+  },
+  "indexed_artifacts": 408,
+  "sources": [
+    {
+      "path": "src/application/DxbcGeometryDependencies.cpp",
+      "bytes": 13979,
+      "sha256": "357d34b3d1bac3143218802cc0f101ddbb4731862a1984a904e7b4e9065d092c"
+    },
+    {
+      "path": "src/application/DxbcGeometryDependencies.h",
+      "bytes": 983,
+      "sha256": "809a7a33a333540d00dc05f7722c4623ad2b142099d2ca61b8062c49470d33f5"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "bytes": 961,
+      "sha256": "a03d4b629ede98c365966246d4a7d5f2fd62c83efc07541bd1ae7a2c606ffbd0"
+    },
+    {
+      "path": "src/application/PostTransform.cpp",
+      "bytes": 128210,
+      "sha256": "2e3bda5b4902517fa8334b887bb6390f3d197b1170a295744aa7c126bcfaa3a9"
+    },
+    {
+      "path": "tests/GeometryUavDependencyTests.cpp",
+      "bytes": 30957,
+      "sha256": "47936515b91387515e8d872c4e0c1c10a9fcc2262de9feccf3b7e28ab89dfd59"
+    },
+    {
+      "path": "tests/NativeReplayMeshUiTests.cpp",
+      "bytes": 40624,
+      "sha256": "d379b6a15301c952dc744031e907cf8f69a3b67338f1ceadf3f56871dd750a1b"
+    },
+    {
+      "path": "tests/UavGeometryCapture.h",
+      "bytes": 10159,
+      "sha256": "154ce4ce623150762683d90a8308af4d418bd52521de0a02db6818f638ac54a2"
+    },
+    {
+      "path": "tools/validate_fixed_geometry_counts.py",
+      "bytes": 8989,
+      "sha256": "a0ea1c48bef67998fdf5f13fa3f5cf6bfe22d35b3c1162e395554738fd21b8c1"
+    },
+    {
+      "path": "tools/validate_geometry_uav_independence.py",
+      "bytes": 11950,
+      "sha256": "fd5f5a96b4fd5aa5b51d81325fccbae1a487baaf097054c61830de7f37f911d3"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "bytes": 13506,
+      "sha256": "e6d39237925dfc0c29341acfbf620ed22164ac089e0cbfde6cbfa0e5349728bc"
+    }
+  ]
+}
