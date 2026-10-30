@@ -1,0 +1,1695 @@
+{
+  "schema": 1,
+  "kind": "native_pixel_attribute_evaluation_evidence",
+  "root": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\attribute-evaluation\\verified",
+  "workflow_root": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\attribute-evaluation\\workflow-verified",
+  "tests": {
+    "FloraDxbcPixelInputsTests": 201,
+    "FloraDxbcExecutionTests": 1272,
+    "FloraDxbcExecutionTraceTests": 28,
+    "FloraDxbcExecutionTraceReaderTests": 65,
+    "FloraNativePixelOutputsTests": 95,
+    "FloraNativePixelDebugTests": 31,
+    "FloraNativeDebugSessionTests": 50,
+    "FloraNativeComputeDebugTests": 71
+  },
+  "total_passed": 1813,
+  "inputs": [
+    {
+      "case": "0-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-eval-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-centroid-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-centroid-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-centroid-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-sample-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-sample-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-sample-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-snapped-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "0-eval-snapped-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-high-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-high-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-eval-snapped-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "0-linear-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-linear-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-min16-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-min16-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-nointerpolation-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-nointerpolation-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-noperspective-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-position-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-position-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-position-z-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-position-z-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sample-id-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sample-id-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sm4-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sm4-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sm41-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sm41-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sparse-1",
+      "compared_quad_components": 1152,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-sparse-4",
+      "compared_quad_components": 4608,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-trigger-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-trigger-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-uint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "0-uint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 5140,
+      "adapter_luid": 74655
+    },
+    {
+      "case": "32902-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-eval-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-centroid-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-centroid-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-centroid-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-sample-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-sample-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-sample-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-snapped-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "32902-eval-snapped-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-high-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-high-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-eval-snapped-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "32902-linear-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-linear-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-min16-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-min16-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-nointerpolation-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-nointerpolation-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-noperspective-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-position-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-position-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-position-z-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-position-z-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sample-id-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sample-id-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sm4-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sm4-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sm41-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sm41-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sparse-1",
+      "compared_quad_components": 1152,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-sparse-4",
+      "compared_quad_components": 4608,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-trigger-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-trigger-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-uint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "32902-uint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 32902,
+      "adapter_luid": 74756
+    },
+    {
+      "case": "4318-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-eval-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-centroid-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-centroid-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-centroid-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-sample-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-sample-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-sample-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-constant-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-snapped-constant-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 0
+    },
+    {
+      "case": "4318-eval-snapped-edge-1",
+      "compared_quad_components": 16,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-edge-4",
+      "compared_quad_components": 96,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-frequency-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-frequency-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-high-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-high-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-eval-snapped-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256,
+      "execution_steps": 12,
+      "attribute_evaluations": 1
+    },
+    {
+      "case": "4318-linear-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-linear-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-min16-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-min16-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-nointerpolation-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-nointerpolation-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-centroid-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-centroid-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-noperspective-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-position-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-position-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-position-z-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-position-z-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sample-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sample-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sample-id-1",
+      "compared_quad_components": 576,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sample-id-4",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sm4-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sm4-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sm41-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sm41-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sparse-1",
+      "compared_quad_components": 1152,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-sparse-4",
+      "compared_quad_components": 4608,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-trigger-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-trigger-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-uint-1",
+      "compared_quad_components": 2304,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    },
+    {
+      "case": "4318-uint-4",
+      "compared_quad_components": 9216,
+      "adapter_vendor": 4318,
+      "adapter_luid": 69256
+    }
+  ],
+  "jobs": [
+    {
+      "case": "0-constant",
+      "steps": 12,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 352,
+      "peak_working_set_bytes": 40525824,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-derivative",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 564,
+      "peak_working_set_bytes": 40652800,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-sample",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 770,
+      "peak_working_set_bytes": 41230336,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-discard",
+      "steps": 20,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 353,
+      "peak_working_set_bytes": 40632320,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-source",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 369,
+      "peak_working_set_bytes": 40542208,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-uav",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 347,
+      "peak_working_set_bytes": 40632320,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "0-eval-centroid",
+      "steps": 12,
+      "attribute_evaluations": 1,
+      "elapsed_ms": 768,
+      "peak_working_set_bytes": 42483712,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "0-eval-sample",
+      "steps": 20,
+      "attribute_evaluations": 2,
+      "elapsed_ms": 1227,
+      "peak_working_set_bytes": 45326336,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "0-eval-snapped",
+      "steps": 24,
+      "attribute_evaluations": 4,
+      "elapsed_ms": 1645,
+      "peak_working_set_bytes": 43290624,
+      "original_gpu_bits": [
+        1065353216,
+        1065353216,
+        1088421888,
+        1077936128
+      ]
+    },
+    {
+      "case": "4318-constant",
+      "steps": 12,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 733,
+      "peak_working_set_bytes": 127557632,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-derivative",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 1081,
+      "peak_working_set_bytes": 129220608,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-sample",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 1104,
+      "peak_working_set_bytes": 129728512,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-discard",
+      "steps": 20,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 701,
+      "peak_working_set_bytes": 127778816,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-source",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 745,
+      "peak_working_set_bytes": 127496192,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-uav",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 718,
+      "peak_working_set_bytes": 127606784,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "4318-eval-centroid",
+      "steps": 12,
+      "attribute_evaluations": 1,
+      "elapsed_ms": 1320,
+      "peak_working_set_bytes": 137805824,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "4318-eval-sample",
+      "steps": 20,
+      "attribute_evaluations": 2,
+      "elapsed_ms": 2186,
+      "peak_working_set_bytes": 142708736,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "4318-eval-snapped",
+      "steps": 24,
+      "attribute_evaluations": 4,
+      "elapsed_ms": 2840,
+      "peak_working_set_bytes": 141021184,
+      "original_gpu_bits": [
+        1065353216,
+        1065353216,
+        1088421888,
+        1077936128
+      ]
+    },
+    {
+      "case": "32902-constant",
+      "steps": 12,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 845,
+      "peak_working_set_bytes": 100040704,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-derivative",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 1138,
+      "peak_working_set_bytes": 102223872,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-sample",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 1259,
+      "peak_working_set_bytes": 108593152,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-discard",
+      "steps": 20,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 806,
+      "peak_working_set_bytes": 100159488,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-source",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 765,
+      "peak_working_set_bytes": 100077568,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-uav",
+      "steps": 16,
+      "attribute_evaluations": 0,
+      "elapsed_ms": 768,
+      "peak_working_set_bytes": 100487168,
+      "original_gpu_bits": null
+    },
+    {
+      "case": "32902-eval-centroid",
+      "steps": 12,
+      "attribute_evaluations": 1,
+      "elapsed_ms": 1413,
+      "peak_working_set_bytes": 109703168,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "32902-eval-sample",
+      "steps": 20,
+      "attribute_evaluations": 2,
+      "elapsed_ms": 2105,
+      "peak_working_set_bytes": 120877056,
+      "original_gpu_bits": [
+        1065353216,
+        1088421888,
+        1077936128,
+        1056964608
+      ]
+    },
+    {
+      "case": "32902-eval-snapped",
+      "steps": 24,
+      "attribute_evaluations": 4,
+      "elapsed_ms": 2817,
+      "peak_working_set_bytes": 111681536,
+      "original_gpu_bits": [
+        1065353216,
+        1065353216,
+        1088421888,
+        1077936128
+      ]
+    }
+  ],
+  "artifact_manifests": [
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\attribute-evaluation\\verified\\artifact-identities.json",
+      "bytes": 1190919,
+      "sha256": "e23dbbeabfc3fe6e6ef0c1f74b40f6da54096ac3379362041152ba791d81679e",
+      "entries": 7453
+    },
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\attribute-evaluation\\workflow-verified\\artifact-identities.json",
+      "bytes": 29409,
+      "sha256": "96504928ba12071229cc6ea79dc8ef6f36bf728df4f2d83c5eb54097f41fc70a",
+      "entries": 199
+    }
+  ],
+  "corrupted_inputs_rejected": 618,
+  "original_fragment_eligibility": null,
+  "remaining": [
+    "Minimum-precision eval operands",
+    "Full P1/P5/P6 parity",
+    "P7/P8 dependency removal and release"
+  ],
+  "superseded_runs": [
+    {
+      "suite": "FloraNativePixelDebugTests",
+      "command": [
+        "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraNativePixelDebugTests.exe",
+        "-o",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\dx11-native\\attribute-evaluation\\verified\\FloraNativePixelDebugTests.txt,txt"
+      ],
+      "exit_code": 9,
+      "seconds": 36.171999999991385
+    }
+  ]
+}

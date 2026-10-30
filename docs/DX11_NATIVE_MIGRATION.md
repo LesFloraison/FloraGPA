@@ -1861,3 +1861,14 @@ Worker/CLI jobs with original CS output comparisons. Independent validation chec
 147 GPU observations, six reversible journals and 588 rejected alterations. See
 `research/DX11_NATIVE_MSAD.md` for the retained failures and `/17` cache boundary.
 Full debugger/fragment parity, P1 closure and P7/P8 release gates remain open.
+
+Native pixel debugging now executes full-precision `eval_snapped`,
+`eval_sample_index`, and `eval_centroid` through original-geometry GPU
+observations. The private output and journal paths share bounded, cancellable
+observations with explicit adapter/quad identity and unknown out-of-range sample
+values. Analysis cache identity advances to `/18`. Eight suites pass 1,813 checks;
+independent validation covers 198 GPU input cases, 96 journals, 27 Worker jobs,
+and 618 rejected alterations. See `research/DX11_NATIVE_ATTRIBUTE_EVALUATION.md`
+for retained failures, original GPU comparisons, and reproduction. Minimum-
+precision eval operands, full debugger/fragment parity, P1 closure, and P7/P8
+removal/release acceptance remain open.
