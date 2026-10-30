@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "kind": "owned_attribute_precision_compiler_probe",
+  "compiler": {
+    "path": "C:\\Windows\\SYSTEM32\\d3dcompiler_47.dll",
+    "sha256": "0f89c19165fd83a05e39bea601a06007e6a8814d55e2adf913902926231f843e"
+  },
+  "probe": "tools/probe_attribute_precision.py",
+  "raw_root": "artifacts\\dx11-native\\attribute-precision\\compiler-verified",
+  "artifact_manifest_sha256": "56be6ad8da19f1959eeb159fc00905d1edd4f9b51e5503c48efe1c0238085cbd",
+  "cases": [
+    {
+      "case": "centroid-float-full",
+      "hresult": 0,
+      "hlsl_sha256": "8036185a0c98f9078af8a4e6dc2c99fb3dcaf58670b08a1ac446e3e47e303816",
+      "dxbc_sha256": "c955fe4e67cc85be34901477871394f2cb80f297f40a01ecb8f492ee01eb9334",
+      "evaluation": [
+        "eval_centroid o0.xyzw, v0.xyzw"
+      ]
+    },
+    {
+      "case": "centroid-float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "23c1453b3e463f4a9b954798b4568e81132cad7b82c6ff81fa55dd139c25f263",
+      "dxbc_sha256": "c955fe4e67cc85be34901477871394f2cb80f297f40a01ecb8f492ee01eb9334",
+      "evaluation": [
+        "eval_centroid o0.xyzw, v0.xyzw"
+      ]
+    },
+    {
+      "case": "centroid-min16float-full",
+      "hresult": 0,
+      "hlsl_sha256": "a3e11e02e8f3978fcc61a2e1024a9002cf9441641501053d03488ef87898cdbd",
+      "dxbc_sha256": "518b9ffcf7b7b7477b4ab7b6f497cd56af833a13fa3a3fdf1152ddaf4f77e08b",
+      "evaluation": [
+        "eval_centroid r0.xyzw {min16f}, v0.xyzw {min16f}"
+      ]
+    },
+    {
+      "case": "centroid-min16float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "7421bd6d805b5ebb2aea51e21cc7a284c20b4595b761f7b4ff63152414daee7c",
+      "dxbc_sha256": "518b9ffcf7b7b7477b4ab7b6f497cd56af833a13fa3a3fdf1152ddaf4f77e08b",
+      "evaluation": [
+        "eval_centroid r0.xyzw {min16f}, v0.xyzw {min16f}"
+      ]
+    },
+    {
+      "case": "centroid-min10float-full",
+      "hresult": 0,
+      "hlsl_sha256": "5f9efc0aa20daaf68ee9c70e2c5d3a063fbaae795568132862f34af9b2d5dc79",
+      "dxbc_sha256": "0bfd4ed438d88779893386012364f9b646ac7e41058e8cec1930a2962bf11edc",
+      "evaluation": [
+        "eval_centroid r0.xyzw {min2_8f}, v0.xyzw {min2_8f}"
+      ]
+    },
+    {
+      "case": "centroid-min10float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "b333bb4437571efcc0877404906e05c49fcd3dff168bfc183c3e847d310fa879",
+      "dxbc_sha256": "0bfd4ed438d88779893386012364f9b646ac7e41058e8cec1930a2962bf11edc",
+      "evaluation": [
+        "eval_centroid r0.xyzw {min2_8f}, v0.xyzw {min2_8f}"
+      ]
+    },
+    {
+      "case": "sample-float-full",
+      "hresult": 0,
+      "hlsl_sha256": "6ed33170d4eb72d300d3a7aaae5d42c37bed220fbf209d66a0881284f633cbdc",
+      "dxbc_sha256": "b8965da91ea77974b181d99a814c77b038803a8983d4007ca507ead5ddd5b08a",
+      "evaluation": [
+        "eval_sample_index o0.xyzw, v0.xyzw, r0.x"
+      ]
+    },
+    {
+      "case": "sample-float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "bc9fafe3440665784b6be8ce86e8523805e309a60e6396182097c1290f17b6ef",
+      "dxbc_sha256": "b8965da91ea77974b181d99a814c77b038803a8983d4007ca507ead5ddd5b08a",
+      "evaluation": [
+        "eval_sample_index o0.xyzw, v0.xyzw, r0.x"
+      ]
+    },
+    {
+      "case": "sample-min16float-full",
+      "hresult": 0,
+      "hlsl_sha256": "de08466e76923fd6d69aa7ebb4bf6d8c584db904994c155d67cc69c49f439773",
+      "dxbc_sha256": "bf22faec894e8a5e61c21d7ee3719d505af27a6a8b5bd687925ca4810210ff71",
+      "evaluation": [
+        "eval_sample_index r0.xyzw {min16f}, v0.xyzw {min16f}, r0.x"
+      ]
+    },
+    {
+      "case": "sample-min16float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "aa1d6b5dcaa6551eca9de26c7e3c78a72b2d81a920ed3c33d1d6b0252668bf15",
+      "dxbc_sha256": "bf22faec894e8a5e61c21d7ee3719d505af27a6a8b5bd687925ca4810210ff71",
+      "evaluation": [
+        "eval_sample_index r0.xyzw {min16f}, v0.xyzw {min16f}, r0.x"
+      ]
+    },
+    {
+      "case": "sample-min10float-full",
+      "hresult": 0,
+      "hlsl_sha256": "ccec40fbe6b2812ecfb2834f52c90f55436b6f96bb89be8423e51f8d473b6006",
+      "dxbc_sha256": "87d35ad668f879c0b9f0079fbee0821f22605e59543af02b9d8aeb1dc98129bd",
+      "evaluation": [
+        "eval_sample_index r0.xyzw {min2_8f}, v0.xyzw {min2_8f}, r0.x"
+      ]
+    },
+    {
+      "case": "sample-min10float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "262be43d5b259086523543a0dff75491f6bd58917f9be9813f81d09414d25e2d",
+      "dxbc_sha256": "87d35ad668f879c0b9f0079fbee0821f22605e59543af02b9d8aeb1dc98129bd",
+      "evaluation": [
+        "eval_sample_index r0.xyzw {min2_8f}, v0.xyzw {min2_8f}, r0.x"
+      ]
+    },
+    {
+      "case": "snapped-float-full",
+      "hresult": 0,
+      "hlsl_sha256": "80cf408fbf5ae8d5c550d7f3c681a42152161c53c146139a36c8103ad418b33c",
+      "dxbc_sha256": "ddf8e82a75024f3ef853339a5d0bdbb39b6f48c713c257b68644616b1641e72b",
+      "evaluation": [
+        "eval_snapped o0.xyzw, v0.xyzw, r0.xyxx"
+      ]
+    },
+    {
+      "case": "snapped-float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "d857e40324c628256533267fea1475943b764aace1e0f47f73a49d6760f0c7e4",
+      "dxbc_sha256": "ddf8e82a75024f3ef853339a5d0bdbb39b6f48c713c257b68644616b1641e72b",
+      "evaluation": [
+        "eval_snapped o0.xyzw, v0.xyzw, r0.xyxx"
+      ]
+    },
+    {
+      "case": "snapped-min16float-full",
+      "hresult": 0,
+      "hlsl_sha256": "2f0993a0115c02163c2a6dca61223f72ee03504afe1aedd066467f2478355110",
+      "dxbc_sha256": "8320230a171a92878b5bf40f80e43bac4f10bbcd261ec6a9a9d5b12ac83e94bf",
+      "evaluation": [
+        "eval_snapped r0.xyzw {min16f}, v0.xyzw {min16f}, r0.xyxx"
+      ]
+    },
+    {
+      "case": "snapped-min16float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "da9fc5c70126aefa9ad0d4ca1172e2ec57f17be88af5032f7aecac8730e0299a",
+      "dxbc_sha256": "8320230a171a92878b5bf40f80e43bac4f10bbcd261ec6a9a9d5b12ac83e94bf",
+      "evaluation": [
+        "eval_snapped r0.xyzw {min16f}, v0.xyzw {min16f}, r0.xyxx"
+      ]
+    },
+    {
+      "case": "snapped-min10float-full",
+      "hresult": 0,
+      "hlsl_sha256": "a5e1f14a854aabb2fa12def09dbb7b0e7f00ea0f14d211bbe0d45dd09cbbaf4c",
+      "dxbc_sha256": "8cfea7e22bbd31733c093099560a05f300b71955c7f3a4281561b13f747b54b7",
+      "evaluation": [
+        "eval_snapped r0.xyzw {min2_8f}, v0.xyzw {min2_8f}, r0.xyxx"
+      ]
+    },
+    {
+      "case": "snapped-min10float-minimum",
+      "hresult": 0,
+      "hlsl_sha256": "78405e94bcf45375cd35361332b25e481015b6bceac56605ec6297ad0fd90be4",
+      "dxbc_sha256": "8cfea7e22bbd31733c093099560a05f300b71955c7f3a4281561b13f747b54b7",
+      "evaluation": [
+        "eval_snapped r0.xyzw {min2_8f}, v0.xyzw {min2_8f}, r0.xyxx"
+      ]
+    }
+  ],
+  "runtime_validation": false
+}
