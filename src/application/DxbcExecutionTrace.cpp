@@ -162,6 +162,11 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
         std::array<Inputs, 4> inputs;
         for (unsigned i = 0; i < 4; ++i) {
             inputs[i] = snapshot.inputs;
+            if (pixel->evaluateAttribute)
+                inputs[i].evaluateAttribute = [evaluate = pixel->evaluateAttribute,
+                                               i](const AttributeRequest &request) {
+                    return evaluate(request)[i];
+                };
             for (const auto &[r, v] : pixel->registers[i]) {
                 if (r.kind != 1 && r.kind != 35)
                     throw std::runtime_error("Pixel trace input is not an input register");
@@ -400,6 +405,8 @@ static Json exportExecutionTrace(const QString &path, const InputSnapshot &snaps
     if (pixel) {
         summary["derivative_batches"] = quad->derivativeBatches();
         summary["final_active_mask"] = quad->activeMask();
+        if (pixel->attributeObservations)
+            summary["attribute_evaluations"] = *pixel->attributeObservations;
     }
     journal.write(summary);
     journal.commit();

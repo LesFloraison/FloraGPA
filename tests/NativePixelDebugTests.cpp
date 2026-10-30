@@ -64,7 +64,8 @@ class NativePixelDebugTests final : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode : {"constant", "derivative", "sample", "discard", "source", "uav"})
+            for (const auto *mode : {"constant", "derivative", "sample", "discard", "source", "uav",
+                                     "eval-centroid", "eval-sample", "eval-snapped"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void execution() {
@@ -73,7 +74,7 @@ class NativePixelDebugTests final : public QObject {
             QFETCH(QString, mode);
             QTemporaryDir dir;
             const auto capture = dir.filePath("frame.gpa_frame");
-            auto fixture = blendCapture(1, false, false, mode == "sample" ? 4 : 1);
+            auto fixture = blendCapture(1, false, false, mode == "sample" || mode == "eval-sample" ? 4 : 1);
             for (const auto &entry : fixture.entries)
                 if (entry.id == 100)
                     put(fixture.bytes, size_t(entry.offset) + 24, 9u);
@@ -100,8 +101,12 @@ class NativePixelDebugTests final : public QObject {
             fixture.save(capture);
             Frame frame(capture.toStdWString());
             Experiment experiment(frame);
-            const std::string vs = "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;"
-                                   "return float4(i==2?3:-1,i==1?3:-1,0,1);}";
+            const std::string vs =
+                mode.startsWith("eval-")
+                    ? "struct O{float4 p:SV_Position;float4 a:DATA;};O main(uint v:SV_VertexID){"
+                      "uint i=v%3;O o;o.p=float4(i==2?3:-1,i==1?3:-1,0,1);o.a=float4(1,7,3,.5);return o;}"
+                    : "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;"
+                      "return float4(i==2?3:-1,i==1?3:-1,0,1);}";
             experiment.setShader(frame, 10, compileClassProgram(vs, "vs_5_0"), vs, "main");
             std::string ps = "float4 main(float4 p:SV_Position,uint id:SV_PrimitiveID";
             if (mode == "sample")
@@ -115,6 +120,15 @@ class NativePixelDebugTests final : public QObject {
                 ps += "if(id==1)discard;\n";
             ps += "return float4(id," + std::string(mode == "sample" ? "sample" : "7") + "," +
                   (mode == "derivative" ? "ddx(p.x)" : "3") + ",.5);\n}";
+            if (mode.startsWith("eval-")) {
+                const std::string expression = mode == "eval-centroid" ? "EvaluateAttributeCentroid(a)"
+                                               : mode == "eval-sample"
+                                                   ? "EvaluateAttributeAtSample(a,uint(p.x)+2)"
+                                                   : "EvaluateAttributeSnapped(a,int2(p.xy)*7)";
+                ps = "float4 main(float4 p:SV_Position,linear float4 a:DATA,uint id:SV_PrimitiveID)"
+                     ":SV_Target{float4 value=" +
+                     expression + ";value.x=float(id);return value;}";
+            }
             auto code = compileClassProgram(ps, "ps_5_0");
             if (mode == "source") {
                 Com<ID3DBlob> binary, errors;
@@ -133,7 +147,7 @@ class NativePixelDebugTests final : public QObject {
                 selection.erase("warp");
                 selection["gpu_vendor"] = vendor;
             }
-            if (mode == "sample")
+            if (mode == "sample" || mode == "eval-sample")
                 selection["sample"] = 2;
             const auto output = dir.filePath("out");
             const auto job =
@@ -149,6 +163,16 @@ class NativePixelDebugTests final : public QObject {
                                                    result.at("artifacts").at("trace.jsonl").at("sha256"));
             const auto initial = reader.registers();
             reader.moveTo(reader.size());
+            if (mode.startsWith("eval-")) {
+                const auto observations = reader.completion().at("attribute_evaluations");
+                QCOMPARE(observations.size(), size_t(mode == "eval-centroid" ? 1
+                                                     : mode == "eval-sample" ? 2
+                                                                             : 4));
+                for (const auto &observation : observations)
+                    QCOMPARE(observation.at("backend"), Json("dxbc-pixel-attribute-evaluation/1"));
+                QVERIFY(QFile::copy(capture, output + "/frame.gpa_frame"));
+                QVERIFY(QFile::copy(project, output + "/experiment.json"));
+            }
             const auto lane = reader.header().at("selected_lane").get<uint32_t>();
             if (mode != "discard") {
                 const auto value = reader.registerValue(lane, {2, {0}});
@@ -156,6 +180,30 @@ class NativePixelDebugTests final : public QObject {
                     statePack(1.f, mode == "sample" ? 2.f : 7.f, mode == "derivative" ? 1.f : 3.f, .5f);
                 std::array<uint32_t, 4> expected{};
                 std::memcpy(expected.data(), bytes.data(), bytes.size());
+                if (mode.startsWith("eval-")) {
+                    // Check the compiled shader against actual GPU storage. In
+                    // particular, this compiler's snapped lowering can insert
+                    // a masked MOV whose component mapping differs from a
+                    // source-level constant prediction.
+                    const auto &records = data.at("private_history").at("records");
+                    const auto record = std::find_if(records.begin(), records.end(), [](const auto &row) {
+                        return row.at("primitive_ordinal") == 1;
+                    });
+                    QVERIFY(record != records.end());
+                    const auto &gpu = record->at("after");
+                    QCOMPARE(gpu.at("exact_storage_bits"), Json(true));
+                    const auto observed = gpu.at("bytes").get<std::vector<uint8_t>>();
+                    QCOMPARE(observed.size(), sizeof(expected));
+                    QCOMPARE(gpu.at("valid_bytes"), Json(std::vector<bool>(16, true)));
+                    std::memcpy(expected.data(), observed.data(), observed.size());
+                }
+                if (value != dxbc_exec::Value::known(expected)) {
+                    qWarning().noquote() << QString::fromStdString(Json{
+                        {"actual_bits", value.bits},
+                        {"valid_mask", value.valid},
+                        {"expected_bits", expected}}.dump());
+                    preserve(output);
+                }
                 QCOMPARE(value, dxbc_exec::Value::known(expected));
             } else
                 QVERIFY((reader.completion().at("final_active_mask").get<uint32_t>() & (1u << lane)) == 0);

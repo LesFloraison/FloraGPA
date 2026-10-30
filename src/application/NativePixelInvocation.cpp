@@ -5,6 +5,88 @@
 #include <chrono>
 #include <set>
 namespace flora {
+namespace {
+struct PixelAttributeContext {
+    Com<ID3D11Device> device;
+    bool warp;
+    dxbc_exec::PixelRasterState raster;
+    std::vector<uint8_t> shader;
+    dxbc_exec::PixelInputRecordSelection selection;
+    NativePixelInvocationLimits limits;
+    CancelCheck bounded;
+    std::map<uint32_t, dxbc_exec::PixelGeometryBridge> bridges;
+    std::map<uint32_t, std::array<dxbc_exec::Value, 4>> original;
+    dxbc_exec::PixelInputRecord anchor;
+    nlohmann::json identity;
+    std::shared_ptr<nlohmann::json> observations = std::make_shared<nlohmann::json>(nlohmann::json::array());
+    uint64_t retained = 0;
+    std::map<dxbc_exec::AttributeRequest, std::array<dxbc_exec::Value, 4>> cache;
+
+    std::array<dxbc_exec::Value, 4> evaluate(dxbc_exec::AttributeRequest request) {
+        using namespace dxbc_exec;
+        checkCancellation(bounded);
+        if (request.opcode == 203)
+            for (auto &value : request.location)
+                value &= 15;
+        if (const auto found = cache.find(request); found != cache.end())
+            return found->second;
+        const auto found = bridges.find(request.inputRegister);
+        if (found == bridges.end())
+            throw std::runtime_error("Pixel attribute register has no original geometry bridge");
+        const auto pixel = pixelInputShader(shader, request.inputRegister, selection,
+                                            PixelAttributeEvaluation{request.opcode, request.location});
+        const auto samples = raster.rasterizer.ForcedSampleCount ? raster.rasterizer.ForcedSampleCount
+                                                                 : raster.target.samples.Count;
+        std::array<Value, 4> values{};
+        nlohmann::json observation;
+        if (request.opcode == 204 && request.location[0] >= samples &&
+            pixel.attributeConstantMask != pixel.mask) {
+            for (unsigned lane = 0; lane < 4; ++lane) {
+                values[lane] = original.at(request.inputRegister)[lane];
+                values[lane].valid &= uint8_t(pixel.attributeConstantMask);
+                for (unsigned c = 0; c < 4; ++c)
+                    if (!(values[lane].valid & (1u << c)))
+                        values[lane].bits[c] = 0;
+            }
+            observation = {{"backend", "undefined_attribute_sample_index"},
+                           {"raster_samples", samples},
+                           {"private_draws", 0}};
+        } else {
+            if (retained >= limits.maxBytes)
+                throw std::runtime_error("Pixel attribute observation budget exceeded");
+            auto observed = capturePixelRasterInputs(device.Get(), warp, raster, found->second, pixel,
+                                                     limits.maxBytes - retained, bounded, limits.timeoutMs);
+            if (observed.records.size() != 1)
+                throw std::runtime_error("Pixel attribute observation is not unique");
+            for (unsigned i = 4; i < 9; ++i)
+                if (observed.records[0].words[i] != anchor.words[i])
+                    throw std::runtime_error("Pixel attribute observation changed quad identity");
+            for (const auto *key : {"adapter_luid", "adapter_vendor", "adapter_device", "feature_level",
+                                    "warp", "x", "y", "sample", "layer", "raster_samples", "target_samples",
+                                    "raster_state", "shader_sha256", "sample_frequency"})
+                if (observed.identity.at(key) != identity.at(key))
+                    throw std::runtime_error("Pixel attribute observation changed original raster identity");
+            for (unsigned lane = 0; lane < 4; ++lane)
+                values[lane] = pixel.decode(observed.records[0].words[lane]);
+            observation = std::move(observed.identity);
+        }
+        observation["request"] = {{"opcode", request.opcode},
+                                  {"input_register", request.inputRegister},
+                                  {"location", request.location}};
+        observation["quad_values"] = nlohmann::json::array();
+        for (const auto &value : values)
+            observation["quad_values"].push_back({{"bits", value.bits}, {"valid_mask", value.valid}});
+        const auto bytes = observation.dump().size() + sizeof(request) + sizeof(values);
+        if (bytes > limits.maxBytes - retained)
+            throw std::runtime_error("Pixel attribute cache budget exceeded");
+        checkCancellation(bounded);
+        retained += bytes;
+        observations->push_back(std::move(observation));
+        cache.emplace(request, values);
+        return values;
+    }
+};
+} // namespace
 nlohmann::json captureNativePixelSampleDepth(ID3D11Device *device, bool warp,
                                              const dxbc_exec::PixelRasterState &raster,
                                              const PostTransformGeometry &geometry, uint64_t ordinal,
@@ -76,7 +158,7 @@ captureNativePixelInvocationInputs(ID3D11Device *device, bool warp, const dxbc_e
     if (!device || !limits.maxBytes || !limits.timeoutMs || limits.timeoutMs > 60000)
         throw std::invalid_argument("Invalid native pixel invocation limits");
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(limits.timeoutMs);
-    const CancelCheck bounded = [&] {
+    const CancelCheck bounded = [cancelled, deadline] {
         checkCancellation(cancelled);
         if (std::chrono::steady_clock::now() >= deadline)
             throw std::runtime_error("Native pixel invocation deadline");
@@ -86,6 +168,18 @@ captureNativePixelInvocationInputs(ID3D11Device *device, bool warp, const dxbc_e
     const Program program(shader);
     if (program.stage() != 0)
         throw std::invalid_argument("Native pixel invocation requires a pixel shader");
+    std::shared_ptr<PixelAttributeContext> attributes;
+    if (std::any_of(
+            program.instructions().begin(), program.instructions().end(),
+            [](const auto &instruction) { return instruction.opcode >= 203 && instruction.opcode <= 205; })) {
+        attributes = std::make_shared<PixelAttributeContext>();
+        attributes->device = device;
+        attributes->warp = warp;
+        attributes->raster = raster;
+        attributes->shader.assign(shader.begin(), shader.end());
+        attributes->limits = limits;
+        attributes->bounded = bounded;
+    }
     std::set<uint32_t> registers;
     for (const auto &instruction : program.instructions())
         if (instruction.opcode == 95 || (instruction.opcode >= 98 && instruction.opcode <= 100)) {
@@ -118,7 +212,7 @@ captureNativePixelInvocationInputs(ID3D11Device *device, bool warp, const dxbc_e
             throw std::runtime_error("Native pixel invocation payload budget exceeded");
         const auto pixel = reg == UINT32_MAX ? pixelCoverageShader(shader, selection)
                                              : pixelInputShader(shader, reg, selection);
-        const auto bridge = pixelGeometryBridge(geometry, pixel, ordinal);
+        auto bridge = pixelGeometryBridge(geometry, pixel, ordinal);
         if (bridge.vertices.size() > (limits.maxBytes - retained) / 2)
             throw std::runtime_error("Native pixel invocation bridge budget exceeded");
         auto observed = capturePixelRasterInputs(device, warp, raster, bridge, pixel,
@@ -129,9 +223,35 @@ captureNativePixelInvocationInputs(ID3D11Device *device, bool warp, const dxbc_e
         if (bytes > limits.maxBytes - retained)
             throw std::runtime_error("Native pixel invocation observation budget exceeded");
         retained += bytes;
+        if (attributes) {
+            const auto bridgeBytes = bridge.vertices.size() + bridge.vertexShader.size() +
+                                     bridge.geometryShader.size() + bridge.identity.dump().size();
+            if (bridgeBytes > limits.maxBytes - retained)
+                throw std::runtime_error("Pixel attribute bridge budget exceeded");
+            retained += bridgeBytes;
+            attributes->retained += bridgeBytes;
+            attributes->bridges.emplace(reg, std::move(bridge));
+            if (observed.records.size() == 1)
+                for (unsigned lane = 0; lane < 4; ++lane)
+                    attributes->original[reg][lane] = pixel.decode(observed.records[0].words[lane]);
+        }
         passes.emplace(reg, std::move(observed));
     }
     auto result = pixelTraceInputs(shader, passes);
+    if (attributes) {
+        attributes->selection = selection;
+        attributes->anchor = passes.begin()->second.records.front();
+        attributes->identity = passes.begin()->second.identity;
+        attributes->retained += shader.size() + attributes->identity.dump().size() +
+                                attributes->original.size() * (sizeof(uint32_t) + 4 * sizeof(Value));
+        if (attributes->retained >= limits.maxBytes)
+            throw std::runtime_error("Pixel attribute context budget exceeded");
+        result.attributeRetainedBytes = attributes->retained;
+        result.attributeObservations = attributes->observations;
+        result.evaluateAttribute = [attributes](const AttributeRequest &request) {
+            return attributes->evaluate(request);
+        };
+    }
     checkCancellation(bounded);
     const auto ids = validatedPixelPrimitiveIds(geometry);
     result.inputProvenance["geometry_sha256"] = sha256(geometry.bytes, bounded);

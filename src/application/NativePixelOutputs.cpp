@@ -114,6 +114,7 @@ Json evaluateNativePixelOutputs(const dxbc_exec::InputSnapshot &snapshot,
         bytes += amount;
     };
     // Copy the mutable graph once; all four lanes share its private aliases.
+    account(selection.attributeRetainedBytes);
     Inputs common = snapshot.inputs;
     if (common.sharedMemory)
         throw std::runtime_error("Pixel output evaluation cannot accept compute shared memory");
@@ -134,6 +135,11 @@ Json evaluateNativePixelOutputs(const dxbc_exec::InputSnapshot &snapshot,
     std::array<Inputs, 4> inputs;
     for (uint32_t lane = 0; lane < 4; ++lane) {
         inputs[lane] = common;
+        if (selection.evaluateAttribute)
+            inputs[lane].evaluateAttribute = [evaluate = selection.evaluateAttribute,
+                                              lane](const AttributeRequest &request) {
+                return evaluate(request)[lane];
+            };
         for (const auto &[reg, value] : selection.registers[lane]) {
             if ((reg.kind != 1 && reg.kind != 35) || !inputs[lane].registers.emplace(reg, value).second)
                 throw std::runtime_error("Native pixel output input register is invalid or duplicated");
@@ -172,6 +178,8 @@ Json evaluateNativePixelOutputs(const dxbc_exec::InputSnapshot &snapshot,
                          {"shader_active", (quad.activeMask() & (1u << lane)) != 0},
                          {"outputs", values}});
     }
+    if (selection.attributeObservations)
+        account(selection.attributeObservations->dump().size());
     return {{"schema", 1},
             {"kind", "native_pixel_shader_outputs"},
             {"backend", "native-pixel-outputs/1"},
@@ -199,6 +207,8 @@ Json evaluateNativePixelOutputs(const dxbc_exec::InputSnapshot &snapshot,
             {"gpu_assisted_steps", gpuInstructions},
             {"derivative_batches", quad.derivativeBatches()},
             {"sampling_batches", quad.samplingBatches()},
+            {"attribute_evaluations",
+             selection.attributeObservations ? *selection.attributeObservations : nlohmann::json::array()},
             {"private_storage_bytes", bytes},
             {"private_memory_changes", memoryChanges},
             {"private_counter_changes", counterChanges}};

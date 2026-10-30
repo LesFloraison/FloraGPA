@@ -26,7 +26,7 @@ def main():
     for path in sorted((args.root / "owned").iterdir()):
         vendor = int(path.name.split('-')[1 if path.name.startswith(('boundary-', 'integer-')) else 0])
         job, result = read(path)
-        require(job['backend'] == 'dx11-native/17', 'Backend identity')
+        require(job['backend'] == 'dx11-native/18', 'Backend identity')
         data = validate(job, result, vendor)
         count = data['return_count_observation']
         if path.name.startswith('integer-'):

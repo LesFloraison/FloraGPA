@@ -272,6 +272,9 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         throw std::runtime_error("Pixel raster layer output requires an observed layer input");
     const auto samples =
         state.rasterizer.ForcedSampleCount ? state.rasterizer.ForcedSampleCount : target.samples.Count;
+    if (pixel.evaluation && pixel.evaluation->opcode == 204 && pixel.evaluation->location[0] >= samples &&
+        pixel.attributeConstantMask != pixel.mask)
+        throw std::runtime_error("Pixel attribute evaluation sample is outside the raster sample count");
     if (!selection.maxRecords || selection.maxRecords > 4096 || !samples || samples > 32 ||
         selection.sample >= samples ||
         (target.dimension != D3D11_RESOURCE_DIMENSION_UNKNOWN &&
@@ -659,6 +662,12 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         {"record_order", "unspecified"},
         {"geometry", bridge.identity}};
     result.identity["raster_state"] = pixelRasterIdentity(state);
+    if (pixel.evaluation) {
+        result.identity["backend"] = "dxbc-pixel-attribute-evaluation/1";
+        result.identity["evaluation"] = {{"opcode", pixel.evaluation->opcode},
+                                         {"location", pixel.evaluation->location},
+                                         {"constant_mask", pixel.attributeConstantMask}};
+    }
     return result;
 }
 } // namespace flora::dxbc_exec

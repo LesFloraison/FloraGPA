@@ -228,7 +228,12 @@ std::vector<PixelInputBinding> pixelShaderInputSignature(Bytes original) {
     return result;
 }
 static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint32_t> inputRegister,
-                                              std::optional<PixelInputRecordSelection> records) {
+                                              std::optional<PixelInputRecordSelection> records,
+                                              std::optional<PixelAttributeEvaluation> evaluation = {}) {
+    if (evaluation && (!inputRegister || evaluation->opcode < 203 || evaluation->opcode > 205 ||
+                       (evaluation->opcode == 204 && evaluation->location[1]) ||
+                       (evaluation->opcode == 205 && evaluation->location != std::array<uint32_t, 2>{})))
+        throw std::runtime_error("Invalid pixel attribute evaluation request");
     if (inputRegister && *inputRegister >= 32)
         throw std::runtime_error("Pixel input register is outside v0..v31");
     if (records && (!records->maxRecords || records->maxRecords > 4096 || records->sample >= 32))
@@ -239,6 +244,7 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     result.originalShaderSha256 = sha256(original);
     result.reg = inputRegister.value_or(UINT32_MAX);
     result.records = records;
+    result.evaluation = evaluation;
     std::vector<Row> selectedDeclarations;
     std::optional<Row> originalPositionDeclaration;
     std::optional<Row> originalFrequencyDeclaration;
@@ -287,6 +293,8 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
         if (!mask || (result.mask & mask))
             throw std::runtime_error("Overlapping or empty pixel input declaration");
         result.mask |= mask;
+        if (interpolation == 1)
+            result.attributeConstantMask |= mask;
         minimumPrecision |= index == 3;
         auto remapped = row;
         remapped[index] = 0;
@@ -315,6 +323,8 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     }
     if (result.mask & ~signatureMask)
         throw std::runtime_error("Pixel input declaration exceeds signature");
+    if (evaluation && position)
+        throw std::runtime_error("Pixel attribute evaluation cannot read SV_Position");
     if (position && (position->type != 3 || (position->mask & 3) != 3))
         throw std::runtime_error("Pixel position signature lacks float xy");
     if (sample && (sample->type != 1 || !std::has_single_bit(sample->mask)))
@@ -403,8 +413,24 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     uint32_t helperTemps = 1;
     uint32_t nextRegister = inputRegister ? 1 : 0;
     std::vector<Row> initialize{{0x05000036, 0x1000f2, temporary, 0x4001, 0}};
-    if (inputRegister)
+    if (inputRegister && !evaluation)
         initialize.push_back({0x05000036, 0x100002 | (result.mask << 4), temporary, 0x101e46, 0});
+    if (evaluation) {
+        if (result.attributeConstantMask)
+            initialize.push_back(
+                {0x05000036, 0x100002 | (result.attributeConstantMask << 4), temporary, 0x101e46, 0});
+        const auto interpolated = result.mask & ~result.attributeConstantMask;
+        Row instruction{evaluation->opcode, 0x100002 | (interpolated << 4), temporary, 0x101e46, 0};
+        if (evaluation->opcode == 203) {
+            instruction.insert(instruction.end(),
+                               {0x4002, evaluation->location[0] & 15, evaluation->location[1] & 15, 0, 0});
+        } else if (evaluation->opcode == 204) {
+            instruction.insert(instruction.end(), {0x4001, evaluation->location[0]});
+        }
+        instruction[0] |= uint32_t(instruction.size()) << 24;
+        if (interpolated)
+            initialize.push_back(std::move(instruction));
+    }
     for (auto f : templateFields) {
         if (f.reg == UINT32_MAX) {
             fields.push_back(f);
@@ -521,8 +547,9 @@ static PixelInputShader buildPixelInputShader(Bytes original, std::optional<uint
     return result;
 }
 PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
-                                  std::optional<PixelInputRecordSelection> records) {
-    return buildPixelInputShader(original, inputRegister, records);
+                                  std::optional<PixelInputRecordSelection> records,
+                                  std::optional<PixelAttributeEvaluation> evaluation) {
+    return buildPixelInputShader(original, inputRegister, records, evaluation);
 }
 PixelInputShader pixelCoverageShader(Bytes original, const PixelInputRecordSelection &records) {
     return buildPixelInputShader(original, std::nullopt, records);

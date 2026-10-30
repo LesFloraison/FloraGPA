@@ -13,6 +13,12 @@ struct PixelInputRecordSelection {
     uint32_t x = 0, y = 0, sample = 0, layer = 0, maxRecords = 32;
     bool layerInput = false;
 };
+struct PixelAttributeEvaluation {
+    // DXBC eval_snapped, eval_sample_index or eval_centroid. Snapped offsets
+    // use the signed low four bits; sample indices are checked against raster samples.
+    uint32_t opcode = 205;
+    std::array<uint32_t, 2> location{};
+};
 struct PixelInputShader {
     std::vector<uint8_t> bytecode;
     std::string originalShaderSha256;
@@ -28,6 +34,8 @@ struct PixelInputShader {
     // Records start at byte 16 and span 144 bytes.
     // The private observation shader never needs a free application UAV slot.
     std::optional<PixelInputRecordSelection> records;
+    std::optional<PixelAttributeEvaluation> evaluation;
+    uint32_t attributeConstantMask = 0;
     // Compact signature consumed by a private pre-raster bridge. D3D11 links
     // hardware registers as well as semantics: do not bind this shader against
     // the unmodified original producer. Rasterizer-generated values also occur
@@ -44,7 +52,8 @@ struct PixelInputShader {
 // run original side effects, or preserve original depth/discard behavior.
 // The generated SM5 helper requires a feature-level-11 device.
 PixelInputShader pixelInputShader(Bytes original, uint32_t inputRegister,
-                                  std::optional<PixelInputRecordSelection> records = {});
+                                  std::optional<PixelInputRecordSelection> records = {},
+                                  std::optional<PixelAttributeEvaluation> evaluation = {});
 // Observes quad coverage and selection without inventing a source register.
 // reg is UINT32_MAX and mask is zero; ordinary input declarations are not copied.
 PixelInputShader pixelCoverageShader(Bytes original, const PixelInputRecordSelection &records);

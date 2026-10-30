@@ -338,7 +338,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                         continue;
                     }
                     const uint64_t bytes =
-                        inputs.inputProvenance.dump().size() +
+                        inputs.inputProvenance.dump().size() + inputs.attributeRetainedBytes +
                         uint64_t(4 * 33) * (sizeof(dxbc_exec::Register) + sizeof(dxbc_exec::Value));
                     retainShader(bytes);
                     invocations.push_back({std::move(inputs), {sample}, bytes});

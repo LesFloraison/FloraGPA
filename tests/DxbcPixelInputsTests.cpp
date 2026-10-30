@@ -1,13 +1,17 @@
+#include "application/DxbcExecutionTraceReader.h"
 #include "application/DxbcGpuCompletion.h"
 #include "application/DxbcPixelGeometry.h"
 #include "application/DxbcPixelInputs.h"
 #include "application/DxbcPixelRaster.h"
 #include "application/HlslCompilation.h"
 #include "application/NativePixelInvocation.h"
+#include "application/NativePixelOutputs.h"
 #include "core/Dxbc.h"
 #include "replay/Replay.h"
+#include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QTemporaryDir>
 #include <QtTest>
 #include <bit>
 #include <d3d11sdklayers.h>
@@ -559,13 +563,54 @@ class DxbcPixelInputsTests : public QObject {
         QTest::addColumn<QString>("mode");
         QTest::addColumn<uint32_t>("samples");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode :
-                 {"linear", "noperspective", "centroid", "noperspective centroid", "sample",
-                  "noperspective sample", "nointerpolation", "uint", "sint", "sparse", "min16", "trigger",
-                  "position", "position-z", "sample-id", "sm4", "sm41"})
+            for (const auto *mode : {"linear",
+                                     "noperspective",
+                                     "centroid",
+                                     "noperspective centroid",
+                                     "sample",
+                                     "noperspective sample",
+                                     "nointerpolation",
+                                     "uint",
+                                     "sint",
+                                     "sparse",
+                                     "min16",
+                                     "trigger",
+                                     "position",
+                                     "position-z",
+                                     "sample-id",
+                                     "sm4",
+                                     "sm41",
+                                     "eval-centroid",
+                                     "eval-sample",
+                                     "eval-snapped",
+                                     "eval-snapped-high",
+                                     "eval-centroid-noperspective",
+                                     "eval-sample-noperspective",
+                                     "eval-snapped-noperspective",
+                                     "eval-centroid-constant",
+                                     "eval-sample-constant",
+                                     "eval-snapped-constant",
+                                     "eval-centroid-frequency",
+                                     "eval-sample-frequency",
+                                     "eval-snapped-frequency",
+                                     "eval-centroid-edge",
+                                     "eval-sample-edge",
+                                     "eval-snapped-edge"})
                 for (uint32_t samples : {1u, 4u})
                     QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(mode).arg(samples)))
                         << vendor << QString(mode) << samples;
+    }
+    void attributeRequestValidation() {
+        const auto shader = compile("uint4 main(float4 p:SV_Position):SV_Target{return asuint(p);}");
+        const auto reg = inputRegister(shader, "SV_Position");
+        QVERIFY_EXCEPTION_THROWN(pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{}),
+                                 std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{202, {}}),
+                                 std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{205, {1, 0}}),
+                                 std::runtime_error);
+        QVERIFY_EXCEPTION_THROWN(pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{204, {0, 1}}),
+                                 std::runtime_error);
     }
     void capture() {
         QFETCH(uint32_t, vendor);
@@ -576,22 +621,52 @@ class DxbcPixelInputsTests : public QObject {
             const bool integer = mode == "uint" || mode == "sint";
             const bool system = mode.startsWith("position") || mode == "sample-id";
             const bool sparse = mode == "sparse" || mode == "position-z";
+            std::optional<PixelAttributeEvaluation> evaluation;
+            std::string evaluated = "v";
+            if (mode.startsWith("eval-")) {
+                evaluation.emplace();
+                if (mode.startsWith("eval-centroid")) {
+                    evaluated = "EvaluateAttributeCentroid(v)";
+                } else if (mode.startsWith("eval-sample")) {
+                    evaluation->opcode = 204;
+                    evaluation->location[0] = samples - 1;
+                    evaluated = "EvaluateAttributeAtSample(v," + std::to_string(samples - 1) + ")";
+                } else {
+                    evaluation->opcode = 203;
+                    evaluation->location = mode.endsWith("high")
+                                               ? std::array<uint32_t, 2>{0x12345678, 0xfffffff7}
+                                               : std::array<uint32_t, 2>{0xfffffff8, 7};
+                    evaluated = "EvaluateAttributeSnapped(v,int2(-8,7))";
+                }
+            }
             std::string qualifier = "linear", type = "float4";
+            // The installed compiler rejects eval_* on constant declarations.
+            // Observe the independently specified identity operation instead;
+            // the product helper must preserve the provoking vertex's value.
+            if (mode.endsWith("constant"))
+                evaluated = "v";
             if (integer) {
                 qualifier = "nointerpolation";
                 type = mode == "uint" ? "uint4" : "int4";
             } else if (mode == "min16")
                 type = "min16float4";
+            else if (evaluation)
+                qualifier = mode.endsWith("noperspective") ? "noperspective"
+                            : mode.endsWith("constant")    ? "nointerpolation"
+                            : mode.endsWith("frequency")   ? "sample"
+                                                           : "centroid";
             else if (!system && !sparse && mode != "trigger" && mode != "sm4" && mode != "sm41")
                 qualifier = mode.toStdString();
             const std::string value = integer
                                           ? (mode == "uint" ? "uint4(0x80000000,0x7fc12345,0xffffffff,1)"
                                                             : "int4(-123,-2147483647,12345,-1)")
                                           : "float4(id*3.125+0.125,id*0.5-0.25,id*1.25+0.375,id*4.5-2.75)";
-            const std::string vsBody = "O main(uint id:SV_VertexID){O o;float2 "
-                                       "p=id==0?float2(-1,-1):id==1?float2(3,-1):float2(-1,3);"
-                                       "float w=id==0?1:id==1?2:4;o.p=float4(p*w,0.25*w,w);o.v=" +
-                                       value + ";return o;}";
+            const std::string vsBody =
+                "O main(uint id:SV_VertexID){O o;float2 p=" +
+                std::string(mode.endsWith("edge")
+                                ? "id==0?float2(-.65,.7):id==1?float2(-.45,.7):float2(-.65,.5);"
+                                : "id==0?float2(-1,-1):id==1?float2(3,-1):float2(-1,3);") +
+                "float w=id==0?1:id==1?2:4;o.p=float4(p*w,0.25*w,w);o.v=" + value + ";return o;}";
             const auto vs =
                 compile("struct O{float4 p:SV_Position;" + type + " v:DATA;};" + vsBody, "vs_5_0");
             std::string psSource;
@@ -608,16 +683,17 @@ class DxbcPixelInputsTests : public QObject {
                     "){O o;o.value=asuint(" +
                     (sparse            ? std::string("float4(v.x,0,v.z,0)")
                      : mode == "min16" ? "float4(v)"
-                                       : "v") +
+                                       : evaluated) +
                     ");o.sample=" + (mode == "trigger" ? "s" : "0") + ";return o;}";
             auto ps = compile(psSource, mode == "sm4" ? "ps_4_0" : mode == "sm41" ? "ps_4_1" : "ps_5_0");
             const auto selected = inputRegister(ps, mode.startsWith("position") ? "SV_Position"
                                                     : mode == "sample-id"       ? "SV_SampleIndex"
                                                                                 : "DATA");
-            const auto helper = pixelInputShader(ps, selected);
+            const auto helper = pixelInputShader(ps, selected, {}, evaluation);
             QCOMPARE(helper.mask, mode == "position-z" ? 4u : mode == "sample-id" ? 1u : sparse ? 5u : 15u);
             QCOMPARE(helper.sampleFrequency, mode == "sample" || mode == "noperspective sample" ||
-                                                 mode == "trigger" || mode == "sample-id");
+                                                 mode == "trigger" || mode == "sample-id" ||
+                                                 mode.endsWith("frequency"));
             Com<ID3D11VertexShader> vertex, compactVertex;
             const std::string parameters =
                 "float4 p:SV_Position" + (system ? std::string() : "," + qualifier + " " + type + " v:DATA") +
@@ -627,7 +703,7 @@ class DxbcPixelInputsTests : public QObject {
                                     : mode == "position-z" ? "asuint(float4(0,0,p.z,0))"
                                     : sparse               ? "asuint(float4(v.x,0,v.z,0))"
                                     : mode == "min16"      ? "asuint(float4(v))"
-                                                           : "asuint(v)";
+                                                           : "asuint(" + evaluated + ")";
             const auto oracleSource =
                 std::string(quadOracle) + "Q main(" + parameters +
                 "){float2 parity=float2(int2(floor(p.xy))&1);"
@@ -733,7 +809,7 @@ class DxbcPixelInputsTests : public QObject {
             d.context->OMSetRenderTargets(1, targets[0].rtv.GetAddressOf(), nullptr);
             const auto rasterState = pixelRasterState(d.context.Get(), 0);
             const PixelInputRecordSelection recordSelection{3, 2, samples - 1, 0, 32, false};
-            const auto recordShader = pixelInputShader(ps, selected, recordSelection);
+            const auto recordShader = pixelInputShader(ps, selected, recordSelection, evaluation);
             const auto recordBridge = pixelGeometryBridge(geometry, recordShader, 0);
             const auto recordCapture = capturePixelRasterInputs(d.device.Get(), vendor == 0, rasterState,
                                                                 recordBridge, recordShader);
@@ -751,6 +827,73 @@ class DxbcPixelInputsTests : public QObject {
             const auto &selectedRecord = recordCapture.records[0].words;
             const auto selectedLane = selectedRecord[4][2] + 2 * selectedRecord[4][3];
             QCOMPARE(selectedRecord[selectedLane], expected[address]);
+            nlohmann::json nativeExecution;
+            QByteArray nativeJournal;
+            if (evaluation) {
+                const auto cancelled = std::make_shared<bool>(false);
+                auto invocation = captureNativePixelInvocationInputs(d.device.Get(), vendor == 0, rasterState,
+                                                                     geometry, ps, 0, recordSelection, {},
+                                                                     [cancelled] { return *cancelled; });
+                if (mode.endsWith("edge"))
+                    QVERIFY(invocation.activeMask && invocation.activeMask != 15);
+                InputSnapshot snapshot;
+                snapshot.stage = 4;
+                snapshot.event = 1;
+                snapshot.shader = 2;
+                snapshot.frameSha256 = sha256(vs);
+                snapshot.bytecode = ps;
+                snapshot.adapterVendor = recordCapture.identity.at("adapter_vendor");
+                snapshot.adapterDevice = recordCapture.identity.at("adapter_device");
+                snapshot.adapterLuid = recordCapture.identity.at("adapter_luid");
+                nativeExecution = evaluateNativePixelOutputs(snapshot, invocation);
+                for (unsigned lane = 0; lane < 4; ++lane) {
+                    const auto &outputs = nativeExecution.at("lanes")[lane].at("outputs");
+                    const auto color = std::find_if(outputs.begin(), outputs.end(), [](const auto &value) {
+                        return value.at("kind") == "color" && value.at("index") == 0;
+                    });
+                    QVERIFY(color != outputs.end());
+                    QCOMPARE(color->at("valid_mask"), nlohmann::json(15));
+                    QCOMPARE(color->at("raw_bits"), nlohmann::json(neighbors[lane][address]));
+                }
+                QTemporaryDir temporary;
+                QVERIFY(temporary.isValid());
+                const auto path = temporary.filePath("attribute-trace.jsonl");
+                const auto completion = exportPixelExecutionTrace(path, snapshot, invocation);
+                QFile journal(path);
+                QVERIFY(journal.open(QIODevice::ReadOnly));
+                nativeJournal = journal.readAll();
+                journal.close();
+                ExecutionTraceReader reader(
+                    path, QCryptographicHash::hash(nativeJournal, QCryptographicHash::Sha256)
+                              .toHex()
+                              .toStdString());
+                reader.moveTo(reader.size());
+                for (unsigned lane = 0; lane < 4; ++lane) {
+                    const auto value = reader.registerValue(lane, {2, {0}});
+                    QCOMPARE(value.valid, uint8_t(15));
+                    QCOMPARE(value.bits, neighbors[lane][address]);
+                }
+                reader.moveTo(0);
+                reader.moveTo(reader.size());
+                nativeExecution["trace_completion"] = completion;
+                nativeExecution["input_provenance"] = invocation.inputProvenance;
+                if (invocation.attributeObservations) {
+                    QCOMPARE(invocation.attributeObservations->size(), size_t(1));
+                    const AttributeRequest outside{204, selected, {samples, 0}};
+                    const auto unknown = invocation.evaluateAttribute(outside);
+                    for (const auto &value : unknown) {
+                        QCOMPARE(value.valid, uint8_t(0));
+                        QCOMPARE(value.bits, Words{});
+                    }
+                    QCOMPARE(invocation.attributeObservations->size(), size_t(2));
+                    QCOMPARE(invocation.evaluateAttribute(outside), unknown);
+                    QCOMPARE(invocation.attributeObservations->size(), size_t(2));
+                    nativeExecution["undefined_sample"] = invocation.attributeObservations->back();
+                    *cancelled = true;
+                    QVERIFY_EXCEPTION_THROWN(invocation.evaluateAttribute(outside), OperationCancelled);
+                    nativeExecution["cancelled_cache_hit_rejected"] = true;
+                }
+            }
             Com<ID3D11RenderTargetView> stillBound;
             d.context->OMGetRenderTargets(1, &stillBound, nullptr);
             QCOMPARE(stillBound.Get(), targets[0].rtv.Get());
@@ -787,6 +930,11 @@ class DxbcPixelInputsTests : public QObject {
                 save("source-geometry.json", sourceGeometry.data(), sourceGeometry.size());
                 save("bridge-geometry.json", bridgeIdentity.data(), bridgeIdentity.size());
                 shader("original-ps", ps);
+                if (evaluation) {
+                    const auto text = nativeExecution.dump(2);
+                    save("native-execution.json", text.data(), text.size());
+                    save("native-trace.jsonl", nativeJournal.data(), size_t(nativeJournal.size()));
+                }
                 shader("helper-ps", helper.bytecode);
                 shader("oracle-ps", oracleCode);
                 save("original-ps.hlsl", psSource.data(), psSource.size());
@@ -841,6 +989,15 @@ class DxbcPixelInputsTests : public QObject {
                     for (unsigned s = 0; s < samples; ++s) {
                         const auto index = (y * 16 + x) * samples + s;
                         const auto location = observed[4][index];
+                        const Words untouched{16777216, 16777216, 16777216, 16777216};
+                        if (mode.endsWith("edge") && location == untouched) {
+                            QCOMPARE(expected[index], untouched);
+                            for (unsigned lane = 0; lane < 4; ++lane)
+                                QCOMPARE(neighbors[lane][index], untouched);
+                            for (unsigned target = 0; target < 8; ++target)
+                                QCOMPARE(observed[target][index], untouched);
+                            continue;
+                        }
                         QCOMPARE(location[0], x);
                         QCOMPARE(location[1], y);
                         QVERIFY(location[2] <= 1 && location[3] <= 1);

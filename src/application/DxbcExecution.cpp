@@ -1294,6 +1294,55 @@ Step Lane::step() {
             done = !s.quad;
             result.discarded = true;
         }
+    } else if (op >= 203 && op <= 205) {
+        const auto &destination = args[0], &attribute = args[1];
+        if (p.stage != 0 || !s.quad || (instruction.words[0] & 0x00fff800u) || destination.modifier ||
+            destination.precision || destination.components != 2 || destination.mode != 0 ||
+            (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) ||
+            attribute.kind != 1 || attribute.indices.size() != 1 || attribute.modifier ||
+            attribute.precision || attribute.components != 2 || (attribute.mode != 1 && attribute.mode != 2))
+            fail("Invalid or unsupported DXBC pixel attribute evaluation operands");
+        const auto binding = s.address(attribute);
+        if (binding.indices[0] >= 32)
+            fail("DXBC pixel attribute register exceeds v31");
+        AttributeRequest request{op, binding.indices[0], {}};
+        bool known = true;
+        if (op != 205) {
+            const auto &location = args[2];
+            if (location.modifier || location.precision ||
+                (op == 203 ? location.components != 2
+                           : (location.components != 1 && !(location.components == 2 && location.mode == 2))))
+                fail("Invalid DXBC pixel attribute location operand");
+            const auto value = s.source(location, true);
+            const uint8_t mask = op == 203 ? 3 : 1;
+            known = (value.valid & mask) == mask;
+            request.location = {op == 203 ? value.bits[0] & 15 : value.bits[0],
+                                op == 203 ? value.bits[1] & 15 : 0};
+        }
+        Value value;
+        if (known) {
+            if (!s.inputs.evaluateAttribute)
+                fail("DXBC pixel attribute evaluation requires original raster observations");
+            value = s.inputs.evaluateAttribute(request);
+            if (!value.wellFormed() || value.mapping != std::array<MappingStatus, 4>{})
+                fail("Invalid DXBC pixel attribute observation");
+            result.instructionGpuAssisted = true;
+        }
+        const auto target = s.address(destination);
+        if (s.inBounds(target)) {
+            const auto before = s.value(target);
+            auto after = before;
+            for (unsigned c = 0; c < 4; ++c)
+                if ((destination.mask & (1u << c)) &&
+                    (target.kind != 3 || c < p.arrays.at(target.indices[0]).second)) {
+                    const auto component = attribute.select[c];
+                    after.bits[c] = value.bits[component];
+                    after.mapping[c] = MappingStatus::NotStatus;
+                    after.valid =
+                        uint8_t((after.valid & ~(1u << c)) | (((value.valid >> component) & 1u) << c));
+                }
+            result.changes.push_back({target, before, after});
+        }
     } else if (op == 110 || op == 111) {
         const bool position = op == 110;
         const auto &destination = args[0], &resource = args[1];

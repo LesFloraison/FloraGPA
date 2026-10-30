@@ -1,6 +1,7 @@
 #pragma once
 #include "core/Frame.h"
 #include <compare>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -107,6 +108,12 @@ class Memory {
     const std::map<uint64_t, Buffer> &buffers() const;
     const std::map<uint64_t, Counter> &counters() const;
 };
+struct AttributeRequest {
+    uint32_t opcode = 205, inputRegister = 0;
+    std::array<uint32_t, 2> location{};
+    auto operator<=>(const AttributeRequest &) const = default;
+};
+using AttributeEvaluator = std::function<std::array<Value, 4>(const AttributeRequest &)>;
 struct Inputs {
     // Missing inputs and missing bindings remain unknown. Present constant
     // buffers have explicit lengths; reads beyond those lengths return zero.
@@ -116,6 +123,9 @@ struct Inputs {
     std::shared_ptr<GpuOperations> gpu;
     std::shared_ptr<Memory> sharedMemory;
     std::shared_ptr<TextureInputs> textures;
+    // Original primitive/raster observations, in physical input-component order.
+    // The caller binds the quad lane. Missing observations never become guessed interpolation.
+    std::function<Value(const AttributeRequest &)> evaluateAttribute;
     // Runtime-resolved function table for each declared interface array element.
     // Absence means unresolved binding, never table zero.
     std::map<uint32_t, uint32_t> interfaceTables;

@@ -145,7 +145,7 @@ def workflows(root):
             folder = directory / route
             job = json.loads((folder / 'job.json').read_text(encoding='utf-8'))
             result = json.loads((folder / 'result.json').read_text(encoding='utf-8'))
-            require(result['ok'] and result['backend'] == job['backend'] == 'dx11-native/17', 'Worker backend')
+            require(result['ok'] and result['backend'] == job['backend'] == 'dx11-native/18', 'Worker backend')
             require(result['request_id'] == job['request_id'], 'Request identity')
             context = result['context']
             for key in ('backend', 'backend_sha256', 'action', 'options', 'frame_sha256', 'experiment_sha256'):

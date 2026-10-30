@@ -17,6 +17,9 @@ struct PixelTraceOptions {
     uint32_t selectedLane = 0;
     uint8_t activeMask = 15;
     nlohmann::json inputProvenance = nlohmann::json::object();
+    AttributeEvaluator evaluateAttribute;
+    std::shared_ptr<nlohmann::json> attributeObservations;
+    uint64_t attributeRetainedBytes = 0;
     uint64_t maxSteps = 1000000, maxBytes = 256 * 1024 * 1024;
 };
 inline constexpr const char *vertexExecutionModel = "independent-vertex-invocation/1";
