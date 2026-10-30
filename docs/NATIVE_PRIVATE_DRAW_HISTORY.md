@@ -76,9 +76,9 @@ execution order, helper invocation or instance. Read the scope and validity
 fields before consuming these observations.
 
 `return_count_observation` reports `not_requested`, `not_applicable`, `observed`
-or `unknown`. Color selections without a PS, and mixed color/depth bindings
-without a PS, remain not applicable with a null count. Depth-only draws can
-accumulate counts through a private color transport even without a PS. A
+or `unknown`. Color selections without a PS remain not applicable with a null
+count. Depth selections can accumulate through private color transport even
+without a PS, whether or not application color views are bound. A
 successful count belongs to the diagnostic draw; it does not establish original
 fragment identities, instance, order or original resource modifications. The
 observation retains GPA event/frame/shader identity, actual adapter, source views,
@@ -90,8 +90,12 @@ shares the history deadline and cancellation signal, with transport and retained
 payloads bounded by `--max-bytes`. Existing readback telemetry counts selected
 original-storage snapshots; the count transport has its own report.
 
-With mixed outputs, depth counting selects a declared and bound PS color output.
-Its 2D view must match the DSV's width, height, layer count, sample count and
+With mixed outputs, depth counting prefers a declared and bound PS color output.
+If none exists, it adds an unused output for an existing color view; a missing
+PS uses an owned empty shader. Existing shader exports remain intact. The added
+output route currently rejects alpha-to-coverage rather than inventing alpha.
+See [added-output verification](research/DX11_NATIVE_ADDED_DEPTH_COUNTS.md).
+The selected 2D view must match the DSV's width, height, layer count, sample count and
 quality. The relative raster layer aligns across the views; their source mips
 and first resource layers remain separate. The route retains the original DSV
 and reuses color accumulation, including integer RT0 coverage protection. See

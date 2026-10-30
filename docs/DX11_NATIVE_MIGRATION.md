@@ -1845,3 +1845,11 @@ A separate historical color-verifier regression preserves 450 observations and
 1,800 negative controls. See `research/DX11_NATIVE_MIXED_DEPTH_COUNTS.md`.
 Mixed null-PS and other explicit transport boundaries remain, together with
 complete fragment reconstruction, debugger parity, P1 closure and P7/P8 gates.
+
+Mixed depth counting now adds an unused diagnostic color export when necessary,
+including absent PS, pure depth shaders and exports to unbound targets. Existing
+exports remain intact; added-output alpha-to-coverage is rejected explicitly.
+Five suites pass 743 checks. Independent validation covers 255 mixed and 117
+depth-only observations plus 60 Worker/CLI jobs and rejects 2,802 alterations.
+See `research/DX11_NATIVE_ADDED_DEPTH_COUNTS.md`. Original fragment qualification,
+full debugger parity, P1 closure and P7/P8 removal/release gates remain open.
