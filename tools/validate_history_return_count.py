@@ -18,7 +18,7 @@ def main():
     args = parser.parse_args()
     modes = ("storage", "shader", "merger", "identity", "presence", "tests", "count", "all-msaa")
     expected = {f"{v}-{m}" for v, m in itertools.product((0, 4318, 32902), modes)}
-    expected |= {f"boundary-{v}-{m}" for v, m in itertools.product((0, 4318, 32902), ("array", "depth", "no-ps"))}
+    expected |= {f"boundary-{v}-{m}" for v, m in itertools.product((0, 4318, 32902), ("array", "depth", "no-ps", "depth-only", "depth-null", "depth-layer"))}
     expected |= {f"integer-{v}-{a}" for v, a in itertools.product((0, 4318, 32902), (1, 0x3f800000))}
     require({p.name for p in (args.root / "owned").iterdir()} == expected, "Incomplete owned matrix")
     controls = observed = inapplicable = 0
@@ -26,7 +26,7 @@ def main():
     for path in sorted((args.root / "owned").iterdir()):
         vendor = int(path.name.split('-')[1 if path.name.startswith(('boundary-', 'integer-')) else 0])
         job, result = read(path)
-        require(job['backend'] == 'dx11-native/13', 'Backend identity')
+        require(job['backend'] == 'dx11-native/14', 'Backend identity')
         data = validate(job, result, vendor)
         count = data['return_count_observation']
         if path.name.startswith('integer-'):
@@ -40,7 +40,12 @@ def main():
         elif path.name.startswith('boundary-'):
             mode = path.name.split('-', 2)[2]
             require(data['frame_sha256'] == sha(path / 'frame.gpa_frame'), 'Boundary source evidence')
-            if mode == 'array':
+            if mode.startswith('depth-'):
+                require(count['count'] == 1 and count['status'] == 'observed', 'Depth Worker count')
+                require(count['observation']['original_null_pixel_shader'] == (mode == 'depth-null'), 'Null PS identity')
+                require(count['observation']['depth_transport']['source_mip'] == (1 if mode == 'depth-layer' else 0)
+                        and count['observation']['depth_transport']['source_first_layer'] == (1 if mode == 'depth-layer' else 0), 'Depth subresource')
+            elif mode == 'array':
                 require(count['count'] == 1 and count['status'] == 'observed'
                         and data['selection']['mip'] == data['selection']['layer'] == 1
                         and count['observation']['count_transport']['layer'] == 0, 'Absolute/relative subresource')
@@ -60,7 +65,7 @@ def main():
                      lambda r: r['data']['return_count_observation'].update(original_fragment_eligibility=True),
                      lambda r: r['execution']['loaded_modules'].append('C:/unexpected/renderdoc.dll')]
         if count['status'] == 'observed':
-            mutations += [lambda r: r['data']['return_count_observation']['observation']['count_transport'].update(layer=99),
+            mutations += [lambda r: r['data']['return_count_observation']['observation']['depth_transport' if 'depth_transport' in count['observation'] else 'count_transport'].update(layer=99),
                           lambda r: r['data']['return_count_observation'].update(status='unknown')]
         for mutate in mutations:
             wrong = copy.deepcopy(result)
@@ -88,7 +93,7 @@ def main():
     exits = json.loads((args.root / 'exits.json').read_text(encoding='utf-8'))
     require(len(exits) == 12 and all(row['exit_code'] == 0 for row in exits), 'Failed or missing process')
     totals = []
-    for run, expected_passes in zip(exits[:3], (44, 61, 50)):
+    for run, expected_passes in zip(exits[:3], (53, 61, 50)):
         match = re.search(r'Totals: (\d+) passed, (\d+) failed, (\d+) skipped, (\d+) blacklisted',
                           (args.root / (run['label'] + '.txt')).read_text(encoding='utf-8'))
         require(match is not None and tuple(map(int, match.groups())) == (expected_passes, 0, 0, 0), 'Regression total')

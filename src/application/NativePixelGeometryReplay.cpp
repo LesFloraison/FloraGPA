@@ -115,7 +115,12 @@ class NativePixelGeometryReplay {
                   NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve,
                   std::optional<NativeDepthCompletionSelection> depthSelection = {},
                   std::optional<NativePixelOrdinalSelection> ordinalSelection = {},
-                  std::optional<NativePixelReturnCountSelection> countSelection = {}) {
+                  std::optional<NativePixelReturnCountSelection> countSelection = {},
+                  bool countDepthReturns = false) {
+        const bool countReturns = countSelection.has_value() || countDepthReturns;
+        if (countDepthReturns && (!depthSelection || countSelection || primitiveMask || accumulatePredicate ||
+                                  ordinalSelection || testOverride != NativePixelTestOverride::Preserve))
+            throw std::invalid_argument("Invalid private depth return count request");
         checkDeadline();
         const auto overrideName = nativePixelTestOverrideName(testOverride);
         if (testOverride != NativePixelTestOverride::Preserve && !accumulatePredicate)
@@ -152,7 +157,7 @@ class NativePixelGeometryReplay {
                 throw std::runtime_error("Private original draw output payload budget exceeded");
             const auto parameters = resolveDrawParameters(r, event);
             const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
-            if ((ordinalSelection || countSelection) && raster.rasterizer.ForcedSampleCount)
+            if ((ordinalSelection || countReturns) && raster.rasterizer.ForcedSampleCount)
                 throw std::runtime_error(
                     "Private pixel diagnostic transport is incompatible with forced sampling");
             Json shaders = Json::array();
@@ -219,18 +224,20 @@ class NativePixelGeometryReplay {
                         check(source.As(&texture), "Get 2D depth completion source");
                         D3D11_TEXTURE2D_DESC desc{};
                         texture->GetDesc(&desc);
-                        uint32_t mip = 0, layers = 1;
+                        uint32_t mip = 0, firstLayer = 0, layers = 1;
                         switch (view.ViewDimension) {
                         case D3D11_DSV_DIMENSION_TEXTURE2D:
                             mip = view.Texture2D.MipSlice;
                             break;
                         case D3D11_DSV_DIMENSION_TEXTURE2DARRAY:
                             mip = view.Texture2DArray.MipSlice;
+                            firstLayer = view.Texture2DArray.FirstArraySlice;
                             layers = view.Texture2DArray.ArraySize;
                             break;
                         case D3D11_DSV_DIMENSION_TEXTURE2DMS:
                             break;
                         case D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY:
+                            firstLayer = view.Texture2DMSArray.FirstArraySlice;
                             layers = view.Texture2DMSArray.ArraySize;
                             break;
                         default:
@@ -284,7 +291,10 @@ class NativePixelGeometryReplay {
                                                   desc.BindFlags,
                                                   0,
                                                   0};
-                        report["depth_transport"] = {{"width", desc.Width},
+                        report["depth_transport"] = {{"source_format", uint32_t(view.Format)},
+                                                     {"source_mip", mip},
+                                                     {"source_first_layer", firstLayer},
+                                                     {"width", desc.Width},
                                                      {"height", desc.Height},
                                                      {"layers", layers},
                                                      {"samples", desc.SampleDesc.Count},
@@ -481,7 +491,7 @@ class NativePixelGeometryReplay {
                             auxiliaryCount
                                 ? instrumentAuxiliaryPixelReturnCount(completionCode, target,
                                                                       request.maxBytes - workingBytes, scoped)
-                            : countSelection
+                            : countReturns
                                 ? instrumentPixelReturnCount(completionCode, target,
                                                              request.maxBytes - workingBytes, scoped)
                             : accumulatePredicate
@@ -598,7 +608,7 @@ class NativePixelGeometryReplay {
                             selected.DestBlendAlpha = D3D11_BLEND_ZERO;
                             selected.BlendOpAlpha = D3D11_BLEND_OP_ADD;
                         }
-                        if (countSelection) {
+                        if (countReturns) {
                             auto &selected = blend.RenderTarget[target];
                             selected.BlendEnable = TRUE;
                             selected.SrcBlend = selected.DestBlend = D3D11_BLEND_ONE;
@@ -655,13 +665,16 @@ class NativePixelGeometryReplay {
                             {"slot", target},
                             {"format", uint32_t(desc.Format)},
                             {"cleared_to_zero", true},
-                            {"blend_and_logic_disabled", !accumulatePredicate && !countSelection},
+                            {"blend_and_logic_disabled", !accumulatePredicate && !countReturns},
                             {"write_mask", 15},
                             {"alpha_to_coverage", blend.AlphaToCoverageEnable != FALSE},
                             {"sample_mask", mask}};
-                        if (countSelection) {
+                        if (countReturns) {
                             report["kind"] = "native_pixel_return_count_observation";
-                            report["backend"] = "native-pixel-return-count/3";
+                            report["backend"] = countDepthReturns ? "native-depth-return-count/1"
+                                                                  : "native-pixel-return-count/3";
+                            if (countDepthReturns)
+                                report["kind"] = "native_depth_return_count_observation";
                             report["scope"] = "returning_samples_on_private_additive_target";
                             report["completion_target"]["rgb_reduction"] = "add";
                             report["completion_target"]["alpha_reduction"] = "replace";
@@ -964,7 +977,7 @@ class NativePixelGeometryReplay {
                             ((uint64_t(position.layer) * height + position.y) * width + position.x) * 16;
                         if (offset > storage.size() || storage.size() - offset < 16)
                             throw std::runtime_error("Diagnostic color transport readback bounds");
-                        if (countSelection) {
+                        if (countReturns) {
                             std::array<uint32_t, 4> bits{};
                             std::memcpy(bits.data(), storage.data() + offset, 16);
                             report["return_count"] = decodeNativePixelReturnCount(bits);
@@ -1217,6 +1230,14 @@ Json replayNativeDepthCompletion(Replay &r, Id event, const NativeDepthCompletio
     result["reference_draw"] = reference;
     result["replay_passes"] = 2;
     return result;
+}
+Json replayNativeDepthReturnCount(Replay &r, Id event, const NativeDepthCompletionSelection &selection,
+                                  const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                  uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, 0, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
+                  NativePixelTestOverride::Preserve, selection, {}, {}, true);
 }
 Json replayNativePixelReturnCount(Replay &r, Id event, const NativePixelReturnCountSelection &selection,
                                   const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,

@@ -82,6 +82,14 @@ nlohmann::json replayNativeDepthCompletion(Replay &, Id event, const NativeDepth
                                            const std::function<void(Replay &, bool after)> &observe = {},
                                            uint64_t maxBytes = 256ull * 1024 * 1024,
                                            uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
+// Adds RGB unit accumulation to the depth-only diagnostic transport. The same
+// binding restrictions as depth completion apply. A missing PS is replaced with
+// an owned empty shader; counts describe the diagnostic draw, not original PS
+// invocations. Queries retain their own whole-output domain and are not counts.
+nlohmann::json replayNativeDepthReturnCount(Replay &, Id event, const NativeDepthCompletionSelection &,
+                                            const std::function<void(Replay &, bool after)> &observe = {},
+                                            uint64_t maxBytes = 256ull * 1024 * 1024,
+                                            uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
 // Observes a predicate on the returning fragment's actual SV_PrimitiveID.
 // This is a system identity, not an inferred primitive ordinal or instance ID.
 nlohmann::json replayNativePixelPrimitiveMask(Replay &, Id event, uint32_t target, PixelPrimitiveMask,

@@ -177,9 +177,9 @@ class DxbcPixelCompletionTests final : public QObject {
         QTest::addColumn<uint32_t>("samples");
         QTest::addColumn<uint32_t>("sample");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode :
-                 {"pass", "depth-fail", "discard", "early-discard", "shader-depth", "coverage", "null",
-                  "stencil-pass", "stencil-fail", "early-stencil-discard"})
+            for (const auto *mode : {"pass", "depth-fail", "discard", "early-discard", "shader-depth",
+                                     "coverage", "null", "stencil-pass", "stencil-fail",
+                                     "early-stencil-discard", "repeat", "repeat-stencil", "repeat-discard"})
                 for (const auto [samples, sample] : {std::pair{1u, 0u}, std::pair{4u, 0u}, std::pair{4u, 3u}})
                     QTest::newRow(
                         qPrintable(QString("%1-%2-%3-%4").arg(vendor).arg(mode).arg(samples).arg(sample)))
@@ -221,6 +221,12 @@ class DxbcPixelCompletionTests final : public QObject {
                 source = "float main():SV_Depth{return .75;}";
             if (mode == "coverage")
                 source = "uint main():SV_Coverage{return 5;}";
+            if (mode == "repeat-discard")
+                source = "void main(uint id:SV_PrimitiveID){if(id==1)discard;}";
+            if (mode.startsWith("repeat")) {
+                std::erase_if(c.entries, [](const auto &e) { return e.id == 1000; });
+                c.add(1000, 7, 0x37, statePack(Id(990), Id(0), Id(1), 9u, 0u));
+            }
             const auto original =
                 mode == "null" ? compileHlsl(source, "ps_5_0", "main", "native-null-depth-ps.hlsl").bytecode
                                : compileClassProgram(source, "ps_5_0");
@@ -234,6 +240,11 @@ class DxbcPixelCompletionTests final : public QObject {
             auto o = options(vendor, 1000);
             if (mode != "null")
                 o.shaders[32] = original;
+            if (mode.startsWith("repeat"))
+                o.shaders[30] = compileClassProgram(
+                    "float4 main(uint v:SV_VertexID):SV_Position{float2 p[3]={float2(-1,-1),"
+                    "float2(-1,3),float2(3,-1)};return float4(p[v%3],.25,1);}",
+                    "vs_5_0");
             D3D11_DEPTH_STENCIL_DESC ds{};
             ds.DepthEnable = TRUE;
             ds.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -243,6 +254,10 @@ class DxbcPixelCompletionTests final : public QObject {
             ds.FrontFace =
                 ds.BackFace = {D3D11_STENCIL_OP_INCR_SAT, D3D11_STENCIL_OP_DECR_SAT, D3D11_STENCIL_OP_INVERT,
                                mode == "stencil-fail" ? D3D11_COMPARISON_NEVER : D3D11_COMPARISON_ALWAYS};
+            if (mode.startsWith("repeat"))
+                ds.DepthFunc = D3D11_COMPARISON_ALWAYS;
+            if (mode == "repeat-stencil")
+                ds.FrontFace.StencilPassOp = ds.BackFace.StencilPassOp = D3D11_STENCIL_OP_INCR_SAT;
             o.depthStencilEdits[1000].descriptor = ds;
             stage = "create reference replay";
             Replay reference(frame, o);
@@ -294,7 +309,29 @@ class DxbcPixelCompletionTests final : public QObject {
             stage = "verify restored depth sample";
             QCOMPARE(observedDepth, referenceDepth);
             QCOMPARE(readDepth(replay), initial);
+            stage = "execute depth return count";
+            const auto counted =
+                replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}, [&](Replay &r, bool after) {
+                    if (after)
+                        observedDepth = readDepth(r);
+                });
+            QCOMPARE(observedDepth, referenceDepth);
+            QCOMPARE(readDepth(replay), initial);
+            const bool survived = (!discard || mode == "repeat-discard") && mode != "shader-depth" &&
+                                  (mode != "coverage" || sample % 2 == 0) && mode != "depth-fail" &&
+                                  mode != "stencil-fail";
+            const uint32_t expectedCount = mode == "repeat-discard"    ? 2u
+                                           : mode.startsWith("repeat") ? 3u
+                                                                       : uint32_t(survived);
+            QCOMPARE(counted.at("return_count").at("valid"), Json(true));
+            QCOMPARE(counted.at("return_count").at("count"), Json(expectedCount));
+            QCOMPARE(counted.at("backend"), Json("native-depth-return-count/1"));
+            QVERIFY(counted.at("original_fragment_eligibility").is_null());
+            if (mode == "repeat-stencil")
+                QCOMPARE(uint32_t(referenceDepth.at(3) - initial.at(3)), expectedCount);
             save({{"status", "observed"},
+                  {"return_count_observation", counted},
+                  {"expected_return_count", expectedCount},
                   {"mode", mode.toStdString()},
                   {"vendor_request", vendor},
                   {"samples", samples},
@@ -312,9 +349,6 @@ class DxbcPixelCompletionTests final : public QObject {
             QCOMPARE(report.at("replay_passes"), Json(2));
             QCOMPARE(report.at("diagnostic_counts_match"),
                      Json(report.at("diagnostic_passing_samples") == Json(passing)));
-            const bool survived = !discard && mode != "shader-depth" &&
-                                  (mode != "coverage" || sample % 2 == 0) && mode != "depth-fail" &&
-                                  mode != "stencil-fail";
             QCOMPARE(report.at("depth_transport").at("marker_present"), Json(survived));
             replay.inspectNativeState([&](auto *context, const auto &) {
                 Com<ID3D11RenderTargetView> view;
@@ -326,6 +360,18 @@ class DxbcPixelCompletionTests final : public QObject {
             QVERIFY_THROWS_EXCEPTION(OperationCancelled,
                                      replayNativeDepthCompletion(replay, 1000, {}, {}, 256ull * 1024 * 1024,
                                                                  30000, [] { return true; }));
+            QVERIFY_THROWS_EXCEPTION(
+                OperationCancelled,
+                replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}, [](Replay &, bool after) {
+                    if (after)
+                        throw OperationCancelled();
+                }));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                     replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}, {}, 1));
+            QCOMPARE(readDepth(replay), initial);
+            QCOMPARE(
+                replayNativeDepthReturnCount(replay, 1000, {0, 0, 0, sample}).at("return_count").at("count"),
+                Json(expectedCount));
             QCOMPARE(readDepth(replay), initial);
         } catch (const std::exception &error) {
             QFAIL(qPrintable(QString::fromLatin1(stage) + ": " + QString::fromUtf8(error.what())));

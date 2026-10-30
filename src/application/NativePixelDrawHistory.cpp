@@ -544,18 +544,35 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
                      {"count", nullptr},
                      {"original_fragment_eligibility", nullptr}};
     if (limits.observeReturnCount) {
-        if (target.view.at("slot").is_null()) {
+        const bool depthTarget = target.view.at("slot").is_null();
+        bool colorBound = false;
+        if (depthTarget)
+            r.inspectNativeState([&](auto *context, const auto &) {
+                std::array<ID3D11RenderTargetView *, 8> views{};
+                context->OMGetRenderTargets(UINT(views.size()), views.data(), nullptr);
+                for (auto *view : views)
+                    if (view) {
+                        colorBound = true;
+                        view->Release();
+                    }
+            });
+        if (depthTarget && colorBound) {
             returnCount["status"] = "not_applicable";
             returnCount["reason"] = "selected_depth_target";
-        } else if (original.at("shaders")[4].at("resource") == 0) {
+        } else if (!depthTarget && original.at("shaders")[4].at("resource") == 0) {
             returnCount["status"] = "not_applicable";
             returnCount["reason"] = "no_pixel_shader";
         } else {
             const auto observation =
-                replayNativePixelReturnCount(r, event,
-                                             {target.view.at("slot").get<uint32_t>(), s.x, s.y,
-                                              target.view.at("relative_layer").get<uint32_t>(), s.sample},
-                                             {}, limits.maxBytes, limits.timeoutMs, bounded);
+                depthTarget
+                    ? replayNativeDepthReturnCount(
+                          r, event, {s.x, s.y, target.view.at("relative_layer").get<uint32_t>(), s.sample},
+                          {}, limits.maxBytes, limits.timeoutMs, bounded)
+                    : replayNativePixelReturnCount(r, event,
+                                                   {target.view.at("slot").get<uint32_t>(), s.x, s.y,
+                                                    target.view.at("relative_layer").get<uint32_t>(),
+                                                    s.sample},
+                                                   {}, limits.maxBytes, limits.timeoutMs, bounded);
             if (observation.at("frame_sha256") != original.at("frame_sha256") ||
                 observation.at("adapter") != original.at("adapter") ||
                 observation.at("shaders") != original.at("shaders"))
@@ -706,7 +723,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
     return {
         {"schema", 1},
         {"kind", "private_pixel_draw_history"},
-        {"backend", "native-pixel-draw-history/2"},
+        {"backend", "native-pixel-draw-history/3"},
         {"event", event},
         {"frame_sha256", replay.at("frame_sha256")},
         {"adapter", replay.at("adapter")},

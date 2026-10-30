@@ -24,7 +24,7 @@ def same(a, b):
 
 
 def validate(r, vendor):
-    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/2', 'schema/backend')
+    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/3', 'schema/backend')
     require(r['kind'] == 'private_pixel_draw_history', 'private history kind')
     require(r['order'] == 'captured_geometry_storage' and r['sample_selection_domain'] == 'target_storage', 'order/sample scope')
     require(r['original_fragment_eligibility'] is None, 'original eligibility')
@@ -55,21 +55,28 @@ def validate(r, vendor):
         observed = count['observation']
         for key in ('event', 'frame_sha256', 'adapter', 'shaders'):
             require(observed[key] == r['original_draw_observation'][key], 'Return count context: ' + key)
-        transport = observed['count_transport']
         selection = r['selection']
-        require([transport[k] for k in ('source_slot', 'x', 'y', 'sample', 'layer', 'source_mip')]
-                == [selection['subresource']['slot'], selection['x'], selection['y'], selection['sample'],
+        depth = selection['subresource']['slot'] is None
+        transport = observed['depth_transport' if depth else 'count_transport']
+        if depth:
+            from validate_depth_return_count import verify as verify_depth
+            verify_depth(observed, vendor)
+        else:
+            require(transport['source_slot'] == selection['subresource']['slot'], 'Count source slot')
+        require([transport[k] for k in ('x', 'y', 'sample', 'layer', 'source_mip')]
+                == [selection['x'], selection['y'], selection['sample'],
                     selection['subresource']['relative_layer'], selection['mip']], 'Return count selection')
         require(count['count'] == observed['return_count']['count']
                 and observed['original_fragment_eligibility'] is None
-                and observed['backend'] == 'native-pixel-return-count/3', 'Return count contract')
+                and observed['backend'] == ('native-depth-return-count/1' if depth else 'native-pixel-return-count/3'), 'Return count contract')
         decoded = observed['return_count']
         if decoded['valid'] is True:
             from validate_pixel_return_count import verify
             require(count['status'] == 'observed', 'Valid count status')
             component = observed['completion_shader']['component_type']
             require(component in (1, 2, 3), 'Return count component type')
-            verify(observed, vendor, component_type=component)
+            if not depth:
+                verify(observed, vendor, component_type=component)
         else:
             bits = decoded['raw_bits']
             require(len(bits) == 4 and all(type(x) is int and 0 <= x <= 0xffffffff for x in bits), 'Unknown raw count')
