@@ -1,0 +1,4350 @@
+{
+  "schema": 1,
+  "scope": "native_msad_execution",
+  "full_plan_complete": false,
+  "implementation_commit": "fc9b5f3db6a58967ff334219b72bf26cd71e1f21",
+  "previous_head": "51c43e7eab170eb7965585ae3e5ce18b02e10890",
+  "sources": [
+    {
+      "path": "src/application/DxbcExecution.cpp",
+      "git_blob": "7b98912b2b11d522818fde3e078af081217c353e",
+      "git_sha256": "b2465f3aa5395f16f31243e4bbc16b42a3b834d4ecce3ac39536e23a74892ff1",
+      "working_file_sha256": "2dbf2a8c55a24e31cab2206d10748b4f6aabe39fe8958e54c63401b4387502fb"
+    },
+    {
+      "path": "src/application/NativeAnalysis.h",
+      "git_blob": "ce369096a10f36c78f7160dba6c0370e9e3dfc95",
+      "git_sha256": "824b1a1e520db8a9aa8c778df57d1a4803d714237ce221abc3c2f65df6f9fe4e",
+      "working_file_sha256": "a695d9cad1b1a5396f1a229e7671bbd6dd77d350744aa84252c748ff80b48f1a"
+    },
+    {
+      "path": "tests/DxbcExecutionTests.cpp",
+      "git_blob": "854e8f3268378e5e10f88d7ab420355515ee143c",
+      "git_sha256": "2e9085841d30fe213d57d66fc94c824f3d52f024fe52ae762d35e794c1c25d9d",
+      "working_file_sha256": "77cf189d689dcd3a352560d37ff39a7c084a58b399b2327a4aad1e03ca0c478c"
+    },
+    {
+      "path": "tests/DxbcExecutionTraceTests.cpp",
+      "git_blob": "6f9ee2c5154f7b7dcfc4e961187396a301ba1800",
+      "git_sha256": "600b3198f2f897d39f70560312126fe2185ddbf794c0dbb8bb739bc060bde45a",
+      "working_file_sha256": "4d5095a204ca01c695a899d4a2e36cc1f035abd78f5aa0244071e644028c44e5"
+    },
+    {
+      "path": "tests/NativeComputeDebugTests.cpp",
+      "git_blob": "e6b341ab090ae7b90560597ec485ea0c1f64b223",
+      "git_sha256": "47c56e886b79d62ceef4d0ac386d03af836b851d6a924546dd4ffca4aacd2916",
+      "working_file_sha256": "8699371f38336e07efee1a6102887dd7e3b5c5d8c7aa9e14af54d13b326d5eb1"
+    },
+    {
+      "path": "tools/run_native_msad.py",
+      "git_blob": "f0199e0da5a357f71abc3b48ac9ecbb5e555eea4",
+      "git_sha256": "6f6e3d226a995f8a9d478ae6725127396691b63eeb409debfa47e7eb69ac6943",
+      "working_file_sha256": "f592c6bb19898538f4892e14e71166cd10531a84a69d8ccbdcb10678b1566747"
+    },
+    {
+      "path": "tools/validate_history_return_count.py",
+      "git_blob": "d7b644eb38db4dc759bc9317a126cb194969b785",
+      "git_sha256": "fae5c3188a77f846e0f8fa1c02880b25b556294eb9bd431813fa6057de40d11e",
+      "working_file_sha256": "6d56fefd3d0ab6347cc8b635e8a8190ddaf827c2e81d627d1da61a548518075a"
+    },
+    {
+      "path": "tools/validate_native_msad.py",
+      "git_blob": "b6ca6cb78f31fa333be2da4bcd36b08050eeb59f",
+      "git_sha256": "3919aeda9b0e52a7942fd080f2f559b9f5e064d5f6c036c24ffea9377c87c6c9",
+      "working_file_sha256": "3c41cdb0d93370f5f245a3a4841f194b3b6d507e37c6926461ec9d9d70abd699"
+    },
+    {
+      "path": "tools/validate_native_replay_mesh_ui.py",
+      "git_blob": "16b2c7400dcaf2fba6ea329312c53c45ce3fab25",
+      "git_sha256": "35ba88132b0ea6d5441636294e8374dd117f621c2858b7ee44babacb0facb390",
+      "working_file_sha256": "d58fc6ec10762738283fedf2a7a1f4067dd9dc56712cb0c096711e27785cef0a"
+    },
+    {
+      "path": "tools/validate_typed_load_precision.py",
+      "git_blob": "7358a237e8404bef3593e8fb7817994a2ecc4159",
+      "git_sha256": "0b2fd27d0a0542f79d961698a0831794b5da9653e810bab7b7811cff2bf0091e",
+      "working_file_sha256": "4cd6f784975be45c164f02d362b388f8338118d0121c9c02c7e2fda93f09ddc5"
+    },
+    {
+      "path": "tests/SyntheticCapture.h",
+      "git_blob": "dd5f7036743ed5187aed4b680a53fbeded9b43fe",
+      "git_sha256": "9d934788b995ba5361cfb92f3eebd2fb62ebf4041b149936cd8b1acaff9b617d",
+      "working_file_sha256": "9d934788b995ba5361cfb92f3eebd2fb62ebf4041b149936cd8b1acaff9b617d"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "git_blob": "b147136b72a428ade51cc3ce056f23cb20f5285c",
+      "git_sha256": "1ea5d6771dc0b76f5b1a267dd96bcda57284e3ef6d88c9d342465d12929d6369",
+      "working_file_sha256": "1ea5d6771dc0b76f5b1a267dd96bcda57284e3ef6d88c9d342465d12929d6369"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/dx11-native/msad/baseline-build.txt",
+      "bytes": 1087,
+      "sha256": "fdfff1ba19fdd58dad604f44d1441c9e5393e1a338fb3dc02ce28937e97ec0f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/baseline.txt",
+      "bytes": 760,
+      "sha256": "f696cadba82607fb4d8263c346ce587efac28cb3c3edc880b1f64ba9e087a9fa"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/build.txt",
+      "bytes": 9563,
+      "sha256": "2414156ffd7e53490bfd586c88895852c0be02662a68c0835c444063657189ee"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraDxbcExecutionTests.exe",
+      "bytes": 1039360,
+      "sha256": "58f238bdb106ac64e0d529d5388f4a32dd09acb0d84344630c61b8d80dcaaf75"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraDxbcExecutionTraceReaderTests.exe",
+      "bytes": 941056,
+      "sha256": "1dbf6de1d30f43c7a30833b58d878e26f2bad63786bd75bd9bebad4039ae7b8e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraDxbcExecutionTraceTests.exe",
+      "bytes": 1963520,
+      "sha256": "bf047d478207618e258600c85f03d46e62d5aa151278fd28fbe95eae21a2ec44"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraGPA.Cli.exe",
+      "bytes": 6262784,
+      "sha256": "5ebf92b30a94c96596fc035ed950883884818d267f819cfe6fe2f088212c2ef2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraGPA.exe",
+      "bytes": 5181952,
+      "sha256": "3763bbbf10d23738c7819843865440bfe714555cd995c8fbad62db0acc7965d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraGPA.Worker.exe",
+      "bytes": 6262784,
+      "sha256": "6dc6e310bce2d7a903a8b40fccc64ef4c4d8fab70eeee8c093b02172c3e142de"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraNativeComputeDebugTests.exe",
+      "bytes": 3070464,
+      "sha256": "e391063c425706d42054494413105e435dd8f4680aea100b10c86c8ba6bc548b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/binaries/FloraNativeDebugSessionTests.exe",
+      "bytes": 5621760,
+      "sha256": "fb1306c3eebe4058330a06e7d111167a7d7ac77c9e0d589475429065413c1743"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-0.json",
+      "bytes": 452,
+      "sha256": "42ab8ae9cc44323ec850b7080a532c859262b390fd61e8dbc23d9feda968418c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-0.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-32902.json",
+      "bytes": 456,
+      "sha256": "bdf794871dc097de00a97c9625b794281610155b467b8609403a95dfcf018276"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-32902.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-4318.json",
+      "bytes": 455,
+      "sha256": "ef12bb58fff8d0105c425e2e34120addec92addbd250a79327085ecf461e3c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/compiled-msad-4318.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-0.json",
+      "bytes": 703,
+      "sha256": "e0ac98003936d2ea1cbc521d9c1565af59b8b526dcf0ca04ce1da6e1553b7433"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-1.json",
+      "bytes": 724,
+      "sha256": "e8153d36b1d5b72628eb512a4bf81e2eaef1003e0fbef3c33e49f3e23af0719a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-2.json",
+      "bytes": 705,
+      "sha256": "2113a2ba88efb0f492fa39664b605372e44a88c68ce7a027a0012dc507b5fa24"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-3.json",
+      "bytes": 705,
+      "sha256": "fe821411f6d007b95c076ade2bd740ef0c13630ad138bfbb0d7f094de6872c31"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-0.json",
+      "bytes": 698,
+      "sha256": "ac51f4ec5060847c40ee54840146cc106bd5703efb26ee8101df1b2fe84ded0c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-1.json",
+      "bytes": 719,
+      "sha256": "2ede97f611973e160de8a3b1a544479b24f9261c779498e8e9ed16cb044564a2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-2.json",
+      "bytes": 701,
+      "sha256": "8a96110b233434a2ddd3f6a2649bff6ab638dcd41b4dc26e83c8abd9ac77ae35"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-3.json",
+      "bytes": 701,
+      "sha256": "8da5928a73695bfebcde06560b5e5bf4e5049876c774b5ee29870406716be8f8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-0.json",
+      "bytes": 703,
+      "sha256": "97c7997a44014557c9cf15a87d296c406125d2a523917765591ce3b4ff37ddae"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "ba43bd9a14d2ecde9b90e7142470f4f7a738ac38de373067f8e6e408791b3fca"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-1.json",
+      "bytes": 724,
+      "sha256": "b68f1eca070ef702389e471513c94f9753c2477be67f21550e1457a6b94ac890"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "20e247b7a657a2954eb5a0eab45e4666b4664c6522a8e974847957ab94bc8a93"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-2.json",
+      "bytes": 705,
+      "sha256": "e7ad7b1392f3e7506a1ad5c52fbf1e8eacfbc1bfed901d971115a43452c05730"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "bddae043e3b880e252340b1cc3970c2aa298f00740f2a402dae4572764bc4f2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-3.json",
+      "bytes": 705,
+      "sha256": "2127fea30c63ba8c12f05061b02e970c9ea0ffdeb4aa363bd312de378557e8f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-0.json",
+      "bytes": 703,
+      "sha256": "7cba21db09f7c45d379ecbc45603074bb83fbab10046d6eccdfa885c725d8082"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-1.json",
+      "bytes": 724,
+      "sha256": "30d87b03f267b7ac0f68a61da112058cdf5873c124cd394a7b3487b445f0fa1f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-2.json",
+      "bytes": 705,
+      "sha256": "3b994e3d88769e69e7ce604da6fafc651e39c1cecfed6d9cba85a639cf966bf0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-3.json",
+      "bytes": 705,
+      "sha256": "58327b41d6a677b5801d894770710b90dbc5d502864167c797c0ce6e4977189a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-0-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-0.json",
+      "bytes": 703,
+      "sha256": "86eee2f1d145515b73f39c83eea1a8482a2f65cc0ef62bdf97a92d93c87e9015"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-1.json",
+      "bytes": 724,
+      "sha256": "237fcd3505c8602e293f4bb01cae631f639fb2897939f80053b9dd8216a60712"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-2.json",
+      "bytes": 705,
+      "sha256": "64cbf82b1e38ecd5555c371b20a0762166d8c46636c4b09b296204a9b252b92e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-3.json",
+      "bytes": 705,
+      "sha256": "75b9ec07e1445e49ff23eaa37e541846f8677d4f36881dd0ef616a5888846802"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-0.json",
+      "bytes": 698,
+      "sha256": "f5f386d068757229a328e19ba70d688d1dff1726b0e4b0145d217509dc09c7b6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-1.json",
+      "bytes": 719,
+      "sha256": "999f31c10b68163d54e48c4e8384774636a9fa7580589cf5e2bac320e94e5d6b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-2.json",
+      "bytes": 701,
+      "sha256": "01e70a904ec375fcdb8c9abc45842b243b1772220a7e1cbcd66524951676e3f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-3.json",
+      "bytes": 701,
+      "sha256": "0cd8e4c5bfe1daf9c00ac58d3af01e9d916598706c9582a472a5c13d6a3e4192"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-0.json",
+      "bytes": 703,
+      "sha256": "8012f346923250240b3be5d8453a271cb2adae2e27ea9f9b78d530072a6a5463"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "91b6b4a0666c7b924949f512a6f7658049facc59e7b6e8c8db6276e5a02b561d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-1.json",
+      "bytes": 724,
+      "sha256": "4362ec3f4c3e5c38cd2352acb7a74c45dc45e06243d17852d7a45c66ff4f2bc9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "0c188740308f3a6d20ba7ec5ed7ceb7eb8fd6f672281febaf7416bb7d646b8c7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-2.json",
+      "bytes": 705,
+      "sha256": "8778316cb51cfdd910cc081b1fc9d3204b9ea3924680c7c416ef5b29043ecd87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "df93c00adc061da26505460b698a36dd699acf98321e70f1803369b842aa6837"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-3.json",
+      "bytes": 705,
+      "sha256": "ec81e93a934f47121d7910bc0a93600d04ec49d22774f965f455909c58354052"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-0.json",
+      "bytes": 703,
+      "sha256": "0b8ffd46a978b647ee85aea134976ea1448ff3506d7cbb6d0e5326fcd621cf2e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-1.json",
+      "bytes": 724,
+      "sha256": "db30172ce2697c86ddbd72165ca1c359a62d139e3092c1e5bc81d99cf461f515"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-2.json",
+      "bytes": 705,
+      "sha256": "838c38f44d0b202ce03245b3613931e06e6fb8a3d2df37b52c0424e06f475215"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-3.json",
+      "bytes": 705,
+      "sha256": "6448ee43573aab667cb4a032d50f1110597d0f49c75ed115de397d17d1853741"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-1-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-0.json",
+      "bytes": 703,
+      "sha256": "30e12d771ae2ec558dd2837acbb3598e51a9d4832cf0a7568ef19c1c90207b08"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-1.json",
+      "bytes": 724,
+      "sha256": "f1f07671d1634fc7cd193df4ae584576561bbf77f0f46fe0189afb9c4e5579d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-2.json",
+      "bytes": 705,
+      "sha256": "239f1a414bb96c8be1481b8b79b01b734f9705f304aed5c2eda19869de121d90"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-3.json",
+      "bytes": 705,
+      "sha256": "7c68bea73731faa2295b5aabb77eefcfa77089da606138413db8f7882860bc1f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-0.json",
+      "bytes": 698,
+      "sha256": "afe6197fd70f00d5ea045c6267a3d54b1cf7765136c79ad546d2bc3a49b417c1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-1.json",
+      "bytes": 719,
+      "sha256": "2f61d60c058480696f29e1875e069f38d889c3d073c712346b3975e46b212bbe"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-2.json",
+      "bytes": 701,
+      "sha256": "473acc36645e6a349e09186d705ac05193b476712be791a3f8014595c236cf0f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-3.json",
+      "bytes": 701,
+      "sha256": "fd4415cd63c56d6bacb351cfdd9b8c9506241aa60174eb8b2405c80020cd46f9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-0.json",
+      "bytes": 703,
+      "sha256": "7ef2bbf84a6141e659deadae0c552b35f2da63fa922bedce599948552f467eab"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-0.native.dxbc",
+      "bytes": 200,
+      "sha256": "eb1a22372d46faedbf8cab279750f5e379a9502c7d6187fd47073f5d10848fcc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-1.json",
+      "bytes": 724,
+      "sha256": "a25de44dd1a5862d340a21bbd24ce62382c40eac7ae46ddf73488ea4a3af15bf"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-1.native.dxbc",
+      "bytes": 200,
+      "sha256": "89042d269c576a2398aabc8b3565d4e5654a02e5c252d1aa564a1adaeed5e7af"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-2.json",
+      "bytes": 705,
+      "sha256": "ffcb0eedb36fe6f58a68960f47ade26f81f112fcdb574911cfbbf9374e106f62"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "0d57257815a4ffc3e2b461a498adc0913dd16723d9da2f523709b79ceb53e602"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-3.json",
+      "bytes": 705,
+      "sha256": "91b24e0d04c284070cd474dc472220ff4c529e941887b344fdf3de79b55d3849"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-3.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-0.json",
+      "bytes": 703,
+      "sha256": "9a90498e73ab7a4423f1295fe7e458344e088cd54d36267f9de1e749b3a265b0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-1.json",
+      "bytes": 724,
+      "sha256": "95d585eec9c7a3cf12b913c954f8c99ea5cc234da347ad785c05e3a99dde347f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-2.json",
+      "bytes": 705,
+      "sha256": "f9364cf9d76142b87ca05f23bef9fe0773e977e1d690e1f1a62afb6aa6033ee1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-3.json",
+      "bytes": 705,
+      "sha256": "fda099147062e70be770022102cb9bcd71b7e113f29bb5f56209bd8f0ccb62d6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-0-5-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-0.json",
+      "bytes": 707,
+      "sha256": "31a9c85ab74bbbbdf4f09eee373ddd13a4b2dfd982af4c10142227cef0852cad"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-1.json",
+      "bytes": 728,
+      "sha256": "610aa2677bd67f3b5854d9afb21e6b00800be7ca3431ac4a7e89350072767c71"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-2.json",
+      "bytes": 709,
+      "sha256": "2e653fa5906f7db387b047a9014c94687c33d5097901edb79d1ca3825ecdf0f6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-3.json",
+      "bytes": 709,
+      "sha256": "de0724e0ce2a656115042239d2ad9e9558c165ca785e1d898d0a2dc9c80ad940"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-0.json",
+      "bytes": 702,
+      "sha256": "6c45b46956888e5bc94f3bff49c4e6ac9bf51dd6d7a944fa3e9d5b76d15dfb3e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-1.json",
+      "bytes": 723,
+      "sha256": "52b0e4182b172278a7487c2badb8adaf9c07d179af09704839f93b0575a5d12a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-2.json",
+      "bytes": 705,
+      "sha256": "746cce20e28837dfc1e09a0ec9e001924b62728393ae63c399dd5be53d2c0ce9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-3.json",
+      "bytes": 705,
+      "sha256": "00a0529663665e1cc73ce12c3e870a5869d7c3f750e235d25ad6ed6babe89c37"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-0.json",
+      "bytes": 707,
+      "sha256": "cda2089102a8b35a41230d4a013451203bf826b96a95c6cd1e3bed57bd9c5dde"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "ba43bd9a14d2ecde9b90e7142470f4f7a738ac38de373067f8e6e408791b3fca"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-1.json",
+      "bytes": 728,
+      "sha256": "90becd6b2811a7890ff14691d9650bb7c3228a7b92a19513cbc6b91dbe5a394f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "20e247b7a657a2954eb5a0eab45e4666b4664c6522a8e974847957ab94bc8a93"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-2.json",
+      "bytes": 709,
+      "sha256": "b17952f5683d818655bed60584d1108b103351617d9c6528bb909884456d2946"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "bddae043e3b880e252340b1cc3970c2aa298f00740f2a402dae4572764bc4f2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-3.json",
+      "bytes": 709,
+      "sha256": "5ec8ed2336f98ed44a5da873f3dc2ca5a4e1d7ccc17ae0436645ea91ee905d28"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-0.json",
+      "bytes": 707,
+      "sha256": "237e5e1763cd4e8ccfc687a0165ad2954efdfd0a6aeacf24695c52d21ef4ba4e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-1.json",
+      "bytes": 728,
+      "sha256": "b18a5f81a1e428db0ee2e2c9c7016a2431a78f30b0a2b77f851f11d95229e6f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-2.json",
+      "bytes": 709,
+      "sha256": "412dff3715ec53e6ebed7b0acf9a77bd5362d57df874499fac5e9dbb5d6f117f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-3.json",
+      "bytes": 709,
+      "sha256": "aaf1b646bcd3fb89e5e0c3c31124320a9d8435d257434b7bdc769613f75694a2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-0-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-0.json",
+      "bytes": 707,
+      "sha256": "1609f2c4ccea7a763a37e25bfbba75ae0f7b9c75ec88998551fe5f2f41119c9a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-1.json",
+      "bytes": 728,
+      "sha256": "a5fac4db34b1d5ee288abc77262f8f4653747a9f36ef55d1cb3c29c256808d81"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-2.json",
+      "bytes": 709,
+      "sha256": "3f7eedb70303df9110b9bdfa492e42fd766bb7c07074086a2426c4c3a9b865f6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-3.json",
+      "bytes": 709,
+      "sha256": "ee9f31e1a9a1913c87be2fef376f8629009a4aa772f85d298d79c641a116f166"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-0.json",
+      "bytes": 702,
+      "sha256": "992984d4a260e19564139ae8fb28aab18056072a97e373a05484e77ac35c2a4d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-1.json",
+      "bytes": 723,
+      "sha256": "a4a497bc7ddd63616b00f726158d692fab6ae01d3bccbf6c33a94c366bb099e8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-2.json",
+      "bytes": 705,
+      "sha256": "ea14a67578d3f16fa8a88e6f845b45d0a023bd3162ed095c9f5cb25a3e4618f0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-3.json",
+      "bytes": 705,
+      "sha256": "d3007b9331ea66f0bb2d43d4a7c1bc363f4226ba97283a87c34d24e94c2a78f8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-0.json",
+      "bytes": 707,
+      "sha256": "f9ccddc1bcb18bad59cda82b89eb69b73f66499e46710ef7349b36aa95a19abf"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "91b6b4a0666c7b924949f512a6f7658049facc59e7b6e8c8db6276e5a02b561d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-1.json",
+      "bytes": 728,
+      "sha256": "2b659727719be308f4b186d5ec9bc921051eb4c092f51a1e767b93a023a9e160"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "0c188740308f3a6d20ba7ec5ed7ceb7eb8fd6f672281febaf7416bb7d646b8c7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-2.json",
+      "bytes": 709,
+      "sha256": "a5c15d88bce1f220fe242d6762d81c4e6f61df4370d92e9cbbed288a1d773c10"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "df93c00adc061da26505460b698a36dd699acf98321e70f1803369b842aa6837"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-3.json",
+      "bytes": 709,
+      "sha256": "8c76c8949ebf1c563b1f6d8afe52c59fd1c8619afa3bb261ed418a70f1f0ae28"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-0.json",
+      "bytes": 707,
+      "sha256": "7ab46d32802e618f9557d76b04127a8cb04c5ef1a2f5d812365cc4610eb925ff"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-1.json",
+      "bytes": 728,
+      "sha256": "4530e80c4c7e59be65d786429a7b8da2000523a2d4bfab14cc2be8e4f7923694"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-2.json",
+      "bytes": 709,
+      "sha256": "603c3b5da90cbdb523d0d459e59707177dde8a0e97af67ae9800fe4239c620ec"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-3.json",
+      "bytes": 709,
+      "sha256": "6b919dd9b34bf9f60eaf3a7f17bdc52d800543cb5f3dd6c2fff899db2f21c85c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-1-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-0.json",
+      "bytes": 707,
+      "sha256": "03174eba0edd32288609c4caa7e70b5b48625486eafba00907579217109ddde8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-1.json",
+      "bytes": 728,
+      "sha256": "331e61c155c0731474b91d08261f8f36b52ba904d4b4250871d6c9ca3ec125fe"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-2.json",
+      "bytes": 709,
+      "sha256": "b7d3673a3da085ed689d69d41f53ad597aa2ec3a839c86a615c0e9df7938e467"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-3.json",
+      "bytes": 709,
+      "sha256": "afbb9ded20688963375ada4509cbc76c8c419ecd92ffca672c95a0e1652fd47d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-0.json",
+      "bytes": 702,
+      "sha256": "e88202a0f774e99bf260c30bbd4b89c54bd4157dc82a11df569fd39d52502668"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-1.json",
+      "bytes": 723,
+      "sha256": "c4a7f187ed9996d199d0729dc2da30f2accfa03ececc77fdb8d260bd3de84ff0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-2.json",
+      "bytes": 705,
+      "sha256": "2b94f8c2c48e1c3cc1d7d64009f3fb5b3e8c12d691a4cd6525f50f9b4632d869"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-3.json",
+      "bytes": 705,
+      "sha256": "f97ec00d0830077d2c9ac98a4c2ec55d949be26c12492c7116cdf4ed42df7893"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-0.json",
+      "bytes": 707,
+      "sha256": "6973131ff23d6441ae557c6aa40f072ad876b8bfa231f3536f3996b40d59e205"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-0.native.dxbc",
+      "bytes": 200,
+      "sha256": "eb1a22372d46faedbf8cab279750f5e379a9502c7d6187fd47073f5d10848fcc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-1.json",
+      "bytes": 728,
+      "sha256": "313ebca17611bd3a7ab9eeea0daa52f45647d340f4fbe31d63f044a0d6e5ded1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-1.native.dxbc",
+      "bytes": 200,
+      "sha256": "89042d269c576a2398aabc8b3565d4e5654a02e5c252d1aa564a1adaeed5e7af"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-2.json",
+      "bytes": 709,
+      "sha256": "466c1895f0147595ab55186658debcde0fcd3ac6319b74d159f29b911066d6ea"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "0d57257815a4ffc3e2b461a498adc0913dd16723d9da2f523709b79ceb53e602"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-3.json",
+      "bytes": 709,
+      "sha256": "8b2931156375edc3c50f9c047b1aa20e9ff40f53ffb14e9d188c40d32e16a091"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-3.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-0.json",
+      "bytes": 707,
+      "sha256": "76af6166d1daf9ec4dd2e2d7a705ff7f22cc1d1610b8eb07ee54e7a2f1c646cd"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-1.json",
+      "bytes": 728,
+      "sha256": "23fbb1c18e694af80858242c9f2942a16b7244b03cbd7f6a6357aead4e04da91"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-2.json",
+      "bytes": 709,
+      "sha256": "f2ac5ba3f5a7895ac52511d799acd70b6e17fcfde23218a83e22ca72145f533a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-3.json",
+      "bytes": 709,
+      "sha256": "8ae61cec702dd08abb2894e04c3d726ee21da102eac47df0cdb313e48e90f0da"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-32902-5-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-0.json",
+      "bytes": 706,
+      "sha256": "3412392cb367c0af500b76b8d6b4c4f769d184a94dac5c008664e7754b7c3aa0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-1.json",
+      "bytes": 727,
+      "sha256": "f253099e91f93efd7997d47c2b26ef23dd3b79e97e2b04fa1903ab2353031b5e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-2.json",
+      "bytes": 708,
+      "sha256": "822969553da7037c3eb1334680e766dc64f6c53d0d4d84d368a894461248e7a8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-3.json",
+      "bytes": 708,
+      "sha256": "c7ee28ee83150fccdb8fdd1c80a8078c99eba7aabb92ac83bc1d158619fe8728"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-0.json",
+      "bytes": 701,
+      "sha256": "77a7e99246966adff7c0e2c253b50abc564a33ca95a73c2d8e2af922713f0445"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-1.json",
+      "bytes": 722,
+      "sha256": "dee6692fce576a9ede6a3005fb5736ce1def0c251785a9fd37b4a84052028b63"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-2.json",
+      "bytes": 704,
+      "sha256": "801353a9fb3f75bb5c15324b86a9ab64e4968ae92a613dfc017af238d370a1a6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-3.json",
+      "bytes": 704,
+      "sha256": "1fce84a9209c0ea26fba62f823e0dd0de5ad7b0cc264a4a454a9b5f6ec17a60d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-0.json",
+      "bytes": 706,
+      "sha256": "4c0db0eb6bfa29f30f479ddf7e62647bad6e9fe0cbb3f1ea8187839658d9f3b9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "ba43bd9a14d2ecde9b90e7142470f4f7a738ac38de373067f8e6e408791b3fca"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-1.json",
+      "bytes": 727,
+      "sha256": "ad673fda446fa205abdec0b7603ffbab0380ec2e57badc0ee5b2a9650a66d875"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "20e247b7a657a2954eb5a0eab45e4666b4664c6522a8e974847957ab94bc8a93"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-2.json",
+      "bytes": 708,
+      "sha256": "94d7ccbfe509aee572440a154ba9e07773e383966ceb063b10c1928ef0c3abd7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "bddae043e3b880e252340b1cc3970c2aa298f00740f2a402dae4572764bc4f2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-3.json",
+      "bytes": 708,
+      "sha256": "bd6ec84d832dfd91b4e732c60093cffe2f61a3f2d1f67f48aa310a1847a75c9d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-0.json",
+      "bytes": 706,
+      "sha256": "c3e0538875b6aaf5901060fd5889641103186aefea2b13591814a0dc5fa51877"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-1.json",
+      "bytes": 727,
+      "sha256": "95c0f2734337ed21b5a15378f324e565c16f14140ecc8c1319ca95e27f269bfb"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-2.json",
+      "bytes": 708,
+      "sha256": "1b64337420d955af0a95eb647f83e7a2aaf70e64ec9bfcf3e74ca29ff7d69bd7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-3.json",
+      "bytes": 708,
+      "sha256": "b5ebda78179c2aedebeb3c60c3c7517c46381e5e64f6e00606c5d40a16ab99b5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-0-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-0.json",
+      "bytes": 706,
+      "sha256": "66099a92eb5dce03651e316990b259311fa088d739b544f706c72e69f86dbad5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-1.json",
+      "bytes": 727,
+      "sha256": "b703ce2ca64c073671ecbf2496a36f3aca8986a7747890c2c18d79c8a2155cf9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-2.json",
+      "bytes": 708,
+      "sha256": "333956422bcaa54cf6c2e234bc5ceb6ec6ab76f42bfd0f6267ddc6f8b277c392"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-3.json",
+      "bytes": 708,
+      "sha256": "f3fe23747be1c0fcc4847aafffa64d8a8eca354f38076fe36036f514ef5c81e8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-0.json",
+      "bytes": 701,
+      "sha256": "b53dc927f949b6b0d74c5c7579f074e7d557fb0d328a3b0efead5ac800acf4f1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-1.json",
+      "bytes": 722,
+      "sha256": "fa208c36be3ab253f6786855a432c8c01365bd4b72cb66b7b1ee259a12936655"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-2.json",
+      "bytes": 704,
+      "sha256": "d5eb1553e77f4212c187726b56285a695b5ad7a1dafdcbce026c248ff53f8104"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-3.json",
+      "bytes": 704,
+      "sha256": "c48e2987ea303da4bfbfc843af8b60fe6709f030187479495f10b8f1d8a4210c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-0.json",
+      "bytes": 706,
+      "sha256": "a3043dff809ac6d0e4e3afe7b310833b77584c2dc83d78497cc51afb4dbe4876"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-0.native.dxbc",
+      "bytes": 184,
+      "sha256": "91b6b4a0666c7b924949f512a6f7658049facc59e7b6e8c8db6276e5a02b561d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-1.json",
+      "bytes": 727,
+      "sha256": "4185b135224239c5edb78b2d1b5a88ca350705088cda20e70dd7287a5602324c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-1.native.dxbc",
+      "bytes": 184,
+      "sha256": "0c188740308f3a6d20ba7ec5ed7ceb7eb8fd6f672281febaf7416bb7d646b8c7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-2.json",
+      "bytes": 708,
+      "sha256": "e6ad57518f53b150df7fdabfcc459b4a1c401eca3ca209c66e495710c9118cab"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "df93c00adc061da26505460b698a36dd699acf98321e70f1803369b842aa6837"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-3.json",
+      "bytes": 708,
+      "sha256": "6746dd7215a2dd916962b66be2844ad5381ec166b184421017fb57c3574de497"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-3.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-0.json",
+      "bytes": 706,
+      "sha256": "b0e6984bab5223550f1f4b1b5969eb34a183c6c9ee77cf4e19794d9a1b8c63c6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-1.json",
+      "bytes": 727,
+      "sha256": "bb26c53aeb45e2e84aaf33f0e1b65bc3579d7416ccf1222efb79f99e53a6cf76"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-2.json",
+      "bytes": 708,
+      "sha256": "eabf7d5225f7e69371eeb2e881a5b68030a5cdd95e7976a87077dae59ba0357a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-2.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-3.json",
+      "bytes": 708,
+      "sha256": "5410e45cfbfec8b04f2be567b9e7c7acced5efe8e38a042675518450c9d6f3fb"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-1-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-0.json",
+      "bytes": 706,
+      "sha256": "fd3ac1141e42586883bd92335af82204b6b588d6e5fb9708d4dac50c1b3b21e8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-1.json",
+      "bytes": 727,
+      "sha256": "d9f062d374299106817d6be19facf5ed0cb934f369bf0ff08d244d7ae8ba8c72"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-2.json",
+      "bytes": 708,
+      "sha256": "c41385f5d1db436ce076fcf6e215dfb294477b11a6207a5fe09979973f535c55"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-3.json",
+      "bytes": 708,
+      "sha256": "2ed70acf6984a3efbcab54a2a8d5aa6b2b26ca0b26c28737aa3fa4ef95183bc9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-0.json",
+      "bytes": 701,
+      "sha256": "cc0d3983b37ceed4754081c8f11ed5a97718f5a541bde3d368e91c47b452fe90"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-1.json",
+      "bytes": 722,
+      "sha256": "956814ef3abe6d96d7d2b3d0880e262963d4b1d4295b27520fa8b521d67e2eab"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-2.json",
+      "bytes": 704,
+      "sha256": "c6a5a4cdf8b9467fa752fc9cc0d8826f18a514fc95cd0499a47b50e235dec5e4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-3.json",
+      "bytes": 704,
+      "sha256": "b38e845e5fa2682f5d156e1bb4df180621cb9e4fca648637d045a75a8caa8047"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-0.json",
+      "bytes": 706,
+      "sha256": "1d637933bed81a39c75a8d157b473dc54b34e3cb5a699d38f240af0e1c04ac9d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-0.native.dxbc",
+      "bytes": 200,
+      "sha256": "eb1a22372d46faedbf8cab279750f5e379a9502c7d6187fd47073f5d10848fcc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-0.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "5a5db57753e09b1affac503905b1ad1204cb0193b2e44864a36badd114a59b12"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-1.json",
+      "bytes": 727,
+      "sha256": "4dd7f3a68c5565fe6e95e1292503fbbf4c0ddd49997ddee98b08aefef07f18ad"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-1.native.dxbc",
+      "bytes": 200,
+      "sha256": "89042d269c576a2398aabc8b3565d4e5654a02e5c252d1aa564a1adaeed5e7af"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-1.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "c1ecc0c463d5b398a1338ace245714efb9b31a6781ab804b918f6005957f5fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-2.json",
+      "bytes": 708,
+      "sha256": "f778d8844419335327a0d343f0482130c00ef54d27ebe6e0d9340f2ad6e38f8c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "0d57257815a4ffc3e2b461a498adc0913dd16723d9da2f523709b79ceb53e602"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "e6087095c0fe301ba4a2766715a4e5e510970de4d342581b32bafa9249a3a520"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-3.json",
+      "bytes": 708,
+      "sha256": "5cec468ca342319312f75a22b96e043396f01b802b77b365ca45a45d48d43de4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-3.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-2-3.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-0.json",
+      "bytes": 706,
+      "sha256": "98721ef25297dc8c17f966083e9531a5fd45a913e3b6e0d48b3660fe844b063a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-1.json",
+      "bytes": 727,
+      "sha256": "a12d2ff168afaac6b9cef85de019b4cd877b477152fc0bebb291a4c551b02dd1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-2.json",
+      "bytes": 708,
+      "sha256": "9e68a23498897ae5c84edd42f3e82f84fecc8bd6831bc5d9809bb1e800ebef42"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-2.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-2.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-3.json",
+      "bytes": 708,
+      "sha256": "847bfc213456a321f86f5aebf0ff664a01fe4674d995a45cf3166ff25798e519"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/msad-4318-5-3-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-0-0.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-0-0.jsonl",
+      "bytes": 9577,
+      "sha256": "d85e7351c5ee07cbd85e53c81fb3cdbcb94d88e3a0cabd2e4f5b726a9fd3bd5a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-0-1.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-0-1.jsonl",
+      "bytes": 9572,
+      "sha256": "e94c7b78935e87b53343ccd2f79732a41d95441481a23e90e94b3e545edd0a8b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-1-0.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-1-0.jsonl",
+      "bytes": 3910,
+      "sha256": "6205102343ef539f8f89e9c53ca2647d0f025dad7921b74046b9a52b1955899d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-1-1.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-1-1.jsonl",
+      "bytes": 3914,
+      "sha256": "4bee08cc3cea284a773667864b99e6f942c840f9753f225a0d2a4941ad63cec1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-5-0.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-5-0.jsonl",
+      "bytes": 4667,
+      "sha256": "77e0637ef09e22d2932c2217f00acd2a2e817b1a9ef0ad9843ad3f1921547b46"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-5-1.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/trace-5-1.jsonl",
+      "bytes": 4671,
+      "sha256": "d5fb57f1acf51fbd8100d0da7f94500409128407eaa97ae74234cb4688339659"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "9330e8fd0956d21b12f84faa223791d9067b8c2aa739d9ccd1529d245625d09e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/job.json",
+      "bytes": 770,
+      "sha256": "acdf0cb37cb523c6a1b2e27c8f53902d4b24b3ddcd68ea855e28a5353f6e7fc8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/result.json",
+      "bytes": 24104,
+      "sha256": "fa55156494f3cbd585f647be9e51beaa105ee5cb245b74a4abe3d54a73a38b27"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "0803bee8d666fc327ea987183789c8f110a3ac34d72ed3f564fb1ef6ac126b3f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/trace.jsonl",
+      "bytes": 126365,
+      "sha256": "9cf15942b20795e0d3876baa8e10ba2266961c5b0bde3accf8cdc4aafa72c1a6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/experiment.json",
+      "bytes": 18523,
+      "sha256": "18f248f394bf735094f5647fc5d4a126ad2003c56bb7cc3152d2cba0337e2361"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/session.zip",
+      "bytes": 212363,
+      "sha256": "0f5f6efb1ef9b030370273d5534738ce3756700af92ad1bd3dd0fe4ba859bf28"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "8a9fb3595a267769f4cf90dced21bdb054fae8c2e3c4b64d9942b551a31bdc0f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/job.json",
+      "bytes": 828,
+      "sha256": "fe3c8c7d2ebda6cd76b91dc8a898ed33dbfa7388705380cd2d46ea035eb170db"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/result.json",
+      "bytes": 24163,
+      "sha256": "0f1e907832ecffde5ef569694a6d560afd084125ca4230898e683e78b6bba426"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "0803bee8d666fc327ea987183789c8f110a3ac34d72ed3f564fb1ef6ac126b3f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/trace.jsonl",
+      "bytes": 126360,
+      "sha256": "310422dc9e6b45140cc2660751377f2862fe91a29b520e6fe7952fa545a737d2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-0/workflow.json",
+      "bytes": 1007,
+      "sha256": "f973fe55210670b1b036ca31da16aa282f0a1d9bb8f80ed2b4ccf21751061971"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "cd7d47b605f9d36b206fbf8048794ff5b5ff8d3920ba48c446a37342c85d91d2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/job.json",
+      "bytes": 789,
+      "sha256": "944ab5dabcaf09d84c6d6c5dfedadb88948f210ebb2b3e8eef1ec4948b09a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/result.json",
+      "bytes": 24520,
+      "sha256": "92c0e2f0b518d464434fce1243c3e035c98618a8635843aa11ed573df64adbf4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "4937fee73371c9d339190dc9a88969c529f8ab4d491e441f655d5f5f80a5602b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/trace.jsonl",
+      "bytes": 126368,
+      "sha256": "971b87d9af6df2ba01146c6f7955bf69a848c5d4a7a49c2c13838120b1dbfd36"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/experiment.json",
+      "bytes": 18523,
+      "sha256": "a57f578bf4ee2458e3fbfad0b003a8219048fafdb37a7717fd4d73dfc3ea951b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/session.zip",
+      "bytes": 212804,
+      "sha256": "59b35d4339724c5ab43b7395ef912cf1b723e5b3286df72550f331dc5eeca859"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "9830e8433d013162eebad792e8c04ea06fe001bfd221e5dca474b6a1df037ac5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/job.json",
+      "bytes": 847,
+      "sha256": "f518d3cca96db89c1a380958707ef535317851c3b89cb97893d98f8297cad58b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/result.json",
+      "bytes": 24579,
+      "sha256": "9e3e5aaff9771f77f9e14f9ce7b83ee83045376b9e4fb3bcbff2cf28f95bb286"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "4937fee73371c9d339190dc9a88969c529f8ab4d491e441f655d5f5f80a5602b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/trace.jsonl",
+      "bytes": 126363,
+      "sha256": "979ba9c6585d23f7391cbb7b080c14cc1471ec867ac434b663ef51b724ecd56d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-32902/workflow.json",
+      "bytes": 1011,
+      "sha256": "68885328ada3f54468118e375a50cb07acad80a1325707c86baa0ffcdef7bdc5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "c8e1d5e10b6eeaa6d466b3040aaad4d9fcf73559a4f97e81177c3c84a83c1ff1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/job.json",
+      "bytes": 785,
+      "sha256": "e9da702de48e4b9ed90875ff870a3eedeab6ff42a37676861806de76fd9c8d2f"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/result.json",
+      "bytes": 24862,
+      "sha256": "3f907f8a65ac7bf9f3d64ed88b11168efab0321bf01562772d1f935599a74a9e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "d629cda3175464dbbd27b1fe0d1bc3dbcdf6d7ce4fe06e4115a636bda34c56cc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/trace.jsonl",
+      "bytes": 126367,
+      "sha256": "34de0d5d23943f0e63d5661074931bf319973cac464e817d0f7474cd796fea25"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/experiment.json",
+      "bytes": 18523,
+      "sha256": "69a0972e116d2614f07e29c964091a52b9686d4554380237d1fe6406d8b5b2f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/session.zip",
+      "bytes": 213140,
+      "sha256": "3fcba51e998162bc2312a0e0a359cc4cb685a300ea6fc6632a49a73713ef1b96"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "0a30af83463815dfbc6522ae981f07264ad71037dbffe16c9620c2041f0427ef"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/job.json",
+      "bytes": 843,
+      "sha256": "b7d6fecc2804d3a5e534cadfcea99c90cfc25e7f3d0cd90cec6df8b6c6ffe78a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/result.json",
+      "bytes": 24921,
+      "sha256": "a86bec2f64a5e4b1f51d03c7898f31a6d0927c895d69b5a17c6e80f7f0d47e70"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "d629cda3175464dbbd27b1fe0d1bc3dbcdf6d7ce4fe06e4115a636bda34c56cc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/trace.jsonl",
+      "bytes": 126362,
+      "sha256": "e83865d0e481e5d0d95c8e2febf827d0a05282443afa7a01d2dc3f7d2872b104"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/evidence/workflow-4318/workflow.json",
+      "bytes": 1010,
+      "sha256": "3859de2264e4b35f8180e9b9f51723cc5d5dd511f0523034bfd5ffb1fe879112"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/exits.json",
+      "bytes": 1432,
+      "sha256": "7dc7ba9882a311766fc7f1ccc6f65f91ec552c0bb8d444420f545770de4acdde"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTests.txt",
+      "bytes": 668901,
+      "sha256": "3f150ae307cf4ec8f8d045e2c5e36ba59e42212f6e58baea34f7ba50b7903191"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceReaderTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceReaderTests.txt",
+      "bytes": 4565,
+      "sha256": "d5d1eb7d74864f82fe9094f6d92ab50a5a8fe1c35984c7c29017b81022056b9c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceTests.txt",
+      "bytes": 3191,
+      "sha256": "6a994f219f4c94c3c64de4b0010bf8bd346accbab1879ba0acd7647ccc552345"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraNativeComputeDebugTests.txt",
+      "bytes": 5085,
+      "sha256": "9cae7e3248dafd415486ae0f7b72747713d0fd25d5eb4046cfd18f2c6b1b43fa"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraNativeDebugSessionTests-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final/FloraNativeDebugSessionTests.txt",
+      "bytes": 3496,
+      "sha256": "379538f863ede8c5babef5f1115707d32523019ef11444b4e33186c7f0626be2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/final-build.txt",
+      "bytes": 2194,
+      "sha256": "042a9ce8accee37627a71454f557310b07c7b0c3bc5b01764934b5f108e9e1c4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-0.json",
+      "bytes": 452,
+      "sha256": "42ab8ae9cc44323ec850b7080a532c859262b390fd61e8dbc23d9feda968418c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-0.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-32902.json",
+      "bytes": 456,
+      "sha256": "bdf794871dc097de00a97c9625b794281610155b467b8609403a95dfcf018276"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-32902.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-4318.json",
+      "bytes": 455,
+      "sha256": "ef12bb58fff8d0105c425e2e34120addec92addbd250a79327085ecf461e3c6b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/compiled-msad-4318.native.dxbc",
+      "bytes": 880,
+      "sha256": "b29db43b4e97b0210823c72edd84cc86dc3f82588b4668bb98bb1f11b5a13a87"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-0.json",
+      "bytes": 2684,
+      "sha256": "2695334f523aabe5d995a00dcb3c33ada0b66613d9671dbb3448ca5685a94060"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-1.json",
+      "bytes": 2666,
+      "sha256": "bd80ec0d3ab498764e6ccb4d6a6f72c51a43332cb865b6b6a606521014c26787"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-2.json",
+      "bytes": 2684,
+      "sha256": "a5a18b923528f4db761a3dc41dd3de1c63ffe88acdd55b43ce6bb315f775a41c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-3.json",
+      "bytes": 2684,
+      "sha256": "8652d330d8f072001173c77e713019e55ed2a1884c241de39d2eab5144fd36ac"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-0.json",
+      "bytes": 2684,
+      "sha256": "116297b4bc0e8da6a80b9876c727155c258ef14bd7cdcaacaeb908227d8b1372"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-1.json",
+      "bytes": 2666,
+      "sha256": "9de75546c4de63355e28152d04a396a6ca7a957b4931b62a21a4b9380acf43b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-2.json",
+      "bytes": 2684,
+      "sha256": "46c037d71740936124895c12479c87ef8341dd9efb1010c4fc9a248385593e15"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-3.json",
+      "bytes": 2684,
+      "sha256": "fd2a186edac2de1dc0503d250be3bde56b695885d6dc74e23772b0c47bba3e5d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-0.json",
+      "bytes": 2684,
+      "sha256": "e3f1e4bab18dac9d1e54d85cb87550dcddb2a6f023110a1aff8bc69be1c8bb48"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-1.json",
+      "bytes": 2666,
+      "sha256": "ca79785ec6fa6c5ed52ac992f5908706a54cfa44d526129ac65568e208c7da3d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-2.json",
+      "bytes": 2684,
+      "sha256": "0c3569f53e347fa8665a99e31dea388c015f07942547d1ab402b5df12655e7f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-3.json",
+      "bytes": 2684,
+      "sha256": "4f6aae92de033e9eeccdcef6889817bcbd29cd47ee444f0a895f098f7e328ff3"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-0-5-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-0.json",
+      "bytes": 2688,
+      "sha256": "11e19299bd0ea4b7b37ad430068111d492ff8c55fc1a5b9b04f84229b47b1367"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-1.json",
+      "bytes": 2670,
+      "sha256": "ff528c038314511bf2b65cf3e50e2e1af3cf92e057477f79cbfaf1a207dc0ca5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-2.json",
+      "bytes": 2688,
+      "sha256": "ad92ac3dc56f1c7c2416a7d1056a3333bc6058fd49317087b4daca6aadc392f2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-3.json",
+      "bytes": 2688,
+      "sha256": "389a8fba342f64947a9c7bc6980af3c23b801677db09d285f4dbf9c97479a355"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-0.json",
+      "bytes": 2688,
+      "sha256": "5d2027525d716421866b26b1d2d15f0b64ca1d9cebe52a5c968305688318d0e5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-1.json",
+      "bytes": 2670,
+      "sha256": "958b3f9a12fbe686fabbe6716f023266acfb5bab912f5a348c6b77c5cf7f7989"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-2.json",
+      "bytes": 2688,
+      "sha256": "b33c25da23d5a70ea14676d0745db247d117325250b1712175bd212193bf82ea"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-3.json",
+      "bytes": 2688,
+      "sha256": "744e65635ab2cff47c2608b06ac148945f9e1683569b3969d1b5c2ee6fbb324d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-0.json",
+      "bytes": 2688,
+      "sha256": "87ece6ff868cb18d125cc0afacefe92d34799737a2a24f948cae11032ea45fb0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-1.json",
+      "bytes": 2670,
+      "sha256": "3502f6dc8daca2a4eee5299e26a9baf1a389dc492008bff69ca59d67f6743984"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-2.json",
+      "bytes": 2688,
+      "sha256": "e8cce50b8466b6d082c3e4f385812563451794881bfd8a227b43b1b5dcb2e352"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-3.json",
+      "bytes": 2688,
+      "sha256": "49dc5834098dd8e682dd4509e04044ee708d4f4a5284bba47485e4f643ed27a5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-32902-5-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-0.json",
+      "bytes": 2687,
+      "sha256": "76a7c7777c18eecd195c67f2d760b92349c11f8303212db3e9de7bf3743d451b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-1.json",
+      "bytes": 2669,
+      "sha256": "68b895e7fe5201d66025754e438d5abacd43c78aee1098708de90a555730ea7c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "f9194e76393f7e3706de4fed974bff9050beadd014d856abc25d3adc27065e47"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-2.json",
+      "bytes": 2687,
+      "sha256": "b24de48ffb72cf72b20ccf3a3b7a1286867a606b6ba2dd112e35140ff78c6619"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "e8eaa8f61ebe7604c2e49351d4d25dfe273daf4d8855011cdeb835859e85e574"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-3.json",
+      "bytes": 2687,
+      "sha256": "46914cda8bcccc69063662cd7877d85406e0ebeda7014b8b82af4be0f9ad95a7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "5b1d7c3889bf09446b7ec08f7a9d1ad85f6090d6b6a6ea5791eaea213f174340"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-0-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-0.json",
+      "bytes": 2687,
+      "sha256": "3f84a08150ef523d69f87a25512d193c4f0021769b4c966feaaf1baa6e6a5e8a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-0.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-1.json",
+      "bytes": 2669,
+      "sha256": "e2ff335bc493b35af3d8337ec2a9d22893c8fd78de7b2ad53355c51af02d1519"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-1.native.dxbc",
+      "bytes": 160,
+      "sha256": "ded6d64c5dcef6e152b3d745f90e7798f40f6601b904a274b95c1b6c1a912be1"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-2.json",
+      "bytes": 2687,
+      "sha256": "1a09a9688024e7896abb05be864e36e93964482848c88408beca7672ee75f6dc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-2.native.dxbc",
+      "bytes": 184,
+      "sha256": "b3db568c49bd22f010a3199c29f612a7d24dee04524297e0ad7e37e638afad77"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-3.json",
+      "bytes": 2687,
+      "sha256": "c2189088daff9b8083ef7b6a8a37f46387d48a23a1a15eeea744d907cc5b2918"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-3.native.dxbc",
+      "bytes": 160,
+      "sha256": "b2e6db3167e2c4cfde3f8cdaa70382324f6d98c1080cd539b67e33071a251f66"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-1-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-0.json",
+      "bytes": 2687,
+      "sha256": "57d4c38cc0a2293a1e899eb1bd00a8c3afc90d03af8effe9e850ede6bb0dd428"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-0.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-0.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-1.json",
+      "bytes": 2669,
+      "sha256": "be75bb7d29f025ec211a56ff978d72981afc4f3956f361d74dbe33a0ec107731"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-1.native.dxbc",
+      "bytes": 176,
+      "sha256": "3a5e2afec78a4c425ba5e1a2f5a53a36424b55f949a50868f93e3278ff88e421"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-1.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "168d72b3f722548debbec82299c7ed70c477f39865ce01ba12cdfa03260f8b2d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-2.json",
+      "bytes": 2687,
+      "sha256": "2215ac018bcaaab49fa82a34bef614013f1b7c09a4809e41cb71364dc094a04b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-2.native.dxbc",
+      "bytes": 200,
+      "sha256": "b303383a8fb6ecc1503a774ad815f130254871e9baebd44163641cb3d62742b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-2.oracle.dxbc",
+      "bytes": 404,
+      "sha256": "162a65f50372afa67b50b008abeb2819db1d6b034fdc93f9eca608bcb64c1379"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-3.json",
+      "bytes": 2687,
+      "sha256": "1751b182f90388fd878969baf599b710f3871c5da6fe78838fa2a39aff1bab9d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-3.native.dxbc",
+      "bytes": 176,
+      "sha256": "689597b03985ceb78c4e2f0ca7ce304f8a8c5cc2c5beb2f97945af00165e3e2b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial/msad-4318-5-3.oracle.dxbc",
+      "bytes": 380,
+      "sha256": "8dcff8cba6c0dbb098d6377e995744825b6a94942f18a2d696df1a9f86c1a7d0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/initial.txt",
+      "bytes": 9791,
+      "sha256": "093d55a8dab918a53f1451f466ebbbe5be0842e2bbb871121631dbdb3bff4ed2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/trace-build.txt",
+      "bytes": 1107,
+      "sha256": "b9640a37a9fdadeed77134ef41b5681818eca00402a75e7226aafec3ec136acf"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/validation.txt",
+      "bytes": 218,
+      "sha256": "82e956e3443db842a56ba695a72e6896272a383ad34b6e97f00154904f8c1ff5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/verification.json",
+      "bytes": 8869,
+      "sha256": "124c14cfbcfa9aa306cda0619c8882eab55efd0cd186a346a675a5f625df9d74"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-build.txt",
+      "bytes": 1988,
+      "sha256": "44d235318a57360013a3f73b0d8bf24c1378844e5906ba0c17d0dc0c6e1a396d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-final-build.txt",
+      "bytes": 1694,
+      "sha256": "d52237401d87395cca3671a4228f2e2daa884bfba4228a9658539334cd52faa7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-validation.txt",
+      "bytes": 218,
+      "sha256": "82e956e3443db842a56ba695a72e6896272a383ad34b6e97f00154904f8c1ff5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verification.json",
+      "bytes": 28751,
+      "sha256": "054a0b607f63aa242b3e85086f8cccf82451fa972ae7fba959955c443eb4e9b3"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/binaries/FloraGPA.Cli.exe",
+      "bytes": 6262784,
+      "sha256": "5ebf92b30a94c96596fc035ed950883884818d267f819cfe6fe2f088212c2ef2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/binaries/FloraGPA.Worker.exe",
+      "bytes": 6262784,
+      "sha256": "6dc6e310bce2d7a903a8b40fccc64ef4c4d8fab70eeee8c093b02172c3e142de"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/binaries/FloraNativeComputeDebugTests.exe",
+      "bytes": 3070464,
+      "sha256": "00a2dbc859e799b435a17afc6ee26e9fbccafe27b2c5176b8c1536bf070af27b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "6d6be0bab60454cdbb0e5502e9a0f7d4faefc35e57a220048dfb870e3c249bd0"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/job.json",
+      "bytes": 806,
+      "sha256": "ed0bda865fc2518eb4f06ec7f2f97381755ecefd6828324ded4b3945164bd60e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/result.json",
+      "bytes": 24104,
+      "sha256": "6def7260af51e7048c83ac80c29c39ecd7988be8c47de6fbdfb0f3f584cb3432"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "8f8e0478dcc3dd3dbdb3a83f4e674e801552a06dc9ad675ace1b36aaf0dba4c2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/trace.jsonl",
+      "bytes": 126365,
+      "sha256": "b00a512f164c64febbacc43e284c582480e0a5e1e7994d2091647e437f53aedb"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/experiment.json",
+      "bytes": 18523,
+      "sha256": "725c7bc34559d8bc2c743662078b12bca458e08638ff1218b6add4e5e15cbbf6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/session.zip",
+      "bytes": 212399,
+      "sha256": "96334da7e8df7d9d77f176b0c7ff5e6cfef7385b26ee6fe7f2f10225cef91587"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "ae7c6336c87576e041e842d60f939fdf5c20a4924d2dc6acbe7870da79752146"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/job.json",
+      "bytes": 864,
+      "sha256": "3cc5d25a0fd620283ff6099f27edc9948edd1b4ccfa48c64642a584deae03edb"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/result.json",
+      "bytes": 24163,
+      "sha256": "22312bfe9bc9541cbe32155daab9737107207973e74d00f9185d09b0467a4fb8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "8f8e0478dcc3dd3dbdb3a83f4e674e801552a06dc9ad675ace1b36aaf0dba4c2"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/trace.jsonl",
+      "bytes": 126360,
+      "sha256": "a8475db2669a70ce0518404bb71c721dd1c5fef06d5f3b24be123e01e304a1a3"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-0/workflow.json",
+      "bytes": 1007,
+      "sha256": "1e3fb5133dabc6af7d4621e291d020ed883c121bbf0abec72010d86576123ecb"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "6c67e28bc4918c9117e80c638be2ebb0fda377ddd808715cb136afd67f3bc6b4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/job.json",
+      "bytes": 825,
+      "sha256": "30d79908b3c7413d019b8de337559258c0ef095ce3b71ebe2c243eca537f3d0e"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/result.json",
+      "bytes": 24520,
+      "sha256": "3af40bb972daa01cd0e7e3c9de9d9e2a5d2d7dcf2edc17316fac330cad466d8a"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "0425e12940f15a7b8ab5fb9423c11bb6d25f02bb06608dd332d8d4c916646397"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/trace.jsonl",
+      "bytes": 126368,
+      "sha256": "cb20997148375d27c0f70fbe80819afabd528832e9419b15a3057adcf3632ca7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/experiment.json",
+      "bytes": 18523,
+      "sha256": "ed94aebad5dec848b6277f79224184105a93aa91930bb1c95e5f578d8ed5f237"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/session.zip",
+      "bytes": 212840,
+      "sha256": "c280cd84d736976fd35f029841b9ba7da0e741b196299875042bff307e341328"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "59e6d528948c05337faae26b87edb33f1ef618580a6a13d6277ce509416091b7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/job.json",
+      "bytes": 883,
+      "sha256": "7fb46bafed636060d84685fdcf077afcf6a4f61301f03cd7b27a64f7119d1769"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/result.json",
+      "bytes": 24579,
+      "sha256": "5b2827ad836b220b9c4d12551d8f7b3ed5a4a976a4d2ebb4e46a0db3a5984ce4"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "0425e12940f15a7b8ab5fb9423c11bb6d25f02bb06608dd332d8d4c916646397"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/trace.jsonl",
+      "bytes": 126363,
+      "sha256": "741d84babe50f7e2facc36347b7cb070f2af00f95f6874e3154c6bd180eb165b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-32902/workflow.json",
+      "bytes": 1011,
+      "sha256": "7f2751396bd51ec070d74a8421e3ec8f2f93bfbd006f661e353cbde7e3988534"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/debug.json",
+      "bytes": 1281,
+      "sha256": "3390e078d66aa73342a5cb34ecd37254fc0367aa1b08688fed7c6f59d9b7c709"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/job.json",
+      "bytes": 821,
+      "sha256": "1fff6050a81899694c52bfad4e2ad1c9156066c17c749ff8526da59d573d1211"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/result.json",
+      "bytes": 24862,
+      "sha256": "8d2f97e57e009e358ab9fa61765f90fbaec7b8977bc6c13efea4b94a2abf723b"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "39a8248d4390568e1b4c9b55e42283d194c40fe8455e2f402ea24c605fe5c08d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/trace.jsonl",
+      "bytes": 126367,
+      "sha256": "dc70f77926bad661765ff44024a0957536375f17e44252ad79700e711490d845"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/cli/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/experiment.json",
+      "bytes": 18523,
+      "sha256": "f74193775112128d50cf353eaa1d41c3189017143d7f48d27791a8238f448fb9"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/frame.gpa_frame",
+      "bytes": 25074,
+      "sha256": "fb3637ff3d63ebbe78463e2b26d97f84755f337cd01111b1e0818881f24839d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/session.zip",
+      "bytes": 213176,
+      "sha256": "5f1a7006b2e7c207e1356dbf373c1fa317e6015abc17a6b2e6b9a6673fc57cdc"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/debug.json",
+      "bytes": 1281,
+      "sha256": "dc8245d9857fe28c40d749e453c49a718fe4311a2aa789ec8889140994108ac8"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/job.json",
+      "bytes": 879,
+      "sha256": "d4ae87a55f30f012032681d8dd9e92d68db47a0d691df05a90c38ed5bb96d45c"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/result.json",
+      "bytes": 24921,
+      "sha256": "90fe8471c6d0dcea3b7f5b745463653cc61e4ff9227d7e7a999c9eedbd19a0d7"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/shader.dxbc",
+      "bytes": 13204,
+      "sha256": "39a8248d4390568e1b4c9b55e42283d194c40fe8455e2f402ea24c605fe5c08d"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/trace.jsonl",
+      "bytes": 126362,
+      "sha256": "7c53c72fb35b37f933edd9b8616ab6cc99494f1c37ddc3b71009cedc332f28d6"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/worker/worker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/evidence/workflow-4318/workflow.json",
+      "bytes": 1010,
+      "sha256": "173eb7ee428902179ff755587282de4da22aed029b5350569cc01559a2140bea"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/exit.json",
+      "bytes": 302,
+      "sha256": "b793fe4bcc5e23056a7836e7c640da16cb1f6e17cb1d356865358b9ff7b373d5"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-verified/FloraNativeComputeDebugTests.txt",
+      "bytes": 4515,
+      "sha256": "8db3fa13194fa1240c68e72df4f788ee21a583e44b17839f3a5d42ac09dc1880"
+    },
+    {
+      "path": "artifacts/dx11-native/msad/workflow-version-build.txt",
+      "bytes": 1694,
+      "sha256": "872f513a798ca1033a148c009ceb3b4a804878a699863fdd01fbc02902a35c7a"
+    }
+  ],
+  "qt_totals": [
+    {
+      "suite": "FloraDxbcExecutionTests",
+      "passed": 1271,
+      "log": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTests.txt"
+    },
+    {
+      "suite": "FloraDxbcExecutionTraceTests",
+      "passed": 28,
+      "log": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceTests.txt"
+    },
+    {
+      "suite": "FloraDxbcExecutionTraceReaderTests",
+      "passed": 65,
+      "log": "artifacts/dx11-native/msad/final/FloraDxbcExecutionTraceReaderTests.txt"
+    },
+    {
+      "suite": "FloraNativeDebugSessionTests",
+      "passed": 50,
+      "log": "artifacts/dx11-native/msad/final/FloraNativeDebugSessionTests.txt"
+    },
+    {
+      "suite": "FloraNativeComputeDebugTests",
+      "passed": 71,
+      "log": "artifacts/dx11-native/msad/workflow-verified/FloraNativeComputeDebugTests.txt"
+    }
+  ],
+  "qt_passed": 1485,
+  "validation": {
+    "schema": 1,
+    "raw_observations": 144,
+    "compiled_observations": 3,
+    "gpu_observations": 147,
+    "known_gpu_components": 480,
+    "rejected_alterations": 588,
+    "journals": 6,
+    "journal_steps": 36,
+    "workflow_jobs": [
+      {
+        "vendor": 0,
+        "route": "worker",
+        "elapsed_ms": 39,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll",
+          "C:\\Windows\\SYSTEM32\\cryptsp.dll"
+        ],
+        "peak_working_set_bytes": 24027136
+      },
+      {
+        "vendor": 0,
+        "route": "cli",
+        "elapsed_ms": 42,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll",
+          "C:\\Windows\\SYSTEM32\\cryptsp.dll"
+        ],
+        "peak_working_set_bytes": 24059904
+      },
+      {
+        "vendor": 4318,
+        "route": "worker",
+        "elapsed_ms": 225,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 105013248
+      },
+      {
+        "vendor": 4318,
+        "route": "cli",
+        "elapsed_ms": 213,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\msasn1.dll",
+          "C:\\Windows\\SYSTEM32\\cryptnet.dll",
+          "C:\\Windows\\System32\\CRYPT32.dll",
+          "C:\\Windows\\SYSTEM32\\wldp.dll",
+          "C:\\Windows\\SYSTEM32\\drvstore.dll",
+          "C:\\Windows\\SYSTEM32\\devobj.dll",
+          "C:\\Windows\\System32\\wintrust.dll",
+          "C:\\Windows\\System32\\imagehlp.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTSP.dll",
+          "C:\\Windows\\system32\\rsaenh.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\System32\\shlwapi.dll",
+          "C:\\Windows\\system32\\nvspcap64.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\SYSTEM32\\ntmarta.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\nvamsi.inf_amd64_e6537d0cc841801c\\nvppex.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll"
+        ],
+        "peak_working_set_bytes": 104398848
+      },
+      {
+        "vendor": 32902,
+        "route": "worker",
+        "elapsed_ms": 222,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\apphelp.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igd10umt64xe.DLL",
+          "C:\\Windows\\System32\\SHLWAPI.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igc64.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll",
+          "C:\\Windows\\SYSTEM32\\cryptsp.dll"
+        ],
+        "peak_working_set_bytes": 75096064
+      },
+      {
+        "vendor": 32902,
+        "route": "cli",
+        "elapsed_ms": 159,
+        "loaded_modules": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Worker.exe",
+          "C:\\Windows\\SYSTEM32\\ntdll.dll",
+          "C:\\Windows\\System32\\KERNEL32.DLL",
+          "C:\\Windows\\System32\\KERNELBASE.dll",
+          "C:\\Windows\\System32\\SHELL32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Gui.dll",
+          "C:\\Windows\\System32\\msvcp_win.dll",
+          "C:\\Windows\\SYSTEM32\\dxgi.dll",
+          "C:\\Windows\\SYSTEM32\\d3d11.dll",
+          "C:\\Windows\\System32\\ucrtbase.dll",
+          "C:\\Windows\\System32\\win32u.dll",
+          "C:\\Windows\\System32\\GDI32.dll",
+          "C:\\Windows\\System32\\gdi32full.dll",
+          "C:\\Windows\\System32\\USER32.dll",
+          "C:\\Windows\\SYSTEM32\\bcrypt.dll",
+          "C:\\Windows\\System32\\ole32.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\D3DCOMPILER_47.dll",
+          "C:\\Windows\\System32\\combase.dll",
+          "C:\\Windows\\System32\\sechost.dll",
+          "C:\\Windows\\System32\\msvcrt.dll",
+          "C:\\Windows\\System32\\RPCRT4.dll",
+          "C:\\Windows\\System32\\ADVAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\powrprof.dll",
+          "C:\\Windows\\SYSTEM32\\d3d12.dll",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\Qt6Core.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140.dll",
+          "C:\\Windows\\System32\\WS2_32.dll",
+          "C:\\Windows\\System32\\OLEAUT32.dll",
+          "C:\\Windows\\SYSTEM32\\VCRUNTIME140_1.dll",
+          "C:\\Windows\\SYSTEM32\\UxTheme.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_1.dll",
+          "C:\\Windows\\SYSTEM32\\DWrite.dll",
+          "C:\\Windows\\SYSTEM32\\MSVCP140_2.dll",
+          "C:\\Windows\\SYSTEM32\\MPR.dll",
+          "C:\\Windows\\SYSTEM32\\AUTHZ.dll",
+          "C:\\Windows\\SYSTEM32\\USERENV.dll",
+          "C:\\Windows\\SYSTEM32\\NETAPI32.dll",
+          "C:\\Windows\\SYSTEM32\\WINMM.dll",
+          "C:\\Windows\\SYSTEM32\\VERSION.dll",
+          "C:\\Windows\\SYSTEM32\\icuuc.dll",
+          "C:\\Windows\\SYSTEM32\\CRYPTBASE.DLL",
+          "C:\\Windows\\SYSTEM32\\SRVCLI.DLL",
+          "C:\\Windows\\SYSTEM32\\NETUTILS.DLL",
+          "C:\\Windows\\SYSTEM32\\icu.DLL",
+          "C:\\Windows\\SYSTEM32\\UMPDC.dll",
+          "C:\\Windows\\System32\\IMM32.DLL",
+          "C:\\Windows\\System32\\bcryptPrimitives.dll",
+          "C:\\Windows\\System32\\shcore.dll",
+          "C:\\Windows\\SYSTEM32\\dxcore.dll",
+          "C:\\Windows\\SYSTEM32\\directxdatabasehelper.dll",
+          "C:\\Windows\\SYSTEM32\\kernel.appcore.dll",
+          "C:\\Windows\\SYSTEM32\\cfgmgr32.dll",
+          "C:\\Windows\\SYSTEM32\\apphelp.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igd10umt64xe.DLL",
+          "C:\\Windows\\System32\\SHLWAPI.dll",
+          "C:\\Windows\\System32\\DriverStore\\FileRepository\\iigd_dch.inf_amd64_3e1839579948c84c\\igc64.dll",
+          "C:\\Windows\\SYSTEM32\\windows.storage.dll",
+          "C:\\Windows\\SYSTEM32\\profapi.dll",
+          "C:\\Windows\\system32\\d3dcompiler_47.dll",
+          "C:\\Windows\\SYSTEM32\\cryptsp.dll"
+        ],
+        "peak_working_set_bytes": 75141120
+      }
+    ],
+    "actual_adapters": [
+      {
+        "selection": "0-0-0",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-0-1",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-0-2",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-0-3",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-1-0",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-1-1",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-1-2",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-1-3",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-5-0",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-5-1",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-5-2",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "0-5-3",
+        "adapter": "Microsoft Basic Render Driver",
+        "device_id": 140,
+        "driver_version": 2814751477605871,
+        "luid_high": 0,
+        "luid_low": 74655,
+        "vendor_id": 5140
+      },
+      {
+        "selection": "4318-0-0",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-0-1",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-0-2",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-0-3",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-1-0",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-1-1",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-1-2",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-1-3",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-5-0",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-5-1",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-5-2",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "4318-5-3",
+        "adapter": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device_id": 11352,
+        "driver_version": 9007199255791310,
+        "luid_high": 0,
+        "luid_low": 69256,
+        "vendor_id": 4318
+      },
+      {
+        "selection": "32902-0-0",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-0-1",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-0-2",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-0-3",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-1-0",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-1-1",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-1-2",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-1-3",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-5-0",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-5-1",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-5-2",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      },
+      {
+        "selection": "32902-5-3",
+        "adapter": "Intel(R) Graphics",
+        "device_id": 32103,
+        "driver_version": 9007199261368954,
+        "luid_high": 0,
+        "luid_low": 74756,
+        "vendor_id": 32902
+      }
+    ],
+    "full_debugger_parity": false
+  }
+}

@@ -1853,3 +1853,11 @@ Five suites pass 743 checks. Independent validation covers 255 mixed and 117
 depth-only observations plus 60 Worker/CLI jobs and rejects 2,802 alterations.
 See `research/DX11_NATIVE_ADDED_DEPTH_COUNTS.md`. Original fragment qualification,
 full debugger parity, P1 closure and P7/P8 removal/release gates remain open.
+
+The C++ DXBC executor now implements MSAD with byte masking and component validity.
+Undefined overflow remains unknown; a known zero reference masks an unknown source.
+Five suites pass 1,485 checks, including source watch/session export and six isolated
+Worker/CLI jobs with original CS output comparisons. Independent validation checks
+147 GPU observations, six reversible journals and 588 rejected alterations. See
+`research/DX11_NATIVE_MSAD.md` for the retained failures and `/17` cache boundary.
+Full debugger/fragment parity, P1 closure and P7/P8 release gates remain open.
