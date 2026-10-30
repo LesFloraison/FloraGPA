@@ -1705,3 +1705,14 @@ multi-target occlusion failures; no counts are normalized or skipped. See
 `research/DX11_PIXEL_ORDINAL_RESEARCH.md`. This is P1/P5 research, not a product
 cutover; original fragment qualification, overlap support beyond the stencil
 range and P7/P8 remain open.
+
+An internal GPA replay operation now observes counterfactual stencil references
+on private resources without consuming application UAV slots. Eighteen binding
+and recovery groups and nine real-capture controls pass. The 144-group extraction
+matrix retains three Intel small-target selection failures, independently
+reproduced without GPA replay; verified fragment ordinals remain unknown.
+Four suites record 611 passes, nine strict research failures and no skips.
+Existing geometry and presence regressions pass. See
+`research/DX11_NATIVE_PIXEL_ORDINAL_OBSERVATIONS.md` for reproducible controls,
+900 corruption checks, retained query deviations and remaining P5-P8 gates.
+Public history/debugger consumers and RenderDoc dependencies remain unchanged.
