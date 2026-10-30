@@ -11,10 +11,27 @@
 #include "replay/NativeMsaaTransfer.h"
 #include "replay/Unpredicated.h"
 #include <algorithm>
+#include <bit>
 #include <chrono>
+#include <cmath>
 #include <d3d11sdklayers.h>
 namespace flora {
 using Json = nlohmann::json;
+Json decodeNativePixelReturnCount(std::array<uint32_t, 4> bits) {
+    const float value = std::bit_cast<float>(bits[0]);
+    const bool consistent = bits[0] == bits[1] && bits[0] == bits[2];
+    const bool integral = std::isfinite(value) && value >= 0 && std::floor(value) == value;
+    const bool exact = consistent && integral && value < 16777216.0f;
+    return {{"raw_bits", bits},
+            {"valid", exact},
+            {"count", exact ? Json(uint32_t(value)) : Json(nullptr)},
+            {"reason", exact         ? "exact_float32_integer"
+                       : !consistent ? "rgb_disagreement"
+                       : !integral   ? "invalid_accumulation"
+                                     : "float32_integer_limit"},
+            {"exclusive_integer_limit", 16777216},
+            {"original_fragment_eligibility", nullptr}};
+}
 const char *nativePixelTestOverrideName(NativePixelTestOverride mode) {
     switch (mode) {
     case NativePixelTestOverride::Preserve:
@@ -97,7 +114,8 @@ class NativePixelGeometryReplay {
                   bool accumulatePredicate = false,
                   NativePixelTestOverride testOverride = NativePixelTestOverride::Preserve,
                   std::optional<NativeDepthCompletionSelection> depthSelection = {},
-                  std::optional<NativePixelOrdinalSelection> ordinalSelection = {}) {
+                  std::optional<NativePixelOrdinalSelection> ordinalSelection = {},
+                  std::optional<NativePixelReturnCountSelection> countSelection = {}) {
         checkDeadline();
         const auto overrideName = nativePixelTestOverrideName(testOverride);
         if (testOverride != NativePixelTestOverride::Preserve && !accumulatePredicate)
@@ -116,6 +134,10 @@ class NativePixelGeometryReplay {
             (ordinalSelection->target >= 8 || ordinalSelection->ordinal >= 255 || depthSelection ||
              primitiveMask || accumulatePredicate || testOverride != NativePixelTestOverride::Preserve))
             throw std::invalid_argument("Invalid private pixel ordinal selection; supported range is 0..254");
+        if (countSelection && (countSelection->target >= 8 || completionTarget != countSelection->target ||
+                               primitiveMask || accumulatePredicate || depthSelection || ordinalSelection ||
+                               testOverride != NativePixelTestOverride::Preserve))
+            throw std::invalid_argument("Invalid private pixel return count selection");
         const auto state = r.prepareState(event);
         const CancelCheck scoped = [&] {
             checkDeadline();
@@ -130,9 +152,9 @@ class NativePixelGeometryReplay {
                 throw std::runtime_error("Private original draw output payload budget exceeded");
             const auto parameters = resolveDrawParameters(r, event);
             const auto raster = dxbc_exec::pixelRasterState(r.context_.Get());
-            if (ordinalSelection && raster.rasterizer.ForcedSampleCount)
+            if ((ordinalSelection || countSelection) && raster.rasterizer.ForcedSampleCount)
                 throw std::runtime_error(
-                    "Private pixel ordinal stencil is incompatible with forced sampling");
+                    "Private pixel diagnostic transport is incompatible with forced sampling");
             Json shaders = Json::array();
             for (unsigned stage = 0; stage < 5; ++stage) {
                 const auto resource = state.stages[stage].shader;
@@ -168,7 +190,7 @@ class NativePixelGeometryReplay {
                     std::vector<uint8_t> ordinalInput;
                     Com<ID3D11BlendState1> completionBlend;
                     Com<ID3D11DepthStencilState> testDepthState;
-                    Com<ID3D11Texture2D> depthTransport;
+                    Com<ID3D11Texture2D> diagnosticTransport;
                     Resource transportResource;
                     uint64_t workingBytes = cloneBytes;
                     if (depthSelection) {
@@ -231,7 +253,7 @@ class NativePixelGeometryReplay {
                         desc.Usage = D3D11_USAGE_DEFAULT;
                         desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
                         desc.CPUAccessFlags = desc.MiscFlags = 0;
-                        check(r.device_->CreateTexture2D(&desc, nullptr, &depthTransport),
+                        check(r.device_->CreateTexture2D(&desc, nullptr, &diagnosticTransport),
                               "Create depth completion transport");
                         Com<ID3D11RenderTargetView> target;
                         D3D11_RENDER_TARGET_VIEW_DESC targetView{};
@@ -243,7 +265,8 @@ class NativePixelGeometryReplay {
                             targetView.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
                             targetView.Texture2DArray = {0, 0, layers};
                         }
-                        check(r.device_->CreateRenderTargetView(depthTransport.Get(), &targetView, &target),
+                        check(r.device_->CreateRenderTargetView(diagnosticTransport.Get(), &targetView,
+                                                                &target),
                               "Create depth completion RTV");
                         auto *pointer = target.Get();
                         context->OMSetRenderTargetsAndUnorderedAccessViews(
@@ -271,6 +294,119 @@ class NativePixelGeometryReplay {
                                                      {"layer", depthSelection->layer},
                                                      {"sample", depthSelection->sample},
                                                      {"layer_domain", "bound_dsv_view"},
+                                                     {"budgeted_bytes", workingBytes - cloneBytes}};
+                    }
+                    if (countSelection) {
+                        auto *context = r.context_.Get();
+                        std::array<ID3D11RenderTargetView *, 8> raw{};
+                        std::array<Com<ID3D11RenderTargetView>, 8> views;
+                        Com<ID3D11DepthStencilView> depth;
+                        context->OMGetRenderTargets(8, raw.data(), &depth);
+                        UINT count = 0;
+                        for (UINT i = 0; i < 8; ++i) {
+                            views[i].Attach(raw[i]);
+                            if (raw[i])
+                                count = i + 1;
+                        }
+                        const auto target = countSelection->target;
+                        if (!views[target])
+                            throw std::runtime_error("Private pixel count target is not bound");
+                        D3D11_RENDER_TARGET_VIEW_DESC view{};
+                        views[target]->GetDesc(&view);
+                        Com<ID3D11Resource> resource;
+                        views[target]->GetResource(&resource);
+                        Com<ID3D11Texture2D> texture;
+                        check(resource.As(&texture), "Get 2D pixel count source");
+                        D3D11_TEXTURE2D_DESC desc{};
+                        texture->GetDesc(&desc);
+                        uint32_t mip = 0, firstLayer = 0, layers = 1;
+                        switch (view.ViewDimension) {
+                        case D3D11_RTV_DIMENSION_TEXTURE2D:
+                            mip = view.Texture2D.MipSlice;
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DARRAY:
+                            mip = view.Texture2DArray.MipSlice;
+                            firstLayer = view.Texture2DArray.FirstArraySlice;
+                            layers = view.Texture2DArray.ArraySize;
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DMS:
+                            break;
+                        case D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY:
+                            firstLayer = view.Texture2DMSArray.FirstArraySlice;
+                            layers = view.Texture2DMSArray.ArraySize;
+                            break;
+                        default:
+                            throw std::runtime_error("Unsupported pixel count RTV dimension");
+                        }
+                        desc.Width = std::max(1u, desc.Width >> mip);
+                        desc.Height = std::max(1u, desc.Height >> mip);
+                        if (countSelection->x >= desc.Width || countSelection->y >= desc.Height ||
+                            countSelection->layer >= layers ||
+                            countSelection->sample >= desc.SampleDesc.Count)
+                            throw std::invalid_argument("Pixel count selection exceeds its RTV");
+                        const uint64_t plane = uint64_t(desc.Width) * desc.Height * 16;
+                        if (!layers || !desc.SampleDesc.Count ||
+                            plane > (request.maxBytes - workingBytes) / 3 / layers / desc.SampleDesc.Count)
+                            throw std::runtime_error("Pixel count transport payload budget exceeded");
+                        workingBytes += plane * layers * desc.SampleDesc.Count * 3;
+                        desc.MipLevels = 1;
+                        desc.ArraySize = layers;
+                        desc.Format = desc.SampleDesc.Count > 1 ? DXGI_FORMAT_R32G32B32A32_TYPELESS
+                                                                : DXGI_FORMAT_R32G32B32A32_FLOAT;
+                        desc.Usage = D3D11_USAGE_DEFAULT;
+                        desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+                        desc.CPUAccessFlags = desc.MiscFlags = 0;
+                        UINT support = 0;
+                        check(r.device_->CheckFormatSupport(DXGI_FORMAT_R32G32B32A32_FLOAT, &support),
+                              "Check pixel count float blending");
+                        if (!(support & D3D11_FORMAT_SUPPORT_BLENDABLE))
+                            throw std::runtime_error("Pixel count requires RGBA32F blending");
+                        check(r.device_->CreateTexture2D(&desc, nullptr, &diagnosticTransport),
+                              "Create pixel count transport");
+                        D3D11_RENDER_TARGET_VIEW_DESC replacement{};
+                        replacement.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+                        if (desc.SampleDesc.Count > 1) {
+                            replacement.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+                            replacement.Texture2DMSArray = {0, layers};
+                        } else {
+                            replacement.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+                            replacement.Texture2DArray = {0, 0, layers};
+                        }
+                        views[target].Reset();
+                        check(r.device_->CreateRenderTargetView(diagnosticTransport.Get(), &replacement,
+                                                                &views[target]),
+                              "Create pixel count RTV");
+                        raw[target] = views[target].Get();
+                        context->OMSetRenderTargetsAndUnorderedAccessViews(count, raw.data(), depth.Get(), 0,
+                                                                           D3D11_KEEP_UNORDERED_ACCESS_VIEWS,
+                                                                           nullptr, nullptr);
+                        transportResource.type = 0x85;
+                        transportResource.desc = {desc.Width,
+                                                  desc.Height,
+                                                  1,
+                                                  layers,
+                                                  uint32_t(desc.Format),
+                                                  desc.SampleDesc.Count,
+                                                  desc.SampleDesc.Quality,
+                                                  0,
+                                                  desc.BindFlags,
+                                                  0,
+                                                  0};
+                        report["count_transport"] = {{"slot", target},
+                                                     {"source_format", uint32_t(view.Format)},
+                                                     {"source_mip", mip},
+                                                     {"source_first_layer", firstLayer},
+                                                     {"width", desc.Width},
+                                                     {"height", desc.Height},
+                                                     {"layers", layers},
+                                                     {"samples", desc.SampleDesc.Count},
+                                                     {"sample_quality", desc.SampleDesc.Quality},
+                                                     {"view_format", uint32_t(replacement.Format)},
+                                                     {"x", countSelection->x},
+                                                     {"y", countSelection->y},
+                                                     {"layer", countSelection->layer},
+                                                     {"sample", countSelection->sample},
+                                                     {"layer_domain", "bound_rtv_view"},
                                                      {"budgeted_bytes", workingBytes - cloneBytes}};
                     }
                     if (completionTarget) {
@@ -312,7 +448,7 @@ class NativePixelGeometryReplay {
                             if (!producer)
                                 throw std::runtime_error("Bound GS does not provide a primitive identity");
                         }
-                        const auto marked =
+                        auto marked =
                             accumulatePredicate
                                 ? instrumentPixelPrimitivePresence(completionCode, target, *primitiveMask,
                                                                    request.maxBytes - workingBytes, scoped,
@@ -323,6 +459,12 @@ class NativePixelGeometryReplay {
                                                                producer)
                                 : instrumentPixelCompletion(completionCode, target, marker,
                                                             request.maxBytes - workingBytes, scoped);
+                        if (countSelection) {
+                            if (marked.identity.at("component_type") != 3)
+                                throw std::runtime_error("Pixel return count requires a float shader output");
+                            marked.identity["requires_private_unblended_target"] = false;
+                            marked.identity["requires_additive_rgb_float32_target"] = true;
+                        }
                         if (marked.bytecode.size() > request.maxBytes - workingBytes)
                             throw std::runtime_error("Private pixel completion shader budget exceeded");
                         workingBytes += marked.bytecode.size();
@@ -422,6 +564,15 @@ class NativePixelGeometryReplay {
                             selected.DestBlendAlpha = D3D11_BLEND_ZERO;
                             selected.BlendOpAlpha = D3D11_BLEND_OP_ADD;
                         }
+                        if (countSelection) {
+                            auto &selected = blend.RenderTarget[target];
+                            selected.BlendEnable = TRUE;
+                            selected.SrcBlend = selected.DestBlend = D3D11_BLEND_ONE;
+                            selected.BlendOp = D3D11_BLEND_OP_ADD;
+                            selected.SrcBlendAlpha = D3D11_BLEND_ONE;
+                            selected.DestBlendAlpha = D3D11_BLEND_ZERO;
+                            selected.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+                        }
                         Com<ID3D11Device1> extendedDevice;
                         check(r.device_.As(&extendedDevice), "Get private completion device");
                         check(extendedDevice->CreateBlendState1(&blend, &completionBlend),
@@ -470,10 +621,19 @@ class NativePixelGeometryReplay {
                             {"slot", target},
                             {"format", uint32_t(desc.Format)},
                             {"cleared_to_zero", true},
-                            {"blend_and_logic_disabled", !accumulatePredicate},
+                            {"blend_and_logic_disabled", !accumulatePredicate && !countSelection},
                             {"write_mask", 15},
                             {"alpha_to_coverage", blend.AlphaToCoverageEnable != FALSE},
                             {"sample_mask", mask}};
+                        if (countSelection) {
+                            report["kind"] = "native_pixel_return_count_observation";
+                            report["backend"] = "native-pixel-return-count/1";
+                            report["scope"] = "returning_samples_on_private_additive_target";
+                            report["completion_target"]["rgb_reduction"] = "add";
+                            report["completion_target"]["alpha_reduction"] = "replace";
+                            report["completion_target"]["logic_disabled"] = true;
+                            report["diagnostic_working_payload_bytes"] = workingBytes;
+                        }
                         if (accumulatePredicate) {
                             report["kind"] = "native_pixel_primitive_presence_observation";
                             report["backend"] = "native-pixel-primitive-presence/1";
@@ -740,9 +900,14 @@ class NativePixelGeometryReplay {
                         {"cs_invocations", counts.CSInvocations}};
                     if (observe)
                         observe(r, true);
-                    if (depthTransport) {
+                    if (diagnosticTransport) {
+                        const auto position = depthSelection
+                                                  ? *depthSelection
+                                                  : NativeDepthCompletionSelection{
+                                                        countSelection->x, countSelection->y,
+                                                        countSelection->layer, countSelection->sample};
                         // The transport is no longer an output after the draw.
-                        // Restore the depth-only OM layout before inspection.
+                        // Unbind private color outputs before inspecting diagnostic storage.
                         Com<ID3D11DepthStencilView> depth;
                         context->OMGetRenderTargets(0, nullptr, &depth);
                         context->OMSetRenderTargetsAndUnorderedAccessViews(
@@ -751,10 +916,10 @@ class NativePixelGeometryReplay {
                         Replay::PredicateIsolation isolation(r);
                         const auto storage =
                             transportResource.desc[5] == 1
-                                ? r.readTextureStorage(depthTransport.Get(), transportResource, scoped)
+                                ? r.readTextureStorage(diagnosticTransport.Get(), transportResource, scoped)
                                 : readNativeMsaaStorage(
-                                      r.device_.Get(), context, depthTransport.Get(), transportResource,
-                                      depthSelection->sample, uint32_t(DXGI_FORMAT_R32G32B32A32_FLOAT),
+                                      r.device_.Get(), context, diagnosticTransport.Get(), transportResource,
+                                      position.sample, uint32_t(DXGI_FORMAT_R32G32B32A32_FLOAT),
                                       [&](ID3D11Resource *resource, const Resource &layout) {
                                           return r.readTextureStorage(resource, layout, scoped);
                                       },
@@ -762,18 +927,22 @@ class NativePixelGeometryReplay {
                                       .bytes;
                         const auto width = transportResource.desc[0], height = transportResource.desc[1];
                         const auto offset =
-                            ((uint64_t(depthSelection->layer) * height + depthSelection->y) * width +
-                             depthSelection->x) *
-                            16;
+                            ((uint64_t(position.layer) * height + position.y) * width + position.x) * 16;
                         if (offset > storage.size() || storage.size() - offset < 16)
-                            throw std::runtime_error("Depth completion readback bounds");
-                        std::array<uint32_t, 3> rgb{};
-                        std::memcpy(rgb.data(), storage.data() + offset, 12);
-                        report["depth_transport"]["rgb_bits"] = rgb;
-                        report["depth_transport"]["marker_present"] = rgb == marker;
-                        report["kind"] = "native_depth_completion_observation";
-                        report["scope"] = "original_depth_draw_with_private_color_transport";
-                        report["backend"] = "native-depth-completion/1";
+                            throw std::runtime_error("Diagnostic color transport readback bounds");
+                        if (countSelection) {
+                            std::array<uint32_t, 4> bits{};
+                            std::memcpy(bits.data(), storage.data() + offset, 16);
+                            report["return_count"] = decodeNativePixelReturnCount(bits);
+                        } else {
+                            std::array<uint32_t, 3> rgb{};
+                            std::memcpy(rgb.data(), storage.data() + offset, 12);
+                            report["depth_transport"]["rgb_bits"] = rgb;
+                            report["depth_transport"]["marker_present"] = rgb == marker;
+                            report["kind"] = "native_depth_completion_observation";
+                            report["scope"] = "original_depth_draw_with_private_color_transport";
+                            report["backend"] = "native-depth-completion/1";
+                        }
                     }
                     checkDeadline();
                     validate();
@@ -1014,6 +1183,14 @@ Json replayNativeDepthCompletion(Replay &r, Id event, const NativeDepthCompletio
     result["reference_draw"] = reference;
     result["replay_passes"] = 2;
     return result;
+}
+Json replayNativePixelReturnCount(Replay &r, Id event, const NativePixelReturnCountSelection &selection,
+                                  const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,
+                                  uint32_t timeoutMs, const CancelCheck &cancelled) {
+    const std::function<void(Replay &, uint64_t)> unused;
+    return NativePixelGeometryReplay(r, event, {0, 0, {}, maxBytes, timeoutMs}, unused, cancelled)
+        .original(observe, selection.target, {}, {0x3f800000, 0x3f800000, 0x3f800000}, false,
+                  NativePixelTestOverride::Preserve, {}, {}, selection);
 }
 Json replayNativePixelPrimitiveMask(Replay &r, Id event, uint32_t target, PixelPrimitiveMask selection,
                                     const std::function<void(Replay &, bool)> &observe, uint64_t maxBytes,

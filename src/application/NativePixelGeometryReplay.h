@@ -58,6 +58,20 @@ nlohmann::json replayNativePixelCompletion(
 struct NativeDepthCompletionSelection {
     uint32_t x = 0, y = 0, layer = 0, sample = 0;
 };
+struct NativePixelReturnCountSelection {
+    uint32_t target = 0, x = 0, y = 0, layer = 0, sample = 0;
+};
+// Decodes RGB float32 accumulation. Values at the exact-integer limit are
+// unknown because adding one can stop changing the stored value.
+nlohmann::json decodeNativePixelReturnCount(std::array<uint32_t, 4> bits);
+// Redirects one existing float PS output to private RGBA32F storage and adds
+// one RGB unit per returning, surviving sample. Original alpha, depth/stencil,
+// coverage, other outputs and UAV slots remain. Coordinates are relative to the
+// selected 2D RTV view. This measures a diagnostic replay, not original identity.
+nlohmann::json replayNativePixelReturnCount(Replay &, Id event, const NativePixelReturnCountSelection &,
+                                            const std::function<void(Replay &, bool after)> &observe = {},
+                                            uint64_t maxBytes = 256ull * 1024 * 1024,
+                                            uint32_t timeoutMs = 30000, const CancelCheck &cancelled = {});
 // Adds a private color transport to a 2D depth-only draw and reads one sample.
 // Layer is relative to the bound DSV. Original depth/stencil, discard and
 // coverage remain active; alpha-to-coverage and an occupied UAV slot zero are

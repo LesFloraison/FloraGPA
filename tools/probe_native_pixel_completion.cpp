@@ -10,10 +10,11 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     try {
         const auto args = app.arguments();
-        if (args.size() != 9 && args.size() != 11 && !(args.size() == 12 && args[11] == "--presence"))
-            throw std::runtime_error(
-                "Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
-                "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE [--presence] | --ordinal N]");
+        if (args.size() != 9 && !(args.size() == 10 && args[9] == "--return-count") && args.size() != 11 &&
+            !(args.size() == 12 && args[11] == "--presence"))
+            throw std::runtime_error("Usage: FloraNativePixelCompletionProbe FRAME EVENT SLOT X Y SAMPLE "
+                                     "VENDOR NEW_DIRECTORY [PRIMITIVE_MASK PRIMITIVE_VALUE [--presence] | "
+                                     "--ordinal N | --return-count]");
         auto number = [&](int i) {
             bool ok = false;
             const auto value = args[i].toULongLong(&ok, 0);
@@ -24,6 +25,7 @@ int main(int argc, char **argv) {
         const Id event = number(2);
         const auto slot = uint32_t(number(3)), x = uint32_t(number(4)), y = uint32_t(number(5));
         const auto sample = uint32_t(number(6)), vendor = uint32_t(number(7));
+        const bool returnCount = args.size() == 10 && args[9] == "--return-count";
         const auto ordinal = args.size() == 11 && args[9] == "--ordinal"
                                  ? std::optional<uint32_t>(uint32_t(number(10)))
                                  : std::nullopt;
@@ -95,8 +97,11 @@ int main(int argc, char **argv) {
         const auto before = pixel(replay);
         std::vector<uint8_t> cleared, marked, original;
         const auto observer = [&](Replay &r, bool after) { (after ? marked : cleared) = pixel(r); };
-        auto report = ordinal ? replayNativePixelOrdinal(replay, event, {slot, *ordinal, true}, observer,
+        auto report = returnCount
+                          ? replayNativePixelReturnCount(replay, event, {slot, x, y, 0, sample}, observer,
                                                          256ull * 1024 * 1024, 60000, cancel)
+                      : ordinal ? replayNativePixelOrdinal(replay, event, {slot, *ordinal, true}, observer,
+                                                           256ull * 1024 * 1024, 60000, cancel)
                       : args.size() == 12
                           ? replayNativePixelPrimitivePresence(replay, event, slot, *primitive, observer,
                                                                256ull * 1024 * 1024, 60000, cancel)
@@ -120,19 +125,28 @@ int main(int argc, char **argv) {
         const bool matched =
             before == restored && before == pixel(replay) && original == expected &&
             originalReport.at("passing_samples") == reference.measurementResult()->occlusion &&
-            (ordinal || report.at("passing_samples") == originalReport.at("passing_samples"));
+            (ordinal || returnCount ||
+             report.at("passing_samples") == originalReport.at("passing_samples")) &&
+            (!returnCount || report.at("return_count").at("valid") == true);
         const auto source = frame.shader(frame.resource(shader).data);
         std::optional<PixelPrimitiveInput> producer;
         if (primitive && report.at("primitive_id_source") == "bound_geometry_shader")
             producer =
                 PixelPrimitiveInput{report.at("completion_shader").at("input_register").get<uint32_t>(),
                                     report.at("completion_shader").at("input_component").get<uint32_t>()};
-        const auto rewritten =
+        auto rewritten =
             args.size() == 12 ? instrumentPixelPrimitivePresence(source, slot, *primitive,
                                                                  256ull * 1024 * 1024, cancel, producer)
             : primitive ? instrumentPixelPrimitiveMask(source, slot, *primitive, 256ull * 1024 * 1024, cancel,
                                                        producer)
-                        : instrumentPixelCompletion(source, slot, {0x3f800000, 0x40000000, 0x40400000});
+                        : instrumentPixelCompletion(
+                              source, slot,
+                              returnCount ? std::array<uint32_t, 3>{0x3f800000, 0x3f800000, 0x3f800000}
+                                          : std::array<uint32_t, 3>{0x3f800000, 0x40000000, 0x40400000});
+        if (returnCount) {
+            rewritten.identity["requires_private_unblended_target"] = false;
+            rewritten.identity["requires_additive_rgb_float32_target"] = true;
+        }
         if (rewritten.identity != report.at("completion_shader"))
             throw std::runtime_error("Completion probe shader identity differs");
         save("original.dxbc", source);
@@ -152,6 +166,11 @@ int main(int argc, char **argv) {
                            {"marker_changed_storage", cleared != marked},
                            {"original_storage_restored", before == restored},
                            {"original_gpu_schedule", false}};
+        if (returnCount) {
+            report["probe"].erase("marker_changed_storage");
+            report["probe"]["count_is_original_fragment_identity"] = false;
+            report["probe"]["original_target_redirected"] = true;
+        }
         if (primitive) {
             report["probe"].erase("marker_changed_storage");
             report["probe"]["diagnostic_storage_changed"] = cleared != marked;
