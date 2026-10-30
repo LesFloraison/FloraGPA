@@ -46,6 +46,7 @@ int nativeAnalyzeCli(QStringList arguments) {
             {"index", "Override the per-vertex attribute index after all draw offsets", "integer"});
         parser.addOption(
             {"history-scope", "events or private-draw; original fragment history remains pending", "scope"});
+        parser.addOption({"return-count", "Count returning samples on a private diagnostic target"});
         parser.addOption({"shader-outputs", "Evaluate private draw shader outputs"});
         parser.addOption({"output-merger", "Evaluate private draw shader outputs and output merger"});
         parser.addOption({"primitive-identity", "Observe conditional system IDs in private draw history"});
@@ -84,7 +85,8 @@ int nativeAnalyzeCli(QStringList arguments) {
             if (key == "out" || key == "experiment" || key == "timeout")
                 continue;
             if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
-                key == "primitive-identity" || key == "primitive-presence" || key == "primitive-tests")
+                key == "primitive-identity" || key == "primitive-presence" || key == "primitive-tests" ||
+                key == "return-count")
                 options[field] = true;
             else if (key == "stage" || key == "history-scope" || key == "debug-scope" ||
                      key == "vertex-storage")

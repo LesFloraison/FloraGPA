@@ -1,4 +1,5 @@
-#include "BlendCapture.h"
+#include "DepthStencilCapture.h"
+#include "PixelOrdinalCapture.h"
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
 #include <QDir>
@@ -55,7 +56,7 @@ class NativeDrawHistoryJobsTests final : public QObject {
              {Json{{"gpa_event", nullptr}}, Json{{"history_scope", "events"}}, Json{{"shader_outputs", 1}},
               Json{{"output_merger", "true"}}, Json{{"primitive_identity", nullptr}},
               Json{{"primitive_presence", 1}}, Json{{"primitive_tests", 1}}, Json{{"primitive_tests", true}},
-              Json{{"max_steps", 5}}}) {
+              Json{{"return_count", 1}}, Json{{"max_steps", 5}}}) {
             auto invalid = valid;
             invalid.update(patch);
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", invalid));
@@ -64,7 +65,7 @@ class NativeDrawHistoryJobsTests final : public QObject {
         missing.erase("gpa_event");
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", missing));
         for (const auto key : {"shader_outputs", "output_merger", "primitive_identity", "primitive_presence",
-                               "primitive_tests"}) {
+                               "primitive_tests", "return_count"}) {
             auto events = Json{{"resource", 1000}, {"history_scope", "events"}, {key, false}};
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("history", events));
             QVERIFY_THROWS_EXCEPTION(std::invalid_argument, nativeAnalysisRequest("texture", events));
@@ -75,7 +76,7 @@ class NativeDrawHistoryJobsTests final : public QObject {
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
             for (const auto *mode :
-                 {"storage", "shader", "merger", "identity", "presence", "tests", "all-msaa"})
+                 {"storage", "shader", "merger", "identity", "presence", "tests", "count", "all-msaa"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void isolatedDraw() {
@@ -100,6 +101,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
             const auto project = dir.filePath("experiment.json");
             experiment.save(project);
             auto options = selection(vendor);
+            if (mode == "count" || msaa)
+                options["return_count"] = true;
             if (mode == "shader")
                 options["shader_outputs"] = true;
             if (mode == "merger" || msaa)
@@ -122,6 +125,11 @@ class NativeDrawHistoryJobsTests final : public QObject {
             QCOMPARE(data.at("event"), Json(100));
             QCOMPARE(data.at("selection").at("sample"), Json(msaa ? 2 : 0));
             QCOMPARE(data.at("fragment_history_available"), Json(false));
+            const auto &count = data.at("return_count_observation");
+            QCOMPARE(count.at("requested"), Json(mode == "count" || msaa));
+            QCOMPARE(count.at("status"), Json(mode == "count" || msaa ? "observed" : "not_requested"));
+            QCOMPARE(count.at("count"), mode == "count" || msaa ? Json(3) : Json(nullptr));
+            QVERIFY(count.at("original_fragment_eligibility").is_null());
             QVERIFY(data.at("original_fragment_eligibility").is_null());
             QCOMPARE(data.at("observed_storage_restored"), Json(true));
             QCOMPARE(data.at("records").size(), size_t(3));
@@ -168,6 +176,9 @@ class NativeDrawHistoryJobsTests final : public QObject {
             stale["options"]["primitive_identity"] = !options.value("primitive_identity", false);
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateNativeAnalysisResult(stale, result));
             stale = job;
+            stale["options"]["return_count"] = !options.value("return_count", false);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateNativeAnalysisResult(stale, result));
+            stale = job;
             stale["experiment_sha256"] = "changed";
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateNativeAnalysisResult(stale, result));
             save(output + "/verified.json", {{"vendor_request", vendor},
@@ -183,21 +194,159 @@ class NativeDrawHistoryJobsTests final : public QObject {
         QTemporaryDir dir;
         const auto capture = dir.filePath("frame.gpa_frame");
         blendCapture().save(capture);
-        auto bad = selection();
+        auto selected = selection();
+        selected["return_count"] = true;
+        auto bad = selected;
         bad["x"] = 1;
         const auto failed =
             prepareNativeAnalysisJob(capture, "history", dir.filePath("failed"), worker(), bad);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, runNativeAnalysisJob(failed, worker(), 30));
         QVERIFY(!QFile::exists(dir.filePath("failed/result.json")));
         const auto cancelled =
-            prepareNativeAnalysisJob(capture, "history", dir.filePath("cancelled"), worker(), selection());
+            prepareNativeAnalysisJob(capture, "history", dir.filePath("cancelled"), worker(), selected);
         QVERIFY_THROWS_EXCEPTION(OperationCancelled, runNativeAnalysisJob(cancelled, worker(), 30, [&] {
                                      return QDir(dir.filePath("cancelled")).exists();
                                  }));
         QVERIFY(!QFile::exists(dir.filePath("cancelled/result.json")));
         const auto retry =
-            prepareNativeAnalysisJob(capture, "history", dir.filePath("retry"), worker(), selection());
+            prepareNativeAnalysisJob(capture, "history", dir.filePath("retry"), worker(), selected);
         QVERIFY(load(runNativeAnalysisJob(retry, worker(), 30)).at("ok") == true);
+    }
+    void integerCount_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<uint32_t>("alpha");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (uint32_t alpha : {1u, 0x3f800000u})
+                QTest::newRow(qPrintable(QString("integer-%1-%2").arg(vendor).arg(alpha))) << vendor << alpha;
+    }
+    void countBoundaries_data() {
+        QTest::addColumn<uint32_t>("vendor");
+        QTest::addColumn<QString>("mode");
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *mode : {"depth", "no-ps", "array"})
+                QTest::newRow(qPrintable(QString("boundary-%1-%2").arg(vendor).arg(mode)))
+                    << vendor << QString(mode);
+    }
+    void countBoundaries() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(QString, mode);
+            auto fixture = mode == "depth" ? depthStencilCapture() : blendCapture();
+            auto options = selection(vendor);
+            options["return_count"] = true;
+            if (mode == "depth") {
+                options["gpa_event"] = 1000;
+                options["resource"] = 720;
+            }
+            if (mode == "no-ps") {
+                std::erase_if(fixture.entries, [](const auto &e) { return e.id == 90 || e.id == 190; });
+                State state{};
+                state.topology = 4;
+                state.sampleMask = UINT32_MAX;
+                state.omStart = 8;
+                state.rtCount = 1;
+                state.rtv[0] = 1002;
+                state.blend = 64;
+                state.rasterizer = 52;
+                state.viewports = 50;
+                state.stages[0].shader = 10;
+                fixture.add(90, 3, 3, snapshot(state));
+                fixture.add(190, 3, 3, snapshot(state));
+            }
+            if (mode == "array") {
+                std::erase_if(fixture.entries, [](const auto &e) { return e.id >= 1000 && e.id <= 1002; });
+                fixture.add(1000, 5, 0x85,
+                            statePack(Id(0), Id(0), 2u, 2u, 2u, 3u, 2u, 1u, 0u, 0u, 32u, 0u, 0u, Id(0)));
+                fixture.add(1002, 5, 0x8d, statePack(Id(0), Id(0), Id(1000), 2u, 5u, 1u, 1u, 2u));
+                fixture.add(70, 7, 0x32,
+                            statePack(Id(0), Id(1), Id(1002), uint8_t(1), .125f, .5f, .25f, .25f));
+                options["mip"] = 1;
+                options["layer"] = 1;
+            }
+            QTemporaryDir dir;
+            const auto capture = dir.filePath("frame.gpa_frame");
+            fixture.save(capture);
+            const auto output = dir.filePath("result");
+            const auto job = prepareNativeAnalysisJob(capture, "history", output, worker(), options);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 60));
+            const auto &count = result.at("data").at("return_count_observation");
+            QCOMPARE(count.at("requested"), Json(true));
+            QVERIFY(count.at("original_fragment_eligibility").is_null());
+            if (mode == "array") {
+                QCOMPARE(count.at("count"), Json(1));
+                const auto &transport = count.at("observation").at("count_transport");
+                QCOMPARE(transport.at("source_mip"), Json(1));
+                QCOMPARE(transport.at("source_first_layer"), Json(1));
+                QCOMPARE(transport.at("layer"), Json(0));
+            } else {
+                QCOMPARE(count.at("status"), Json("not_applicable"));
+                QVERIFY(count.at("count").is_null());
+                QCOMPARE(count.at("reason"),
+                         Json(mode == "depth" ? "selected_depth_target" : "no_pixel_shader"));
+                QVERIFY(!count.contains("observation"));
+            }
+            QVERIFY(QFile::copy(capture, output + "/frame.gpa_frame"));
+            evidence(output);
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
+    void integerCount() {
+        try {
+            QFETCH(uint32_t, vendor);
+            QFETCH(uint32_t, alpha);
+            auto fixture = blendCapture(1, false, true);
+            for (const auto &entry : fixture.entries) {
+                if (entry.id == 64)
+                    put(fixture.bytes, size_t(entry.offset) + 16, 1u);
+                if (entry.id == 100)
+                    put(fixture.bytes, size_t(entry.offset) + 24, 9u);
+            }
+            addOrdinalCode(fixture, 11,
+                           "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;return "
+                           "float4(i==2?3:-1,i==1?3:-1,0,1);}",
+                           "vs_5_0");
+            addOrdinalCode(fixture, 13,
+                           "uint4 main():SV_Target{return uint4(7,11,13," + std::to_string(alpha) + "u);}",
+                           "ps_5_0");
+            QTemporaryDir dir;
+            const auto capture = dir.filePath("frame.gpa_frame");
+            fixture.save(capture);
+            Frame frame(capture.toStdWString());
+            ReplayOptions replayOptions;
+            replayOptions.until = 100;
+            replayOptions.debug = true;
+            replayOptions.warp = !vendor;
+            if (vendor)
+                replayOptions.vendor = vendor;
+            Replay reference(frame, replayOptions);
+            reference.run();
+            const auto original = reference.readTexture(1000);
+            const uint32_t expected = Reader(original).read<uint32_t>() == 7 ? 3 : 0;
+            auto options = selection(vendor);
+            options["return_count"] = true;
+            const auto output = dir.filePath("integer");
+            const auto job = prepareNativeAnalysisJob(capture, "history", output, worker(), options);
+            const auto result = load(runNativeAnalysisJob(job, worker(), 60));
+            const auto &data = result.at("data");
+            const auto &count = data.at("return_count_observation");
+            QCOMPARE(count.at("status"), Json("observed"));
+            QCOMPARE(count.at("count"), Json(expected));
+            QCOMPARE(count.at("observation").at("count_transport").at("source_slot"), Json(0));
+            QCOMPARE(count.at("observation").at("count_transport").at("slot"), Json(1));
+            QCOMPARE(data.at("original_draw_observation").at("after").at("bytes"), Json(original));
+            QVERIFY(data.at("original_fragment_eligibility").is_null());
+            QCOMPARE(data.at("fragment_history_available"), Json(false));
+            QCOMPARE(data.at("before"), data.at("restored"));
+            save(output + "/verified.json", {{"vendor_request", vendor},
+                                             {"alpha_bits", alpha},
+                                             {"reference_bytes", original},
+                                             {"expected_count", expected}});
+            QVERIFY(QFile::copy(capture, output + "/frame.gpa_frame"));
+            evidence(output);
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
     }
     void cli() {
         QTemporaryDir dir;
@@ -207,8 +356,8 @@ class NativeDrawHistoryJobsTests final : public QObject {
         process.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe",
                       {"analyze", capture, "history", "--history-scope", "private-draw", "--gpa-event", "100",
                        "--resource", "1000", "--warp", "--output-merger", "--primitive-identity",
-                       "--primitive-presence", "--primitive-tests", "--max-steps", "100000", "--out",
-                       dir.filePath("cli")});
+                       "--primitive-presence", "--primitive-tests", "--return-count", "--max-steps", "100000",
+                       "--out", dir.filePath("cli")});
         QVERIFY(process.waitForFinished(30000));
         QVERIFY2(process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0,
                  process.readAllStandardError().constData());
@@ -216,6 +365,7 @@ class NativeDrawHistoryJobsTests final : public QObject {
         QCOMPARE(result.at("data").at("primitive_identity_observation").at("system_primitive_id"), Json(0));
         QCOMPARE(result.at("data").at("merger_evaluation").at("requested"), Json(true));
         QCOMPARE(result.at("context").at("options").at("max_steps"), Json(100000));
+        QCOMPARE(result.at("data").at("return_count_observation").at("count"), Json(1));
     }
 };
 QTEST_GUILESS_MAIN(NativeDrawHistoryJobsTests)

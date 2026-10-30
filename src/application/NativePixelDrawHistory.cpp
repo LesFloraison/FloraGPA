@@ -539,6 +539,37 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
             : Json(nullptr);
     original["geometry_passing_samples"] = bridgePassing;
     original["geometry_passing_samples_match"] = original.at("passing_samples") == bridgePassing;
+    Json returnCount{{"requested", limits.observeReturnCount},
+                     {"status", "not_requested"},
+                     {"count", nullptr},
+                     {"original_fragment_eligibility", nullptr}};
+    if (limits.observeReturnCount) {
+        if (target.view.at("slot").is_null()) {
+            returnCount["status"] = "not_applicable";
+            returnCount["reason"] = "selected_depth_target";
+        } else if (original.at("shaders")[4].at("resource") == 0) {
+            returnCount["status"] = "not_applicable";
+            returnCount["reason"] = "no_pixel_shader";
+        } else {
+            const auto observation =
+                replayNativePixelReturnCount(r, event,
+                                             {target.view.at("slot").get<uint32_t>(), s.x, s.y,
+                                              target.view.at("relative_layer").get<uint32_t>(), s.sample},
+                                             {}, limits.maxBytes, limits.timeoutMs, bounded);
+            if (observation.at("frame_sha256") != original.at("frame_sha256") ||
+                observation.at("adapter") != original.at("adapter") ||
+                observation.at("shaders") != original.at("shaders"))
+                throw std::runtime_error("Private return count context mismatch");
+            const auto size = observation.dump().size();
+            if (size > limits.maxBytes)
+                throw std::runtime_error("Private return count retained payload budget exceeded");
+            returnCount["retained_payload_bytes"] = size;
+            returnCount["status"] =
+                observation.at("return_count").at("valid") == true ? "observed" : "unknown";
+            returnCount["count"] = observation.at("return_count").at("count");
+            returnCount["observation"] = observation;
+        }
+    }
     Json identity{{"requested", limits.observePrimitiveIdentity}, {"status", "not_requested"}};
     Json association{{"scope", "system_id_equality_only"},
                      {"status", "not_observed"},
@@ -675,7 +706,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
     return {
         {"schema", 1},
         {"kind", "private_pixel_draw_history"},
-        {"backend", "native-pixel-draw-history/1"},
+        {"backend", "native-pixel-draw-history/2"},
         {"event", event},
         {"frame_sha256", replay.at("frame_sha256")},
         {"adapter", replay.at("adapter")},
@@ -697,6 +728,7 @@ nlohmann::json collectNativePixelDrawHistory(Replay &r, Id event, const NativeHi
         {"candidate_passes", candidateReports},
         {"geometry_replay", replay},
         {"original_draw_observation", original},
+        {"return_count_observation", returnCount},
         {"primitive_identity_observation", identity},
         {"primitive_identity_association", association},
         {"primitive_presence_observation", presence},

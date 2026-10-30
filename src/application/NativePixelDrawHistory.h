@@ -21,6 +21,9 @@ struct NativePixelDrawHistoryLimits {
     // Counterfactual full draws disable individual output tests. Differences
     // are observations, not original-fragment failure attribution.
     bool observePrimitiveTests = false;
+    // Count returning samples on a private additive target. This does not
+    // identify original fragments or establish their execution order.
+    bool observeReturnCount = false;
 };
 // Runs at a private before-primitive checkpoint with measured quad inputs.
 // Consumers must copy mutable snapshot storage before executing a trace.

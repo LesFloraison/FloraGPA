@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import struct
+import math
 from validate_native_pixel_geometry_replay import common, FRAME_HASHES, require
 
 
@@ -23,7 +24,7 @@ def same(a, b):
 
 
 def validate(r, vendor):
-    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/1', 'schema/backend')
+    require(r['schema'] == 1 and r['backend'] == 'native-pixel-draw-history/2', 'schema/backend')
     require(r['kind'] == 'private_pixel_draw_history', 'private history kind')
     require(r['order'] == 'captured_geometry_storage' and r['sample_selection_domain'] == 'target_storage', 'order/sample scope')
     require(r['original_fragment_eligibility'] is None, 'original eligibility')
@@ -38,6 +39,46 @@ def validate(r, vendor):
         from validate_native_original_draw import validate as original_draw
         original_draw(r)
         original_reads = 2
+    count = r['return_count_observation']
+    require(type(count['requested']) is bool and count['original_fragment_eligibility'] is None,
+            'Return count provenance')
+    if not count['requested']:
+        require(count['status'] == 'not_requested' and count['count'] is None and 'observation' not in count,
+                'Unrequested count')
+    elif count['status'] == 'not_applicable':
+        expected_reason = ('selected_depth_target' if r['selection']['subresource']['slot'] is None
+                           else 'no_pixel_shader' if r['original_draw_observation']['shaders'][4]['resource'] == 0
+                           else None)
+        require(expected_reason is not None and count['reason'] == expected_reason and count['count'] is None
+                and 'observation' not in count, 'Inapplicable count')
+    else:
+        observed = count['observation']
+        for key in ('event', 'frame_sha256', 'adapter', 'shaders'):
+            require(observed[key] == r['original_draw_observation'][key], 'Return count context: ' + key)
+        transport = observed['count_transport']
+        selection = r['selection']
+        require([transport[k] for k in ('source_slot', 'x', 'y', 'sample', 'layer', 'source_mip')]
+                == [selection['subresource']['slot'], selection['x'], selection['y'], selection['sample'],
+                    selection['subresource']['relative_layer'], selection['mip']], 'Return count selection')
+        require(count['count'] == observed['return_count']['count']
+                and observed['original_fragment_eligibility'] is None
+                and observed['backend'] == 'native-pixel-return-count/3', 'Return count contract')
+        decoded = observed['return_count']
+        if decoded['valid'] is True:
+            from validate_pixel_return_count import verify
+            require(count['status'] == 'observed', 'Valid count status')
+            component = observed['completion_shader']['component_type']
+            require(component in (1, 2, 3), 'Return count component type')
+            verify(observed, vendor, component_type=component)
+        else:
+            bits = decoded['raw_bits']
+            require(len(bits) == 4 and all(type(x) is int and 0 <= x <= 0xffffffff for x in bits), 'Unknown raw count')
+            value = struct.unpack('<f', struct.pack('<I', bits[0]))[0]
+            integral = math.isfinite(value) and value >= 0 and math.floor(value) == value
+            reason = ('rgb_disagreement' if bits[:3] != [bits[0]] * 3 else
+                      'invalid_accumulation' if not integral else 'float32_integer_limit' if value >= 2**24 else None)
+            require(reason is not None and decoded['reason'] == reason and decoded['valid'] is False
+                    and count['status'] == 'unknown' and count['count'] is None, 'Unknown count cannot become zero')
     identity_reads = 0
     if r.get('primitive_identity_observation', {}).get('requested') is True:
         from validate_native_pixel_identity import validate_history_identity

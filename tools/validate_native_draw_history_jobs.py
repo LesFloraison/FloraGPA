@@ -45,6 +45,8 @@ def validate(job, result, vendor):
             'Requested primitive presence')
     require(data.get('primitive_presence_observation', {}).get('test_variants_requested', False) is options.get('primitive_tests', False),
             'Requested primitive test variants')
+    require(data['return_count_observation']['requested'] is options.get('return_count', False),
+            'Requested return count')
     storage(data, vendor)
     if outputs:
         shader(data, vendor)
