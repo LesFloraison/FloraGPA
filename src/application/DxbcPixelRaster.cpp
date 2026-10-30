@@ -663,9 +663,10 @@ PixelRasterInputs capturePixelRasterInputs(ID3D11Device *reference, bool warp, c
         {"geometry", bridge.identity}};
     result.identity["raster_state"] = pixelRasterIdentity(state);
     if (pixel.evaluation) {
-        result.identity["backend"] = "dxbc-pixel-attribute-evaluation/1";
+        result.identity["backend"] = "dxbc-pixel-attribute-evaluation/2";
         result.identity["evaluation"] = {{"opcode", pixel.evaluation->opcode},
                                          {"location", pixel.evaluation->location},
+                                         {"precision", pixel.evaluation->precision},
                                          {"constant_mask", pixel.attributeConstantMask}};
     }
     return result;

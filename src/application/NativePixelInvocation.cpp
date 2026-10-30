@@ -33,28 +33,17 @@ struct PixelAttributeContext {
         const auto found = bridges.find(request.inputRegister);
         if (found == bridges.end())
             throw std::runtime_error("Pixel attribute register has no original geometry bridge");
-        const auto pixel = pixelInputShader(shader, request.inputRegister, selection,
-                                            PixelAttributeEvaluation{request.opcode, request.location});
+        const auto pixel =
+            pixelInputShader(shader, request.inputRegister, selection,
+                             PixelAttributeEvaluation{request.opcode, request.location, request.precision});
         const auto samples = raster.rasterizer.ForcedSampleCount ? raster.rasterizer.ForcedSampleCount
                                                                  : raster.target.samples.Count;
         std::array<Value, 4> values{};
         nlohmann::json observation;
-        if (request.opcode == 204 && request.location[0] >= samples &&
-            pixel.attributeConstantMask != pixel.mask) {
-            for (unsigned lane = 0; lane < 4; ++lane) {
-                values[lane] = original.at(request.inputRegister)[lane];
-                values[lane].valid &= uint8_t(pixel.attributeConstantMask);
-                for (unsigned c = 0; c < 4; ++c)
-                    if (!(values[lane].valid & (1u << c)))
-                        values[lane].bits[c] = 0;
-            }
-            observation = {{"backend", "undefined_attribute_sample_index"},
-                           {"raster_samples", samples},
-                           {"private_draws", 0}};
-        } else {
+        auto observe = [&](const PixelInputShader &helper) {
             if (retained >= limits.maxBytes)
                 throw std::runtime_error("Pixel attribute observation budget exceeded");
-            auto observed = capturePixelRasterInputs(device.Get(), warp, raster, found->second, pixel,
+            auto observed = capturePixelRasterInputs(device.Get(), warp, raster, found->second, helper,
                                                      limits.maxBytes - retained, bounded, limits.timeoutMs);
             if (observed.records.size() != 1)
                 throw std::runtime_error("Pixel attribute observation is not unique");
@@ -67,12 +56,37 @@ struct PixelAttributeContext {
                 if (observed.identity.at(key) != identity.at(key))
                     throw std::runtime_error("Pixel attribute observation changed original raster identity");
             for (unsigned lane = 0; lane < 4; ++lane)
-                values[lane] = pixel.decode(observed.records[0].words[lane]);
-            observation = std::move(observed.identity);
+                values[lane] = helper.decode(observed.records[0].words[lane]);
+            return observed.identity;
+        };
+        if (request.opcode == 204 && request.location[0] >= samples &&
+            pixel.attributeConstantMask != pixel.mask) {
+            values = original.at(request.inputRegister);
+            observation = {{"backend", "undefined_attribute_sample_index"},
+                           {"raster_samples", samples},
+                           {"private_draws", 0}};
+            if (pixel.attributeConstantMask && (request.precision[0] || request.precision[1])) {
+                // Observe the narrowed constant components, without executing an
+                // undefined sample request for the interpolated components.
+                const auto constants = pixelInputShader(shader, request.inputRegister, selection,
+                                                        PixelAttributeEvaluation{205, {}, request.precision});
+                auto evidence = observe(constants);
+                observation["private_draws"] = evidence.at("private_draws");
+                observation["constant_observation"] = std::move(evidence);
+            }
+            for (unsigned lane = 0; lane < 4; ++lane) {
+                values[lane].valid &= uint8_t(pixel.attributeConstantMask);
+                for (unsigned c = 0; c < 4; ++c)
+                    if (!(values[lane].valid & (1u << c)))
+                        values[lane].bits[c] = 0;
+            }
+        } else {
+            observation = observe(pixel);
         }
         observation["request"] = {{"opcode", request.opcode},
                                   {"input_register", request.inputRegister},
-                                  {"location", request.location}};
+                                  {"location", request.location},
+                                  {"precision", request.precision}};
         observation["quad_values"] = nlohmann::json::array();
         for (const auto &value : values)
             observation["quad_values"].push_back({{"bits", value.bits}, {"valid_mask", value.valid}});

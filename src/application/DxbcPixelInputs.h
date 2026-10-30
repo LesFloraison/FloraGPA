@@ -18,6 +18,7 @@ struct PixelAttributeEvaluation {
     // use the signed low four bits; sample indices are checked against raster samples.
     uint32_t opcode = 205;
     std::array<uint32_t, 2> location{};
+    std::array<uint32_t, 2> precision{};
 };
 struct PixelInputShader {
     std::vector<uint8_t> bytecode;

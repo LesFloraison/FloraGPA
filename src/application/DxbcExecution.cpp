@@ -477,8 +477,11 @@ Program::Program(Bytes dxbc) {
                         args[2].precision == 5) &&
                        (!comparison || args.back().precision <= 2);
             }();
+            const bool precisionAttribute = data->stage == 0 && op >= 203 && op <= 205 &&
+                                            args[0].precision <= 2 && args[1].precision <= 2 &&
+                                            (op == 205 || !args[2].precision);
             if (!precisionArithmetic(op) && !precisionSampling && !precisionLoad && !precisionStore &&
-                !precisionGather &&
+                !precisionGather && !precisionAttribute &&
                 std::any_of(args.begin(), args.end(), [](const Operand &arg) { return arg.precision != 0; }))
                 throw std::runtime_error("Minimum precision on DXBC opcode " + std::to_string(op) +
                                          " at word " + std::to_string(data->instructions.back().wordOffset) +
@@ -1297,15 +1300,17 @@ Step Lane::step() {
     } else if (op >= 203 && op <= 205) {
         const auto &destination = args[0], &attribute = args[1];
         if (p.stage != 0 || !s.quad || (instruction.words[0] & 0x00fff800u) || destination.modifier ||
-            destination.precision || destination.components != 2 || destination.mode != 0 ||
+            destination.precision > 2 || destination.components != 2 || destination.mode != 0 ||
             (destination.kind != 0 && destination.kind != 2 && destination.kind != 3) ||
             attribute.kind != 1 || attribute.indices.size() != 1 || attribute.modifier ||
-            attribute.precision || attribute.components != 2 || (attribute.mode != 1 && attribute.mode != 2))
+            attribute.precision > 2 || attribute.components != 2 ||
+            (attribute.mode != 1 && attribute.mode != 2))
             fail("Invalid or unsupported DXBC pixel attribute evaluation operands");
         const auto binding = s.address(attribute);
         if (binding.indices[0] >= 32)
             fail("DXBC pixel attribute register exceeds v31");
         AttributeRequest request{op, binding.indices[0], {}};
+        request.precision = {destination.precision, attribute.precision};
         bool known = true;
         if (op != 205) {
             const auto &location = args[2];

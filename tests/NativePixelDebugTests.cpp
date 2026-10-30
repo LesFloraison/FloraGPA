@@ -64,8 +64,10 @@ class NativePixelDebugTests final : public QObject {
         QTest::addColumn<uint32_t>("vendor");
         QTest::addColumn<QString>("mode");
         for (uint32_t vendor : {0u, 4318u, 32902u})
-            for (const auto *mode : {"constant", "derivative", "sample", "discard", "source", "uav",
-                                     "eval-centroid", "eval-sample", "eval-snapped"})
+            for (const auto *mode :
+                 {"constant", "derivative", "sample", "discard", "source", "uav", "eval-centroid",
+                  "eval-sample", "eval-snapped", "eval-centroid-min16", "eval-sample-min16",
+                  "eval-snapped-min16", "eval-centroid-min10", "eval-sample-min10", "eval-snapped-min10"})
                 QTest::newRow(qPrintable(QString::number(vendor) + "-" + mode)) << vendor << QString(mode);
     }
     void execution() {
@@ -74,7 +76,8 @@ class NativePixelDebugTests final : public QObject {
             QFETCH(QString, mode);
             QTemporaryDir dir;
             const auto capture = dir.filePath("frame.gpa_frame");
-            auto fixture = blendCapture(1, false, false, mode == "sample" || mode == "eval-sample" ? 4 : 1);
+            auto fixture =
+                blendCapture(1, false, false, mode == "sample" || mode.startsWith("eval-sample") ? 4 : 1);
             for (const auto &entry : fixture.entries)
                 if (entry.id == 100)
                     put(fixture.bytes, size_t(entry.offset) + 24, 9u);
@@ -101,10 +104,16 @@ class NativePixelDebugTests final : public QObject {
             fixture.save(capture);
             Frame frame(capture.toStdWString());
             Experiment experiment(frame);
+            const std::string type = mode.endsWith("min16")   ? "min16float4"
+                                     : mode.endsWith("min10") ? "min10float4"
+                                                              : "float4";
             const std::string vs =
                 mode.startsWith("eval-")
-                    ? "struct O{float4 p:SV_Position;float4 a:DATA;};O main(uint v:SV_VertexID){"
-                      "uint i=v%3;O o;o.p=float4(i==2?3:-1,i==1?3:-1,0,1);o.a=float4(1,7,3,.5);return o;}"
+                    ? "struct O{float4 p:SV_Position;" + type +
+                          " a:DATA;};O main(uint v:SV_VertexID){"
+                          "uint i=v%3;O o;o.p=float4(i==2?3:-1,i==1?3:-1,0,1);o.a=" +
+                          (mode.endsWith("min10") ? "float4(.125,.375,-.625,.8125)" : "float4(1,7,3,.5)") +
+                          ";return o;}"
                     : "float4 main(uint v:SV_VertexID):SV_Position{uint i=v%3;"
                       "return float4(i==2?3:-1,i==1?3:-1,0,1);}";
             experiment.setShader(frame, 10, compileClassProgram(vs, "vs_5_0"), vs, "main");
@@ -121,13 +130,16 @@ class NativePixelDebugTests final : public QObject {
             ps += "return float4(id," + std::string(mode == "sample" ? "sample" : "7") + "," +
                   (mode == "derivative" ? "ddx(p.x)" : "3") + ",.5);\n}";
             if (mode.startsWith("eval-")) {
-                const std::string expression = mode == "eval-centroid" ? "EvaluateAttributeCentroid(a)"
-                                               : mode == "eval-sample"
-                                                   ? "EvaluateAttributeAtSample(a,uint(p.x)+2)"
-                                                   : "EvaluateAttributeSnapped(a,int2(p.xy)*7)";
-                ps = "float4 main(float4 p:SV_Position,linear float4 a:DATA,uint id:SV_PrimitiveID)"
-                     ":SV_Target{float4 value=" +
-                     expression + ";value.x=float(id);return value;}";
+                const std::string expression =
+                    mode.startsWith("eval-centroid") ? "EvaluateAttributeCentroid(a)"
+                    : mode.startsWith("eval-sample") ? "EvaluateAttributeAtSample(a,uint(p.x)+2)"
+                                                     : "EvaluateAttributeSnapped(a,int2(p.xy)*7)";
+                ps = "float4 main(float4 p:SV_Position,linear " + type +
+                     " a:DATA,uint id:SV_PrimitiveID)"
+                     ":SV_Target{" +
+                     type + " value=" + expression +
+                     (type == "float4" ? ";value.x=float(id);return value;}"
+                                       : ";float4 output=float4(value);output.x=float(id);return output;}");
             }
             auto code = compileClassProgram(ps, "ps_5_0");
             if (mode == "source") {
@@ -147,7 +159,7 @@ class NativePixelDebugTests final : public QObject {
                 selection.erase("warp");
                 selection["gpu_vendor"] = vendor;
             }
-            if (mode == "sample" || mode == "eval-sample")
+            if (mode == "sample" || mode.startsWith("eval-sample"))
                 selection["sample"] = 2;
             const auto output = dir.filePath("out");
             const auto job =
@@ -165,11 +177,11 @@ class NativePixelDebugTests final : public QObject {
             reader.moveTo(reader.size());
             if (mode.startsWith("eval-")) {
                 const auto observations = reader.completion().at("attribute_evaluations");
-                QCOMPARE(observations.size(), size_t(mode == "eval-centroid" ? 1
-                                                     : mode == "eval-sample" ? 2
-                                                                             : 4));
+                QCOMPARE(observations.size(), size_t(mode.startsWith("eval-centroid") ? 1
+                                                     : mode.startsWith("eval-sample") ? 2
+                                                                                      : 4));
                 for (const auto &observation : observations)
-                    QCOMPARE(observation.at("backend"), Json("dxbc-pixel-attribute-evaluation/1"));
+                    QCOMPARE(observation.at("backend"), Json("dxbc-pixel-attribute-evaluation/2"));
                 QVERIFY(QFile::copy(capture, output + "/frame.gpa_frame"));
                 QVERIFY(QFile::copy(project, output + "/experiment.json"));
             }

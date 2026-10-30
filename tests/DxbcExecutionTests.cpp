@@ -327,71 +327,91 @@ class DxbcExecutionTests final : public QObject {
   private slots:
     void pixelAttributeExecutionContracts() {
         try {
-            for (uint32_t opcode : {203u, 204u, 205u}) {
-                auto attribute = src(1, 0);
-                attribute[0] = (attribute[0] & ~0xff0u) | 0x1b0;
-                auto location = src(1, 1);
-                if (opcode == 204)
-                    location[0] = (location[0] & ~0xffcu) | 8;
-                auto instruction = opcode == 205 ? op(opcode, {dst(0, 0, 5), attribute})
-                                                 : op(opcode, {dst(0, 0, 5), attribute, location});
-                const std::vector<Words> rows{op(104, {{2}}),
-                                              op(98 | (2 << 11), {dst(1, 0)}),
-                                              op(98 | (1 << 11), {dst(1, 1)}),
-                                              op(101, {dst(2, 0)}),
-                                              op(54, {dst(0, 0), {0x4002, 11, 22, 33, 44}}),
-                                              instruction,
-                                              op(54, {dst(2, 0), src(0, 0)}),
-                                              op(62)};
-                const Program program(makeDxbc({{0x58454853, writeDxbcProgram({{0x50, 0}, rows})}}));
-                for (unsigned form = 0; form < 5; ++form) {
-                    if (opcode == 205 && form == 1)
-                        continue;
-                    unsigned calls = 0;
-                    std::array<Inputs, 4> inputs;
-                    for (unsigned lane = 0; lane < 4; ++lane) {
-                        inputs[lane].registers[{1, {0}}] = {};
-                        inputs[lane].registers[{1, {1}}] = {
-                            {opcode == 203 ? 0x12345678u + lane : lane, 0xfffffff7, 0, 0},
-                            uint8_t(form == 1 ? 0 : 15)};
-                        if (form != 2)
-                            inputs[lane].evaluateAttribute = [&, lane](const AttributeRequest &request) {
-                                ++calls;
-                                if (request.opcode != opcode || request.inputRegister != 0 ||
-                                    request.location != (opcode == 205 ? std::array<uint32_t, 2>{}
-                                                         : opcode == 204
-                                                             ? std::array<uint32_t, 2>{lane, 0}
-                                                             : std::array<uint32_t, 2>{8 + lane, 7}))
-                                    throw std::runtime_error(
-                                        "Attribute request lost integer location semantics");
-                                return Value{{0x7fc12345, 0x80000000, 0x3f800000, 0xffffffff},
-                                             uint8_t(form == 3   ? 16
-                                                     : form == 4 ? 5
-                                                                 : 10)};
-                            };
-                    }
-                    PixelQuad quad(program, std::move(inputs), 5);
-                    auto run = [&] {
+            for (uint32_t opcode : {203u, 204u, 205u})
+                for (const auto precision : {std::array<uint32_t, 2>{0, 0},
+                                             {1, 1},
+                                             {2, 2},
+                                             {0, 1},
+                                             {1, 0},
+                                             {0, 2},
+                                             {2, 0},
+                                             {1, 2},
+                                             {2, 1}}) {
+                    auto precise = [](Words operand, uint32_t value) {
+                        if (value) {
+                            operand[0] |= 0x80000000;
+                            operand.insert(operand.begin() + 1, 1u | (value << 14));
+                        }
+                        return operand;
+                    };
+                    auto attribute = src(1, 0);
+                    attribute[0] = (attribute[0] & ~0xff0u) | 0x1b0;
+                    attribute = precise(attribute, precision[1]);
+                    const auto destination = precise(dst(0, 0, 5), precision[0]);
+                    auto location = src(1, 1);
+                    if (opcode == 204)
+                        location[0] = (location[0] & ~0xffcu) | 8;
+                    auto instruction = opcode == 205 ? op(opcode, {destination, attribute})
+                                                     : op(opcode, {destination, attribute, location});
+                    const std::vector<Words> rows{op(106 | (1 << 16)),
+                                                  op(104, {{2}}),
+                                                  op(98 | (2 << 11), {dst(1, 0)}),
+                                                  op(98 | (1 << 11), {dst(1, 1)}),
+                                                  op(101, {dst(2, 0)}),
+                                                  op(54, {dst(0, 0), {0x4002, 11, 22, 33, 44}}),
+                                                  instruction,
+                                                  op(54, {dst(2, 0), src(0, 0)}),
+                                                  op(62)};
+                    const Program program(makeDxbc({{0x58454853, writeDxbcProgram({{0x50, 0}, rows})}}));
+                    for (unsigned form = 0; form < 5; ++form) {
+                        if (opcode == 205 && form == 1)
+                            continue;
+                        unsigned calls = 0;
+                        std::array<Inputs, 4> inputs;
+                        for (unsigned lane = 0; lane < 4; ++lane) {
+                            inputs[lane].registers[{1, {0}}] = {};
+                            inputs[lane].registers[{1, {1}}] = {
+                                {opcode == 203 ? 0x12345678u + lane : lane, 0xfffffff7, 0, 0},
+                                uint8_t(form == 1 ? 0 : 15)};
+                            if (form != 2)
+                                inputs[lane].evaluateAttribute = [&, lane](const AttributeRequest &request) {
+                                    ++calls;
+                                    if (request.opcode != opcode || request.inputRegister != 0 ||
+                                        request.precision != precision ||
+                                        request.location != (opcode == 205 ? std::array<uint32_t, 2>{}
+                                                             : opcode == 204
+                                                                 ? std::array<uint32_t, 2>{lane, 0}
+                                                                 : std::array<uint32_t, 2>{8 + lane, 7}))
+                                        throw std::runtime_error(
+                                            "Attribute request lost integer location semantics");
+                                    return Value{{0x7fc12345, 0x80000000, 0x3f800000, 0xffffffff},
+                                                 uint8_t(form == 3   ? 16
+                                                         : form == 4 ? 5
+                                                                     : 10)};
+                                };
+                        }
+                        PixelQuad quad(program, std::move(inputs), 5);
+                        auto run = [&] {
+                            while (!quad.finished())
+                                quad.step();
+                        };
+                        if (form == 2 || form == 3) {
+                            QVERIFY_EXCEPTION_THROWN(run(), std::runtime_error);
+                            continue;
+                        }
                         while (!quad.finished())
                             quad.step();
-                    };
-                    if (form == 2 || form == 3) {
-                        QVERIFY_EXCEPTION_THROWN(run(), std::runtime_error);
-                        continue;
+                        QCOMPARE(calls, form == 1 ? 0u : 4u);
+                        for (unsigned lane = 0; lane < 4; ++lane) {
+                            const auto value = quad.lane(lane).value({2, {0}});
+                            QCOMPARE(value.valid, uint8_t(form == 1 || form == 4 ? 10 : 15));
+                            QCOMPARE(value.bits, (std::array<uint32_t, 4>{form == 1 ? 0u : 0xffffffff, 22,
+                                                                          form == 1 ? 0u : 0x80000000, 44}));
+                        }
                     }
-                    while (!quad.finished())
-                        quad.step();
-                    QCOMPARE(calls, form == 1 ? 0u : 4u);
-                    for (unsigned lane = 0; lane < 4; ++lane) {
-                        const auto value = quad.lane(lane).value({2, {0}});
-                        QCOMPARE(value.valid, uint8_t(form == 1 || form == 4 ? 10 : 15));
-                        QCOMPARE(value.bits, (std::array<uint32_t, 4>{form == 1 ? 0u : 0xffffffff, 22,
-                                                                      form == 1 ? 0u : 0x80000000, 44}));
-                    }
+                    Lane standalone(program, Inputs{});
+                    QVERIFY_EXCEPTION_THROWN(execute(standalone), std::runtime_error);
                 }
-                Lane standalone(program, Inputs{});
-                QVERIFY_EXCEPTION_THROWN(execute(standalone), std::runtime_error);
-            }
         } catch (const std::exception &error) {
             QFAIL(error.what());
         }

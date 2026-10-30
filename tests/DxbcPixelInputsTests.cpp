@@ -1,5 +1,6 @@
 #include "application/DxbcExecutionTraceReader.h"
 #include "application/DxbcGpuCompletion.h"
+#include "application/DxbcGpuOperations.h"
 #include "application/DxbcPixelGeometry.h"
 #include "application/DxbcPixelInputs.h"
 #include "application/DxbcPixelRaster.h"
@@ -599,6 +600,16 @@ class DxbcPixelInputsTests : public QObject {
                 for (uint32_t samples : {1u, 4u})
                     QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(mode).arg(samples)))
                         << vendor << QString(mode) << samples;
+        for (uint32_t vendor : {0u, 4318u, 32902u})
+            for (const auto *operation : {"centroid", "sample", "snapped"})
+                for (const auto *precision : {"min16", "min10"})
+                    for (const auto *suffix : {"", "-noperspective", "-constant", "-frequency", "-edge"})
+                        for (uint32_t samples : {1u, 4u}) {
+                            const auto mode =
+                                QString("eval-%1-%2%3").arg(operation).arg(precision).arg(suffix);
+                            QTest::newRow(qPrintable(QString("%1-%2-%3").arg(vendor).arg(mode).arg(samples)))
+                                << vendor << mode << samples;
+                        }
     }
     void attributeRequestValidation() {
         const auto shader = compile("uint4 main(float4 p:SV_Position):SV_Target{return asuint(p);}");
@@ -611,6 +622,10 @@ class DxbcPixelInputsTests : public QObject {
                                  std::runtime_error);
         QVERIFY_EXCEPTION_THROWN(pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{204, {0, 1}}),
                                  std::runtime_error);
+        for (const auto precision : {std::array<uint32_t, 2>{3, 0}, {0, 3}, {4, 0}, {0, 5}})
+            QVERIFY_EXCEPTION_THROWN(
+                pixelInputShader(shader, reg, {}, PixelAttributeEvaluation{205, {}, precision}),
+                std::runtime_error);
     }
     void capture() {
         QFETCH(uint32_t, vendor);
@@ -657,9 +672,16 @@ class DxbcPixelInputsTests : public QObject {
                                                            : "centroid";
             else if (!system && !sparse && mode != "trigger" && mode != "sm4" && mode != "sm41")
                 qualifier = mode.toStdString();
-            const std::string value = integer
-                                          ? (mode == "uint" ? "uint4(0x80000000,0x7fc12345,0xffffffff,1)"
-                                                            : "int4(-123,-2147483647,12345,-1)")
+            if (evaluation && (mode.contains("-min16") || mode.contains("-min10"))) {
+                const uint32_t precision = mode.contains("-min16") ? 1 : 2;
+                type = precision == 1 ? "min16float4" : "min10float4";
+                evaluation->precision = {precision, precision};
+                evaluated = "float4(" + type + "(" + evaluated + "))";
+            }
+            const std::string value = integer ? (mode == "uint" ? "uint4(0x80000000,0x7fc12345,0xffffffff,1)"
+                                                                : "int4(-123,-2147483647,12345,-1)")
+                                      : mode.contains("-min10")
+                                          ? "float4(.125+id*.03125,-.25+id*.0625,.375+id*.125,-.75+id*.25)"
                                           : "float4(id*3.125+0.125,id*0.5-0.25,id*1.25+0.375,id*4.5-2.75)";
             const std::string vsBody =
                 "O main(uint id:SV_VertexID){O o;float2 p=" +
@@ -842,6 +864,8 @@ class DxbcPixelInputsTests : public QObject {
                 snapshot.shader = 2;
                 snapshot.frameSha256 = sha256(vs);
                 snapshot.bytecode = ps;
+                if (evaluation->precision[0] || evaluation->precision[1])
+                    snapshot.inputs.gpu = std::make_shared<GpuOperations>(d.device.Get(), vendor == 0);
                 snapshot.adapterVendor = recordCapture.identity.at("adapter_vendor");
                 snapshot.adapterDevice = recordCapture.identity.at("adapter_device");
                 snapshot.adapterLuid = recordCapture.identity.at("adapter_luid");
@@ -879,7 +903,7 @@ class DxbcPixelInputsTests : public QObject {
                 nativeExecution["input_provenance"] = invocation.inputProvenance;
                 if (invocation.attributeObservations) {
                     QCOMPARE(invocation.attributeObservations->size(), size_t(1));
-                    const AttributeRequest outside{204, selected, {samples, 0}};
+                    const AttributeRequest outside{204, selected, {samples, 0}, evaluation->precision};
                     const auto unknown = invocation.evaluateAttribute(outside);
                     for (const auto &value : unknown) {
                         QCOMPARE(value.valid, uint8_t(0));

@@ -14,7 +14,10 @@ EVAL = ('eval-centroid', 'eval-sample', 'eval-snapped', 'eval-snapped-high',
         'eval-centroid-noperspective', 'eval-sample-noperspective', 'eval-snapped-noperspective',
         'eval-centroid-constant', 'eval-sample-constant', 'eval-snapped-constant',
         'eval-centroid-frequency', 'eval-sample-frequency', 'eval-snapped-frequency',
-        'eval-centroid-edge', 'eval-sample-edge', 'eval-snapped-edge')
+        'eval-centroid-edge', 'eval-sample-edge', 'eval-snapped-edge') + tuple(
+        f'eval-{op}-{precision}{suffix}' for op in ('centroid', 'sample', 'snapped')
+        for precision in ('min16', 'min10')
+        for suffix in ('', '-noperspective', '-constant', '-frequency', '-edge'))
 
 
 def require(value, message):
@@ -98,9 +101,12 @@ def validate_input(directory, replacements=None):
             require(len(records) == 1 and journal[-1]['attribute_evaluations'] == records, 'Attribute journal provenance')
             record = records[0]
             opcode = 205 if mode.startswith('eval-centroid') else 204 if mode.startswith('eval-sample') else 203
-            require(record['backend'] == 'dxbc-pixel-attribute-evaluation/1' and
+            require(record['backend'] == 'dxbc-pixel-attribute-evaluation/2' and
                     record['request']['opcode'] == opcode and record['adapter_luid'] == report['adapter_luid'],
                     'GPU evaluation identity')
+            precision = 1 if '-min16' in mode else 2 if '-min10' in mode else 0
+            require(record['request']['precision'] == [precision, precision] and
+                    record['evaluation']['precision'] == [precision, precision], 'Attribute operand precision')
             require(record['request']['location'] == ([0, 0] if opcode == 205 else
                                                      [samples - 1, 0] if opcode == 204 else [8, 7]),
                     'Integer evaluation location')
@@ -118,7 +124,7 @@ def validate_input(directory, replacements=None):
 
 def validate_job(directory):
     job, result = read(directory / 'job.json'), read(directory / 'result.json')
-    require(result['ok'] and result['backend'] == job['backend'] == 'dx11-native/18', 'Worker backend')
+    require(result['ok'] and result['backend'] == job['backend'] == 'dx11-native/19', 'Worker backend')
     require(result['request_id'] == job['request_id'] and result['context']['action'] == 'debug-pixel', 'Worker identity')
     for key in ('schema', 'backend', 'backend_sha256', 'frame_sha256', 'experiment_sha256', 'action', 'options'):
         require(result['context'][key] == job[key], 'Worker context ' + key)
@@ -134,7 +140,7 @@ def validate_job(directory):
     count = 0
     gpu_bits = None
     if mode.startswith('eval-'):
-        count = {'eval-centroid': 1, 'eval-sample': 2, 'eval-snapped': 4}[mode]
+        count = {'eval-centroid': 1, 'eval-sample': 2, 'eval-snapped': 4}['-'.join(mode.split('-')[:2])]
         require(len(journal[-1]['attribute_evaluations']) == count, 'Dynamic evaluation locations')
         require(digest(directory / 'frame.gpa_frame')['sha256'] == job['frame_sha256'], 'Synthetic GPA frame digest')
         checkpoint = next(row for row in result['data']['private_history']['records'] if row['primitive_ordinal'] == 1)
@@ -180,7 +186,8 @@ def main():
         if not report['mode'].endswith('-constant'):
             mutations += [('native-execution.json', lambda r: r.update(cancelled_cache_hit_rejected=False)),
                           ('native-execution.json', lambda r: r['undefined_sample']['quad_values'][0].update(valid_mask=15)),
-                          ('native-execution.json', lambda r: r['attribute_evaluations'][0]['request'].update(opcode=0))]
+                          ('native-execution.json', lambda r: r['attribute_evaluations'][0]['request'].update(opcode=0)),
+                          ('native-execution.json', lambda r: r['attribute_evaluations'][0]['request'].update(precision=[3, 3]))]
         for file, mutate in mutations:
             changed = copy.deepcopy(report if file == 'report.json' else native)
             mutate(changed)
@@ -190,7 +197,8 @@ def main():
                 controls += 1
             else:
                 raise ValueError('Corrupted input evidence was accepted: ' + name)
-    modes = ('constant', 'derivative', 'sample', 'discard', 'source', 'uav', 'eval-centroid', 'eval-sample', 'eval-snapped')
+    modes = ('constant', 'derivative', 'sample', 'discard', 'source', 'uav', 'eval-centroid', 'eval-sample', 'eval-snapped') + tuple(
+        f'eval-{op}-{precision}' for op in ('centroid', 'sample', 'snapped') for precision in ('min16', 'min10'))
     jobs = [validate_job(workflow / 'jobs' / f'{vendor}-{mode}') for vendor in (0, 4318, 32902) for mode in modes]
     totals = {}
     workflow_suites = ('FloraNativePixelDebugTests', 'FloraNativeDebugSessionTests', 'FloraNativeComputeDebugTests')
@@ -224,7 +232,7 @@ def main():
               'tests': totals, 'total_passed': sum(totals.values()), 'inputs': inputs, 'jobs': jobs,
               'artifact_manifests': manifests,
               'corrupted_inputs_rejected': controls, 'original_fragment_eligibility': None,
-              'remaining': ['Minimum-precision eval operands', 'Full P1/P5/P6 parity', 'P7/P8 dependency removal and release']}
+              'remaining': ['Minimum-precision integer location operands', 'Full P1/P5/P6 parity', 'P7/P8 dependency removal and release']}
     if root != workflow:
         report['superseded_runs'] = [run for run in read(root / 'exits.json') if run['suite'] in workflow_suites]
     args.out.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')

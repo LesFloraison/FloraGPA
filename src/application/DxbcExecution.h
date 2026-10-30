@@ -111,6 +111,8 @@ class Memory {
 struct AttributeRequest {
     uint32_t opcode = 205, inputRegister = 0;
     std::array<uint32_t, 2> location{};
+    // Destination and attribute precision in DXBC operand-token order.
+    std::array<uint32_t, 2> precision{};
     auto operator<=>(const AttributeRequest &) const = default;
 };
 using AttributeEvaluator = std::function<std::array<Value, 4>(const AttributeRequest &)>;
