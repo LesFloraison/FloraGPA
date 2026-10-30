@@ -1716,3 +1716,15 @@ Existing geometry and presence regressions pass. See
 `research/DX11_NATIVE_PIXEL_ORDINAL_OBSERVATIONS.md` for reproducible controls,
 900 corruption checks, retained query deviations and remaining P5-P8 gates.
 Public history/debugger consumers and RenderDoc dependencies remain unchanged.
+
+Single-sample coverage normalization now closes the three Intel native ordinal
+selection failures without changing any of the 144 original GPA frames, shaders
+or expected vectors. It preserves RET/RETC and earlier UAV effects, consumes no
+application UAV slot, and records its identity in `native-pixel-ordinal/2` reports.
+The native suite passes all 164 checks, including normalized failure/cancellation
+recovery. All 300 transformed semantic cases match the independent bit model;
+24 original WARP RETC differences remain strict research failures. Existing
+geometry, presence and completion regressions pass, while six original Intel
+query failures remain. See `research/DX11_SINGLE_SAMPLE_COVERAGE.md` for 1,272
+corruption checks, unchanged-input evidence and remaining P5-P8 gates. No fragment
+identity is promoted and no public backend is switched by this increment.
