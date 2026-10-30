@@ -77,8 +77,13 @@ Selection select(const TextureInput &texture, const TextureInputView &view, uint
 } // namespace
 Value TextureInputs::loadUav(const Register &binding, uint32_t dimension, uint32_t returns,
                              const Value &address, const std::array<uint32_t, 4> &swizzle, uint32_t mask,
-                             GpuOperations *gpu, bool &assisted, uint32_t stage) const {
+                             GpuOperations *gpu, bool &assisted, uint32_t stage,
+                             const std::array<uint32_t, 2> &precision, bool refactoringAllowed,
+                             bool outputDestination, bool literalAddress) const {
     assisted = false;
+    if (precision[0] == 3 || precision[0] > 5 || (precision[1] && precision[1] != 4 && precision[1] != 5) ||
+        (outputDestination && stage != 0))
+        throw std::runtime_error("Invalid typed texture UAV load precision or output stage");
     addressMask(binding, dimension, address);
     for (auto c : swizzle)
         if (c > 3)
@@ -93,14 +98,31 @@ Value TextureInputs::loadUav(const Register &binding, uint32_t dimension, uint32
     if (found == resources.end())
         return {};
     const auto &texture = found->second;
-    auto selection = select(texture, view, dimension, returns, address);
     if (!gpu)
         throw std::runtime_error("Typed texture UAV access requires the selected GPU");
+    auto effectiveAddress = address;
+    if (precision[1]) {
+        // Ownership/validity must follow the GPU-converted coordinates used by ld_uav_typed.
+        std::vector<uint32_t> operand =
+            literalAddress
+                ? std::vector<uint32_t>{0x80004002u,     1u | (precision[1] << 14), address.bits[0],
+                                        address.bits[1], address.bits[2],           address.bits[3]}
+                : std::vector<uint32_t>{0x80100e46u, 1u | (precision[1] << 14), 1};
+        std::vector<uint32_t> words{54, 0x1000f2, 0};
+        words.insert(words.end(), operand.begin(), operand.end());
+        words[0] |= uint32_t(words.size()) << 24;
+        effectiveAddress.bits = gpu->instruction(stage, {54, 0, false, words}, {{0, {0}}}, {15}, {address},
+                                                 {Value{}}, refactoringAllowed)
+                                    .at(0)
+                                    .bits;
+    }
+    auto selection = select(texture, view, dimension, returns, effectiveAddress);
     if (dimension == 5 && !selection.offset)
-        selection.offset = gpu->textureUavFootprint(texture, view, dimension, returns, address, false, stage);
-    auto result =
-        gpu->textureUav(texture, view, dimension, returns, address, {}, false, swizzle, mask, false, stage)
-            .first;
+        selection.offset =
+            gpu->textureUavFootprint(texture, view, dimension, returns, effectiveAddress, false, stage);
+    auto result = gpu->textureUav(texture, view, dimension, returns, address, {}, false, swizzle, mask, false,
+                                  stage, precision, refactoringAllowed, outputDestination, literalAddress)
+                      .first;
     assisted = true;
     result.valid = uint8_t(mask);
     if (!selection.offset)

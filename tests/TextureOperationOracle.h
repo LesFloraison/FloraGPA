@@ -13,7 +13,7 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
                                              const std::vector<std::array<uint32_t, 4>> &values,
                                              uint32_t outputPrecision, const SamplerInput *sampler = nullptr,
                                              uint32_t outputCount = 1, uint32_t outputIndex = 0,
-                                             uint32_t outputSlot = 0) {
+                                             uint32_t outputSlot = 0, bool textureUav = false) {
     if (!outputCount || outputCount > 1024 || outputIndex >= outputCount ||
         (stage != 5 && (outputCount != 1 || outputIndex != 0)) || outputSlot >= 8 ||
         (stage != 0 && outputSlot))
@@ -58,9 +58,18 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
     else
         create.operator()<ID3D11Texture3D, D3D11_TEXTURE3D_DESC>(&ID3D11Device::CreateTexture3D);
     D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
-    std::memcpy(&desc, view.nativeDescriptor.data(), sizeof desc);
+    if (!textureUav)
+        std::memcpy(&desc, view.nativeDescriptor.data(), sizeof desc);
     Com<ID3D11ShaderResourceView> srv;
-    if (view.planeSlice) {
+    Com<ID3D11UnorderedAccessView> inputUav;
+    if (textureUav) {
+        D3D11_UNORDERED_ACCESS_VIEW_DESC ud{};
+        if (view.nativeDescriptor.size() != 5 || (stage != 0 && stage != 5))
+            throw std::runtime_error("Invalid independent texture UAV");
+        std::memcpy(&ud, view.nativeDescriptor.data(), sizeof ud);
+        check(device->CreateUnorderedAccessView(resource.Get(), &ud, &inputUav),
+              "Create independent precision UAV");
+    } else if (view.planeSlice) {
         Com<ID3D11Device3> extended;
         check(device->QueryInterface(IID_PPV_ARGS(&extended)), "Get independent planar view device");
         D3D11_SHADER_RESOURCE_VIEW_DESC1 selected{};
@@ -148,6 +157,11 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
         context->RSSetViewports(1, &viewport);
         context->OMSetRenderTargets(outputSlot + 1, targets.data(), nullptr);
         context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        if (textureUav) {
+            auto *input = view.resource ? inputUav.Get() : nullptr;
+            context->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,
+                                                               nullptr, nullptr, 1, 1, &input, nullptr);
+        }
         context->Draw(3, 0);
     } else {
         bd = {outputCount * 16,
@@ -187,6 +201,10 @@ inline std::array<uint32_t, 4> directTexture(ID3D11Device *device, Bytes code, u
             context->CSSetConstantBuffers(2, 1, &buffer);
             context->CSSetShaderResources(3, 1, &source);
             context->CSSetUnorderedAccessViews(3, 1, &out, nullptr);
+            if (textureUav) {
+                auto *input = view.resource ? inputUav.Get() : nullptr;
+                context->CSSetUnorderedAccessViews(1, 1, &input, nullptr);
+            }
             context->Dispatch(1, 1, 1);
         }
     }

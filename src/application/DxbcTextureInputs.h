@@ -106,7 +106,9 @@ struct TextureInputs {
                      bool &assisted) const;
     Value loadUav(const Register &, uint32_t dimension, uint32_t returns, const Value &address,
                   const std::array<uint32_t, 4> &swizzle, uint32_t mask, GpuOperations *, bool &assisted,
-                  uint32_t stage = 5) const;
+                  uint32_t stage = 5, const std::array<uint32_t, 2> &precision = {},
+                  bool refactoringAllowed = false, bool outputDestination = false,
+                  bool literalAddress = false) const;
     std::vector<MemoryChange> storeUav(const Register &, uint32_t dimension, uint32_t returns,
                                        const Value &address, const Value &, GpuOperations *, bool &assisted,
                                        uint32_t stage = 5) const;

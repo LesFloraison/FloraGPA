@@ -1327,7 +1327,7 @@ nlohmann::json GpuOperations::identity() const {
             {"feature_level", uint32_t(s.device->GetFeatureLevel())},
             {"warp", s.warp},
             {"completion_wait", s.completion->usesFence() ? "fence-event/1" : "native-poll/1"},
-            {"backend", "dxbc-gpu/30"}};
+            {"backend", "dxbc-gpu/31"}};
 }
 uint64_t GpuOperations::operations() const { return state_->count; }
 std::array<Value, 4> GpuOperations::pixelDerivatives(uint32_t opcode, const std::array<Value, 4> &inputs) {
@@ -1423,7 +1423,8 @@ std::pair<Value, std::vector<uint8_t>>
 GpuOperations::textureUav(const TextureInput &input, const TextureInputView &view, uint32_t dimension,
                           uint32_t returns, const Value &address, const Value &value, bool store,
                           const std::array<uint32_t, 4> &swizzle, uint32_t mask, bool atomicMarker,
-                          uint32_t stage) {
+                          uint32_t stage, const std::array<uint32_t, 2> &precision, bool refactoringAllowed,
+                          bool outputDestination, bool literalAddress) {
     auto &s = *state_;
     checkCancellation(s.cancelled);
     if (s.failed)
@@ -1432,6 +1433,9 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
         input.storage.bytes.size() > 256ull * 1024 * 1024 || view.nativeDescriptor.size() != 5 ||
         (dimension != 2 && dimension != 3 && dimension != 5 && dimension != 7 && dimension != 8))
         throw std::runtime_error("Invalid native texture UAV operation");
+    if (precision[0] == 3 || precision[0] > 5 || (precision[1] && precision[1] != 4 && precision[1] != 5) ||
+        (outputDestination && stage != 0) || (store && (precision[0] || precision[1] || outputDestination)))
+        throw std::runtime_error("Invalid native texture UAV precision or output stage");
     if (atomicMarker && (!store || (view.format != 42 && view.format != 43) ||
                          returns != (view.format == 42 ? 0x4444u : 0x3333u)))
         throw std::runtime_error("Invalid native atomic texture footprint");
@@ -1513,8 +1517,13 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
                                              UINT(sub.slicePitch));
             operation.shadow = input.storage.bytes;
         }
-        std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{1}}), row(155, {{1, 1, 1}}),
+        std::vector<Words> rows{row(89, {{0x208e46, 0, 2}}), row(104, {{2}}), row(155, {{1, 1, 1}}),
                                 row(156 | (dimension << 11), {dest(30, 0), {returns}})};
+        const Words coordinate =
+            literalAddress ? Words{0x4002, address.bits[0], address.bits[1], address.bits[2], address.bits[3]}
+                           : Words{0x208e46, 0, 0};
+        if (precision[0] || precision[1])
+            rows.insert(rows.begin(), row(106 | (1u << 16) | (refactoringAllowed ? 1u << 11 : 0u), {}));
         if (atomicMarker)
             rows.push_back(row(173, {dest(30, 0), {0x208e46, 0, 0}, immediate(1)}));
         else if (store)
@@ -1525,8 +1534,11 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
                 selection |= swizzle[c] << (c * 2);
             rows.push_back(row(158, {dest(30, 1), {16}}));
             rows.push_back(row(54, {dest(0, 0), immediate(0)}));
-            rows.push_back(row(163, {dest(0, 0, mask), {0x208e46, 0, 0}, source(30, 0, selection)}));
-            rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 0)}));
+            rows.push_back(row(163, {withPrecision(dest(0, 0, mask), precision[0]),
+                                     withPrecision(coordinate, precision[1]), source(30, 0, selection)}));
+            rows.push_back(row(54, {dest(0, 1), immediate(0)}));
+            rows.push_back(row(54, {dest(0, 1, mask), withPrecision(source(0, 0), precision[0])}));
+            rows.push_back(row(168, {dest(30, 1), immediate(0), immediate(0), source(0, 1)}));
         }
         rows.push_back(row(62, {}));
         const auto bytes = writeDxbcProgram({{0x50050, 0}, rows});
@@ -1546,10 +1558,11 @@ GpuOperations::textureUav(const TextureInput &input, const TextureInputView &vie
             uint32_t selection = 0;
             for (unsigned c = 0; c < 4; ++c)
                 selection |= swizzle[c] << (c * 2);
-            const auto code = typedPixelUavKernel(dimension, returns, store, {0x208e46, 0, 0}, mask,
-                                                  selection, {}, false, atomicMarker);
-            const auto valueResult =
-                s.pixels(code, {address.bits, value.bits}, nullptr, nullptr, {}, 0, operation.view.Get())[0];
+            const auto code =
+                typedPixelUavKernel(dimension, returns, store, coordinate, mask, selection, precision,
+                                    refactoringAllowed, atomicMarker, outputDestination);
+            const auto valueResult = s.pixels(code, {address.bits, value.bits}, nullptr, nullptr, {},
+                                              outputDestination ? precision[0] : 0, operation.view.Get())[0];
             if (!store)
                 return {valueResult, {}};
         } else {

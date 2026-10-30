@@ -203,19 +203,29 @@ class DxbcTextureLoadTests final : public QObject {
         QTest::addColumn<uint32_t>("dimension");
         QTest::addColumn<uint32_t>("stage");
         QTest::addColumn<uint32_t>("precision");
-        for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
-            for (uint32_t dimension : {2u, 3u, 5u, 7u, 8u})
-                for (uint32_t stage : {0u, 1u, 5u})
-                    for (uint32_t precision : {1u, 2u, 4u, 5u})
-                        QTest::newRow(qPrintable(
-                            QString("%1-%2-%3-%4").arg(vendor).arg(dimension).arg(stage).arg(precision)))
-                            << vendor << dimension << stage << precision;
+        QTest::addColumn<bool>("uav");
+        for (bool uav : {false, true})
+            for (uint32_t vendor : {0u, 0x10deu, 0x8086u})
+                for (uint32_t dimension : {2u, 3u, 5u, 7u, 8u})
+                    for (uint32_t stage : {0u, 1u, 5u})
+                        for (uint32_t precision : {1u, 2u, 4u, 5u}) {
+                            if (uav && stage == 1)
+                                continue;
+                            QTest::newRow(qPrintable(QString("%1-%2-%3-%4%5")
+                                                         .arg(vendor)
+                                                         .arg(dimension)
+                                                         .arg(stage)
+                                                         .arg(precision)
+                                                         .arg(uav ? "-uav" : "")))
+                                << vendor << dimension << stage << precision << uav;
+                        }
     }
     void minimumPrecision() {
         QFETCH(uint32_t, vendor);
         QFETCH(uint32_t, dimension);
         QFETCH(uint32_t, stage);
         QFETCH(uint32_t, precision);
+        QFETCH(bool, uav);
         try {
             QTemporaryDir temporary;
             auto capture = testing::computeCapture(true);
@@ -223,7 +233,9 @@ class DxbcTextureLoadTests final : public QObject {
             capture.save(framePath);
             Frame frame(framePath.toStdWString());
             Replay replay(frame, options(vendor));
-            auto gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), vendor == 0);
+            bool cancelled = false;
+            auto gpu = std::make_shared<GpuOperations>(replay.nativeDevice(), vendor == 0,
+                                                       [&] { return cancelled; });
             TextureInput texture;
             const uint32_t format = precision < 4 ? 2 : precision == 4 ? 4 : 3;
             const uint32_t returns = precision < 4 ? 5 : precision == 4 ? 3 : 4;
@@ -235,6 +247,10 @@ class DxbcTextureLoadTests final : public QObject {
                 texture.resource.desc = {4, 4, 2, layers, format, 1, 0, 0, 8, 0, 0};
             else
                 texture.resource.desc = {4, 4, 2, 2, format, 0, 8, 0, 0};
+            if (uav)
+                texture.resource.desc[texture.resource.type == 0x85   ? 8
+                                      : texture.resource.type == 0x86 ? 6
+                                                                      : 5] |= 128;
             texture.subresources = textureSubresources(texture.resource);
             const auto &last = texture.subresources.back();
             texture.storage = Buffer::known(std::vector<uint8_t>(last.offset + last.size));
@@ -272,6 +288,17 @@ class DxbcTextureLoadTests final : public QObject {
                 for (uint32_t mode = 0; mode < 4; ++mode)
                     for (uint32_t direct = 0; direct < (stage == 5 ? 1u : 2u); ++direct)
                         for (bool literalAddress : {false, true}) {
+                            if (uav) {
+                                view.firstMip = mode == 2 ? 1 : 0;
+                                view.mipCount = 1;
+                                view.nativeDescriptor = {format, view.dimension, view.firstMip, 0,
+                                                         layers > 1 ? layers : 0};
+                                if (dimension == 5) {
+                                    view.depthSlices = std::array<uint32_t, 2>{0, 2u >> view.firstMip};
+                                    view.nativeDescriptor[4] = (*view.depthSlices)[1];
+                                }
+                                inputs.textures->views[{30, {1}}] = view;
+                            }
                             const uint32_t mask = mode & 1 ? 9 : 15;
                             const std::array<uint32_t, 4> address{mode == 1   ? 65537u
                                                                   : mode == 3 ? UINT32_MAX
@@ -289,7 +316,8 @@ class DxbcTextureLoadTests final : public QObject {
                             };
                             std::vector<Words> rows{
                                 op(106 | (1u << 16)), op(89, {{0x208e46, 2, 1}}),
-                                op(88 | dimension << 11, {{0x1070f2, 3}, {returns * 0x1111}}),
+                                op((uav ? 156u : 88u) | dimension << 11,
+                                   {{uav ? 0x11e0f2u : 0x1070f2u, uav ? 1u : 3u}, {returns * 0x1111}}),
                                 op(104, {{4}})};
                             if (stage == 5) {
                                 rows.push_back(op(155, {{1, 1, 1}}));
@@ -300,14 +328,14 @@ class DxbcTextureLoadTests final : public QObject {
                             rows.push_back(op(54, {destination(targetKind, targetIndex),
                                                    {0x4002, seed[0], seed[1], seed[2], seed[3]}}));
                             rows.push_back(op(
-                                45 | 0x80000000u,
+                                (uav ? 163u : 45u) | 0x80000000u,
                                 {{2u | (dimension << 6) | 0x80000000u, 3u | ((returns * 0x1111) << 6)},
                                  annotated(destination(targetKind, targetIndex, mask), precision),
                                  annotated(literalAddress
                                                ? Words{0x4002, address[0], address[1], address[2], address[3]}
                                                : Words{0x208e46, 2, 0},
                                            addressPrecision),
-                                 {0x1071b6, 3}}));
+                                 {uav ? 0x11e1b6u : 0x1071b6u, uav ? 1u : 3u}}));
                             if (!direct) {
                                 rows.push_back(op(54, {destination(stage == 5 ? 0 : 2, stage == 5 ? 2 : 0),
                                                        {0x4002, seed[0], seed[1], seed[2], seed[3]}}));
@@ -341,9 +369,9 @@ class DxbcTextureLoadTests final : public QObject {
                             const auto programBytes = writeDxbcProgram({{stage << 16 | 0x50, 0}, rows});
                             parts.emplace_back(0x58454853, programBytes);
                             const auto code = makeDxbc(parts);
-                            const auto expected =
-                                testing::directTexture(replay.nativeDevice(), code, stage, texture, view,
-                                                       {address}, direct ? precision : 0);
+                            const auto expected = testing::directTexture(
+                                replay.nativeDevice(), code, stage, texture, view, {address},
+                                direct ? precision : 0, nullptr, 1, 0, 0, uav);
                             const Program program(code);
                             Lane lane(program, inputs);
                             lane.step();
@@ -367,9 +395,23 @@ class DxbcTextureLoadTests final : public QObject {
                             QCOMPARE(missing.bits, expected);
                             QCOMPARE(missing.valid, uint8_t(zero ? 15 : 15 ^ mask));
                             std::fill(validity.begin(), validity.end(), 1);
+                            if (uav && mode == 0 && !direct && !literalAddress) {
+                                cancelled = true;
+                                Lane interrupted(program, inputs);
+                                interrupted.step();
+                                QVERIFY_THROWS_EXCEPTION(OperationCancelled, interrupted.step());
+                                QCOMPARE(interrupted.value({targetKind, {targetIndex}}), Value::known(seed));
+                                cancelled = false;
+                                Lane recovered(program, inputs);
+                                recovered.step();
+                                recovered.step();
+                                QCOMPARE(recovered.value({targetKind, {targetIndex}}), actual);
+                            }
                             records.push_back(
                                 {{"address_precision", addressPrecision},
+                                 {"view_descriptor", view.nativeDescriptor},
                                  {"literal_address", literalAddress},
+                                 {"cancellation_checked", uav && mode == 0 && !direct && !literalAddress},
                                  {"mode", mode},
                                  {"address", address},
                                  {"output_destination", bool(direct)},
@@ -385,11 +427,17 @@ class DxbcTextureLoadTests final : public QObject {
                         }
             QCOMPARE(inputs.textures->resources.at(1).storage.bytes, texture.storage.bytes);
             validation(replay);
-            const nlohmann::json report{{"schema", 1},        {"probe", "minimum_precision_texture_load"},
-                                        {"vendor", vendor},   {"dimension", dimension},
-                                        {"stage", stage},     {"precision", precision},
-                                        {"format", format},   {"helper", gpu->identity()},
-                                        {"records", records}, {"passed", true}};
+            const nlohmann::json report{{"schema", 1},
+                                        {"probe", "minimum_precision_texture_load"},
+                                        {"vendor", vendor},
+                                        {"dimension", dimension},
+                                        {"stage", stage},
+                                        {"uav", uav},
+                                        {"precision", precision},
+                                        {"format", format},
+                                        {"helper", gpu->identity()},
+                                        {"records", records},
+                                        {"passed", true}};
             const auto root = qEnvironmentVariable("FLORA_TEXTURE_PRECISION_EVIDENCE");
             if (!root.isEmpty()) {
                 QDir directory(root);
