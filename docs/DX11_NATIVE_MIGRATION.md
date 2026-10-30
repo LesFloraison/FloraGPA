@@ -1788,3 +1788,16 @@ support the new `native-pixel-return-count/1` capability. See
 state recovery and reproducible evidence. Integer shader outputs, additional
 transport types, complete original fragment qualification, full debugger parity
 and P7/P8 remain open. Public history/backend selection is unchanged.
+
+The `/2` return-count increment adds uint/int/min16uint/min16int outputs through
+full-precision RGB markers while preserving original shader instructions. Six
+suites pass 1,373 checks without failures or skips, including 840 supported
+integer observations and 360 explicit rejection/restoration checks. Nine real
+capture controls retain their selected counts; independent validators reject
+3,768 corruptions. The pre-guard experiment retains 24 NVIDIA failure groups
+(58 sample discrepancies) when replacing integer RT0 under alpha-to-coverage.
+Those combinations are rejected across adapters unless shader coverage is
+explicit; they remain an open capability boundary, not completed features.
+See `research/DX11_NATIVE_PIXEL_INTEGER_COUNTS.md`. Full original fragment
+qualification, debugger parity, RenderDoc removal and standalone release
+acceptance remain open.

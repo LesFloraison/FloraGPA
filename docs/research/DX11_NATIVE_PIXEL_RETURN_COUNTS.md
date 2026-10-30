@@ -1,5 +1,9 @@
 # Native pixel return counts on private float targets
 
+This records the `/1` increment. The subsequent
+[integer-output increment](DX11_NATIVE_PIXEL_INTEGER_COUNTS.md) adds bounded
+integer support and documents an RT0 alpha-to-coverage incompatibility.
+
 Implementation: `20892ca4fc2a907e97d2188e390e2faa4d056423`.
 Previous branch head: `de70fd7e5498a6dde8313ecff2f96b80df57fad1`.
 
@@ -34,8 +38,9 @@ component words, validity, a decoded count and its validity reason. RGB channels
 must agree and describe a finite nonnegative integer strictly below 2^24.
 At or above 2^24, the count is unknown: repeated unit additions can stop changing
 float32 storage. Negative, fractional, nonfinite and inconsistent values are also
-unknown, never rounded or clamped into a count. Original alpha bits remain
-available independently of RGB count validity.
+unknown, never rounded or clamped into a count. Diagnostic stored alpha words
+remain available independently of RGB count validity. They follow float blending
+rules and are not guaranteed to preserve original shader alpha bits.
 
 The [Direct3D floating-point rules](https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm)
 specify arithmetic precision for fixed-function blending as well as shader
