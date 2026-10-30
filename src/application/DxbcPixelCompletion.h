@@ -7,6 +7,11 @@ struct PixelCompletionShader {
     std::vector<uint8_t> bytecode;
     nlohmann::json identity;
 };
+// Single-sample outputs only: defer coverage bit zero to a return-time discard.
+// Retaining an all-one oMask export preserves suppression of alpha-to-coverage.
+PixelCompletionShader normalizeSingleSamplePixelCoverage(Bytes original,
+                                                         uint64_t maxBytes = 256ull * 1024 * 1024,
+                                                         const CancelCheck &cancelled = {});
 // Add an otherwise unused RGB output to a depth/coverage-only PS. The caller
 // must instrument its returns and bind a private diagnostic RTV before use.
 // Original depth, coverage and executable instructions are retained.

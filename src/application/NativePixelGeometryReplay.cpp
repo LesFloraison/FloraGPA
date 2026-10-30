@@ -165,6 +165,7 @@ class NativePixelGeometryReplay {
                 event, state,
                 [&] {
                     Com<ID3D11PixelShader> completionShader;
+                    std::vector<uint8_t> ordinalInput;
                     Com<ID3D11BlendState1> completionBlend;
                     Com<ID3D11DepthStencilState> testDepthState;
                     Com<ID3D11Texture2D> depthTransport;
@@ -452,6 +453,8 @@ class NativePixelGeometryReplay {
                         report["scope"] = "original_ps_body_on_private_completion_target";
                         report["diagnostic_shader_replacements"] = true;
                         report["completion_shader"] = marked.identity;
+                        if (ordinalSelection)
+                            ordinalInput = std::move(marked.bytecode);
                         if (primitiveMask) {
                             report["kind"] = "native_pixel_primitive_mask_observation";
                             report["backend"] = "native-pixel-primitive-mask-observation/1";
@@ -595,8 +598,9 @@ class NativePixelGeometryReplay {
                                                  D3D11_STENCIL_OP_INCR_SAT, D3D11_COMPARISON_EQUAL};
                         check(r.device_->CreateDepthStencilState(&selected, &testDepthState),
                               "Create private ordinal selector state");
-                        bool early = false;
-                        uint64_t inspectedShaderBytes = 0;
+                        bool early = false, coverage = false;
+                        uint64_t inspectedShaderBytes = 0, normalizedShaderBytes = 0;
+                        report["coverage_normalization"] = nullptr;
                         if (state.stages[4].shader) {
                             auto code = shader(state.stages[4].shader);
                             if (code.size() > request.maxBytes - workingBytes - bytes)
@@ -610,7 +614,32 @@ class NativePixelGeometryReplay {
                                     checkDeadline();
                                     if ((instruction[0] & 0x7ff) == 106)
                                         early |= (instruction[0] & 0x2000) != 0;
+                                    if ((instruction[0] & 0x7ff) == 101 && instruction.size() >= 2)
+                                        coverage |= ((instruction[1] >> 12) & 255) == 15;
                                 }
+                            }
+                            if (coverage && desc.SampleDesc.Count == 1) {
+                                auto normalized = normalizeSingleSamplePixelCoverage(
+                                    ordinalInput.empty() ? code : Bytes(ordinalInput),
+                                    request.maxBytes - workingBytes - bytes - inspectedShaderBytes, scoped);
+                                normalizedShaderBytes = normalized.bytecode.size();
+                                Com<ID3D11PixelShader> selectedShader;
+                                auto linkage = r.get<ID3D11ClassLinkage>(
+                                    shaderClassLinkage(r.frame_, state.stages[4].shader));
+                                check(r.device_->CreatePixelShader(normalized.bytecode.data(),
+                                                                   normalized.bytecode.size(), linkage,
+                                                                   &selectedShader),
+                                      "Create private ordinal coverage shader");
+                                std::array<ID3D11ClassInstance *, 256> rawClasses{};
+                                std::array<Com<ID3D11ClassInstance>, 256> classes;
+                                UINT classCount = UINT(rawClasses.size());
+                                Com<ID3D11PixelShader> previousShader;
+                                context->PSGetShader(&previousShader, rawClasses.data(), &classCount);
+                                for (UINT i = 0; i < classCount; ++i)
+                                    classes[i].Attach(rawClasses[i]);
+                                context->PSSetShader(selectedShader.Get(), rawClasses.data(), classCount);
+                                report["coverage_normalization"] = std::move(normalized.identity);
+                                report["diagnostic_shader_replacements"] = true;
                             }
                         }
                         {
@@ -623,7 +652,7 @@ class NativePixelGeometryReplay {
                             nullptr);
                         context->OMSetDepthStencilState(testDepthState.Get(), ordinalSelection->ordinal);
                         report["kind"] = "native_pixel_ordinal_observation";
-                        report["backend"] = "native-pixel-ordinal/1";
+                        report["backend"] = "native-pixel-ordinal/2";
                         report["scope"] = "original_ps_body_with_counterfactual_stencil_reference";
                         report["ordinal_selection"] = {{"target", target},
                                                        {"requested_ordinal", ordinalSelection->ordinal},
@@ -653,7 +682,7 @@ class NativePixelGeometryReplay {
                                                        {"application_uav_bindings_retained", true},
                                                        {"original_depth_stencil_eligibility", nullptr}};
                         report["diagnostic_working_payload_bytes"] =
-                            workingBytes + bytes + inspectedShaderBytes;
+                            workingBytes + bytes + inspectedShaderBytes + normalizedShaderBytes;
                     }
                     if (observe)
                         observe(r, false);

@@ -41,6 +41,8 @@ struct NativePixelOrdinalSelection {
 // The requested ordinal is not a verified identity: driver selection deviations
 // remain under investigation and verified_fragment_ordinal is always unknown.
 // Observed storage retains original blending unless markReturns is requested.
+// Single-sample coverage exports are normalized to return-time discard with an
+// all-one mask export. Reports identify this transform; original eligibility is unknown.
 nlohmann::json replayNativePixelOrdinal(Replay &, Id event, const NativePixelOrdinalSelection &,
                                         const std::function<void(Replay &, bool after)> &observe = {},
                                         uint64_t maxBytes = 256ull * 1024 * 1024, uint32_t timeoutMs = 30000,

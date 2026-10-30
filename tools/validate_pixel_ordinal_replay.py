@@ -33,7 +33,7 @@ def native(report, key):
     for row, (ordinal, marked) in zip(report["rows"], requests):
         result = row["report"]
         selection = result["ordinal_selection"]
-        require(result["schema"] == 1 and result["backend"] == "native-pixel-ordinal/1" and
+        require(result["schema"] == 1 and result["backend"] in ("native-pixel-ordinal/1", "native-pixel-ordinal/2") and
                 result["scope"] == "original_ps_body_with_counterfactual_stencil_reference", "Wrong native scope")
         require(result["original_fragment_eligibility"] is None and not result["original_gpu_schedule"] and
                 selection["verified_fragment_ordinal"] is None and
@@ -48,8 +48,18 @@ def native(report, key):
         require(selection["stencil_payload_bytes"] == 4 * samples and selection["width"] ==
                 selection["height"] == selection["layer_count"] == 1 and selection["mip"] ==
                 selection["first_layer"] == 0 and selection["samples"] == samples, "Wrong stencil layout")
+        normalized = result["backend"] == "native-pixel-ordinal/2" and mode == 3 and samples == 1
         require(selection["application_uav_bindings_retained"] and result["extra_uav_slots"] == 0 and
-                result["diagnostic_shader_replacements"] == marked, "Wrong shader or UAV contract")
+                result["diagnostic_shader_replacements"] == (marked or normalized), "Wrong shader or UAV contract")
+        require((result.get("coverage_normalization") is not None) == normalized, "Wrong coverage transform scope")
+        if normalized:
+            coverage = result["coverage_normalization"]
+            source = result["completion_shader"]["shader_sha256"] if marked else result["shaders"][4]["sha256"]
+            require(coverage["backend"] == "native-single-sample-coverage/1" and coverage["changed"] and
+                    coverage["required_samples"] == 1 and coverage["extra_temps"] == 1 and
+                    coverage["extra_uav_slots"] == 0 and coverage["coverage_declaration_retained"] and
+                    coverage["source_sha256"] == source and coverage["original_fragment_eligibility"] is None,
+                    "Invalid coverage transform provenance")
         require(result["diagnostic_working_payload_bytes"] <= result["payload_limit"], "Payload exceeded")
         require(result["debug_validation"] == "no_errors", "Native validation error")
         expected = []
@@ -104,7 +114,7 @@ REAL = {
 
 def real(report, files, name, vendor):
     event, resource, shader, x, y, digest = REAL[name]
-    require(report["backend"] == "native-pixel-ordinal/1" and report["scope"] ==
+    require(report["backend"] in ("native-pixel-ordinal/1", "native-pixel-ordinal/2") and report["scope"] ==
             "original_ps_body_with_counterfactual_stencil_reference", "Wrong real observation scope")
     require(report["event"] == event and report["frame_sha256"] == digest and report["selection"] ==
             {"resource": resource, "shader": shader, "x": x, "y": y, "slot": 0, "sample": 0},

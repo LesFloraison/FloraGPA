@@ -188,6 +188,26 @@ class NativePixelOrdinalReplayTests final : public QObject {
         std::vector<std::array<uint32_t, 4>> before;
         for (uint32_t sample = 0; sample < samples; ++sample)
             before.push_back(pixel(replay, resource, samples, sample));
+        const auto bindings = boundState(replay);
+        if (mode == 3 && samples == 1) {
+            for (bool after : {false, true}) {
+                QVERIFY_THROWS_EXCEPTION(
+                    std::runtime_error,
+                    replayNativePixelOrdinal(replay, 100, {targets - 1, 0}, [&](Replay &, bool observed) {
+                        if (observed == after)
+                            throw std::runtime_error("Injected normalized coverage failure");
+                    }));
+                QCOMPARE(boundState(replay), bindings);
+                QCOMPARE(pixel(replay, resource, samples, 0), before[0]);
+            }
+            bool cancelled = false;
+            QVERIFY_THROWS_EXCEPTION(
+                std::exception, replayNativePixelOrdinal(
+                                    replay, 100, {targets - 1, 0}, [&](Replay &, bool) { cancelled = true; },
+                                    256ull * 1024 * 1024, 30000, [&] { return cancelled; }));
+            QCOMPARE(boundState(replay), bindings);
+            QCOMPARE(pixel(replay, resource, samples, 0), before[0]);
+        }
         Json evidence{{"vendor", vendor},   {"layout", layout}, {"samples", samples},   {"mode", mode},
                       {"targets", targets}, {"before", before}, {"rows", Json::array()}};
         for (uint32_t rank : {0u, 1u, 2u, 127u, 253u, 254u}) {
@@ -200,11 +220,13 @@ class NativePixelOrdinalReplayTests final : public QObject {
                                 actual.push_back(pixel(r, resource, samples, sample));
                     });
                 const auto &selection = report.at("ordinal_selection");
+                QCOMPARE(boundState(replay), bindings);
                 QCOMPARE(selection.at("force_early_depth_stencil"), Json(mode == 2));
                 QCOMPARE(selection.at("stencil_payload_bytes"), Json(4 * samples));
                 QCOMPARE(selection.at("application_uav_bindings_retained"), Json(true));
                 QVERIFY(report.at("original_fragment_eligibility").is_null());
                 QCOMPARE(report.at("extra_uav_slots"), Json(0));
+                QCOMPARE(!report.at("coverage_normalization").is_null(), mode == 3 && samples == 1);
                 std::vector<std::array<uint32_t, 4>> expected;
                 for (uint32_t sample = 0; sample < samples; ++sample) {
                     const auto fragment = mode == 1 ? rank * 2 : mode == 3 ? rank * 2 + sample % 2 : rank;

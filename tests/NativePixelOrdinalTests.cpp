@@ -1,3 +1,4 @@
+#include "application/DxbcPixelCompletion.h"
 #include "application/HlslCompilation.h"
 #include "replay/Replay.h"
 #include <QDir>
@@ -92,10 +93,13 @@ class NativePixelOrdinalTests final : public QObject {
                                 : 4;
         const bool floatOutput = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_FLOAT") != 0;
         const UINT stencilMip = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_STENCIL_MIP");
+        const bool wideStencil = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_WIDE_STENCIL") != 0;
+        const UINT coverageDiscard = qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_COVERAGE_DISCARD");
         const bool rasterMultisample = !qEnvironmentVariableIsSet("FLORA_PIXEL_ORDINAL_RASTER_MSAA") ||
                                        qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_RASTER_MSAA") != 0;
         QVERIFY(extent == 1 || extent == 4);
         QVERIFY(stencilMip == 0 || (stencilMip == 2 && samples == 1));
+        QVERIFY(coverageDiscard <= 2);
         auto device = makeDevice(vendor);
         Com<ID3D11DeviceContext> context;
         device->GetImmediateContext(&context);
@@ -132,7 +136,7 @@ class NativePixelOrdinalTests final : public QObject {
         for (UINT i = 0; i != targets; ++i)
             pixel += std::string(floatOutput ? "float4 c" : "uint4 c") + std::to_string(i) + ":SV_Target" +
                      std::to_string(i) + ";";
-        if (mode == 3)
+        if (mode == 3 && coverageDiscard != 1)
             pixel += "uint coverage:SV_Coverage;";
         pixel += "};";
         if (mode == 2)
@@ -140,12 +144,28 @@ class NativePixelOrdinalTests final : public QObject {
         pixel += "O main(V v,uint p:SV_PrimitiveID,uint s:SV_SampleIndex){O o;";
         if (mode == 1 || mode == 2)
             pixel += "if(v.identity.x&1)discard;";
-        if (mode == 3)
-            pixel += "o.coverage=((v.identity.x&1)==(s&1))?0xffffffff:0;";
+        if (mode == 3 && coverageDiscard != 1)
+            pixel += coverageDiscard ? "o.coverage=0xffffffff;"
+                                     : "o.coverage=((v.identity.x&1)==(s&1))?0xffffffff:0;";
         for (UINT i = 0; i != targets; ++i)
             pixel += "o.c" + std::to_string(i) + "=uint4(v.identity.x+1,p,v.identity.y,s);";
+        if (mode == 3 && coverageDiscard)
+            pixel += "if((v.identity.x&1)!=(s&1))discard;";
         pixel += "return o;}";
-        const auto psCode = compileHlsl(pixel, "ps_5_0").bytecode;
+        const auto sourcePsCode = compileHlsl(pixel, "ps_5_0").bytecode;
+        auto psCode = sourcePsCode;
+        Json normalization = nullptr;
+        if (qEnvironmentVariableIntValue("FLORA_PIXEL_ORDINAL_NORMALIZE_COVERAGE")) {
+            QVERIFY(samples == 1);
+            PixelCompletionShader normalized;
+            try {
+                normalized = normalizeSingleSamplePixelCoverage(sourcePsCode);
+            } catch (const std::exception &error) {
+                QFAIL(error.what());
+            }
+            psCode = std::move(normalized.bytecode);
+            normalization = std::move(normalized.identity);
+        }
         const std::string type = floatOutput ? "float4" : "uint4";
         const auto coordinate = std::to_string(extent == 1 ? 0 : 1);
         const auto load = samples == 1 ? "t.Load(int3(" + coordinate + "," + coordinate + ",0))"
@@ -183,7 +203,7 @@ class NativePixelOrdinalTests final : public QObject {
             if (i == targets - 1)
                 check(device->CreateShaderResourceView(color.Get(), nullptr, &source), "Create ordinal SRV");
         }
-        texture.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+        texture.Format = wideStencil ? DXGI_FORMAT_D32_FLOAT_S8X24_UINT : DXGI_FORMAT_D24_UNORM_S8_UINT;
         texture.BindFlags = D3D11_BIND_DEPTH_STENCIL;
         texture.Width <<= stencilMip;
         texture.Height <<= stencilMip;
@@ -237,6 +257,9 @@ class NativePixelOrdinalTests final : public QObject {
         Com<ID3D11Query> occlusion;
         check(device->CreateQuery(&queryDesc, &occlusion), "Create ordinal occlusion");
         Json report{{"stencil_mip", stencilMip},
+                    {"coverage_normalization", normalization},
+                    {"stencil_format", uint32_t(texture.Format)},
+                    {"coverage_discard", coverageDiscard},
                     {"extent", extent},
                     {"float_output", floatOutput},
                     {"raster_multisample", rasterMultisample},
@@ -347,6 +370,8 @@ class NativePixelOrdinalTests final : public QObject {
             save(directory + "/vs.dxbc", Bytes(vsCode));
             save(directory + "/gs.dxbc", Bytes(gsCode));
             save(directory + "/ps.dxbc", Bytes(psCode));
+            if (!normalization.is_null())
+                save(directory + "/source.ps.dxbc", Bytes(sourcePsCode));
             save(directory + "/readback.dxbc", Bytes(csCode));
         }
         QVERIFY2(report["diagnostics"].empty(), report["diagnostics"].dump().c_str());
