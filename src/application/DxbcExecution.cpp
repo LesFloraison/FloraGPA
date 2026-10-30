@@ -444,7 +444,7 @@ Program::Program(Bytes dxbc) {
                                    [](const Operand &arg) { return arg.precision <= 2; });
             }();
             const bool precisionLoad = [&] {
-                if ((op != 45 && !(op == 163 && data->stage == 5)) ||
+                if ((op != 45 && !(op == 163 && (data->stage == 5 || data->stage == 0))) ||
                     (args[0].kind != 0 && args[0].kind != 3 && args[0].kind != 2) || args[2].precision ||
                     args[2].indices.size() != 1 || args[2].indices[0].relative ||
                     args[2].indices[0].base > UINT32_MAX ||

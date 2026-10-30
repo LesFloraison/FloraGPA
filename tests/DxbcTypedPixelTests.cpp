@@ -23,6 +23,7 @@ struct Device {
     Com<ID3D11Buffer> buffer, constants;
     Com<ID3D11Texture2D> output;
     Com<ID3D11ShaderResourceView> view;
+    Com<ID3D11UnorderedAccessView> pixelUav;
     Com<ID3D11RenderTargetView> target;
     Com<ID3D11RasterizerState> rasterizer;
     Com<ID3D11DepthStencilState> depth;
@@ -106,13 +107,15 @@ struct Device {
         context->RSSetScissorRects(1, &scissor);
         context->OMSetDepthStencilState(depth.Get(), 37);
         context->OMSetBlendState(blend.Get(), factor, UINT32_MAX);
-        context->OMSetRenderTargets(1, &rtv, nullptr);
+        auto *uav = pixelUav.Get();
+        context->OMSetRenderTargetsAndUnorderedAccessViews(1, &rtv, nullptr, 3, 1, &uav, nullptr);
     }
     bool bindingsPreserved() {
         Com<ID3D11VertexShader> vs;
         Com<ID3D11PixelShader> ps;
         Com<ID3D11Buffer> cb;
         Com<ID3D11ShaderResourceView> srv;
+        Com<ID3D11UnorderedAccessView> uav;
         Com<ID3D11RenderTargetView> rtv;
         Com<ID3D11RasterizerState> rs;
         Com<ID3D11DepthStencilState> ds;
@@ -127,6 +130,7 @@ struct Device {
         context->PSGetConstantBuffers(0, 1, &cb);
         context->PSGetShaderResources(3, 1, &srv);
         context->OMGetRenderTargets(1, &rtv, nullptr);
+        context->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 3, 1, &uav);
         context->OMGetDepthStencilState(&ds, &stencil);
         context->OMGetBlendState(&bs, factor.data(), &mask);
         context->RSGetState(&rs);
@@ -134,8 +138,9 @@ struct Device {
         context->RSGetScissorRects(&scissorCount, &scissor);
         context->IAGetPrimitiveTopology(&topology);
         return vs.Get() == vertex.Get() && ps.Get() == pixel.Get() && cb.Get() == constants.Get() &&
-               srv.Get() == view.Get() && rtv.Get() == target.Get() && rs.Get() == rasterizer.Get() &&
-               ds.Get() == depth.Get() && bs.Get() == blend.Get() && stencil == 37 && mask == UINT32_MAX &&
+               srv.Get() == view.Get() && uav.Get() == pixelUav.Get() && rtv.Get() == target.Get() &&
+               rs.Get() == rasterizer.Get() && ds.Get() == depth.Get() && bs.Get() == blend.Get() &&
+               stencil == 37 && mask == UINT32_MAX &&
                factor == std::array<float, 4>{0.2f, 0.3f, 0.4f, 0.5f} && viewportCount == 1 &&
                scissorCount == 1 && viewport.TopLeftX == 0 && viewport.TopLeftY == 0 && viewport.Width == 1 &&
                viewport.Height == 1 && viewport.MinDepth == 0 && viewport.MaxDepth == 1 &&
@@ -251,16 +256,31 @@ struct Device {
         check(device->CreateVertexShader(vs.data(), vs.size(), nullptr, &vertex),
               "Create reference raster VS");
         check(device->CreatePixelShader(code.data(), code.size(), nullptr, &pixel), "Create reference PS");
-        D3D11_BUFFER_DESC desc{
-            UINT(storage.size()), D3D11_USAGE_IMMUTABLE, D3D11_BIND_SHADER_RESOURCE, 0, 0, 0};
+        D3D11_BUFFER_DESC desc{UINT(storage.size()),
+                               typedUav ? D3D11_USAGE_DEFAULT : D3D11_USAGE_IMMUTABLE,
+                               UINT(typedUav ? D3D11_BIND_UNORDERED_ACCESS : D3D11_BIND_SHADER_RESOURCE),
+                               0,
+                               0,
+                               0};
         D3D11_SUBRESOURCE_DATA initial{storage.data(), 0, 0};
         check(device->CreateBuffer(&desc, &initial, &buffer), "Create reference typed pixel storage");
-        D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
-        srv.Format = DXGI_FORMAT(format);
-        srv.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srv.Buffer = {1, 3};
-        check(device->CreateShaderResourceView(buffer.Get(), &srv, &view),
-              "Create reference typed pixel view");
+        view.Reset();
+        pixelUav.Reset();
+        if (typedUav) {
+            D3D11_UNORDERED_ACCESS_VIEW_DESC uav{};
+            uav.Format = DXGI_FORMAT(format);
+            uav.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+            uav.Buffer = {1, 3, 0};
+            check(device->CreateUnorderedAccessView(buffer.Get(), &uav, &pixelUav),
+                  "Create reference typed pixel UAV");
+        } else {
+            D3D11_SHADER_RESOURCE_VIEW_DESC srv{};
+            srv.Format = DXGI_FORMAT(format);
+            srv.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+            srv.Buffer = {1, 3};
+            check(device->CreateShaderResourceView(buffer.Get(), &srv, &view),
+                  "Create reference typed pixel view");
+        }
         const std::array<uint32_t, 4> values{index, 0, 0, 0};
         desc = {16, D3D11_USAGE_IMMUTABLE, D3D11_BIND_CONSTANT_BUFFER, 0, 0, 0};
         initial.pSysMem = values.data();
@@ -366,7 +386,7 @@ class DxbcTypedPixelTests final : public QObject {
                             for (bool partial : {false, true})
                                 for (bool typedUav : {false, true})
                                     for (bool refactoringAllowed : {false, true}) {
-                                        if (typedUav && stage != 5)
+                                        if (typedUav && stage != 5 && stage != 0)
                                             continue;
                                         QTest::newRow(qPrintable(QString("%1-%2-%3-%4-%5-%6-%7-%8")
                                                                      .arg(vendor)
@@ -446,6 +466,7 @@ class DxbcTypedPixelTests final : public QObject {
                         bytes = programBytes;
                     }
                 const auto code = makeDxbc(parts);
+                const auto reference = device.run(code, storageBytes, format, index, stage, typedUav);
                 const Program program(code);
                 unsigned loads = 0;
                 for (const auto &instruction : program.instructions()) {
@@ -463,7 +484,6 @@ class DxbcTypedPixelTests final : public QObject {
                              addressPrecision);
                 }
                 QCOMPARE(loads, 1u);
-                const auto reference = device.run(code, storageBytes, format, index, stage, typedUav);
                 auto input = inputs(format, index, Buffer::known(storageBytes), gpu);
                 input.gpu = gpu;
                 if (stage == 5) {
@@ -473,6 +493,11 @@ class DxbcTypedPixelTests final : public QObject {
                         std::map<Register, BufferView>{
                             {{typedUav ? 30u : 7u, {3}}, {1, stride, stride * 3, 0, {}, format}},
                             {{30, {0}}, {2, 0, 16, 16}}},
+                        256 * 1024 * 1024, 16 * 1024 * 1024, gpu);
+                } else if (typedUav) {
+                    input.memory = std::make_shared<Memory>(
+                        std::map<uint64_t, Buffer>{{1, Buffer::known(storageBytes)}},
+                        std::map<Register, BufferView>{{{30, {3}}, {1, stride, stride * 3, 0, {}, format}}},
                         256 * 1024 * 1024, 16 * 1024 * 1024, gpu);
                 }
                 Lane lane(program, input);
@@ -547,21 +572,35 @@ class DxbcTypedPixelTests final : public QObject {
             QFAIL(error.what());
         }
     }
+    void minimumPrecisionValidityAndCancellation_data() {
+        QTest::addColumn<bool>("typedUav");
+        QTest::newRow("srv") << false;
+        QTest::newRow("pixel-uav") << true;
+    }
     void minimumPrecisionValidityAndCancellation() {
+        QFETCH(bool, typedUav);
         try {
             Device device(0);
             bool cancelled = false;
             auto gpu = std::make_shared<GpuOperations>(device.device.Get(), true, [&] { return cancelled; });
             const auto code =
-                compileHlsl("cbuffer Params:register(b0){uint4 p;}Buffer<min16float4> src:register(t3);"
-                            "uint4 main():SV_Target{min16uint index=min16uint(p.x)+min16uint(p.y);"
-                            "return asuint(float4(src[index]));}",
+                compileHlsl(std::string("cbuffer Params:register(b0){uint4 p;}") +
+                                (typedUav ? "RWBuffer<min16float4> src:register(u3);"
+                                          : "Buffer<min16float4> src:register(t3);") +
+                                "uint4 main():SV_Target{min16uint index=min16uint(p.x)+min16uint(p.y);"
+                                "return asuint(float4(src[index]));}",
                             "ps_5_0")
                     .bytecode;
             const Program program(code);
-            auto bytes = Buffer::known(storage(16));
-            bytes.valid[16 + 4] = 0;
-            auto input = inputs(2, 0, bytes, gpu);
+            const auto stride = typedUav ? 4u : 16u;
+            auto bytes = Buffer::known(storage(stride));
+            bytes.valid[typedUav ? stride : stride + 4] = 0;
+            auto input = inputs(typedUav ? 41 : 2, 0, bytes, gpu);
+            if (typedUav)
+                input.memory = std::make_shared<Memory>(
+                    std::map<uint64_t, Buffer>{{1, bytes}},
+                    std::map<Register, BufferView>{{{30, {3}}, {1, stride, stride * 3, 0, {}, 41}}},
+                    256 * 1024 * 1024, 16 * 1024 * 1024, gpu);
             input.gpu = gpu;
             Lane lane(program, input);
             cancelled = true;
@@ -569,7 +608,7 @@ class DxbcTypedPixelTests final : public QObject {
             QCOMPARE(gpu->operations(), uint64_t(0));
             cancelled = false;
             execute(lane);
-            QCOMPARE(lane.value({2, {0}}).valid, uint8_t(13));
+            QCOMPARE(lane.value({2, {0}}).valid, uint8_t(typedUav ? 14 : 13));
             QCOMPARE(input.memory->buffers().at(1).bytes, bytes.bytes);
             QCOMPARE(input.memory->buffers().at(1).valid, bytes.valid);
             auto unknown = input;

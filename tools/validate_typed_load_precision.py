@@ -92,6 +92,8 @@ def main():
     parser.add_argument("directory", type=Path)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--backend", default="dxbc-gpu/19")
+    parser.add_argument("--pixel-uav", action="store_true",
+                        help="Require the expanded matrix including PS typed UAV precision")
     args = parser.parse_args()
     seen, artifacts, controls = set(), [], {}
     components = 0
@@ -107,7 +109,7 @@ def main():
         for artifact in (path, *(path.with_suffix(suffix) for suffix in (".dxbc", ".compiler.dxbc", ".bin"))):
             data = artifact.read_bytes()
             artifacts.append({"path": str(artifact), "bytes": len(data), "sha256": digest(data)})
-        representative = key[0], key[1]
+        representative = key[0], key[1], key[6]
         if representative in representatives:
             continue
         representatives.add(representative)
@@ -132,13 +134,13 @@ def main():
             try:
                 verify(changed, *inputs, args.backend)
             except ValueError as error:
-                controls[f"{key[0]}-{key[1]}-{name}"] = str(error)
+                controls[f"{key[0]}-{key[1]}-{int(key[6])}-{name}"] = str(error)
             else:
                 raise ValueError("Corruption accepted: " + name)
     expected = {case for case in itertools.product(
         (0, 4318, 32902), (0, 1, 5), (1, 2, 4, 5), (0, 4, 5), (False, True),
         (False, True), (False, True), (False, True), (0, 2, 3, 65536, 4294967295))
-        if not case[6] or case[1] == 5}
+        if not case[6] or case[1] == 5 or (args.pixel_uav and case[1] == 0)}
     require(seen == expected, "Incomplete or changed precision matrix")
     result = {"schema": 1, "cases": len(seen), "exact_components": components,
               "scope": "same_adapter_typed_load_precision_observations",
