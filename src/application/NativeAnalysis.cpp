@@ -96,7 +96,7 @@ NativeAnalysisRequest nativeAnalysisRequest(const std::string &action, const Jso
         {"counters", {"gpa_event", "start_event", "end_event"}},
         {"history", {"resource", "x", "y", "slice", "mip", "layer", "sample", "typed_format",
                      "history_scope", "max_bytes", "max_records"}}};
-    if (action.starts_with("debug-"))
+    if (action.starts_with("debug-") || action == "shader-checkpoint")
         throw std::invalid_argument("Shader execution debugging was removed from the GPA DX11 feature scope");
     if (action == "history" && (!options.is_object() || !options.contains("history_scope")))
         throw std::invalid_argument("History requires an explicit events or gpa scope");

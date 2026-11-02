@@ -1,3 +1,6 @@
+# ARCHIVED: this script targets removed product commands/UI or the frozen
+# RenderDoc backend. Its old acceptance gates do not apply to the current branch.
+# See docs/NATIVE_GPA_CLOSURE.md; retained for historical evidence only.
 """Development-only comparison of native checkpoint capture and complete exports.
 
 SPDB/SDBG symbols, original source lines, source stacks and HS phase ownership are

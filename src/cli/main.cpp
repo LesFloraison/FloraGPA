@@ -5,7 +5,6 @@
 #include "application/DrawResources.h"
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
-#include "application/CheckpointInspection.h"
 #include "application/ClassInspector.h"
 #include "application/CommandState.h"
 #include "application/Constants.h"
@@ -22,7 +21,6 @@
 #include "application/GpuStatistics.h"
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
-#include "application/InvocationSelector.h"
 #include "application/InitializationGraph.h"
 #include "application/MdHotspots.h"
 #include "application/MdIterations.h"
@@ -92,6 +90,8 @@ int main(int argc, char **argv) {
         return nativeAnalyzeCli(app.arguments().mid(1));
     if (app.arguments().size() > 1 && app.arguments()[1] == "rdc-analyze")
         { QTextStream(stderr) << "rdc-analyze was removed; use analyze with a GPA frame.\n"; return 2; }
+    if (app.arguments().size() > 1 && app.arguments()[1] == "shader-checkpoint")
+        { QTextStream(stderr) << "shader-checkpoint was removed from the GPA DX11 feature scope.\n"; return 2; }
     QCommandLineParser p;
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
                    "| metric-iterations | metric-groups | "
-                   "statistics | timings | coverage | quad | post-geometry | shader-checkpoint");
+                   "statistics | timings | coverage | quad | post-geometry");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -148,16 +148,10 @@ int main(int argc, char **argv) {
     p.addOption({"quad-target", "Quad target: auto, depth or rt0..rt7", "target", "auto"});
     p.addOption({"quad-layer", "Absolute target layer, volume slice or viewport array index", "index"});
     p.addOption({"geometry-stage",
-                 "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-inputs, vs-writes, ds-writes, gs-emits", "stage",
+                 "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-inputs", "stage",
                  "final"});
     p.addOption({"stream", "Post-transform SO stream 0..3", "index", "0"});
     p.addOption({"instance", "Zero-based instance within the original draw", "index"});
-    p.addOption({"shader-stage", "Checkpoint shader stage: gs, ds or hs", "stage", "gs"});
-    p.addOption({"instruction", "Original shader instruction number for a checkpoint", "index"});
-    p.addOption({"trace", "Capture the original invocation instruction trace"});
-    p.addOption({"hs-phase", "Original HS phase ID", "index"});
-    p.addOption({"input-selector", "Exact declared-input selector JSON", "path"});
-    p.addOption({"max-bytes", "Checkpoint capture byte limit", "bytes", "268435456"});
     p.addOption({"before", "Stop before the selected event"});
     p.addOption({"id", "Resource ID", "id"});
     p.addOption({"filter", "API command text filter", "text"});
@@ -774,8 +768,7 @@ int main(int argc, char **argv) {
             report.insert("completed", true);
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
                    command == "statistics" || command == "texture-storage" || command == "geometry" ||
-                   command == "post-geometry" || command == "replay-pipeline" || command == "predicate" ||
-                   command == "shader-checkpoint") {
+                   command == "post-geometry" || command == "replay-pipeline" || command == "predicate") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -804,7 +797,7 @@ int main(int argc, char **argv) {
             }
             if (command == "predicate" && (!options.until || !p.isSet("id")))
                 throw std::runtime_error("predicate requires --event and --id");
-            if (command == "geometry" || command == "post-geometry" || command == "shader-checkpoint") {
+            if (command == "geometry" || command == "post-geometry") {
                 if (!options.until)
                     throw std::runtime_error(command.toStdString() + " requires --event");
                 options.before = true;
@@ -846,6 +839,8 @@ int main(int argc, char **argv) {
             } else if (command == "post-geometry") {
                 PostTransformOptions inspect;
                 inspect.stage = p.value("geometry-stage").toStdString();
+                if (inspect.stage == "vs-writes" || inspect.stage == "ds-writes" || inspect.stage == "gs-emits")
+                    throw std::runtime_error("Instruction-level geometry traces were removed from the GPA product scope");
                 bool valid = false;
                 inspect.stream = p.value("stream").toUInt(&valid);
                 if (!valid || inspect.stream > 3)
@@ -864,26 +859,6 @@ int main(int argc, char **argv) {
                 report.insert("event", QString::number(options.until));
                 report.insert("vertices", qint64(geometry["vertex_references"].get<uint64_t>()));
                 report.insert("unique_vertices", qint64(geometry["unique_vertices"].get<uint64_t>()));
-            } else if (command == "shader-checkpoint") {
-                if (p.isSet("instance") || p.isSet("stream"))
-                    throw std::runtime_error(
-                        "Shader checkpoints inspect all instances and do not select an output stream");
-                CheckpointInspectionOptions request;
-                request.stage = p.value("shader-stage").toStdString();
-                request.trace = p.isSet("trace");
-                request.maxBytes = parseId("max-bytes");
-                if (p.isSet("instruction"))
-                    request.instruction = parseIndex("instruction");
-                if (p.isSet("hs-phase"))
-                    request.hullPhase = parseIndex("hs-phase");
-                if (p.isSet("input-selector"))
-                    request.inputSelector = checkpoint::readSelector(
-                        std::filesystem::path(p.value("input-selector").toStdWString()));
-                const auto inspection = inspectCheckpoint(replay, options.until, request);
-                exportCheckpoint(inspection, std::filesystem::path(out.toStdWString()));
-                report.insert("checkpoint_file", "checkpoint.json");
-                report.insert("record_count", qint64(inspection.report.at("record_count").get<uint64_t>()));
-                report.insert("shader_stage", QString::fromStdString(request.stage));
             } else if (command == "predicate") {
                 auto detail = inspectPredicate(frame, replay, parseId("id"));
                 detail["event"] = options.until;

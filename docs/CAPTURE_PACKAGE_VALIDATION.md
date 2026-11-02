@@ -78,7 +78,6 @@ extra `--version` arguments are also rejected; existing evidence is preserved.
 python tools/validate_capture_source_build.py --out <new-capture-evidence-dir>
 python tools/validate_source_build.py --profile replay-only `
   --qt-root D:/Qt/6.11.2/msvc2022_64 `
-  --renderdoc-root <verified-official-RenderDoc-1.45-directory> `
   --out <new-replay-evidence-dir>
 ```
 

@@ -291,6 +291,10 @@ class MetricsDiscoveryTests : public QObject {
                 bool found = false;
                 for (size_t i = 0; i < metrics.size(); ++i)
                     if (metrics[i]["name"] == "CsThreads") {
+                        qInfo().noquote() << QString::fromStdString(
+                            Json{{"device", device.information()}, {"set", name}, {"groups", it->second},
+                                 {"metric", metrics[i]}, {"observed", value.values["values"][i]},
+                                 {"expected", (it->second + 1) / 2}}.dump());
                         QCOMPARE(value.values["values"][i]["value"], Json((it->second + 1) / 2));
                         found = true;
                     }

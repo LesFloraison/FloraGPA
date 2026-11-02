@@ -394,8 +394,8 @@ Installation of the bootstrap currently requires an ASCII path; target executabl
 arguments and working directory are Unicode.
 
 For a replay-only package, build the `replay-only-release` preset and pass
-`-BuildDirectory build/replay` to `tools/package.ps1` (with `-RenderDocRoot`
-pointing to the pinned official 1.45 runtime). The application packager uses the
+`-BuildDirectory build/replay` to `tools/package.ps1`. No RenderDoc runtime is
+required. The application packager uses the
 selected build's cache and never takes capture binaries from another build.
 `tools/validate_source_build.py --profile replay-only` checks the corresponding
 committed-source build and package without capture targets or components.

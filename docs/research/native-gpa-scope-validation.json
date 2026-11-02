@@ -84,5 +84,7 @@
     "path": "out/FloraGPA-native-20261102-validation.zip",
     "sha256": "5e1c7de2e7c9b28e8b0c70e1400b2bac1c6d65d3e95b6dea31a585438fc6e713",
     "import_audit": "no RenderDoc/GPA imports in package root binaries"
-  }
+  },
+  "historical_checkpoint": true,
+  "current_acceptance": "../NATIVE_GPA_CLOSURE.md"
 }

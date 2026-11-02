@@ -52,6 +52,32 @@ void verifyChildStopped(const QString &directory) {
 class NativeAnalysisTests final : public QObject {
     Q_OBJECT
   private slots:
+    void retiredProductCommands() {
+        for (const auto name : {"FloraGPA.Cli.exe", "FloraGPA.Worker.exe"}) {
+            const auto executable = QCoreApplication::applicationDirPath() + '/' + name;
+            QProcess process;
+            process.start(executable, {"--help"});
+            QVERIFY(process.waitForFinished(10000));
+            QCOMPARE(process.exitCode(), 0);
+            const auto help = process.readAllStandardOutput();
+            QVERIFY(!help.contains("shader-checkpoint"));
+            QVERIFY(!help.contains("--instruction"));
+            QVERIFY(!help.contains("--renderdoc"));
+            for (const auto command : {"shader-checkpoint", "rdc-analyze"}) {
+                process.start(executable, {command});
+                QVERIFY(process.waitForFinished(10000));
+                QCOMPARE(process.exitCode(), 2);
+                QVERIFY(process.readAllStandardError().contains("removed"));
+            }
+            process.start(executable, {"analyze", "missing.gpa_frame", "history", "--history-scope",
+                                       "events", "--out", "unused"});
+            QVERIFY(process.waitForFinished(10000));
+            QCOMPARE(process.exitCode(), 1);
+            QVERIFY(process.readAllStandardError().contains("internal validation only"));
+        }
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+                                 nativeAnalysisRequest("shader-checkpoint", Json::object()));
+    }
     void requestValidation() {
         for (const auto &options : {Json{{"eid", 10}}, Json{{"renderdoc", "library"}}, Json{{"resource", -1}},
                                     Json{{"resource", 1}, {"sample", uint64_t(UINT32_MAX) + 1}},

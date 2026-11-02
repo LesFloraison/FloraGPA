@@ -132,12 +132,45 @@ class NativeHistoryUiTests final : public QObject {
         QVERIFY(!view.finishNative(serial, result));
         QVERIFY(!action(view, "exportPixelHistory")->isEnabled());
         view.setWorkerBusy(true);
-        QVERIFY(!action(view, "historyNativeEvents")->isEnabled());
+        QVERIFY(!action(view, "historyNativeEvents"));
         view.setWorkerBusy(false);
         view.setNativeMode(false);
         QVERIFY(!view.request().contains("gpa_event"));
         QCOMPARE(view.request().at("history_scope"), Json("gpa"));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finishNative(view.requestId(), result));
+    }
+    void gpaPresentation() {
+        PixelHistoryView view;
+        view.setContext("frame", 1000);
+        view.selectPixel(20, 0, 0, 0, 0, 0);
+        auto result = fixture();
+        result["context"]["options"]["history_scope"] = "gpa";
+        result["data"]["kind"] = "gpa_event_history";
+        result["data"]["schema"] = 1;
+        result["data"]["selection"] = view.request();
+        result["data"]["records"] = Json::array({
+            {{"event", 1000}, {"record_kind", "gpa_event_diagnostic"},
+             {"diagnostic_status", 0}, {"diagnostic_count", 2},
+             {"pixel", {{"available", true}, {"bytes", "ff0000ff"}}}}});
+        QVERIFY(view.finishNative(view.requestId(), result));
+        auto tree = view.findChild<QTreeWidget *>("historyRecords");
+        QCOMPARE(tree->topLevelItemCount(), 1);
+        QCOMPARE(tree->topLevelItem(0)->text(0), QString("1000"));
+        QCOMPARE(tree->topLevelItem(0)->text(1), QString("0"));
+        QCOMPARE(tree->topLevelItem(0)->text(2), QString("2"));
+        QCOMPARE(tree->topLevelItem(0)->text(5), QString("ff0000ff"));
+        QVERIFY(!tree->isColumnHidden(1));
+        QVERIFY(!tree->isColumnHidden(2));
+        QTemporaryDir directory;
+        view.exportResult(directory.filePath("gpa-history.json"));
+        QCOMPARE(read(directory.filePath("gpa-history.json")), result);
+        auto bad = result;
+        bad["data"]["selection"]["resource"] = 21;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finishNative(view.requestId(), bad));
+        QCOMPARE(tree->topLevelItem(0)->text(2), QString("2"));
+        const auto serial = view.requestId();
+        view.setContext("other-frame", 1000);
+        QVERIFY(!view.finishNative(serial, result));
     }
     void mainWindow_data() {
         QTest::addColumn<unsigned>("vendor");
@@ -180,6 +213,8 @@ class NativeHistoryUiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         auto view = window.findChild<PixelHistoryView *>();
         QVERIFY(view);
+        QVERIFY(!window.findChild<QTabWidget *>("checkpointStageTabs"));
+        QVERIFY(!action(*view, "historyNativeEvents"));
         for (auto tabs : window.findChildren<QTabWidget *>())
             if (tabs->indexOf(view) >= 0)
                 tabs->setCurrentWidget(view);

@@ -1,10 +1,6 @@
-> Branch update (2026-10-31): [GPA native scope](DX11_NATIVE_MIGRATION.md) supersedes
-> the RenderDoc/debugger migration descriptions below. Those sections describe the
-> historical release; current native release validation is pending.
-
 # Using FloraGPA
 
-Interfaces reviewed on 2026-10-03 at `ba1c468`. See [current support](CURRENT_STATUS.md)
+Native scope reviewed on 2026-11-03. See [closure and limitations](NATIVE_GPA_CLOSURE.md)
 for limits and the [root README](../README.md#build) for building and packaging.
 Linked migration/audit pages provide batch evidence; old pending statements
 in those records are not the current feature inventory.
@@ -125,10 +121,11 @@ Class linkage exposes saved names, descriptors and owning linkage.
 
 Geometry includes IA and supported native VS/DS/GS/final output, stream/instance
 selection, typed attributes and wireframe views. Specialized views expose VS
-identities, VS/DS writes, GS emissions and HS control-point/patch-constant output.
+identities and HS control-point/patch-constant output.
 Exports retain validity/provenance, with OBJ when positions are valid.
 See [post-transform](POST_TRANSFORM_MIGRATION.md), [VS identities](VS_IDENTITY_MIGRATION.md),
-[output logs](OUTPUT_LOG_MIGRATION.md) and [HS output](HULL_OUTPUT_MIGRATION.md).
+and [HS output](HULL_OUTPUT_MIGRATION.md). Instruction-level write/emission traces
+are retired product entries; their internal instrumentation remains shared.
 
 ## Experiments and edits
 
@@ -166,10 +163,8 @@ verification. **Import ASM / Assemble & Apply** needs a selected external tool.
 See [recovery](HLSL_RECOVERY_MIGRATION.md), [projects](SHADER_PROJECT_MIGRATION.md)
 and [external tools](EXTERNAL_SHADER_MIGRATION.md).
 
-Native GS/HS/DS checkpoint views support Read/Capture/Trace, stepping,
-breakpoints, variables, watches and export within recovered semantics.
-See [checkpoint UI](CHECKPOINT_UI_MIGRATION.md). Source metadata depends on
-available debug information; unavailable values remain unknown.
+Shader execution debugging and GS/HS/DS checkpoint controls have been retired.
+Available source metadata remains part of shader inspection.
 
 Coverage provides fragment/geometry diagnostics, overlays, navigation and exports.
 Quad provides serialized diagnostic-group counters/previews. Coverage is not an
@@ -182,28 +177,27 @@ ordering and coordinate limits.
 & $Cli quad $Frame --id 430 --quad-depth prepared --out ./artifacts/quad-new
 ```
 
-### Optional RenderDoc analysis
+### Native DX11 analysis
 
-The portable package automatically selects its bundled RenderDoc 1.45 release
-DLL for recapture and analysis. A saved existing manual path takes precedence;
-a vanished path falls back to the bundle, then the Program Files installation.
-Explicitly selected incompatible libraries produce an error. Pixel History offers pixel picking, before/after
-values, navigation and export. Recorded VS/PS/CS debugging, Replay Mesh and
-Replay Metrics share native worker/caching infrastructure. Neither Python nor
-qrenderdoc is an application dependency.
+Pixel History provides GPA event diagnostics: one row per event, post-event pixel
+bytes, diagnostic status and count. Counts describe GPA diagnostic passes, not
+individual writes or fragments. The supported scope is single-sample 2D color
+render targets at layer zero; MSAA, volume and depth targets are rejected.
+Replay Mesh and Replay Metrics use the isolated native Worker directly.
 
 ```powershell
-$RenderDocDll = './out/FloraGPA/RenderDoc/renderdoc.dll' # Bundled pinned backend.
-& $Cli replay $Frame --renderdoc $RenderDocDll --out ./artifacts/recapture-new
-& $Cli rdc-analyze --help
+& $Cli analyze $Frame history --history-scope gpa --resource 5 --x 4 --y 4 --out ./artifacts/history-new
+& $Cli analyze --help
 ```
 
-The public app API and version-specific replay ABI have different requirements.
-See [recapture](RDC_CAPTURE_MIGRATION.md), [analysis CLI](RDC_CLI_MIGRATION.md),
-[Pixel History](PIXEL_HISTORY_UI_MIGRATION.md), [debugging](REPLAY_DEBUG_UI_MIGRATION.md),
-[mesh](REPLAY_MESH_MIGRATION.md), [metrics](REPLAY_METRICS_MIGRATION.md) and the
-[1.46 investigation](RENDERDOC146_VALIDATION.md). A different version loading
-through the capture API does not establish replay ABI compatibility.
+Choose the actual resource and coordinates from the loaded capture. No RenderDoc
+runtime, recapture, external replay ABI or GPA installation is used. Old
+`rdc-analyze`, `--renderdoc` and `shader-checkpoint` requests fail explicitly.
+Storage snapshots remain an internal validation facility, not a product mode.
+Large Intel Helldivers analyses can exceed the default 180-second Worker deadline;
+CLI validation uses `--timeout 600`. A timed-out job is a failure until a fresh
+explicit retry succeeds. See [native acceptance](NATIVE_GPA_CLOSURE.md) for evidence
+and release limits.
 
 ## Measurements
 
@@ -221,6 +215,9 @@ Intel Metrics requires supported Intel hardware/driver and the packaged
 `FloraGPA.Metrics.dll` bridge. Catalog discovery, scheduled and uniform Qt
 collection/export are available. Event-group CLI collection exists; its Qt/session
 owner remains pending. WARP/non-Intel devices do not provide Intel MD counters.
+On the validated Intel `8086:7d67` driver, collection succeeds but the `CsThreads`
+numerical qualification fails; available records are not proof of correct values.
+Native DX11 statistics remain available. See the [failure ledger](NATIVE_GPA_CLOSURE.md#historical-problems-and-follow-up).
 See [foundation](METRICS_DISCOVERY_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md),
 [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md) and [groups](MD_HOTSPOTS_MIGRATION.md).
 

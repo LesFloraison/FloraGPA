@@ -25,7 +25,7 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"debug-device", "Enable D3D11 validation"});
         parser.addOption({"gpu-vendor", "Select a PCI vendor ID (decimal or 0x hex)", "id"});
         parser.addOption({"stage", "Mesh stage: final, vs, vs-index, vs-inputs, hs, ds or gs", "stage"});
-        parser.addOption({"history-scope", "events (storage) or gpa (event diagnostics)", "scope"});
+        parser.addOption({"history-scope", "gpa (event diagnostics)", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
                                "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
                                "max-records"})
@@ -62,6 +62,8 @@ int nativeAnalyzeCli(QStringList arguments) {
             else
                 options[field] = number(parser.value(key), key == "gpu-vendor");
         }
+        if (parser.value("history-scope") == "events")
+            throw std::invalid_argument("Event storage history is internal validation only; use --history-scope gpa");
         bool valid = false;
         const auto timeout = parser.value("timeout").toDouble(&valid);
         if (!valid)

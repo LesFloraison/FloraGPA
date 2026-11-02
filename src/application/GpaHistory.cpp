@@ -92,10 +92,14 @@ uint64_t diagnostic(const Replay &source, Id event, const NativeHistorySelection
 
 Json collectGpaEventHistory(Replay &replay, const NativeHistorySelection &selection,
                             const CancelCheck &cancelled) {
-    const auto info = textureInfo(replay.frame().resource(selection.resource));
-    if (info.dimension != 3 || info.samples != 1 || selection.layer || selection.slice ||
+    const auto &resource = replay.frame().resource(selection.resource);
+    const auto info = textureInfo(resource);
+    if (info.dimension != 3 || info.samples != 1 || selection.layer || selection.slice || selection.sample ||
         selection.x >= INT32_MAX || selection.y >= INT32_MAX)
         throw std::invalid_argument("GPA diagnostics currently require a single-sample 2D target, layer zero");
+    if ((resource.desc.at(8) & D3D11_BIND_DEPTH_STENCIL) ||
+        !(resource.desc.at(8) & D3D11_BIND_RENDER_TARGET))
+        throw std::invalid_argument("GPA diagnostics require a validated color render target; depth targets are unsupported");
     auto result = collectNativeEventHistory(replay, selection, cancelled);
     Json records = Json::array();
     uint64_t replays = 1;

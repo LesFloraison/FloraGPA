@@ -1,5 +1,10 @@
 # Native GS / HS / DS checkpoint workspace
 
+> Historical evidence: this document describes an earlier implementation. Removed
+> commands and feature gates are not current product requirements. See
+> [current native scope](DX11_NATIVE_MIGRATION.md).
+
+
 > Historical batch record. Results, package paths, module counts and remaining-work
 > statements below describe this batch. See [current status](CURRENT_STATUS.md)
 > for present support and [the documentation index](README.md) for navigation.

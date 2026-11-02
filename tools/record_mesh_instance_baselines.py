@@ -1,3 +1,6 @@
+# ARCHIVED: this script targets removed product commands/UI or the frozen
+# RenderDoc backend. Its old acceptance gates do not apply to the current branch.
+# See docs/NATIVE_GPA_CLOSURE.md; retained for historical evidence only.
 """Extend retained frozen-main mesh evidence with distinct instance selections.
 
 Development-only: the three new baseline jobs explicitly use RenderDoc. Native

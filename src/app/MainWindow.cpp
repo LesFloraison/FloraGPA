@@ -10,7 +10,6 @@
 #include "CompatibilityButton.h"
 #include "AnnotationsView.h"
 #include "BlendDialog.h"
-#include "CheckpointView.h"
 #include "CommandStateView.h"
 #include "ConstantBufferDialog.h"
 #include "CoverageView.h"
@@ -1044,8 +1043,7 @@ void MainWindow::buildUi() {
     for (auto [label, value] :
          {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
           std::pair{"HS output", "hs"}, std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"},
-          std::pair{"VS identities", "vs-index"}, std::pair{"VS writes", "vs-writes"},
-          std::pair{"DS writes", "ds-writes"}, std::pair{"GS emissions", "gs-emits"},
+          std::pair{"VS identities", "vs-index"},
           std::pair{"VS input replay", "vs-inputs"}})
         geometryStage_->addItem(label, value);
     geometrySource->addWidget(geometryStage_);
@@ -1094,13 +1092,10 @@ void MainWindow::buildUi() {
         const auto selected = geometryStage_->currentData().toString();
         const bool inputs = selected == "vs-inputs";
         const bool hull = selected == "hs";
-        const bool writes = selected == "vs-writes" || selected == "ds-writes" || hull;
         {
             QSignalBlocker blocker(geometryTable_);
             geometryTable_->clear();
             geometryTable_->addItem(hull                     ? "Control points"
-                                    : writes                 ? "Invocation records"
-                                    : selected == "gs-emits" ? "Emission records"
                                     : inputs                 ? "Input replay vertices"
                                                              : "Expanded vertices",
                                     "expanded_vertices");
@@ -1113,11 +1108,11 @@ void MainWindow::buildUi() {
                     geometryTable_->addItem("Original references and cuts", "input_references");
             }
         }
-        mesh_->setVisible(!writes);
+        mesh_->setVisible(!hull);
         geometryTable_->setEnabled(!busy() && (!post || selected == "vs-index" || inputs || hull));
-        if (writes || inputs)
+        if (hull || inputs)
             geometryStream_->setValue(0);
-        geometryStream_->setEnabled(!busy() && post && !writes && !inputs);
+        geometryStream_->setEnabled(!busy() && post && !hull && !inputs);
         geometryInstance_->setEnabled(!busy() && post);
         clearGeometry();
     });
@@ -1183,28 +1178,6 @@ void MainWindow::buildUi() {
         if (!busy())
             locateEvent(id);
     });
-    auto debugTabs = new QTabWidget;
-    debugTabs->setObjectName("checkpointStageTabs");
-    debugTabs->setDocumentMode(true);
-    const QStringList debugStages{"gs", "hs", "ds"};
-    for (size_t i = 0; i < checkpoints_.size(); ++i) {
-        auto view = checkpoints_[i] = new CheckpointView(debugStages[int(i)]);
-        debugTabs->addTab(view, debugStages[int(i)].toUpper());
-        connect(view, &CheckpointView::error, this, &MainWindow::showError);
-        connect(view, &CheckpointView::captureRequested, this,
-                [this, view](const QStringList &options, bool catalog) {
-                    if (busy() || !frame_ || !selectedEvent_)
-                        return;
-                    runningCheckpoint_ = view;
-                    runningCheckpointCatalog_ = catalog;
-                    QStringList args{"shader-checkpoint", capturePath_, "--event",
-                                     QString::number(selectedEvent_)};
-                    args += options;
-                    startWorker(args, false);
-                });
-    }
-    debugTabs->setCurrentIndex(0);
-    centerTabs_->addTab(debugTabs, "Shader Checkpoints");
     auto rightTabs = new QTabWidget;
     rightTabs->setObjectName("inspectorTabs");
     rightTabs->setDocumentMode(true);
@@ -1344,7 +1317,7 @@ void MainWindow::buildUi() {
         }
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
-        updateCheckpointContext();
+        updateAnalysisContext();
         updateProfileContext();
         ++outputGeneration_;
         replayedState_->invalidate();
@@ -1413,7 +1386,7 @@ void MainWindow::setBusy(bool busy) {
         if (auto action = findChild<QAction *>(name)) action->setEnabled(!busy);
     for (auto editor : findChildren<ShaderProjectDialog *>())
         editor->setBusy(busy);
-    updateCheckpointContext();
+    updateAnalysisContext();
     if (history_)
         history_->setWorkerBusy(busy);
     if (nativeCounters_)
@@ -1421,9 +1394,6 @@ void MainWindow::setBusy(bool busy) {
 
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
-    for (auto view : checkpoints_)
-        if (view)
-            view->setWorkerBusy(busy);
     // A preview may replace the texture while an independent export is running.
     // Restore availability from the currently accepted asset, not the old job.
     if (textureExportAction_)
@@ -1443,8 +1413,7 @@ void MainWindow::setBusy(bool busy) {
                                          geometryStage_->currentData() == "vs-inputs" ||
                                          geometryStage_->currentData() == "hs"));
     geometryStream_->setEnabled(
-        !busy && geometryStage_->currentData() != "ia" && geometryStage_->currentData() != "vs-writes" &&
-        geometryStage_->currentData() != "ds-writes" && geometryStage_->currentData() != "hs" &&
+        !busy && geometryStage_->currentData() != "ia" && geometryStage_->currentData() != "hs" &&
         geometryStage_->currentData() != "vs-inputs");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
@@ -1462,19 +1431,7 @@ void MainWindow::setBusy(bool busy) {
         progress_->setValue(0);
     exportAction_->setEnabled(!image_->image().isNull());
 }
-void MainWindow::updateCheckpointContext() {
-    const bool available = frame_ && selectedEvent_ && isDraw(frame_->entry(selectedEvent_).type);
-    QString key;
-    if (frame_) {
-        const auto document = experiment_ ? experiment_->document().dump() : std::string();
-        const auto digest =
-            sha256(Bytes(reinterpret_cast<const uint8_t *>(document.data()), document.size()));
-        key = QString::fromStdString(frame_->sha256()) + ':' + QString::number(selectedEvent_) + ':' +
-              QString::number(adapter_->currentIndex()) + ':' + QString::fromStdString(digest);
-    }
-    for (auto view : checkpoints_)
-        if (view)
-            view->setContext(key, available);
+void MainWindow::updateAnalysisContext() {
     if (history_)
         history_->setContext(historyContextKey(), selectedEvent_);
     if (nativeCounters_)
@@ -1889,15 +1846,6 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                                       .arg(experiment["pending_events"].toArray().size()));
         }
 
-        if (runningKind_ == "shader-checkpoint") {
-            if (!runningCheckpoint_)
-                throw std::runtime_error("Missing checkpoint view");
-            runningCheckpoint_->loadOutput(jobDir_->path() + "/result", runningCheckpointCatalog_);
-            runningCheckpoint_->keepOutput(std::move(jobDir_));
-            statusBar()->showMessage("Shader checkpoints ready", 3000);
-            emit taskFinished(true);
-            return;
-        }
         if (runningKind_ == "quad") {
             if (!result.quad) throw std::runtime_error("Missing prepared Quad result");
             const bool accepted = quad_->accept(runningQuadRequest_, std::move(*result.quad));
@@ -2149,7 +2097,7 @@ void MainWindow::selectEvent(Id id) {
     if (!frame_ || selectedEvent_ == id)
         return;
     selectedEvent_ = id;
-    updateCheckpointContext();
+    updateAnalysisContext();
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
     predicateView_->setSelection(frame_, id);
@@ -2915,7 +2863,7 @@ void MainWindow::updateExperimentActions() {
 void MainWindow::experimentChanged() {
     stashShaderDrafts();
     updateProfileContext();
-    updateCheckpointContext();
+    updateAnalysisContext();
     const auto shaderStage = selectedShaderStage_;
     ++outputGeneration_;
     replayedState_->invalidate();
@@ -3913,8 +3861,9 @@ void MainWindow::openExperiment() {
         shaderDocuments_ = documents;
         shaderEntries_ = entries;
         projectPath_ = path;
-        geometryStage_->setCurrentIndex(
-            geometryStage_->findData(QString::fromStdString(settings.geometryStage)));
+        const auto geometryIndex = geometryStage_->findData(QString::fromStdString(settings.geometryStage));
+        // Retired trace selections must not invalidate the shared experiment.
+        geometryStage_->setCurrentIndex(geometryIndex >= 0 ? geometryIndex : geometryStage_->findData("final"));
         geometryStream_->setValue(int(settings.geometryStream));
         geometryInstance_->setText(QString::fromStdString(settings.geometryInstance));
         geometryTable_->setCurrentIndex(

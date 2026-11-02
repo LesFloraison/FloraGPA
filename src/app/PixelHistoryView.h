@@ -39,7 +39,8 @@ class PixelHistoryView final : public QWidget {
     uint64_t requestId_{};
     bool busy_{};
     nlohmann::json result_;
-    QAction *read_, *cancel_, *locate_, *export_, *nativeMode_;
+    QAction *read_, *cancel_, *locate_, *export_;
+    bool storageValidation_ = false; // Internal validation; never restored from user settings.
     QLineEdit *eventInput_, *resource_, *typedFormat_;
     QSpinBox *x_, *y_, *mip_, *layer_, *sample_, *slice_;
     QLabel *summary_, *values_;

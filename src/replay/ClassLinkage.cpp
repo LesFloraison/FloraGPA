@@ -47,7 +47,9 @@ void Replay::validateClassProgram(Bytes program, unsigned slots) const {
     check(device_.As(&dxgi), "Query class shader adapter");
     check(dxgi->GetAdapter(&adapter), "Get class shader adapter");
     check(adapter->GetDesc(&desc), "Get class shader adapter description");
-    if (desc.VendorId == 0x10de && desc.DeviceId == 0x249d)
+    // Both device IDs reproduced a driver compiler access violation for this
+    // exact empty-table program shape. Ordinary linked programs remain enabled.
+    if (desc.VendorId == 0x10de && (desc.DeviceId == 0x249d || desc.DeviceId == 0x2c58))
         throw std::runtime_error("This NVIDIA adapter crashes on the captured empty-table dynamic pixel "
                                  "shader; select WARP (--warp) to replay the original program");
 }

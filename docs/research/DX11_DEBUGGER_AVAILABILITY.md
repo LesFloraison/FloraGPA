@@ -1,5 +1,9 @@
 # Original GPA shader-debug availability
 
+> Archived debugger research. The former P1/RenderDoc parity gates below are
+> retired; only the verified availability evidence informs the current
+> [GPA product scope](../NATIVE_GPA_CLOSURE.md).
+
 The pinned local GPA build exposes `ShadersPresenter::isShaderDebuggerAvailable`
 through a constant false getter. This is a verified public-property path, not
 evidence that the unresolved debugger engine is absent from every module or

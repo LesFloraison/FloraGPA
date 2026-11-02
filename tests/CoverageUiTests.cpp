@@ -167,7 +167,8 @@ class CoverageUiTests final : public QObject {
         emit image->pixelSelected(0, 0, image->image().pixelColor(0, 0));
         const auto history = window.findChild<PixelHistoryView *>()->request();
         QCOMPARE(history["resource"], Json(20));
-        QCOMPARE(history["gpa_event"], Json(1000));
+        QVERIFY(!history.contains("gpa_event")); // GPA diagnostics cover the full frame.
+        QCOMPARE(history["history_scope"], Json("gpa"));
         QAction *disable = nullptr, *undo = nullptr;
         for (auto action : window.findChildren<QAction *>()) {
             if (action->text() == "Disable Event")

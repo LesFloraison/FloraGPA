@@ -4,6 +4,8 @@ Start with the [project README](../README.md) for prerequisites, building,
 packaging and basic replay. Documentation is primarily English; the development
 chronology remains in Chinese.
 
+Current native branch closure: [product scope and validation](NATIVE_GPA_CLOSURE.md).
+
 ## User and contributor entry points
 
 | Need | Read |
@@ -146,9 +148,9 @@ Use the topical links in the usage/current-status guides for a shorter route.
 
 - [Captured annotations and explicit context membership](ANNOTATION_MIGRATION.md)
 - [Before-event replay boundaries](BEFORE_BOUNDARY_MIGRATION.md)
-- [Native checkpoint capture and export](CHECKPOINT_CAPTURE_MIGRATION.md)
-- [Native checkpoint model migration](CHECKPOINT_MODEL_MIGRATION.md)
-- [Native GS / HS / DS checkpoint workspace](CHECKPOINT_UI_MIGRATION.md)
+- [Archived checkpoint capture and export](CHECKPOINT_CAPTURE_MIGRATION.md)
+- [Internal checkpoint model history](CHECKPOINT_MODEL_MIGRATION.md)
+- [Archived GS / HS / DS checkpoint workspace](CHECKPOINT_UI_MIGRATION.md)
 - [Persistent constant-buffer setter editing](CONSTANT_BUFFER_SETTER_MIGRATION.md)
 - [Native coverage execution](COVERAGE_EXECUTION_MIGRATION.md)
 - [Native coverage shader transformations](COVERAGE_SHADER_MIGRATION.md)

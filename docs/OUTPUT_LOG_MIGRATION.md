@@ -1,3 +1,7 @@
+> Historical research: VS/DS write and GS emission product views and commands
+> were retired by the [GPA scope closure](NATIVE_GPA_CLOSURE.md). Their old UI/CLI
+> acceptance gates no longer apply; shared internal instrumentation remains.
+
 # Native VS/DS writes and GS emissions
 
 > Historical batch record. Results, package paths, module counts and remaining-work

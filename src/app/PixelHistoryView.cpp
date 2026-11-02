@@ -59,12 +59,6 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     details->setCheckable(true);
     details->setObjectName("historyDetailsToggle");
     tools->addSeparator();
-    nativeMode_ = tools->addAction("Event storage");
-    nativeMode_->setObjectName("historyNativeEvents");
-    nativeMode_->setCheckable(true);
-    nativeMode_->setChecked(false);
-    nativeMode_->setToolTip("Read GPA storage before and after resource operations across the full frame. "
-                            "These are event snapshots, not individual fragments.");
     auto advanced = tools->addAction("Coordinates");
     advanced->setCheckable(true);
     advanced->setObjectName("historyCoordinatesToggle");
@@ -102,7 +96,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     slice_ = spin(" Slice ", "historySlice", INT_MAX);
     typedFormat_ = idInput(" Format ", "historyTypedFormat", "Automatic");
     typedFormat_->setToolTip("Optional DXGI format number for native storage interpretation");
-    sample_->setToolTip("Individual MSAA sample; sample 0 for single-sampled textures");
+    sample_->setToolTip("GPA diagnostics require a single-sample target and sample 0");
     layout->addWidget(inputs);
     inputs->hide();
     connect(advanced, &QAction::toggled, inputs, &QWidget::setVisible);
@@ -182,11 +176,12 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
             summary_->setText(QString::fromUtf8(e.what()));
         }
     });
-    connect(nativeMode_, &QAction::toggled, this, &PixelHistoryView::invalidate);
     updateActions();
 }
-void PixelHistoryView::setNativeMode(bool enabled) { nativeMode_->setChecked(enabled); }
-bool PixelHistoryView::nativeMode() const { return nativeMode_->isChecked(); }
+void PixelHistoryView::setNativeMode(bool enabled) {
+    if (storageValidation_ != enabled) { storageValidation_ = enabled; invalidate(); }
+}
+bool PixelHistoryView::nativeMode() const { return storageValidation_; }
 void PixelHistoryView::setContext(const QString &key, qulonglong event) {
     if (key_ != key) {
         key_ = key;
@@ -261,7 +256,6 @@ void PixelHistoryView::updateActions() {
     read_->setEnabled(!busy_ && !key_.isEmpty());
     cancel_->setEnabled(busy_);
     export_->setEnabled(!busy_ && !result_.is_null());
-    nativeMode_->setEnabled(!busy_);
     for (auto widget :
          std::initializer_list<QWidget *>{eventInput_, resource_, x_, y_, mip_, layer_, sample_})
         widget->setEnabled(!busy_);

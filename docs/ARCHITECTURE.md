@@ -17,7 +17,7 @@ that every original GPA feature has been implemented.
 - **Qt UI** owns selection, navigation, presentation and interaction. Native
   replay does not run on the GUI thread; jobs use isolated workers.
 - **FloraGPA.Worker** isolates native replay/analysis jobs; **FloraGPA.Cli** exposes
-  reproducible commands. **FloraGPA.Rdc** isolates optional RenderDoc analysis;
+  reproducible commands. Native DX11 is the sole analysis backend;
   **FloraGPA.Metrics.dll** bridges optional Intel Metrics Discovery access.
 
 Ordinary application replay uses neither Python nor GPA DLLs. Optional native

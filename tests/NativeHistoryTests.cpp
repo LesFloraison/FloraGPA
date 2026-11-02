@@ -110,6 +110,31 @@ class NativeHistoryTests final : public QObject {
         QCOMPARE(replay.counts, clean.counts);
         QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
     }
+    void gpaUnsupportedTargets() {
+        QTemporaryDir directory;
+        const auto path = directory.filePath("unsupported.gpa_frame");
+        depthStencilCapture().save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(0));
+        NativeHistorySelection selection;
+        selection.resource = 720;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectGpaEventHistory(replay, selection));
+        selection.resource = 20;
+        selection.sample = 1;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectGpaEventHistory(replay, selection));
+        selection.sample = 0;
+        selection.layer = 1;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectGpaEventHistory(replay, selection));
+        selection.layer = 0;
+        selection.slice = 1;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectGpaEventHistory(replay, selection));
+        const auto msaaPath = directory.filePath("msaa.gpa_frame");
+        msaaOutputCapture().save(msaaPath);
+        Frame msaaFrame(msaaPath.toStdWString());
+        Replay msaa(msaaFrame, options(0));
+        selection.slice = 0;
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument, collectGpaEventHistory(msaa, selection));
+    }
     void resourceCommands_data() { devices(); }
     void resourceCommands() {
         QFETCH(uint32_t, vendor);

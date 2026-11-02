@@ -1,3 +1,6 @@
+# ARCHIVED: this script targets removed product commands/UI or the frozen
+# RenderDoc backend. Its old acceptance gates do not apply to the current branch.
+# See docs/NATIVE_GPA_CLOSURE.md; retained for historical evidence only.
 """Compare actual Qt-selected values/frames/watches and ZIP exports to Python."""
 import argparse
 import hashlib

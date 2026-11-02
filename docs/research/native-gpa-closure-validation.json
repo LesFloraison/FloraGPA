@@ -1,0 +1,2348 @@
+{
+  "date": "2026-11-03",
+  "branch": "feature/dx11-native-backend",
+  "base_commit": "fd08c149ce47201db420cd86cbbeec220c3d2a37",
+  "backend": "dx11-native/21",
+  "bounded_development_complete": true,
+  "release_accepted": false,
+  "all_tests_passed": false,
+  "scope_document": "../NATIVE_GPA_CLOSURE.md",
+  "formal_release_pending": [
+    "Independent clean Windows host without GPA/RenderDoc",
+    "Intel hardware numerical qualification and declared capture/fidelity limitations remain open"
+  ],
+  "reference": {
+    "version": "25.1.26603.47871",
+    "dx11_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "framedb_qt_sha256": "35a03995d50f390ed74722385583e7bb011f84e563a579c88086d8039ad1df80",
+    "evidence": "Existing version/hash-matched local Ghidra evidence; no original binaries are product dependencies"
+  },
+  "build": {
+    "directory": "build/native-closure",
+    "fresh_configure": true,
+    "all_retained_targets_built": true,
+    "capture_development_enabled": false
+  },
+  "tests": {
+    "ctest_suites": 150,
+    "effective_status_counts": {
+      "passed": 101,
+      "failed": 4,
+      "passed_with_skips": 45
+    },
+    "qt_case_counts": {
+      "passed": 2201,
+      "failed": 5,
+      "skipped": 949
+    },
+    "failures": [
+      "dxbc_feedback_relocation",
+      "metrics_discovery",
+      "hlsl_recovery",
+      "recovery_ui"
+    ],
+    "tests": [
+      {
+        "name": "capture_boundaries",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.101864,
+        "status": "passed"
+      },
+      {
+        "name": "dxbc_feedback_relocation",
+        "run": "ctest.xml",
+        "ctest_status": "failed",
+        "seconds": 3.88933,
+        "qt": {
+          "passed": 42,
+          "failed": 2,
+          "skipped": 0
+        },
+        "status": "failed"
+      },
+      {
+        "name": "geometry_uav_dependencies",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 16.1959,
+        "qt": {
+          "passed": 85,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_analysis",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 23.6125,
+        "qt": {
+          "passed": 62,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_pixel",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 17.1044,
+        "qt": {
+          "passed": 207,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_history",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 47.148,
+        "qt": {
+          "passed": 170,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_vertex_inputs",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 8.12767,
+        "qt": {
+          "passed": 54,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "draw_resources",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 6.88238,
+        "qt": {
+          "passed": 11,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "metric_pass_controller",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0377796,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "metric_iterations",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.037855,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "metric_priority",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.065986,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "metric_analysis",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0379042,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "recorded_metrics",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0535311,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "metric_collector",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.103696,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "md_frame_ranges",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0386463,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "md_hotspots",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0415088,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "md_profile",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.152605,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "md_iteration_collection",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0476923,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "uniform_metrics_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.547112,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 3
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "scheduled_metrics_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0639027,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 3
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "md_iteration_results",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0366812,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "metric_core",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0586891,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "metrics_discovery",
+        "run": "affected.xml",
+        "ctest_status": "failed",
+        "seconds": 0.187284,
+        "qt": {
+          "passed": 3,
+          "failed": 1,
+          "skipped": 1
+        },
+        "status": "failed"
+      },
+      {
+        "name": "replay_mesh_model",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0256442,
+        "status": "passed"
+      },
+      {
+        "name": "native_replay_mesh_ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 19.9339,
+        "qt": {
+          "passed": 105,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_history_ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 32.5569,
+        "qt": {
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "native_counter_ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 17.1103,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "checkpoint_model",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.20684,
+        "status": "passed"
+      },
+      {
+        "name": "quad",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.00818,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_uavs",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.424919,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_depth",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.567801,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_resources",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.245462,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_final",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.290454,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_serial",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.303834,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "dxbc_quad",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.400296,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "quad_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 8.02226,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "coverage_ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 4.70157,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "coverage",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.35867,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "dxbc_coverage",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.953002,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "dxbc_output_log",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.794476,
+        "status": "passed"
+      },
+      {
+        "name": "post_transform",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 15.1776,
+        "qt": {
+          "passed": 13,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "replay_adapter_ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 3.61087,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "gpu_statistics",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 3.29418,
+        "status": "passed"
+      },
+      {
+        "name": "annotations",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.05166,
+        "status": "passed"
+      },
+      {
+        "name": "experiment_report",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0979275,
+        "status": "passed"
+      },
+      {
+        "name": "planar_writes",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.71716,
+        "status": "passed"
+      },
+      {
+        "name": "texture_initial_data",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 4.08015,
+        "status": "passed"
+      },
+      {
+        "name": "texture_inspector",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.117255,
+        "status": "passed"
+      },
+      {
+        "name": "texture_edits",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0466351,
+        "status": "passed"
+      },
+      {
+        "name": "texture_edit_replay",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 8.15962,
+        "qt": {
+          "passed": 34,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "event_chart",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0674026,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "gpu_profile",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 3.82675,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "external_shader_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.862199,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "hlsl_recovery_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.40381,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "shader_project_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.5027,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 2
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "ui",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 174.796,
+        "qt": {
+          "passed": 64,
+          "failed": 0,
+          "skipped": 32
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "experiments",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.162696,
+        "status": "passed"
+      },
+      {
+        "name": "commands",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.10424,
+        "status": "passed"
+      },
+      {
+        "name": "buffer_edits",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.110188,
+        "status": "passed"
+      },
+      {
+        "name": "input_bindings",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 11.7286,
+        "qt": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "depth_stencil",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 8.3947,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "output_bindings",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.892829,
+        "qt": {
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "constant_buffer_setters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.61719,
+        "status": "passed"
+      },
+      {
+        "name": "ia_setters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.134815,
+        "status": "passed"
+      },
+      {
+        "name": "shader_setters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.12633,
+        "status": "passed"
+      },
+      {
+        "name": "pipeline_setters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.526556,
+        "qt": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "frame_output",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.929814,
+        "qt": {
+          "passed": 12,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "view_edits",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.21897,
+        "qt": {
+          "passed": 13,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "srv_bindings",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.733097,
+        "qt": {
+          "passed": 9,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "srv_edits",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.09954,
+        "qt": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "samplers",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.0029,
+        "qt": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "blend",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 16.8702,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "rasterizer",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.52685,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "normalized_predication",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.64338,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "predication",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 7.87699,
+        "qt": {
+          "passed": 43,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "stream_output",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.89238,
+        "qt": {
+          "passed": 19,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "class_linkage",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.47935,
+        "qt": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "replay_pipeline",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.40273,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "external_shader_tools",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.44183,
+        "qt": {
+          "passed": 13,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "hlsl_recovery",
+        "run": "ctest.xml",
+        "ctest_status": "failed",
+        "seconds": 10.9929,
+        "qt": {
+          "passed": 9,
+          "failed": 1,
+          "skipped": 0
+        },
+        "status": "failed"
+      },
+      {
+        "name": "shader_project",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0630658,
+        "qt": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "constant_buffer_lifetimes",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.00834,
+        "qt": {
+          "passed": 146,
+          "failed": 0,
+          "skipped": 19
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "discards",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0694371,
+        "qt": {
+          "passed": 2,
+          "failed": 0,
+          "skipped": 52
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "context_states",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0594442,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 10
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "so_lifetimes",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.629437,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 19
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "pipeline_getters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0383413,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 27
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "lod_clones",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0384433,
+        "qt": {
+          "passed": 2,
+          "failed": 0,
+          "skipped": 52
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "resource_lod",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0563321,
+        "qt": {
+          "passed": 15,
+          "failed": 0,
+          "skipped": 185
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "transfer1",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0378556,
+        "qt": {
+          "passed": 2,
+          "failed": 0,
+          "skipped": 55
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "clear_view",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0370763,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 33
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "predicate_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0378866,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 22
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "stream_queries",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0368543,
+        "qt": {
+          "passed": 2,
+          "failed": 0,
+          "skipped": 103
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "class_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.140095,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 29
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "geometry_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0504729,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 42
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "pipeline_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.202168,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 66
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "buffer_view_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.277945,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 38
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "view_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.47815,
+        "qt": {
+          "passed": 8,
+          "failed": 0,
+          "skipped": 24
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "texture_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.02549,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 48
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "texture_copies",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.055823,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "copy_commands",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.45672,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "buffer_creation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.23806,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 1
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "present_records",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.16314,
+        "qt": {
+          "passed": 25,
+          "failed": 0,
+          "skipped": 2
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "object_observations",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.462277,
+        "qt": {
+          "passed": 7,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "map_nowait",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0567754,
+        "qt": {
+          "passed": 3,
+          "failed": 0,
+          "skipped": 25
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "map_records",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.34181,
+        "qt": {
+          "passed": 56,
+          "failed": 0,
+          "skipped": 16
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "frame_validation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.14716,
+        "status": "passed"
+      },
+      {
+        "name": "process_memory",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0771,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "command_search",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 49.6301,
+        "qt": {
+          "passed": 11,
+          "failed": 0,
+          "skipped": 2
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "capture_structure",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.572637,
+        "qt": {
+          "passed": 15,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "capture_structure_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 6.43423,
+        "qt": {
+          "passed": 14,
+          "failed": 0,
+          "skipped": 5
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "predicate_query_history",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.336829,
+        "qt": {
+          "passed": 19,
+          "failed": 0,
+          "skipped": 10
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "query_inspection",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 3.86931,
+        "qt": {
+          "passed": 58,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "query_inspection_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 35.9843,
+        "qt": {
+          "passed": 16,
+          "failed": 0,
+          "skipped": 2
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "api_export",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.28397,
+        "qt": {
+          "passed": 21,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "api_export_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 101.708,
+        "qt": {
+          "passed": 13,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "geometry_export",
+        "run": "affected.xml",
+        "ctest_status": "passed",
+        "seconds": 0.439107,
+        "qt": {
+          "passed": 22,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "image_export",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.78612,
+        "qt": {
+          "passed": 31,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "image_export_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 57.7599,
+        "qt": {
+          "passed": 15,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "buffer_csv",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.333432,
+        "qt": {
+          "passed": 26,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "buffer_command",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.49426,
+        "qt": {
+          "passed": 18,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "byte_export_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 53.0327,
+        "qt": {
+          "passed": 16,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "byte_export",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.235081,
+        "qt": {
+          "passed": 15,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "output_storage_export",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.24475,
+        "qt": {
+          "passed": 29,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "thumbnail_output",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 7.17927,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "diagnostic_output",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.281154,
+        "qt": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "worker_report",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 4.68601,
+        "qt": {
+          "passed": 30,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "worker_buffer",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.09904,
+        "qt": {
+          "passed": 29,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "image_display",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.78408,
+        "qt": {
+          "passed": 11,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "query_completion",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.686519,
+        "qt": {
+          "passed": 46,
+          "failed": 0,
+          "skipped": 6
+        },
+        "status": "passed_with_skips"
+      },
+      {
+        "name": "worker_image",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.512826,
+        "qt": {
+          "passed": 28,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "worker_recovery",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 229.774,
+        "qt": {
+          "passed": 121,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "qt_compatibility",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.190567,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "cancellation",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 3.81836,
+        "status": "passed"
+      },
+      {
+        "name": "gui_resources",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.185838,
+        "qt": {
+          "passed": 6,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "recovery_ui",
+        "run": "affected.xml",
+        "ctest_status": "failed",
+        "seconds": 20.2128,
+        "qt": {
+          "passed": 7,
+          "failed": 1,
+          "skipped": 0
+        },
+        "status": "failed"
+      },
+      {
+        "name": "compatibility_ui",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.37805,
+        "qt": {
+          "passed": 4,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "command_state",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 5.33308,
+        "qt": {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "contexts",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 1.45489,
+        "qt": {
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0
+        },
+        "status": "passed"
+      },
+      {
+        "name": "initialization_schedule",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.167879,
+        "status": "passed"
+      },
+      {
+        "name": "initialization_graph",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 9.79298,
+        "status": "passed"
+      },
+      {
+        "name": "api_commands",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.447939,
+        "status": "passed"
+      },
+      {
+        "name": "uav_counters",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 2.44589,
+        "status": "passed"
+      },
+      {
+        "name": "constants",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0421923,
+        "status": "passed"
+      },
+      {
+        "name": "shaders",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0622181,
+        "status": "passed"
+      },
+      {
+        "name": "geometry",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0363611,
+        "status": "passed"
+      },
+      {
+        "name": "metadata",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.038337,
+        "status": "passed"
+      },
+      {
+        "name": "core",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0429612,
+        "status": "passed"
+      },
+      {
+        "name": "format_container",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0731606,
+        "status": "passed"
+      },
+      {
+        "name": "format_codecs",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0241297,
+        "status": "passed"
+      },
+      {
+        "name": "format_writer",
+        "run": "ctest.xml",
+        "ctest_status": "passed",
+        "seconds": 0.0391952,
+        "status": "passed"
+      }
+    ]
+  },
+  "retired_tests": [
+    "checkpoint_ui",
+    "UiTests::nativeDebugControls",
+    "Instruction write/emission UI portion of PostTransformTests::mainWindowInspection"
+  ],
+  "known_issues": [
+    {
+      "name": "class_linkage",
+      "status": "blocking crash addressed",
+      "details": "Narrow empty-table dynamic PS rejection on observed NVIDIA 10de:249d and 10de:2c58; WARP works; 10 Qt cases passed"
+    },
+    {
+      "name": "hlsl_recovery / recovery_ui",
+      "status": "historical nonblocking image baseline mismatch",
+      "actual_sha256": "3d431509ec8258047bc7381367a2861e36ba26abad658bc642524692c07426cc",
+      "unchanged_expected_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "follow_up": "Investigate historical BF1 image fidelity; current output matches prior same-device baseline"
+    },
+    {
+      "name": "dxbc_feedback_relocation",
+      "status": "historical compute qualification failed",
+      "details": "NVIDIA raw/structured compute feedback rows gpu-4318-1-0 and gpu-4318-2-0 fail; removed compute debugger is outside bounded product scope; shared assertions retained"
+    },
+    {
+      "name": "metrics_discovery",
+      "status": "device numerical qualification failed",
+      "details": "Intel 8086:7d67 RenderBasic/CsThreads observes 0 versus expected 6; reproduced in prior unchanged test executable; collection success is not numerical qualification"
+    },
+    {
+      "name": "Intel Helldivers metric-profile",
+      "status": "failed; no profile published",
+      "details": "Image guard rejects 126638 changed pixels. Frame/event/experiment identity checks succeed. Existing known_variable full-image capture policy is consistent with this limitation; no claim that metrics are qualified"
+    }
+  ],
+  "package": {
+    "path": "out\\FloraGPA-native-closure-20261103-validation.zip",
+    "sha256": "c34dd7ef05e9458612d55335064f6137e53d9754c3a44c46ac48d97fe56177b6",
+    "bytes": 47067099,
+    "source_tree_sha256": "399a5b6bdd588c270c2f468f26da9e170abbb4c62099d6197a6a453182af47e1",
+    "source_files": 860,
+    "product_binaries": {
+      "FloraGPA.Cli.exe": "04113d70d37c088ccb1f4eea4c08d229d4470001193ea26ecc83a527e5cfa265",
+      "FloraGPA.exe": "36ff46b4492e0a68201f1d5900c7e338597d3250ce90e4afe80d97888e1d431e",
+      "FloraGPA.Metrics.dll": "d8dacc20e42112e7807d8fe6ea2546ef33d407d01028351f05fc4090366fa4a3",
+      "FloraGPA.Worker.exe": "0a01e708b27a580582f4bcf3a87cd34277a1a172c1999557292bf1fa23bbf270"
+    }
+  },
+  "package_matrix": {
+    "completed": true,
+    "workloads": 50,
+    "execution_passed": 49,
+    "profile_validation_failed": 1,
+    "all_dependency_audits_passed": true,
+    "validator_exit_code": 1,
+    "exit_code_reason": "A completed matrix retains the failed Intel Helldivers profile; failure is not converted to a passing exit status."
+  },
+  "workloads": [
+    {
+      "name": "4318-gf2-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true,
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "same_device_baseline": "artifacts\\native-gpa-package-gf2-replay\\report.json"
+    },
+    {
+      "name": "4318-gf2-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 170,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-gf2-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 168,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\4318-gf2-113-0\\final\\vertices.bin"
+    },
+    {
+      "name": "4318-gf2-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 168,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-bf1-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 93,
+      "execution_passed": true,
+      "rgba_sha256": "3d431509ec8258047bc7381367a2861e36ba26abad658bc642524692c07426cc",
+      "same_device_baseline": "artifacts\\native-gpa-package-bf1-replay\\report.json"
+    },
+    {
+      "name": "4318-bf1-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 169,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-bf1-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 166,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "180b440fcb63eaca09c0e253ae3016cdcdeb89605757ff78ddaf87eea7490f1a",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\4318-bf1-876-0\\final\\vertices.bin"
+    },
+    {
+      "name": "4318-bf1-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 163,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 93,
+      "execution_passed": true,
+      "rgba_sha256": "75b871143602487436b4a04c433bf2b7a770645dd5cc81c861f694ccfc1df652",
+      "image_policy": "known_variable; completion and bounded controls, not full-frame hash identity",
+      "controls": {
+        "before": "ed783b75a4114358b0ea067466d02f9cd75b064380f9a995d22c3d7caa5617dc",
+        "no-draws": "5b80e4b2045e11bc8181cf92c7c87ee703f48426b9d30242df2356c14a6d96b1",
+        "disabled-0": "e3d67598f1aea3547653916a1a317162a48dadda2ffddc2ab32646a4842cebcf",
+        "disabled-1": "e3d67598f1aea3547653916a1a317162a48dadda2ffddc2ab32646a4842cebcf",
+        "disabled-2": "e3d67598f1aea3547653916a1a317162a48dadda2ffddc2ab32646a4842cebcf"
+      }
+    },
+    {
+      "name": "4318-helldivers-before",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 95,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-no-draws",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 92,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-disabled-0",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-disabled-1",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-disabled-2",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 94,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-prior-before",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-prior-disabled-0",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 166,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "4318-helldivers-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 166,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "d70de2fb686253a4751ed91a457544ddfc09f37e1af1e4a4a2ca3ebf4cc76639",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\4318-helldivers-200-0\\final\\vertices.bin"
+    },
+    {
+      "name": "4318-helldivers-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 167,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-gf2-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 93,
+      "execution_passed": true,
+      "rgba_sha256": "f5434386e51f9f12d248af05a2e93e91db7bd7a2eb73c9ce771cf53f8f8b36bd"
+    },
+    {
+      "name": "32902-gf2-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 163,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-gf2-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 164,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\32902-gf2-113-0\\final\\vertices.bin"
+    },
+    {
+      "name": "32902-gf2-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 162,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-gf2-intel-metrics",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 92,
+      "execution_passed": true,
+      "qualification": "collection only; numerical hardware qualification remains failed"
+    },
+    {
+      "name": "32902-bf1-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 90,
+      "execution_passed": true,
+      "rgba_sha256": "19db1dba070828bb186b20ae2b2a5e79f7a2df2bd6f00ae0dd890d1562abc037"
+    },
+    {
+      "name": "32902-bf1-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 163,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-bf1-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 163,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "180b440fcb63eaca09c0e253ae3016cdcdeb89605757ff78ddaf87eea7490f1a",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\32902-bf1-876-0\\final\\vertices.bin"
+    },
+    {
+      "name": "32902-bf1-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 161,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-bf1-intel-metrics",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": true,
+      "qualification": "collection only; numerical hardware qualification remains failed"
+    },
+    {
+      "name": "32902-helldivers-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 91,
+      "execution_passed": true,
+      "rgba_sha256": "7fc26f3f2757a5fcdef0acbf7bed94bd3cce2888f18728209b4be9f81d57095f",
+      "image_policy": "known_variable; completion and bounded controls, not full-frame hash identity"
+    },
+    {
+      "name": "32902-helldivers-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 165,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-helldivers-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 165,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "2c205f52e90d9c7e1a6ceda29606507b60c43fbbfcd2444494812e40e292a455",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\32902-helldivers-200-0\\final\\vertices.bin"
+    },
+    {
+      "name": "32902-helldivers-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 164,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "32902-helldivers-intel-metrics",
+      "audit_passed": true,
+      "exit_code": 1,
+      "process_count": 2,
+      "image_events": 96,
+      "execution_passed": false,
+      "status": "validation_failed_no_profile",
+      "qualification": "Not passed: Helldivers full image differs between baseline and measurement; capture is known_variable",
+      "validation": "artifacts\\native-closure-20261102\\package-validation\\32902-helldivers-intel-metrics\\validation.json"
+    },
+    {
+      "name": "0-gf2-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 78,
+      "execution_passed": true,
+      "rgba_sha256": "a789801379ec06f93a13b5bb796cfadba1219096345ca691d3c1e6b41f661082"
+    },
+    {
+      "name": "0-gf2-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 149,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "0-gf2-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 143,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "0c7789531a70d2ef13c730a76aca0af06e303387f8d9845a24a52bf2941eba0c",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\0-gf2-113-0\\final\\vertices.bin"
+    },
+    {
+      "name": "0-gf2-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 145,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "0-bf1-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 78,
+      "execution_passed": true,
+      "rgba_sha256": "87f1e640e90b93d8e55851f9a81b113a22f8a2b1ee49c9d24d75e0d8f7b464bd"
+    },
+    {
+      "name": "0-bf1-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 148,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "0-bf1-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 148,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "5b5d0af6cb879d8ccebaf7b27439a8acdb7a56da8ce76a2f447fe605a4244e75",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\0-bf1-876-0\\final\\vertices.bin"
+    },
+    {
+      "name": "0-bf1-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 145,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "0-helldivers-replay",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 79,
+      "execution_passed": true,
+      "rgba_sha256": "823df957a24cf5b7ae24c6b3488723d69077cbfbeb16badc102bbf937b82050d",
+      "image_policy": "known_variable; completion and bounded controls, not full-frame hash identity"
+    },
+    {
+      "name": "0-helldivers-texture",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 151,
+      "verified_artifacts": 5,
+      "execution_passed": true
+    },
+    {
+      "name": "0-helldivers-mesh",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 148,
+      "verified_artifacts": 9,
+      "execution_passed": true,
+      "vertices_sha256": "368d511bccf53f5d750f33950f8bfcc5b4e57bc50db58d4f16ee2ddbca11f8d3",
+      "same_device_baseline": "artifacts\\dx11-native\\mesh-real-verified\\0-helldivers-200-0\\final\\vertices.bin"
+    },
+    {
+      "name": "0-helldivers-counters",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 146,
+      "verified_artifacts": 2,
+      "execution_passed": true
+    },
+    {
+      "name": "history-nvidia",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 164,
+      "verified_artifacts": 1,
+      "execution_passed": true,
+      "differential": {
+        "ok": true,
+        "events": 10,
+        "original_callbacks": 2,
+        "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+          "device": 11352,
+          "driver_version": 9007199255791310,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 70842,
+          "revision": 161,
+          "subsystem": 1044910147,
+          "vendor": 4318,
+          "warp": false
+        },
+        "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+      }
+    },
+    {
+      "name": "history-intel",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 4,
+      "image_events": 163,
+      "verified_artifacts": 1,
+      "execution_passed": true,
+      "differential": {
+        "ok": true,
+        "events": 10,
+        "original_callbacks": 2,
+        "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+        "adapter": {
+          "description": "Intel(R) Graphics",
+          "device": 32103,
+          "driver_version": 9007199261368954,
+          "feature_level": 45312,
+          "luid_high": 0,
+          "luid_low": 76375,
+          "revision": 6,
+          "subsystem": 1044910147,
+          "vendor": 32902,
+          "warp": false
+        },
+        "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+      }
+    },
+    {
+      "name": "gui-gf2",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 3,
+      "image_events": 158,
+      "execution_passed": true
+    },
+    {
+      "name": "intel-catalog",
+      "audit_passed": true,
+      "exit_code": 0,
+      "process_count": 2,
+      "image_events": 92,
+      "execution_passed": true
+    }
+  ],
+  "audit": {
+    "import_binaries": 33,
+    "forbidden_imports": 0,
+    "image_events": 6613,
+    "process_events": 159,
+    "forbidden_images": 0,
+    "unresolved_images": 0,
+    "positive_control": "parent and child observed",
+    "negative_controls": [
+      "renamed forbidden executable detected",
+      "transient forbidden DLL load and unload detected"
+    ],
+    "clean_host": false
+  },
+  "original_differentials": [
+    {
+      "ok": true,
+      "events": 10,
+      "original_callbacks": 2,
+      "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 70842,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+    },
+    {
+      "ok": true,
+      "events": 10,
+      "original_callbacks": 2,
+      "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 76375,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+    }
+  ],
+  "failed_attempts_preserved": [
+    "Old object corruption in initial reused build",
+    "Initial class_linkage NVIDIA crash",
+    "Initial UI tests still referenced retired entries",
+    "Initial harness None-event and Helldivers full-hash assumptions",
+    "Intel Helldivers texture default 180-second Worker timeout; explicit 600-second retry passed in 239.891 seconds",
+    "Retry against nonempty output refused; failed output preserved before fresh retry"
+  ],
+  "raw_evidence": {
+    "artifacts/native-closure-20261102/configure.log": "eea3e485b1cbb74d5f5a68329a0a56a28aacfba49d528850c3a6b5378b6fee48",
+    "artifacts/native-closure-20261102/fresh-build.log": "039781a400dd8fed8e90c38a09ccc10d3b5e4815ce6e5f5f925bb314ffbe58d3",
+    "artifacts/native-closure-20261102/scope-fix-build.log": "ce5b6e05d08031a61b847170054f4595ea84a80236d28807177321afe4c5177d",
+    "artifacts/native-closure-20261102/ctest.xml": "c9475e09c4819653d976c053f0ee97e51ae171490fbc76146976132597cfc212",
+    "artifacts/native-closure-20261102/affected.xml": "3fd35625018a99b42f7f9cfbb34306d4fdd665b5fac3ea34cc11b6647ed1e3d3",
+    "artifacts/native-closure-20261102/test-summary.json": "c4f8c64c5523eb6c39e55d35d172ebbbe8c67627ac774c2ff3820b67d17545fa",
+    "artifacts/native-closure-20261102/source-dependency-audit.json": "f829b18149c825f6627f2a6178da0d5761d35b2509cf14a93876c756c06bf205",
+    "artifacts/native-closure-20261102/import-audit-final.json": "aaa7c75413cb336ea30b73cc959fe7ee6fd855a805d9233b10dd2a506ce128d3",
+    "artifacts/native-closure-20261102/runtime-audit-summary.json": "e7bf2ed302fa3c0c59c47d4bfde520aecd54d9a809764d97399f18816343fb93",
+    "artifacts/native-closure-20261102/package-validation/validation.json": "701f908e6bb7845b6ed0718481d8f28215bdb3e7c6fbc10fc0a175f3e9e69355",
+    "artifacts/native-closure-20261102/package-validation/complete.json": "0f953018159a203543b98974b8830c597b9a7d86c8596799cf3a7a324150e0cf",
+    "artifacts/native-closure-20261102/original-nvidia/history.json": "dadc97c1dbbe4acbf61c1c4170cbc6f9351d223f7948fff479ca8ee7f40c2846",
+    "artifacts/native-closure-20261102/original-intel/history.json": "5b4afd8b713588b4d4eab9d24cddafc0e8bd974a928d6ca90f668844c79ec8bf",
+    "artifacts/native-closure-20261102/class-linkage-fixed.txt": "cde4748bb81c7a064c4da342f0f48a7138ff287bdb61e45c7190a496b2e6863a",
+    "artifacts/native-closure-20261102/metrics-hardware-diagnostic.txt": "33b3b44e61defef6bce6e0d07fec88d03c16e45ccef9b716927d73ceb9f4d14c",
+    "artifacts/native-closure-20261102/metrics-hardware-prior-build.txt": "8ce69cf93a03cad96ead1f6bab660e8ae38506d4a979823877721de0e9739d59",
+    "artifacts/native-closure-20261102/audit-control-2/audit.json": "2778fc08fe2f0081d18ff38ad00ae7f48038e4b7fc75257503c8993ebd928786",
+    "artifacts/native-closure-20261102/audit-negative/audit.json": "994592fd0480802db2a34439f860729d4942be1a28f2c390436ab223141dfc69",
+    "artifacts/native-closure-20261102/audit-transient-negative/audit.json": "ff081456bbb5d09db29dc88140047f6da17d8ab1821d9c4182ee77bfaef8c0ae",
+    "tools/audit_native_runtime.py": "1fa3ff1152d54d8c3f40e64d7198cd7ceea984a99a1d5a2caf46149dcf838639",
+    "tools/validate_native_closure.py": "7507bca0d116e6e86efd4d25685e2dd6a5ef427bfcf0590003b5021f1863a516",
+    "tools/validate_source_build.py": "1a015898b8bab99a2e9562e4108f8ff20ba8c9a77f174658f9961ef02ba11f33",
+    "artifacts/native-closure-20261102/package-validation-confirmed.log": "cb34e5f9ca69cde75f1d8547d36002c7fe6413f79ffa67b7794984ceee788389"
+  }
+}

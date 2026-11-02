@@ -154,7 +154,7 @@ class ClassLinkageTests final : public QObject {
         check(adapter->GetDesc(&desc), "Get test adapter description");
         options.warp = false;
         Replay hardware(frame, options);
-        if (desc.VendorId == 0x10de && desc.DeviceId == 0x249d) {
+        if (desc.VendorId == 0x10de && (desc.DeviceId == 0x249d || desc.DeviceId == 0x2c58)) {
             bool rejected = false;
             try {
                 hardware.run();

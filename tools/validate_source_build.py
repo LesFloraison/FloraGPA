@@ -45,8 +45,6 @@ def run_process(command, cwd, env, log, timeout):
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('--qt-root', type=Path, required=True)
-    parser.add_argument('--renderdoc-root', type=Path,
-                        help='Pinned official RenderDoc 1.45 x64 ZIP directory for packaging')
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--cmake', type=Path)
     parser.add_argument('--jobs', type=int, default=4)
@@ -148,8 +146,6 @@ def main():
         package_command = [windows/'System32/WindowsPowerShell/v1.0/powershell.exe',
                         '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
                         source/'tools/package.ps1', '-BuildDirectory', build_root, '-OutputDirectory', package]
-        if args.renderdoc_root:
-            package_command += ['-RenderDocRoot', args.renderdoc_root.resolve(strict=True)]
         run('package', package_command)
         report['package_files'] = {p.relative_to(package).as_posix(): digest(p)
                                    for p in package.rglob('*') if p.is_file()}

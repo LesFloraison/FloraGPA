@@ -76,7 +76,7 @@ class ReplayAdapterUiTests final : public QObject {
         restoreReplayAdapter(combo, false, 0x8086);
         for (const auto *command : {"replay", "buffer", "texture", "statistics", "texture-storage",
                                    "geometry", "post-geometry", "replay-pipeline", "predicate",
-                                   "shader-checkpoint", "draw-resources", "coverage", "quad", "timings"})
+                                   "draw-resources", "coverage", "quad", "timings"})
             QCOMPARE(replayAdapterArguments(combo, command), QStringList({"--gpu-vendor", "32902"}));
         for (const auto *command : {"shader", "compile", "assemble", "compile-project", "inventory",
                                    "metric-profile", "metric-iterations", "metric-catalog"})

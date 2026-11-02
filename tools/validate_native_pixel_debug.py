@@ -1,3 +1,6 @@
+# ARCHIVED: this script targets removed product commands/UI or the frozen
+# RenderDoc backend. Its old acceptance gates do not apply to the current branch.
+# See docs/NATIVE_GPA_CLOSURE.md; retained for historical evidence only.
 """Validate explicit private-primitive PS jobs, input joins and reversible journals.
 
 Original draw fragment eligibility and complete PS instruction parity are not

@@ -777,70 +777,21 @@ class PostTransformTests final : public QObject {
         QCOMPARE(window.findChild<QSpinBox *>("geometryStream")->value(), 3);
         QCOMPARE(window.findChild<QLineEdit *>("geometryInstance")->text(), QString("2"));
         QCOMPARE(table->model()->rowCount(), 0);
-        stage->setCurrentIndex(stage->findData("vs-writes"));
-        window.findChild<QSpinBox *>("geometryStream")->setValue(0);
-        window.findChild<QLineEdit *>("geometryInstance")->clear();
+        // Instruction-level write/emission views are retired; ordinary mesh
+        // inspection and project restoration above remain acceptance gates.
+        for (const auto *retired : {"vs-writes", "ds-writes", "gs-emits"})
+            QCOMPARE(stage->findData(retired), -1);
+        auto legacy = document;
+        legacy["ui"]["geometry_selection"]["stage"] = "vs-writes";
+        QVERIFY(saved.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        const auto legacyBytes = QByteArray::fromStdString(legacy.dump());
+        QCOMPARE(saved.write(legacyBytes), legacyBytes.size());
+        saved.close();
         tasks.clear();
-        window.findChild<QAction *>("inspectGeometry")->trigger();
+        projectFile(window, "openExperiment", project);
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
         QVERIFY(tasks.takeLast()[0].toBool());
-        QCOMPARE(table->model()->rowCount(), 3);
-        QCOMPARE(table->model()->headerData(0, Qt::Horizontal).toString(), QString("record"));
-        QCOMPARE(table->model()->headerData(4, Qt::Horizontal).toString(), QString("SV_Position0.x.written"));
-        QVERIFY(!choice->isEnabled());
-        if (!evidence.isEmpty())
-            QVERIFY(window.grab().save(evidence + "/vs-writes.png"));
-        QTimer::singleShot(0, &window, [&] {
-            auto dialog = window.findChild<QFileDialog *>();
-            QVERIFY(dialog);
-            dialog->setDirectory(dir.path());
-            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
-        });
-        window.findChild<QAction *>("exportGeometry")->trigger();
-        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
-        QVERIFY(exported.takeFirst()[0].toBool());
-        for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv"})
-            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/" + file));
-        QVERIFY(!QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/geometry.obj"));
-        const auto streamPath = dir.path() + "/ui-stream.gpa_frame";
-        streamCapture().save(streamPath);
-        loaded.clear();
-        tasks.clear();
-        window.openCapture(streamPath);
-        QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 30000);
-        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
-        QVERIFY(tasks.takeLast()[0].toBool());
-        tasks.clear();
-        for (int row = 0; row < api->model()->rowCount(); ++row) {
-            const auto index = api->model()->index(row, 0);
-            if (index.data(Qt::UserRole).toULongLong() == 150) {
-                api->setCurrentIndex(index);
-                break;
-            }
-        }
-        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
-        QVERIFY(tasks.takeLast()[0].toBool());
-        tasks.clear();
-        stage->setCurrentIndex(stage->findData("gs-emits"));
-        window.findChild<QAction *>("inspectGeometry")->trigger();
-        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
-        QVERIFY(tasks.takeLast()[0].toBool());
-        QCOMPARE(table->model()->rowCount(), 4);
-        QCOMPARE(table->model()->headerData(7, Qt::Horizontal).toString(), QString("operation"));
-        if (!evidence.isEmpty())
-            QVERIFY(window.grab().save(evidence + "/gs-emissions.png"));
-        QTimer::singleShot(0, &window, [&] {
-            auto dialog = window.findChild<QFileDialog *>();
-            QVERIFY(dialog);
-            dialog->setDirectory(dir.path());
-            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
-        });
-        window.findChild<QAction *>("exportGeometry")->trigger();
-        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
-        QVERIFY(exported.takeFirst()[0].toBool());
-        for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv",
-                                 "primitives.csv", "geometry.obj"})
-            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-150/" + file));
+        QCOMPARE(stage->currentData().toString(), QString("final"));
     }
 };
 int main(int argc, char **argv) {

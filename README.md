@@ -18,10 +18,12 @@ reject explicitly. See [capture architecture, validation and remaining gates](do
 
 Ordinary replay runs in native C++ without Python or an Intel GPA installation.
 The current branch uses the native DX11 Worker for analysis and no longer bundles
-RenderDoc. Execution-style shader debugging has been removed to match the local
-GPA feature boundary. GPA event diagnostics and release validation remain in progress;
-see [native backend acceptance](docs/DX11_NATIVE_MIGRATION.md). Intel hardware
-metrics require a supported GPU and driver.
+RenderDoc. Execution-style shader debugging and GS/HS/DS checkpoint controls
+have been removed to match the local
+GPA feature boundary. The bounded native backend development is complete; formal
+release acceptance remains open. See [scope, test failures and package evidence](docs/NATIVE_GPA_CLOSURE.md).
+Intel hardware metrics require a supported GPU and driver; collection availability
+does not imply numerical qualification.
 
 ## Download v0.1
 

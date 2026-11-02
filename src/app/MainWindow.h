@@ -36,7 +36,6 @@ class GpuProfileView;
 class IntelMetricsView;
 class CoverageView;
 class QuadView;
-class CheckpointView;
 class PixelHistoryView;
 class NativeCountersView;
 class ReplayMeshView;
@@ -152,7 +151,7 @@ class MainWindow final : public QMainWindow {
     void setBusy(bool);
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
     void updateStatistics();
-    void updateCheckpointContext();
+    void updateAnalysisContext();
     QString historyContextKey() const;
     PixelHistoryView *history_ = nullptr;
     NativeCountersView *nativeCounters_ = nullptr;
@@ -165,9 +164,6 @@ class MainWindow final : public QMainWindow {
     uint64_t nativeRequestId_{};
     QString nativeContextKey_;
     ReplayMeshView *replayMesh_ = nullptr;
-    std::array<CheckpointView *, 3> checkpoints_{};
-    CheckpointView *runningCheckpoint_ = nullptr;
-    bool runningCheckpointCatalog_ = true;
     std::shared_ptr<const Frame> frame_;
     std::unique_ptr<Experiment> experiment_;
     QString projectPath_;
