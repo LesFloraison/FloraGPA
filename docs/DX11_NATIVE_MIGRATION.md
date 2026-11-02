@@ -83,3 +83,9 @@ The historical class_linkage crash reproduces. Full-suite completion, remaining
 historical failure classification and broader GPA history target acceptance are
 still outstanding. No branch closure is claimed. Compact results are in
 `research/native-gpa-scope-validation.json`; complete logs remain under artifacts.
+
+The historical hlsl_recovery suite was rerun with the capture corpus explicitly
+set: nine cases pass and simultaneousBf1Replacements reproduces the unchanged
+prior-baseline actual hash `3d431509ec8258047bc7381367a2861e36ba26abad658bc642524692c07426cc`.
+The packaged root binaries also pass a dumpbin import audit for GPA/RenderDoc
+imports. The validation ZIP identity is recorded in the compact evidence file.

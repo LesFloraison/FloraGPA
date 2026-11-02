@@ -72,8 +72,17 @@
   ],
   "pending": [
     "Full retained test suite",
-    "Historical hlsl_recovery/recovery_ui failure reproduction",
+    "Historical recovery_ui failure reproduction",
     "Broader GPA diagnostic targets beyond single-sample 2D color layer zero",
     "Clean-host, transient-module and child-process audit"
-  ]
+  ],
+  "historical_failures": {
+    "class_linkage": "reproduced segmentation fault",
+    "hlsl_recovery": "9 passed, 1 failed; BF1 actual 3d431509ec8258047bc7381367a2861e36ba26abad658bc642524692c07426cc matches prior baseline"
+  },
+  "validation_package": {
+    "path": "out/FloraGPA-native-20261102-validation.zip",
+    "sha256": "5e1c7de2e7c9b28e8b0c70e1400b2bac1c6d65d3e95b6dea31a585438fc6e713",
+    "import_audit": "no RenderDoc/GPA imports in package root binaries"
+  }
 }
