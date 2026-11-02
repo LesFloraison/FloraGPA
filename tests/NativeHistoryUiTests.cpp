@@ -87,10 +87,9 @@ class NativeHistoryUiTests final : public QObject {
     void presentation() {
         PixelHistoryView view;
         view.setNativeMode(true);
-        view.setBackendPath("C:/missing/renderdoc.dll", false);
         view.setContext("frame", 100);
         view.selectPixel(20, 0, 0, 0, 0, 0);
-        QVERIFY(!action(view, "historyBackend")->isEnabled());
+        QVERIFY(!action(view, "historyBackend"));
         QVERIFY(!view.findChild<QLineEdit *>("historyEvent")->isEnabled());
         QVERIFY(!view.request().contains("gpa_event"));
         const auto result = fixture();
@@ -136,9 +135,9 @@ class NativeHistoryUiTests final : public QObject {
         QVERIFY(!action(view, "historyNativeEvents")->isEnabled());
         view.setWorkerBusy(false);
         view.setNativeMode(false);
-        QVERIFY(view.request().contains("gpa_event"));
-        QVERIFY(!view.request().contains("history_scope"));
-        QVERIFY(!view.finishNative(view.requestId(), result));
+        QVERIFY(!view.request().contains("gpa_event"));
+        QCOMPARE(view.request().at("history_scope"), Json("gpa"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finishNative(view.requestId(), result));
     }
     void mainWindow_data() {
         QTest::addColumn<unsigned>("vendor");
@@ -191,7 +190,6 @@ class NativeHistoryUiTests final : public QObject {
                 break;
             }
         view->setNativeMode(true);
-        view->setBackendPath("C:/missing/renderdoc.dll", false);
         view->selectPixel(kind == 2 ? 720 : 20, kind == 1 ? 3 : 0, kind == 1 ? 2 : 0, kind == 3 ? 1 : 0,
                           kind == 1 ? 1 : 0, kind == 1 ? 2 : 0, kind == 3 ? 1 : 0);
         tasks.clear();

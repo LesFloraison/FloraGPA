@@ -1,4 +1,3 @@
-#include "RdcAnalyzeCli.h"
 #include "NativeAnalyzeCli.h"
 #include "application/NativeAnalysisJobs.h"
 #include "BufferCsv.h"
@@ -92,7 +91,7 @@ int main(int argc, char **argv) {
     if (app.arguments().size() > 1 && app.arguments()[1] == "analyze")
         return nativeAnalyzeCli(app.arguments().mid(1));
     if (app.arguments().size() > 1 && app.arguments()[1] == "rdc-analyze")
-        return rdcAnalyzeCli(app.arguments().mid(1));
+        { QTextStream(stderr) << "rdc-analyze was removed; use analyze with a GPA frame.\n"; return 2; }
     QCommandLineParser p;
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
@@ -103,8 +102,7 @@ int main(int argc, char **argv) {
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
                    "| metric-iterations | metric-groups | "
-                   "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
-                   "rdc-analyze");
+                   "statistics | timings | coverage | quad | post-geometry | shader-checkpoint");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -118,7 +116,9 @@ int main(int argc, char **argv) {
     p.addOption({"gpu-vendor", "Use the first adapter with this PCI vendor ID (decimal or 0x hex)", "id"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
-    p.addOption({"renderdoc", "Optional RenderDoc DLL for independent replay recapture", "path"});
+    QCommandLineOption retiredRenderdoc("renderdoc", "Removed option", "path");
+    retiredRenderdoc.setFlags(QCommandLineOption::HiddenFromHelp);
+    p.addOption(retiredRenderdoc);
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
@@ -280,8 +280,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Uniform metric options apply to metric-profile only");
         if (p.isSet("decompiler") && command != "shader" && command != "assemble")
             throw std::runtime_error("--decompiler applies to shader or assemble only");
-        if (p.isSet("renderdoc") && command != "replay")
-            throw std::runtime_error("--renderdoc applies to replay only");
+        if (p.isSet("renderdoc"))
+            throw std::runtime_error("--renderdoc was removed; replay uses the native DX11 backend");
         auto parseId = [&](const QString &key) {
             bool valid = false;
             auto id = p.value(key).toULongLong(&valid);
@@ -783,10 +783,7 @@ int main(int argc, char **argv) {
             options.warp = p.isSet("warp");
             options.vendor = gpuVendor;
             options.debug = p.isSet("debug-device");
-            if (p.isSet("renderdoc")) {
-                options.renderdocLibrary = p.value("renderdoc").toStdWString();
-                options.renderdocOutput = QDir(out).absoluteFilePath("independent").toStdWString();
-            }
+
             options.suppressDraws = p.isSet("suppress-draws");
             options.before = p.isSet("before");
             options.prepareBeforeDraw = command != "replay";
@@ -1078,8 +1075,6 @@ int main(int argc, char **argv) {
                 }
             }
             QJsonObject counts;
-            if (const auto capture = replay.finishCapture())
-                report.insert("rdc_capture", QString::fromStdWString(capture->wstring()));
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);

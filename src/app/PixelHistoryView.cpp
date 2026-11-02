@@ -1,5 +1,4 @@
 #include "PixelHistoryView.h"
-#include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QDir>
 #include <QFileDialog>
@@ -19,22 +18,7 @@
 
 namespace flora {
 using Json = nlohmann::json;
-bool historyBackendCompatible(const QString &path) {
-    const auto name = path.toStdWString();
-    DWORD ignored = 0;
-    const auto size = GetFileVersionInfoSizeW(name.c_str(), &ignored);
-    if (!size)
-        return false;
-    std::vector<uint8_t> bytes(size);
-    if (!GetFileVersionInfoW(name.c_str(), 0, size, bytes.data()))
-        return false;
-    VS_FIXEDFILEINFO *info = nullptr;
-    UINT length = 0;
-    if (!VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void **>(&info), &length) ||
-        length < sizeof(*info))
-        return false;
-    return HIWORD(info->dwFileVersionMS) == 1 && LOWORD(info->dwFileVersionMS) == 45;
-}
+
 
 namespace {
 QString scalar(const Json &v) {
@@ -44,35 +28,8 @@ QString scalar(const Json &v) {
         return QString::number(v.get<double>(), 'g', 7);
     return QString::fromStdString(v.is_string() ? v.get<std::string>() : v.dump());
 }
-QString color(const Json &row, const char *key) {
-    const auto kind = row.value("color_interpretation", std::string("float"));
-    const auto field = kind == "uint" ? "uintValue" : kind == "sint" ? "intValue" : "floatValue";
-    QStringList parts;
-    for (const auto &v : row.at(key).at("col").at(field))
-        parts << scalar(v);
-    return parts.join(", ");
-}
-QString outcome(const Json &r) {
-    if (r.value("record_kind", "") == "cpu_write_snapshot")
-        return "CPU snapshot";
-    if (r.value("gpa_command_kind", Json(nullptr)) == "api")
-        return "Resource operation";
-    QStringList failed;
-    for (const auto &[key, label] :
-         std::initializer_list<std::pair<const char *, const char *>>{{"backfaceCulled", "Backface"},
-                                                                      {"depthClipped", "Depth clip"},
-                                                                      {"depthTestFailed", "Depth test"},
-                                                                      {"stencilTestFailed", "Stencil test"},
-                                                                      {"scissorClipped", "Scissor"},
-                                                                      {"shaderDiscarded", "Discard"},
-                                                                      {"sampleMasked", "Sample mask"},
-                                                                      {"predicationSkipped", "Predication"},
-                                                                      {"viewClipped", "Viewport"},
-                                                                      {"depthBoundsFailed", "Depth bounds"}})
-        if (r.value(key, false))
-            failed << label;
-    return failed.isEmpty() ? "Passed / write" : failed.join(", ");
-}
+
+
 Json optionalId(const QLineEdit *input) {
     const auto text = input->text().trimmed();
     if (text.isEmpty())
@@ -105,10 +62,9 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     nativeMode_ = tools->addAction("Event storage");
     nativeMode_->setObjectName("historyNativeEvents");
     nativeMode_->setCheckable(true);
+    nativeMode_->setChecked(false);
     nativeMode_->setToolTip("Read GPA storage before and after resource operations across the full frame. "
                             "These are event snapshots, not individual fragments.");
-    backend_ = tools->addAction("RenderDoc…");
-    backend_->setObjectName("historyBackend");
     auto advanced = tools->addAction("Coordinates");
     advanced->setCheckable(true);
     advanced->setObjectName("historyCoordinatesToggle");
@@ -116,8 +72,6 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     auto inputs = new QToolBar;
     tools->removeAction(read_);
     inputs->addAction(read_);
-    tools->insertAction(cancel_, backend_);
-    tools->insertAction(backend_, nativeMode_);
     auto idInput = [&](const QString &label, const char *name, const QString &placeholder) {
         inputs->addWidget(new QLabel(label));
         auto value = new QLineEdit;
@@ -169,7 +123,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     split->setChildrenCollapsible(false);
     records_ = new QTreeWidget;
     records_->setObjectName("historyRecords");
-    records_->setHeaderLabels({"GPA", "Replay", "Fragment", "Operation", "Before", "After"});
+    records_->setHeaderLabels({"GPA", "Status", "Count", "Operation", "Before", "After"});
     records_->setRootIsDecorated(false);
     records_->setUniformRowHeights(true);
     records_->setAlternatingRowColors(true);
@@ -228,14 +182,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
             summary_->setText(QString::fromUtf8(e.what()));
         }
     });
-    connect(backend_, &QAction::triggered, this, [this] {
-        const auto path = QFileDialog::getOpenFileName(this, "Select RenderDoc 1.45", backendPath_,
-                                                       "RenderDoc (renderdoc.dll)");
-        if (!path.isEmpty())
-            setBackendPath(path);
-    });
     connect(nativeMode_, &QAction::toggled, this, &PixelHistoryView::invalidate);
-    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
 void PixelHistoryView::setNativeMode(bool enabled) { nativeMode_->setChecked(enabled); }
@@ -255,15 +202,7 @@ void PixelHistoryView::setContext(const QString &key, qulonglong event) {
     }
     updateActions();
 }
-void PixelHistoryView::setBackendPath(const QString &path, bool persist) {
-    if (backendPath_ == path)
-        return;
-    backendPath_ = path;
-    if (persist)
-        QSettings().setValue("analysis/renderdoc", path);
-    backend_->setToolTip(path);
-    invalidate();
-}
+
 void PixelHistoryView::selectPixel(qulonglong resource, int x, int y, int mip, int layer, int sample,
                                    int slice) {
     if (busy_)
@@ -277,26 +216,18 @@ void PixelHistoryView::selectPixel(qulonglong resource, int x, int y, int mip, i
     slice_->setValue(slice);
 }
 Json PixelHistoryView::request() const {
-    Json result{{"action", "history"},
-                {"gpa_event", nativeMode() ? Json(nullptr) : optionalId(eventInput_)},
-                {"resource", optionalId(resource_)},
-                {"x", x_->value()},
-                {"y", y_->value()},
-                {"mip", mip_->value()},
-                {"layer", layer_->value()},
-                {"sample", sample_->value()}};
-    if (nativeMode()) {
-        if (result.at("resource").is_null() || result.at("resource") == 0)
-            throw std::runtime_error("Select a GPA resource for event storage history");
-        result.erase("gpa_event");
-        result["history_scope"] = "events";
-        result["slice"] = slice_->value();
-        const auto format = optionalId(typedFormat_);
-        if (!format.is_null()) {
-            if (format == 0 || format.get<uint64_t>() > UINT32_MAX)
-                throw std::runtime_error("Format must be a nonzero unsigned 32-bit DXGI identifier");
-            result["typed_format"] = format;
-        }
+    const auto resource = optionalId(resource_);
+    if (resource.is_null() || resource == 0)
+        throw std::runtime_error("Select a GPA resource for history");
+    Json result{{"action", "history"}, {"resource", resource},
+                {"x", x_->value()}, {"y", y_->value()}, {"mip", mip_->value()},
+                {"layer", layer_->value()}, {"sample", sample_->value()}, {"slice", slice_->value()},
+                {"history_scope", nativeMode() ? "events" : "gpa"}};
+    const auto format = optionalId(typedFormat_);
+    if (!format.is_null()) {
+        if (format == 0 || format.get<uint64_t>() > UINT32_MAX)
+            throw std::runtime_error("Format must be a nonzero unsigned 32-bit DXGI identifier");
+        result["typed_format"] = format;
     }
     return result;
 }
@@ -330,19 +261,20 @@ void PixelHistoryView::updateActions() {
     read_->setEnabled(!busy_ && !key_.isEmpty());
     cancel_->setEnabled(busy_);
     export_->setEnabled(!busy_ && !result_.is_null());
-    backend_->setEnabled(!busy_ && !nativeMode());
-    backend_->setVisible(!nativeMode());
     nativeMode_->setEnabled(!busy_);
     for (auto widget :
          std::initializer_list<QWidget *>{eventInput_, resource_, x_, y_, mip_, layer_, sample_})
         widget->setEnabled(!busy_);
-    eventInput_->setEnabled(!busy_ && !nativeMode());
-    eventInput_->setToolTip(nativeMode() ? "Event storage history covers the full frame" : "Last API event");
+    eventInput_->setEnabled(false);
+    eventInput_->setToolTip("History covers the full frame");
     slice_->setEnabled(!busy_ && nativeMode());
     typedFormat_->setEnabled(!busy_ && nativeMode());
     records_->setHeaderLabels(nativeMode()
                                   ? QStringList{"GPA", "Boundary", "Record", "Operation", "Before", "After"}
-                                  : QStringList{"GPA", "Replay", "Fragment", "Operation", "Before", "After"});
+                                  : QStringList{"GPA", "Status", "Count", "Diagnostic", "Before", "Pixel"});
+    records_->setColumnHidden(1, nativeMode());
+    records_->setColumnHidden(2, nativeMode());
+    records_->setColumnHidden(5, nativeMode());
     values_->setVisible(nativeMode() && records_->currentItem());
     const auto item = records_->currentItem();
     locate_->setEnabled(!busy_ && item && item->data(0, Qt::UserRole).isValid());
@@ -356,62 +288,16 @@ void PixelHistoryView::selected() {
         return;
     }
     const auto index = item->data(0, Qt::UserRole + 1).toULongLong();
-    const auto &rows = nativeMode() ? result_.at("data").at("records") : result_.at("history");
+    const auto &rows = result_.at("data").at("records");
     details_->setPlainText(QString::fromStdString(rows.at(size_t(index)).dump(2)));
     if (nativeMode())
         values_->setText(
             QString("API %1\nBefore: %2\nAfter: %3").arg(item->text(0), item->text(4), item->text(5)));
     updateActions();
 }
-bool PixelHistoryView::finish(uint64_t request, const Json &result) {
-    if (request != requestId_ || nativeMode())
-        return false;
-    if (!result.value("ok", false)) {
-        summary_->setText(QString::fromStdString(result.value("error", "History failed")));
-        emit inspectionFinished(false);
-        return false;
-    }
-    // Validate every displayed field before mutating the current table.
-    for (const auto &r : result.at("history")) {
-        color(r, "preMod");
-        color(r, "postMod");
-        outcome(r);
-    }
-    result_ = result;
-    records_->clear();
-    size_t index = 0;
-    for (const auto &r : result.at("history")) {
-        const auto command =
-            r.at("gpa_command").is_null() ? QString("Unmapped") : scalar(r.at("gpa_command"));
-        auto item = new QTreeWidgetItem(records_, {scalar(r.at("gpa_event")), scalar(r.at("eventId")),
-                                                   scalar(r.at("fragIndex")), command + " · " + outcome(r),
-                                                   color(r, "preMod"), color(r, "postMod")});
-        if (!r.at("gpa_event").is_null())
-            item->setData(0, Qt::UserRole, qulonglong(r.at("gpa_event").get<uint64_t>()));
-        item->setData(0, Qt::UserRole + 1, qulonglong(index++));
-        for (int c = 0; c < 6; ++c)
-            item->setToolTip(c, item->text(c));
-    }
-    const auto &scope = result.at("history_scope");
-    summary_->setText(QString("%1 records · %2 CPU · %3 gaps · (%4, %5)")
-                          .arg(index)
-                          .arg(scope.at("cpu_write_snapshots").get<size_t>())
-                          .arg(scope.at("cpu_write_gaps").size())
-                          .arg(result.at("x").get<uint32_t>())
-                          .arg(result.at("y").get<uint32_t>()));
-    summary_->setText(summary_->text() + QString("\nT:%1 · through API %2 · mip %3 / layer %4 / sample %5")
-                                             .arg(resource_->text(), eventInput_->text())
-                                             .arg(mip_->value())
-                                             .arg(layer_->value())
-                                             .arg(sample_->value()));
-    summary_->setToolTip(QString::fromStdString(scope.dump(2)));
-    details_->setPlainText(QString::fromStdString(scope.dump(2)));
-    updateActions();
-    emit inspectionFinished(true);
-    return true;
-}
+
 bool PixelHistoryView::finishNative(uint64_t serial, const Json &result) {
-    if (serial != requestId_ || !nativeMode())
+    if (serial != requestId_)
         return false;
     if (!result.value("ok", false)) {
         setNotice(QString::fromStdString(result.value("error", "Event storage history failed")));
@@ -419,6 +305,39 @@ bool PixelHistoryView::finishNative(uint64_t serial, const Json &result) {
         return false;
     }
     const auto &data = result.at("data");
+    if (!nativeMode()) {
+        if (result.at("context").at("action") != "history" ||
+            result.at("context").at("options").at("history_scope") != "gpa" ||
+            data.at("kind") != "gpa_event_history" || data.at("schema") != 1)
+            throw std::runtime_error("Unexpected GPA event diagnostic contract");
+        const auto options = request();
+        for (const auto field : {"resource", "x", "y", "mip", "layer", "slice", "sample"})
+            if (data.at("selection").at(field) != options.at(field))
+                throw std::runtime_error("GPA history selection changed");
+        std::vector<QStringList> rows;
+        for (const auto &record : data.at("records")) {
+            if (record.at("record_kind") != "gpa_event_diagnostic")
+                throw std::runtime_error("Unexpected GPA history record");
+            const auto status = record.at("diagnostic_status").get<uint32_t>();
+            const auto label = status == 0 ? "Passed diagnostic" : status == 2 ? "Depth diagnostic" :
+                               status == 3 ? "Stencil diagnostic" : status == 5 ? "Discard diagnostic" : "Unknown status";
+            rows.push_back({scalar(record.at("event")), QString::number(status),
+                            scalar(record.at("diagnostic_count")), label, {}, scalar(record.at("pixel").value("bytes", Json(nullptr)))});
+        }
+        result_ = result;
+        records_->clear();
+        size_t index = 0;
+        for (const auto &row : rows) {
+            auto *item = new QTreeWidgetItem(records_, row);
+            item->setData(0, Qt::UserRole, row[0].toULongLong());
+            item->setData(0, Qt::UserRole + 1, qulonglong(index++));
+        }
+        setNotice(QString("%1 GPA event diagnostics · counterfactual scissor/sample-mask conditions; counts do not prove actual writes").arg(rows.size()));
+        updateActions();
+        emit inspectionFinished(true);
+        return true;
+    }
+
     if (result.at("context").at("action") != "history" ||
         result.at("context").at("options").at("history_scope") != "events" || data.at("schema") != 2 ||
         data.at("kind") != "pixel_event_history" || data.at("source") != "native_dx11_replay" ||

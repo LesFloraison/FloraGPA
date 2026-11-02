@@ -4,8 +4,6 @@
 #include "BlendState.h"
 #include "Device.h"
 #include "NativeSample.h"
-#include "RenderDocCapture.h"
-#include "ReplayAnnotation.h"
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/ClearView.h"
@@ -63,10 +61,6 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
     : frame_(effectiveFrame(frame, options)), options_(std::move(options)) {
     if (options_.viewFrame && frame_.sha256() != frame.sha256())
         throw std::runtime_error("View overlay belongs to a different capture");
-    if (options_.renderdocLibrary.empty() != options_.renderdocOutput.empty())
-        throw std::runtime_error("RenderDoc library and output must be specified together");
-    if (!options_.renderdocLibrary.empty())
-        renderdoc_ = std::make_unique<RenderDocCapture>(options_.renderdocLibrary, options_.renderdocOutput);
     auto minimum = D3D_FEATURE_LEVEL_9_1;
     for (const auto &[id, entry] : frame_.entries()) {
         if (entry.category != 5 || entry.type != 0x81 || entry.size != 28) continue;
@@ -82,23 +76,16 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
     context_ = std::move(selected.context);
     check(context_.As(&context1_), "Query DX11.1 context");
     uavLimit_ = selected.level >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
-    if (renderdoc_) {
-        check(context_.As(&captureAnnotation_), "Query capture annotations");
-        renderdoc_->start(device_.Get());
-    }
+
 }
 Replay::~Replay() {
-    if (renderdoc_)
-        renderdoc_->discard();
     resetPredicates();
     if (context_) {
         context_->ClearState();
         context_->Flush();
     }
 }
-std::optional<std::filesystem::path> Replay::finishCapture() {
-    return renderdoc_ ? std::optional(renderdoc_->finish()) : std::nullopt;
-}
+
 DXGI_ADAPTER_DESC Replay::adapterDescription() const {
     Com<IDXGIDevice> dxgi;
     Com<IDXGIAdapter> adapter;
@@ -389,16 +376,7 @@ IUnknown *Replay::object(Id id) {
         context_->SetResourceMinLOD(texture.Get(), resourceLods_.at(id));
         ++counts["resource_lod_initial_restores"];
     }
-    if (renderdoc_ && result) {
-        Com<ID3D11DeviceChild> child;
-        if (SUCCEEDED(result.As(&child))) {
-            std::ostringstream name;
-            name << "GPA resource " << id << " (type 0x" << std::hex << frame_.entry(id).type << ')';
-            const auto value = name.str();
-            check(child->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(value.size()), value.data()),
-                  "Name captured resource");
-        }
-    }
+
     objects_.emplace(id, result);
     return result.Get();
 }
@@ -703,7 +681,6 @@ void Replay::mappedWrites(const Entry &e) {
     const Bytes tight = layout.recoveredLuma.empty() ? layout.tight : Bytes(layout.recoveredLuma);
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
-    ReplayAnnotation marker(captureAnnotation_.Get(), e.id, kind == D3D11_MAP_READ ? "MapReadDependency" : "MapCapturedWrites");
     // The capture records a successful mapping, not a request to repeat its
     // original polling timing. Wait for this resource on the replay device.
     // Failed calls returned above; illegal successful flag/type pairs reject
@@ -825,7 +802,6 @@ void Replay::command(const Entry &e) {
             throw std::runtime_error("Native resource discard requires ID3D11DeviceContext1");
         if (options_.disabled.contains(e.id))
             return;
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t).c_str());
         if (t == 0x3553)
             context1_->DiscardResource(get<ID3D11Resource>(record.target));
         else if (t == 0x3554)
@@ -895,7 +871,6 @@ void Replay::command(const Entry &e) {
             // device as well; its scheduling may differ from the capture device.
             auto resource = get<ID3D11Resource>(record.resource);
             D3D11_MAPPED_SUBRESOURCE mapped{};
-            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapReadSynchronization");
             const auto operation = "Map READ synchronization at event " + std::to_string(e.id) +
                                    ", resource " + std::to_string(record.resource);
             check(context_->Map(resource, record.subresource, D3D11_MAP_READ, 0, &mapped), operation.c_str());
@@ -962,7 +937,6 @@ void Replay::command(const Entry &e) {
                 timestamps_.push_back(std::move(timestamp));
             }
             {
-                ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t), false);
                 switch (t) {
                 case 0x35:
                     context_->Dispatch(a[0], a[1], a[2]);
@@ -1098,7 +1072,6 @@ void Replay::command(const Entry &e) {
                     throw std::runtime_error("GetData completion requires its captured ordinary query End");
                 predicate = found->second.query.Get();
             } else predicate = get<ID3D11Query>(q.resource);
-            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "GetDataSynchronization");
             const auto operation = "GetData synchronization at event " + std::to_string(e.id) +
                                    ", query " + std::to_string(q.resource);
             const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
@@ -1142,11 +1115,7 @@ void Replay::command(const Entry &e) {
             Com<ID3D11Buffer> buffer;
             check(device_->CreateBuffer(&desc, creation.hasInitial ? &initial : nullptr, &buffer),
                   "Captured CreateBuffer");
-            if (renderdoc_) {
-                const auto name = "GPA resource " + std::to_string(creation.resource) + " (type 0x83)";
-                check(buffer->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(name.size()), name.data()),
-                      "Name captured resource");
-            }
+
             objects_.emplace(creation.resource, buffer);
             ++counts["CreateBuffer"];
             if (!creation.hasInitial)
@@ -1246,13 +1215,7 @@ void Replay::command(const Entry &e) {
             if (!creation.hasInitial)
                 ++counts["textures_created_without_initial_data"];
         }
-        if (renderdoc_) {
-            Com<ID3D11DeviceChild> child;
-            check(created.As(&child), "Captured object is a device child");
-            const auto name = "GPA resource " + std::to_string(creation.resource) + " (captured creation)";
-            check(child->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(name.size()), name.data()),
-                  "Name captured texture/view");
-        }
+
         objects_.emplace(creation.resource, created);
         if (!isViewCreation(t) && hasResourceLodClamp(frame_.resource(creation.resource)))
             resourceLods_[creation.resource] = 0; // A successful native creation establishes the default.
@@ -1366,7 +1329,6 @@ void Replay::command(const Entry &e) {
         for (const auto &rect : command.rectangles)
             rects.push_back({rect[0], rect[1], rect[2], rect[3]});
         const auto view = get<ID3D11View>(command.view);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "ClearView");
         context1_->ClearView(view, command.color.data(), command.hasRectangles ? rects.data() : nullptr,
                              command.count);
     } else if (t == 0x32 || t == 0x33 || t == 0x34) {
@@ -1379,11 +1341,9 @@ void Replay::command(const Entry &e) {
         std::memcpy(floats, values.data(), 16);
         if (t == 0x32) {
             const auto target = get<ID3D11RenderTargetView>(view);
-            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
             context_->ClearRenderTargetView(target, floats);
         } else {
             const auto target = get<ID3D11UnorderedAccessView>(view);
-            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
             if (t == 0x33)
                 context_->ClearUnorderedAccessViewUint(target, values.data());
             else
@@ -1396,13 +1356,11 @@ void Replay::command(const Entry &e) {
         auto stencil = r.read<uint8_t>();
         r.end();
         const auto target = get<ID3D11DepthStencilView>(view);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->ClearDepthStencilView(target, flags, depth, stencil);
     } else if (t == 0x3e) {
         auto dst = r.read<Id>(), src = r.read<Id>();
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->CopyResource(destination, source);
     } else if (t == 0x3f) {
         auto dst = r.read<Id>();
@@ -1412,7 +1370,6 @@ void Replay::command(const Entry &e) {
         const auto destination = get<ID3D11Buffer>(dst);
         const auto source = get<ID3D11UnorderedAccessView>(src);
         requireCreatedCounter(src);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->CopyStructureCount(destination, offset, source);
     } else if (t == 0x40 || t == 0x256) {
         auto dst = r.read<Id>();
@@ -1426,7 +1383,6 @@ void Replay::command(const Entry &e) {
         const auto flags = t == 0x256 ? r.read<UINT>() : 0;
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         if (has && (box.left >= box.right || box.top >= box.bottom || box.front >= box.back))
             ++counts["empty_copy_regions"];
         else if (t == 0x256) {
@@ -1450,7 +1406,6 @@ void Replay::command(const Entry &e) {
         auto srcSub = r.read<UINT>(), format = r.read<UINT>();
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         UINT support = 0;
         check(device_->CheckFormatSupport(DXGI_FORMAT(format), &support), "Check resolve format support");
         if (!(support & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE))
@@ -1460,7 +1415,6 @@ void Replay::command(const Entry &e) {
         auto id = r.read<Id>();
         r.end();
         const auto view = get<ID3D11ShaderResourceView>(id);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->GenerateMips(view);
     } else if (t == 0x247 || t == 0x255) {
         auto layout = updateSourceLayout(frame_, e.id);
@@ -1481,7 +1435,6 @@ void Replay::command(const Entry &e) {
         if (!layout.empty && data.size() != layout.size)
             throw std::runtime_error("Packed UpdateSubresource size mismatch");
         const auto destinationObject = get<ID3D11Resource>(layout.destination);
-        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         if (layout.empty)
             ++counts["empty_update_regions"];
         else if (t == 0x255) {

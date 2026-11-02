@@ -1,3 +1,7 @@
+> Branch update (2026-10-31): [GPA native scope](DX11_NATIVE_MIGRATION.md) supersedes
+> the RenderDoc/debugger migration descriptions below. Those sections describe the
+> historical release; current native release validation is pending.
+
 # Current capabilities and compatibility
 
 Reviewed **2026-10-10**. The project is freezing the [v0.1 stable baseline](RELEASE_V0.1.md)

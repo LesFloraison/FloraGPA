@@ -343,7 +343,6 @@ class NativeReplayMeshUiTests : public QObject {
             QCOMPARE(mesh->preview.at("positions")[1], Json::array({-0., 1., 2.}));
         }
         ReplayMeshView view;
-        view.setNativeMode(true);
         view.setContext("owned-channel-fixture", 1);
         QVERIFY(view.finishNative(view.requestId(), fixture.result, mesh));
         auto table = view.findChild<QTableView *>("replayMeshPositions")->model();
@@ -477,7 +476,6 @@ class NativeReplayMeshUiTests : public QObject {
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, nativeReplayMesh(job, result, corrupt));
             if (stage != "vs-index") {
                 ReplayMeshView view;
-                view.setNativeMode(true);
                 view.setContext("storage", 200);
                 view.findChild<QLineEdit *>("replayMeshInstance")->setText(QString::number(instance));
                 if (stage != "vs-inputs")
@@ -547,7 +545,6 @@ class NativeReplayMeshUiTests : public QObject {
             fixture.save(capture);
             const Id event = stage == "vs" ? 1000 : stage == "gs" ? 150 : 200;
             ReplayMeshView view;
-            view.setNativeMode(true);
             view.setContext("test", event);
             view.findChild<QComboBox *>("replayMeshStage")->setCurrentIndex(stage == "vs" ? 0 : 1);
             if (stage.startsWith("ds") || stage.startsWith("gs-fixed-"))
@@ -623,9 +620,8 @@ class NativeReplayMeshUiTests : public QObject {
                 QVERIFY(!path.contains("renderdoc"));
                 QVERIFY(!path.contains("intelswtools/gpa") && !path.contains("intelswtools\\gpa"));
             }
-            QVERIFY(!view.findChild<QAction *>("replayMeshBackend")->isEnabled());
+            QVERIFY(!view.findChild<QAction *>("replayMeshBackend"));
             const auto id = view.requestId();
-            view.setBackendPath("C:/missing/renderdoc.dll");
             QCOMPARE(view.requestId(), id);
             QVERIFY(view.finishNative(id, result, mesh));
             auto table = view.findChild<QTableView *>("replayMeshPositions");
@@ -708,7 +704,6 @@ class NativeReplayMeshUiTests : public QObject {
         tasks.clear();
         auto view = window.findChild<ReplayMeshView *>();
         QVERIFY(view);
-        view->setNativeMode(true);
         view->findChild<QAction *>("replayMeshRead")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 60000);
         QVERIFY2(tasks.takeLast()[0].toBool(),

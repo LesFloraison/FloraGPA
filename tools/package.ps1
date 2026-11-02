@@ -3,7 +3,6 @@ param(
     [ValidateSet('Release')][string]$Configuration = 'Release',
     [string]$OutputDirectory = '',
     [string]$VisualStudioRoot = '',
-    [string]$RenderDocRoot = '',
     [string]$BuildDirectory = "$PSScriptRoot\..\build\vs2022"
 )
 $ErrorActionPreference = 'Stop'
@@ -17,36 +16,6 @@ if ((Test-Path -LiteralPath $destination) -and
     throw 'Package output must be an empty directory. Choose a new -OutputDirectory.'
 }
 $cache = @{}
-function Get-PackageSha256([string]$Path) {
-    # Avoid module auto-loading differences between Windows PowerShell and pwsh.
-    $stream = [System.IO.File]::OpenRead($Path)
-    $algorithm = [System.Security.Cryptography.SHA256]::Create()
-    try { return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
-    finally { $stream.Dispose(); $algorithm.Dispose() }
-}
-# Bundle the exact native replay ABI accepted by FloraGPA, never whichever DLL
-# happens to be first on PATH. Validate before creating a partial package.
-if (-not $RenderDocRoot) { $RenderDocRoot = Join-Path $env:ProgramFiles 'RenderDoc' }
-$RenderDocRoot = [System.IO.Path]::GetFullPath($RenderDocRoot)
-$rdcManifestPath = Join-Path $repo 'third_party\renderdoc\runtime-manifest.json'
-$rdcManifest = Get-Content -LiteralPath $rdcManifestPath -Raw | ConvertFrom-Json
-foreach ($file in $rdcManifest.files.PSObject.Properties) {
-    $candidate = Join-Path $RenderDocRoot $file.Name
-    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
-        throw "RenderDoc runtime is missing: $candidate. Pass -RenderDocRoot pointing to the official 1.45 x64 ZIP contents."
-    }
-    if ((Get-PackageSha256 $candidate) -ne $file.Value) {
-        throw "RenderDoc runtime differs from the pinned official 1.45 x64 build: $candidate"
-    }
-}
-$rdcLicenses = Join-Path $repo 'third_party\renderdoc\runtime-licenses'
-foreach ($file in $rdcManifest.licenses) {
-    $candidate = Join-Path $rdcLicenses $file.path
-    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -or
-        (Get-PackageSha256 $candidate) -ne $file.sha256) {
-        throw "RenderDoc runtime notice is missing or modified: $($file.path)"
-    }
-}
 $cachePath = Join-Path $buildRoot 'CMakeCache.txt'
 if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
     foreach ($line in Get-Content -LiteralPath $cachePath) {
@@ -79,7 +48,7 @@ if (-not $crt) { throw 'Cannot find the x64 VC143 redistributable runtime.' }
 foreach ($name in @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')) {
     if (-not (Test-Path -LiteralPath (Join-Path $crt $name) -PathType Leaf)) { throw "Incomplete x64 VC143 runtime: $name" }
 }
-$binaries = @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe','FloraGPA.Metrics.dll')
+$binaries = @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Metrics.dll')
 if ($cache['FLORA_BUILD_CAPTURE'] -eq 'ON') {
     $binaries += @('FloraCapture.exe','FloraCaptureRuntime.dll','FloraCaptureShim.dll')
 }
@@ -106,18 +75,6 @@ try {
     $env:VCINSTALLDIR = $previousVc
 }
 Copy-Item -Path (Join-Path $crt '*.dll') -Destination $destination -Force
-$rdcDestination = Join-Path $destination 'RenderDoc'
-New-Item -ItemType Directory -Path $rdcDestination | Out-Null
-foreach ($file in $rdcManifest.files.PSObject.Properties) {
-    Copy-Item -LiteralPath (Join-Path $RenderDocRoot $file.Name) -Destination $rdcDestination
-}
-# The official native crash server is a separate EXE in this subdirectory.
-# Give it app-local CRTs as well; its working directory is not a dependency path.
-foreach ($name in @('msvcp140.dll','vcruntime140.dll')) {
-    Copy-Item -LiteralPath (Join-Path $crt $name) -Destination $rdcDestination
-}
-Copy-Item -LiteralPath $rdcManifestPath -Destination (Join-Path $rdcDestination 'runtime-manifest.json')
-Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force
 $licenses = Join-Path $destination 'licenses'
 New-Item -ItemType Directory -Path $licenses -Force | Out-Null
@@ -126,7 +83,6 @@ if ($cache['FLORA_BUILD_CAPTURE'] -eq 'ON') {
     Copy-Item -LiteralPath (Join-Path $repo 'third_party\detours\LICENSE.md') -Destination (Join-Path $licenses 'detours-MIT.txt')
     Copy-Item -LiteralPath (Join-Path $repo 'src\capture\dependencies.json') -Destination (Join-Path $destination 'capture-dependencies.json')
 }
-Copy-Item -LiteralPath (Join-Path $repo 'third_party\renderdoc\LICENSE.MIT') -Destination (Join-Path $licenses 'renderdoc-api-MIT.txt') -Force
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\metrics-discovery\LICENSE.md') -Destination (Join-Path $licenses 'intel-metrics-discovery-MIT.txt') -Force
 Copy-Item -Path (Join-Path $repo 'third_party\qt\*.txt') -Destination $licenses -Force
 $qtLicenses = Join-Path $QtRoot '..\..\Licenses'

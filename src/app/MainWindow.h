@@ -38,9 +38,7 @@ class CoverageView;
 class QuadView;
 class CheckpointView;
 class PixelHistoryView;
-class ReplayDebugView;
 class NativeCountersView;
-class NativeExecutionDebugView;
 class ReplayMeshView;
 class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
@@ -50,7 +48,7 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || nativeDebugOperation_; }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active(); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -156,37 +154,17 @@ class MainWindow final : public QMainWindow {
     void updateStatistics();
     void updateCheckpointContext();
     QString historyContextKey() const;
-    enum class RdcAnalysis { History, Debug, Mesh };
-    void readRdcAnalysis(ReplayDebugView *view = nullptr, RdcAnalysis kind = RdcAnalysis::History);
-    bool finishRdcAnalysis(const nlohmann::json &result);
-    void startHistoryWorker();
     PixelHistoryView *history_ = nullptr;
-    std::array<ReplayDebugView *, 3> replayDebug_{};
-    ReplayDebugView *runningDebug_ = nullptr;
     NativeCountersView *nativeCounters_ = nullptr;
-    NativeExecutionDebugView *nativeDebug_ = nullptr;
-    bool runningNativeDebug_ = false;
     bool runningNativeMesh_ = false;
     bool runningNativeHistory_ = false;
-    bool nativeDebugOperation_ = false;
     NativeAnalysisController nativeAnalysis_;
     void readNativeCounters();
-    void readNativeDebug();
     void readNativeMesh();
     void readNativeHistory();
     uint64_t nativeRequestId_{};
     QString nativeContextKey_;
     ReplayMeshView *replayMesh_ = nullptr;
-    RdcAnalysis runningAnalysis_ = RdcAnalysis::History;
-    nlohmann::json historyRequest_;
-    uint64_t historyRequestId_{};
-    QString historyKey_, historyRdc_;
-    struct HistoryCapture {
-        std::shared_ptr<QTemporaryDir> directory;
-        QString path;
-    };
-    std::map<QString, HistoryCapture> historyCaptures_;
-    QStringList historyCacheOrder_;
     std::array<CheckpointView *, 3> checkpoints_{};
     CheckpointView *runningCheckpoint_ = nullptr;
     bool runningCheckpointCatalog_ = true;

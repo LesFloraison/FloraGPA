@@ -1,7 +1,6 @@
 #include "ReplayMeshView.h"
 #include "Views.h"
 #include "application/NativeReplayMesh.h"
-#include "application/RenderDocLibrary.h"
 #include "application/ReplayMesh.h"
 #include <QAbstractTableModel>
 #include <QAction>
@@ -88,13 +87,6 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     auto detail = bar->addAction("Details");
     detail->setObjectName("replayMeshDetailsToggle");
     detail->setCheckable(true);
-    nativeMode_ = bar->addAction("Native preview");
-    nativeMode_->setObjectName("replayMeshNative");
-    nativeMode_->setCheckable(true);
-    nativeMode_->setToolTip("Analyze the GPA frame directly. Some instanced HS/DS/GS UAV dependencies are "
-                            "not yet supported; failures do not switch backends.");
-    backend_ = bar->addAction("RenderDoc…");
-    backend_->setObjectName("replayMeshBackend");
     summary_ = new QLabel("No mesh");
     summary_->setObjectName("replayMeshSummary");
     summary_->setMargin(4);
@@ -137,13 +129,6 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
     connect(cancel_, &QAction::triggered, this, &ReplayMeshView::cancelRequested);
     connect(stage_, &QComboBox::currentIndexChanged, this, &ReplayMeshView::invalidate);
     connect(instance_, &QLineEdit::textChanged, this, &ReplayMeshView::invalidate);
-    connect(nativeMode_, &QAction::toggled, this, &ReplayMeshView::invalidate);
-    connect(backend_, &QAction::triggered, this, [this] {
-        auto path = QFileDialog::getOpenFileName(this, "Select RenderDoc 1.45", backendPath_,
-                                                 "RenderDoc (renderdoc.dll)");
-        if (!path.isEmpty())
-            setBackendPath(path);
-    });
     connect(export_, &QAction::triggered, this, [this] {
         try {
             auto path = QFileDialog::getSaveFileName(this, "Export post-shader mesh", "mesh.json",
@@ -154,11 +139,9 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
             emit error(QString::fromUtf8(e.what()));
         }
     });
-    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
-void ReplayMeshView::setNativeMode(bool enabled) { nativeMode_->setChecked(enabled); }
-bool ReplayMeshView::nativeMode() const { return nativeMode_->isChecked(); }
+
 void ReplayMeshView::invalidate() {
     ++requestId_;
     result_ = nullptr;
@@ -178,16 +161,7 @@ void ReplayMeshView::setContext(const QString &key, qulonglong event) {
     event_ = event;
     invalidate();
 }
-void ReplayMeshView::setBackendPath(const QString &path, bool persist) {
-    if (path == backendPath_)
-        return;
-    backendPath_ = path;
-    backend_->setToolTip(path);
-    if (persist)
-        QSettings().setValue("analysis/renderdoc", path);
-    if (!nativeMode())
-        invalidate();
-}
+
 void ReplayMeshView::setWorkerBusy(bool busy) {
     busy_ = busy;
     updateActions();
@@ -196,11 +170,9 @@ void ReplayMeshView::updateActions() {
     read_->setEnabled(!busy_ && !key_.isEmpty() && event_);
     cancel_->setEnabled(busy_);
     export_->setEnabled(!busy_ && !result_.is_null());
-    backend_->setEnabled(!busy_ && !nativeMode());
-    nativeMode_->setEnabled(!busy_);
     stage_->setEnabled(!busy_);
     instance_->setEnabled(!busy_);
-    storage_->setEnabled(!busy_ && nativeMode());
+    storage_->setEnabled(!busy_);
 }
 ReplayMeshView::Json ReplayMeshView::request() const {
     bool ok = false;
@@ -210,11 +182,11 @@ ReplayMeshView::Json ReplayMeshView::request() const {
     if (key_.isEmpty() || !event_)
         throw std::runtime_error("Select a draw first");
     const auto stage = stage_->currentData().toString().toStdString();
-    Json result{{"action", nativeMode() ? "mesh" : "postmesh"},
+    Json result{{"action", "mesh"},
                 {"gpa_event", event_},
-                {"stage", nativeMode() ? (stage == "VSOut" ? "vs-inputs" : "final") : stage},
+                {"stage", stage == "VSOut" ? "vs-inputs" : "final"},
                 {"instance", value}};
-    if (nativeMode() && storage_->currentData().toString() == "remaining")
+    if (storage_->currentData().toString() == "remaining")
         result["vertex_storage"] = "remaining";
     return result;
 }
@@ -222,11 +194,12 @@ bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
                                   std::shared_ptr<NativeReplayMesh> native) {
     if (requestId != requestId_)
         return false;
-    if (!result.value("ok", false))
-        return finish(requestId, result, QString());
+    if (!result.value("ok", false)) {
+        summary_->setText(QString::fromStdString(result.value("error", "Mesh analysis failed")));
+        emit inspectionFinished(false);
+        return false;
+    }
     const auto selection = request();
-    if (!nativeMode())
-        throw std::runtime_error("Native mesh result belongs to another backend selection");
     const auto &options = result.at("context").at("options");
     for (const auto key : {"gpa_event", "stage", "instance"})
         if (options.at(key) != selection.at(key))
@@ -268,73 +241,7 @@ bool ReplayMeshView::finishNative(uint64_t requestId, const Json &result,
     emit inspectionFinished(true);
     return true;
 }
-bool ReplayMeshView::finish(uint64_t request, const Json &result, const QString &directory) {
-    if (request != requestId_)
-        return false;
-    if (!result.value("ok", false)) {
-        summary_->setText(QString::fromStdString(result.value("error", "Mesh analysis failed")));
-        emit inspectionFinished(false);
-        return false;
-    }
-    if (result.value("action", "") != "postmesh" || !result.at("stage").is_string())
-        throw std::runtime_error("Invalid mesh result");
-    QMap<QString, QByteArray> files;
-    QStringList names{"post_vertices.bin", "post_vertices.csv", "post_geometry.obj"};
-    if (result.at("mesh").at("indexResourceId") != "ResourceId::0")
-        names << "post_indices.bin";
-    for (const auto &name : names) {
-        QFile f(QDir(directory).filePath(name));
-        if (!f.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Missing mesh artifact");
-        files[name] = f.readAll();
-        if (f.error() != QFileDevice::NoError)
-            throw std::runtime_error("Cannot read complete mesh artifact");
-    }
-    auto bytes = [](const QByteArray &v) {
-        return std::span<const uint8_t>(reinterpret_cast<const uint8_t *>(v.constData()), size_t(v.size()));
-    };
-    auto meshData = std::make_shared<ReplayMesh>(ReplayMesh::decode(
-        result.at("mesh"), bytes(files["post_vertices.bin"]), bytes(files.value("post_indices.bin"))));
-    if (result.at("vertex_count") != meshData->positions.size() ||
-        result.at("index_count") != meshData->indexCount ||
-        result.at("face_count") != meshData->candidateFaceCount ||
-        files["post_vertices.csv"].toStdString() != meshData->csv() ||
-        files["post_geometry.obj"].toStdString() != meshData->obj())
-        throw std::runtime_error("Mesh metadata or exports disagree with vertex storage");
-    QJsonArray positions, faces;
-    bool finite = meshData->components >= 3;
-    if (finite) {
-        for (const auto &p : meshData->positions) {
-            const auto w = meshData->components > 3 && p[3] != 0 ? p[3] : 1;
-            QJsonArray row;
-            for (unsigned c = 0; c < 3; ++c) {
-                const auto v = p[c] / w;
-                finite = finite && std::isfinite(v);
-                row.append(v);
-            }
-            positions.append(row);
-        }
-        for (const auto &f : meshData->faces)
-            faces.append(QJsonArray{double(f[0] + 1), double(f[1] + 1), double(f[2] + 1)});
-    }
-    result_ = result;
-    files_ = std::move(files);
-    model_->setMesh(meshData);
-    preview_->setMesh(finite ? QJsonObject{{"positions", positions}, {"faces", faces}} : QJsonObject{});
-    summary_->setText(QString("API %1 · %2 · %3 vertices · %4 faces")
-                          .arg(event_)
-                          .arg(QString::fromStdString(result.at("stage").get<std::string>()))
-                          .arg(meshData->positions.size())
-                          .arg(meshData->faces.size()));
-    summary_->setToolTip(finite ? QString()
-                                : "Preview unavailable: positions lack three finite components. Raw values "
-                                  "and exports are preserved.");
-    if (!details_->isHidden())
-        details_->setPlainText(QString::fromStdString(result_.dump(2)));
-    updateActions();
-    emit inspectionFinished(true);
-    return true;
-}
+
 void ReplayMeshView::exportResult(const QString &path) const {
     if (result_.is_null())
         throw std::runtime_error("No mesh to export");

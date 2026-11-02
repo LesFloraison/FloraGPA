@@ -4,6 +4,7 @@
 #include "application/Experiment.h"
 #include "application/NativeAnalysisJobs.h"
 #include "application/NativeHistory.h"
+#include "application/GpaHistory.h"
 #include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
@@ -84,6 +85,31 @@ std::string deviceErrors(const Replay &replay) {
 class NativeHistoryTests final : public QObject {
     Q_OBJECT
   private slots:
+    void gpaEventDiagnostics_data() { devices(); }
+    void gpaEventDiagnostics() {
+        QFETCH(uint32_t, vendor);
+        QTemporaryDir directory;
+        const auto path = directory.filePath("gpa-diagnostics.gpa_frame");
+        depthStencilCapture().save(path);
+        Frame frame(path.toStdWString());
+        Replay replay(frame, options(vendor));
+        NativeHistorySelection selection;
+        selection.resource = 20;
+        const auto result = collectGpaEventHistory(replay, selection);
+        QCOMPARE(result.at("kind"), Json("gpa_event_history"));
+        QCOMPARE(result.at("records").size(), size_t(2));
+        for (const auto &record : result.at("records")) {
+            QCOMPARE(record.at("record_kind"), Json("gpa_event_diagnostic"));
+            QCOMPARE(record.at("diagnostic_count"), Json(1));
+            QVERIFY(record.at("pixel").at("available").get<bool>());
+        }
+        Replay clean(frame, options(vendor));
+        clean.run();
+        QCOMPARE(replay.readTexture(20), clean.readTexture(20));
+        QCOMPARE(replay.readTexture(720), clean.readTexture(720));
+        QCOMPARE(replay.counts, clean.counts);
+        QVERIFY2(deviceErrors(replay).empty(), deviceErrors(replay).c_str());
+    }
     void resourceCommands_data() { devices(); }
     void resourceCommands() {
         QFETCH(uint32_t, vendor);

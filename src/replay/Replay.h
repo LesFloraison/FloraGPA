@@ -62,7 +62,6 @@ struct ReplayOptions {
     bool warp = false;
     std::optional<uint32_t> vendor;
     bool debug = false;
-    std::filesystem::path renderdocLibrary, renderdocOutput;
     bool suppressDraws = false;
     Id until = 0;
     bool before = false;
@@ -150,7 +149,6 @@ struct NativeStatistics {
     PredicateBinding predicate;
 };
 class NativeSample;
-class RenderDocCapture;
 class Replay {
     friend class PostTransformCapture;
     friend class CoverageCapture;
@@ -212,8 +210,6 @@ class Replay {
     void pipelineCreation(const Entry &entry);
     Com<IUnknown> createCapturedShader(Id id, uint16_t type, Bytes data, Id linkage, Id so);
     ReplayOptions options_;
-    std::unique_ptr<RenderDocCapture> renderdoc_;
-    Com<ID3DUserDefinedAnnotation> captureAnnotation_;
     Com<ID3D11Device> device_;
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11DeviceContext1> context1_;
@@ -371,7 +367,6 @@ class Replay {
     const auto &drawAutoResults() const { return soAutoResults_; }
     explicit Replay(const Frame &frame, ReplayOptions options = {});
     ~Replay();
-    std::optional<std::filesystem::path> finishCapture();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
              const ReplayBoundaryObserver &observer = {}, const ReplayBoundaryObserver &commandObserver = {},
              const ReplayCommandScope &commandScope = {});

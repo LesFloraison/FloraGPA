@@ -1,3 +1,7 @@
+> Branch update (2026-10-31): [GPA native scope](DX11_NATIVE_MIGRATION.md) supersedes
+> the RenderDoc/debugger migration descriptions below. Those sections describe the
+> historical release; current native release validation is pending.
+
 # Using FloraGPA
 
 Interfaces reviewed on 2026-10-03 at `ba1c468`. See [current support](CURRENT_STATUS.md)

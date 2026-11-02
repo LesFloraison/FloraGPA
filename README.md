@@ -17,9 +17,11 @@ Qt control entry. **Live frame recording is not available yet**: capture request
 reject explicitly. See [capture architecture, validation and remaining gates](docs/INDEPENDENT_CAPTURE.md).
 
 Ordinary replay runs in native C++ without Python or an Intel GPA installation.
-The portable package includes the pinned RenderDoc 1.45 backend for Pixel History,
-recorded shader debugging, Replay Mesh and Replay Metrics. Intel hardware metrics
-still require a supported GPU and driver.
+The current branch uses the native DX11 Worker for analysis and no longer bundles
+RenderDoc. Execution-style shader debugging has been removed to match the local
+GPA feature boundary. GPA event diagnostics and release validation remain in progress;
+see [native backend acceptance](docs/DX11_NATIVE_MIGRATION.md). Intel hardware
+metrics require a supported GPU and driver.
 
 ## Download v0.1
 
@@ -38,7 +40,7 @@ See [supported capabilities and known limits](docs/RELEASE_V0.1.md).
 - Apply supported shader, resource and pipeline experiments with undo/redo and
   frame-bound project files.
 - Inspect Coverage and Quad diagnostics, collect DX11 timing/statistics, and
-  use optional RenderDoc or Intel Metrics Discovery analysis.
+  use optional Intel Metrics Discovery analysis.
 - Run offline compatibility preflight before attempting GPU replay, including
   checked pipeline getter observations and located missing-resource diagnostics.
 - Replay saved per-stream SO overflow Query intervals and inspect their results;
@@ -93,15 +95,9 @@ the ignored `CMakeUserPresets.json`.
 For the default GUI build, use the same Qt installation for deployment:
 
 ```powershell
-./tools/package.ps1 -QtRoot $QtRoot -RenderDocRoot C:/deps/RenderDoc_1.45_64 -OutputDirectory ./out/FloraGPA
+./tools/package.ps1 -QtRoot $QtRoot -OutputDirectory ./out/FloraGPA
 ./out/FloraGPA/FloraGPA.exe
 ```
-
-For packaging, extract the [official RenderDoc 1.45 x64 ZIP](https://renderdoc.org/stable/1.45/RenderDoc_1.45_64.zip)
-and pass its directory as `-RenderDocRoot`. The helper checks the pinned SHA-256
-before copying the runtime. If omitted, it checks the RenderDoc installation
-under Program Files; another version or build is rejected. Building from source
-does not require this DLL.
 
 The packaging helper reads the Qt kit and Visual Studio instance from
 `build/vs2022/CMakeCache.txt`, so it uses the toolchain selected by your build.
@@ -147,12 +143,12 @@ presentation image have separate output-inspection paths.
 | Feature | Additional requirements |
 |---|---|
 | Ordinary replay, native inspection, Coverage/Quad and DX11 queries | A suitable D3D11 device; supported paths can also use WARP |
-| Pixel History, recorded VS/PS/CS debugging, Replay Mesh and Replay Metrics | Bundled pinned RenderDoc 1.45 backend; no separate installation required |
+| Native history, mesh and counters | Native Worker; GPA event diagnostic acceptance is pending |
 | Intel hardware metrics | A supported Intel GPU and installed Metrics Discovery driver; the bridge is built with FloraGPA |
 | External assembly or HLSL recovery fallback | An explicitly selected compatible shader tool |
 | Development reference comparisons | Python, external reference sources and fixtures; original-kernel comparisons additionally require the pinned installed GPA build |
 
-The RenderDoc runtime is distributed in the portable package, not tracked in Git.
+The current native package contains no RenderDoc runtime. The linked v0.1 release predates this migration.
 GPA binaries, reference sources and game captures are not distributed. Third-party components already included in
 the source/build are described in [THIRD_PARTY.md](THIRD_PARTY.md).
 

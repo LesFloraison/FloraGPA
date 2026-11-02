@@ -17,7 +17,7 @@ bool MainWindow::textureMode() const {
     return resourceImages_ && resourceImages_->currentWidget() == texturePane_;
 }
 bool MainWindow::historyBackendReady() const {
-    return history_->nativeMode() || historyBackendCompatible(history_->backendPath());
+    return true;
 }
 void MainWindow::clearResourceBinding() {
     selectedBinding_.reset();
@@ -399,7 +399,7 @@ void MainWindow::requestHistoryPixel(Id event, Id resource, int x, int y, int mi
     leftTabs_->setCurrentWidget(history_);
     (textureMode() ? textureImage_ : image_)->setSelectedPixel(QPoint(x, y));
     if (!historyBackendReady()) {
-        history_->setNotice("RenderDoc 1.45 required. Select RenderDoc… and retry.");
+        history_->setNotice("Select a GPA output resource and retry.");
         return;
     }
     const bool ownedJob = runningKind_ == "draw-resources" || runningKind_ == "coverage" ||

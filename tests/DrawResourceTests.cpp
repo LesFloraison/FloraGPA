@@ -243,11 +243,11 @@ class DrawResourceTests final : public QObject {
         QCOMPARE(view.request().at("x"), Json(3));
         view.queryPixel(1000, 20, 8, 9, 0, 0, 1);
         QCOMPARE(requests.count(), 2);
-        QVERIFY(!view.finish(old, {{"ok", false}, {"error", "old result"}}));
+        QVERIFY(!view.finishNative(old, {{"ok", false}, {"error", "old result"}}));
         QCOMPARE(view.request().at("x"), Json(8));
         QCOMPARE(view.request().at("sample"), Json(1));
     }
-    void workspaceAndBackendFailure() {
+    void workspaceAndNativeHistory() {
         QTemporaryDir dir;
         fixture().save(dir.filePath("frame.gpa_frame"));
         MainWindow window;
@@ -283,7 +283,6 @@ class DrawResourceTests final : public QObject {
         QVERIFY(tree);
         QCOMPARE(window.findChild<ResourceBrowser *>()->selected()->kind, std::string("RTV"));
         auto history = window.findChild<PixelHistoryView *>();
-        history->setBackendPath("missing-renderdoc.dll");
         window.findChild<QAction *>("pickPixelHistory")->setChecked(true);
         auto image = window.findChild<ImageView *>("frameOutput");
         QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull(), 30000);
@@ -291,7 +290,8 @@ class DrawResourceTests final : public QObject {
         QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
                           image->mapFromScene(QPointF(.5, .5)));
         QCOMPARE(pixels.count(), 1);
-        QTRY_VERIFY(window.findChild<QLabel *>("historySummary")->text().contains("1.45"));
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        QVERIFY(!window.findChild<QAction *>("historyBackend"));
         window.findChild<QAction *>("pickPixelHistory")->setChecked(false);
         window.findChild<QAction *>("toggleResourceCoverage")->setChecked(true);
         QTRY_VERIFY_WITH_TIMEOUT(image->hasOverlay(), 30000);
@@ -458,10 +458,10 @@ class DrawResourceTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 60000);
         QVERIFY(window.grab().save(output + "/coverage-visible.png"));
         window.findChild<QAction *>("pickPixelHistory")->setChecked(true);
-        window.findChild<PixelHistoryView *>()->setBackendPath("missing-renderdoc.dll");
         QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
                           image->mapFromScene(QPointF(100.5, 100.5)));
-        QTRY_VERIFY(window.findChild<QLabel *>("historySummary")->text().contains("1.45"));
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        QVERIFY(!window.findChild<QAction *>("historyBackend"));
         QVERIFY(window.grab().save(output + "/history.png"));
     }
 };

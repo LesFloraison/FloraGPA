@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-02",
+  "release_accepted": false,
+  "backend": "dx11-native/20",
+  "focused_tests": {
+    "native_analysis": 61,
+    "native_history": 169,
+    "native_replay_mesh_ui": 105,
+    "native_history_ui": 15,
+    "native_counter_ui": 7,
+    "replay_mesh_model": "passed"
+  },
+  "original_comparisons": [
+    {
+      "ok": true,
+      "events": 10,
+      "original_callbacks": 2,
+      "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+      "adapter": {
+        "description": "NVIDIA GeForce RTX 5090 Laptop GPU",
+        "device": 11352,
+        "driver_version": 9007199255791310,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 69215,
+        "revision": 161,
+        "subsystem": 1044910147,
+        "vendor": 4318,
+        "warp": false
+      },
+      "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+    },
+    {
+      "ok": true,
+      "events": 10,
+      "original_callbacks": 2,
+      "frame_sha256": "6191437ce27cf9e05b261824aac2e4ebf370bf3f7d5197744562af4a98e37364",
+      "adapter": {
+        "description": "Intel(R) Graphics",
+        "device": 32103,
+        "driver_version": 9007199261368954,
+        "feature_level": 45312,
+        "luid_high": 0,
+        "luid_low": 74715,
+        "revision": 6,
+        "subsystem": 1044910147,
+        "vendor": 32902,
+        "warp": false
+      },
+      "limits": "Same-vendor fixture comparison; resource-to-RTV mapping is supplied by the caller."
+    }
+  ],
+  "packaged_replays": [
+    {
+      "capture": "gf2",
+      "completed": true,
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "external_backend_modules": false
+    },
+    {
+      "capture": "bf1",
+      "completed": true,
+      "rgba_sha256": "3d431509ec8258047bc7381367a2861e36ba26abad658bc642524692c07426cc",
+      "external_backend_modules": false
+    },
+    {
+      "capture": "hd2",
+      "completed": true,
+      "rgba_sha256": "98c7f0646202a11e199d5386cd82abb94f22eb486c51da1b574c87ab900d71d9",
+      "external_backend_modules": false
+    }
+  ],
+  "pending": [
+    "Full retained test suite",
+    "Historical hlsl_recovery/recovery_ui failure reproduction",
+    "Broader GPA diagnostic targets beyond single-sample 2D color layer zero",
+    "Clean-host, transient-module and child-process audit"
+  ]
+}

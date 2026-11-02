@@ -74,8 +74,8 @@ class NativeAnalysisTests final : public QObject {
         QVERIFY_THROWS_EXCEPTION(
             std::invalid_argument,
             nativeAnalysisRequest("debug-thread", {{"gpa_event", 4}, {"thread", {1, 2}}}));
-        QCOMPARE(nativeAnalysisRequest("debug-thread", {{"gpa_event", 4}, {"thread", {1, 2, 3}}}).action,
-                 std::string("debug-thread"));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+            nativeAnalysisRequest("debug-thread", {{"gpa_event", 4}, {"thread", {1, 2, 3}}}));
     }
     void isolatedInventoryAndStaleResult() {
         QTemporaryDir directory;
@@ -627,9 +627,9 @@ class NativeAnalysisTests final : public QObject {
         const auto retry =
             prepareNativeAnalysisJob(capture, "inventory", directory.filePath("retry"), worker());
         QVERIFY(load(runNativeAnalysisJob(retry, worker(), 30)).at("ok") == true);
-        auto unsupported = prepareNativeAnalysisJob(capture, "debug-pixel", directory.filePath("unsupported"),
-                                                    worker(), {{"gpa_event", 1000}});
-        QVERIFY_THROWS_EXCEPTION(std::runtime_error, runNativeAnalysisJob(unsupported, worker(), 30));
+        QVERIFY_THROWS_EXCEPTION(std::invalid_argument,
+            prepareNativeAnalysisJob(capture, "debug-pixel", directory.filePath("unsupported"),
+                                     worker(), {{"gpa_event", 1000}}));
         QVERIFY(!QFileInfo::exists(directory.filePath("unsupported/result.json")));
         auto changed =
             prepareNativeAnalysisJob(capture, "inventory", directory.filePath("changed"), worker());

@@ -38,26 +38,6 @@
   implementations or a compiler runtime from either repository. Upstream notices:
   https://github.com/microsoft/DirectX-Headers/blob/461ef5138bd30922b44fbad77c4e47662812d2d5/LICENSE
   and https://github.com/microsoft/DirectXShaderCompiler/blob/3620b16697cf57313d7a3abdb7a1c3aa3838c35c/LICENSE.TXT.
-- RenderDoc public application API header: MIT, Copyright (c) 2015-2026 Baldur
-  Karlsson. Vendored unmodified as `third_party/renderdoc/renderdoc_app.h`, with
-  license at `third_party/renderdoc/LICENSE.MIT`. Source: the local upstream
-  RenderDoc 1.45 source snapshot's `renderdoc/api/app/renderdoc_app.h`.
-  Header SHA-256: `b7005e7dc34c3635046868bbd76d81b9b055aede0f56daa0bd39fedee0639ffb`.
-  FloraGPA requests public application API 1.6.0 and only loads RenderDoc when
-  requested for analysis recapture. The portable package bundles the official
-  RenderDoc 1.45 x64 release DLL and its native `renderdoccmd.exe` helper,
-  pinned in `runtime-manifest.json`, without
-  QRenderDoc, Python, Qt5 or vendor-specific optional plugins. The runtime is not
-  tracked in Git. Its SHA-256 is
-  `313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3`.
-  The official archive URL/hash, upstream commit, MIT license, acknowledgements
-  and upstream third-party notice files accompany it under `RenderDoc/`.
-  Ordinary replay remains independent of this backend. No Python runtime is
-  redistributed with FloraGPA.
-- RenderDoc 1.45 public replay headers are vendored under
-  `third_party/renderdoc/replay/` for the isolated native analysis worker.
-  MIT, Copyright (c) 2015-2026 Baldur Karlsson and (c) 2014 Crytek; per-file
-  notices are preserved. `replay-manifest.json` records the local upstream
-  snapshot hashes and tested binary commit. `REPLAY_HEADERS.md` documents the
-  two small compatibility changes. This uses the version-specific C++ replay
-  ABI; the optional external DLL must report release version 1.45.
+
+RenderDoc is no longer a product dependency or packaged runtime. Historical
+licenses and source provenance remain in Git history.

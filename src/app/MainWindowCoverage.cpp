@@ -2,7 +2,6 @@
 #include "QuadView.h"
 #include "MainWindow.h"
 #include "PixelHistoryView.h"
-#include "ReplayDebugView.h"
 #include <QAction>
 #include <QStatusBar>
 #include <QTabWidget>
@@ -85,7 +84,6 @@ void MainWindow::selectCoveragePixel(const QString &text, int x, int y, const QC
         updateExperimentActions();
         const auto &sub = report.at("target_subresource");
         history_->selectPixel(resource, x, y, sub.at("mip").get<int>(), sub.at("layer").get<int>(), 0);
-        replayDebug_[1]->selectPixel(x, y, 0);
         properties("Coverage Pixel", {{"Resource", QString::number(resource)},
                                       {"Event", QString::number(event)},
                                       {"Pixel", QString("%1, %2").arg(x).arg(y)},

@@ -12,11 +12,8 @@ constexpr size_t maxBytes = 1024 * 1024;
 [[noreturn]] void fail(const char *message) { throw std::runtime_error(message); }
 const std::map<std::string, std::string> formats{
     {"gs-checkpoint", "FloraGPA native GS debug config 1"},
-    {"debug-vertex", "FloraGPA native VS execution debug config 1"},
-    {"debug-pixel", "FloraGPA native PS execution debug config 1"},
     {"ds-checkpoint", "FloraGPA native DS debug config 1"},
-    {"hs-checkpoint", "FloraGPA native HS debug config 1"},
-    {"debug-thread", "FloraGPA native CS execution debug config 1"}};
+    {"hs-checkpoint", "FloraGPA native HS debug config 1"}};
 bool fields(const Json &value, const std::set<std::string> &names) {
     if (!value.is_object() || value.size() != names.size())
         return false;
@@ -168,7 +165,7 @@ NativeDebugSettings prepareNativeDebugConfig(const Json &result, const Json &row
                                              SourceTrace::ValueLoader loader, const Json &config) {
     if (!fields(config, {"format", "identity", "source_breakpoints", "instruction_breakpoints", "watches"}) ||
         config.at("format") != formats.at(action(result)))
-        fail("Unsupported native shader debug configuration format");
+        fail("Unsupported or removed shader configuration: VS/PS/CS execution debugging is no longer supported");
     if (config.at("identity") != nativeDebugIdentity(result))
         fail("Configuration does not match the current original shader or source mappings");
     const auto &points = config.at("source_breakpoints"),

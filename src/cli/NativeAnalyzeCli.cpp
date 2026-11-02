@@ -8,30 +8,16 @@ int nativeAnalyzeCli(QStringList arguments) {
     using Json = nlohmann::json;
     try {
         arguments[0] = "FloraGPA.Cli analyze";
-        QStringList normalized;
-        for (qsizetype i = 0; i < arguments.size(); ++i) {
-            if (arguments[i] == "--") {
-                normalized.append(arguments.mid(i));
-                break;
-            }
-            normalized << arguments[i];
-            if (arguments[i] == "--group" || arguments[i] == "--thread") {
-                if (i + 3 >= arguments.size())
-                    throw std::invalid_argument("Expected three compute coordinates");
-                normalized << arguments.mid(i + 1, 3).join(',');
-                i += 3;
-            }
-        }
+        if ((arguments.size() > 2 && arguments[2].startsWith("debug-")) ||
+            arguments.contains("--debug-scope") || arguments.contains("private-draw") ||
+            arguments.contains("private-primitive"))
+            throw std::invalid_argument("Execution debugging and private-fragment analysis were removed from the GPA feature scope");
         QCommandLineParser parser;
         parser.addOption({"vertex-storage", "Mesh vertex storage: selected or remaining", "scope"});
         parser.setApplicationDescription("Isolated native DX11 analysis of a GPA frame");
         parser.addHelpOption();
         parser.addPositionalArgument("capture", "DX11 .gpa_frame file");
-        parser.addPositionalArgument(
-            "action",
-            "inventory | events | texture | mesh | counters | history --history-scope events/private-draw "
-            "| debug-vertex | debug-thread | debug-pixel --debug-scope private-primitive "
-            "(fragment history and full debugger parity remain pending)");
+        parser.addPositionalArgument("action", "inventory | events | texture | mesh | counters | history");
         parser.addOption({"out", "New or empty output directory", "path"});
         parser.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
         parser.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
@@ -39,28 +25,12 @@ int nativeAnalyzeCli(QStringList arguments) {
         parser.addOption({"debug-device", "Enable D3D11 validation"});
         parser.addOption({"gpu-vendor", "Select a PCI vendor ID (decimal or 0x hex)", "id"});
         parser.addOption({"stage", "Mesh stage: final, vs, vs-index, vs-inputs, hs, ds or gs", "stage"});
-        parser.addOption({"group", "Compute group X Y Z", "coordinates"});
-        parser.addOption({"thread", "Compute local thread X Y Z", "coordinates"});
-        parser.addOption({"vertex", "Draw-relative VS input reference before cut removal", "integer"});
-        parser.addOption(
-            {"index", "Override the per-vertex attribute index after all draw offsets", "integer"});
-        parser.addOption(
-            {"history-scope", "events or private-draw; original fragment history remains pending", "scope"});
-        parser.addOption({"return-count", "Count returning samples on a private diagnostic target"});
-        parser.addOption({"shader-outputs", "Evaluate private draw shader outputs"});
-        parser.addOption({"output-merger", "Evaluate private draw shader outputs and output merger"});
-        parser.addOption({"primitive-identity", "Observe conditional system IDs in private draw history"});
-        parser.addOption(
-            {"primitive-presence", "Observe candidate system ID presence across complete private draws"});
-        parser.addOption(
-            {"primitive-tests", "Compare private full draws with individual output tests disabled"});
-        parser.addOption(
-            {"debug-scope", "Pixel debug: private-primitive; original invocation remains unknown", "scope"});
+        parser.addOption({"history-scope", "events (storage) or gpa (event diagnostics)", "scope"});
         for (const auto key : {"gpa-event", "resource", "start-event", "end-event", "x", "y", "mip", "layer",
                                "slice", "sample", "typed-format", "instance", "stream", "max-bytes",
-                               "max-records", "max-steps", "max-trace-bytes", "primitive"})
+                               "max-records"})
             parser.addOption({key, "Native analysis selection", "integer"});
-        if (!parser.parse(normalized))
+        if (!parser.parse(arguments))
             throw std::invalid_argument(parser.errorText().toStdString());
         if (parser.isSet("help") || parser.isSet("help-all")) {
             QTextStream(stdout)
@@ -84,18 +54,12 @@ int nativeAnalyzeCli(QStringList arguments) {
             const auto field = QString(key).replace('-', '_').toStdString();
             if (key == "out" || key == "experiment" || key == "timeout")
                 continue;
-            if (key == "warp" || key == "debug-device" || key == "shader-outputs" || key == "output-merger" ||
-                key == "primitive-identity" || key == "primitive-presence" || key == "primitive-tests" ||
-                key == "return-count")
+            if (key == "warp" || key == "debug-device")
                 options[field] = true;
-            else if (key == "stage" || key == "history-scope" || key == "debug-scope" ||
+            else if (key == "stage" || key == "history-scope" ||
                      key == "vertex-storage")
                 options[field] = parser.value(key).toStdString();
-            else if (key == "group" || key == "thread") {
-                options[field] = Json::array();
-                for (const auto &coordinate : parser.value(key).split(','))
-                    options[field].push_back(number(coordinate));
-            } else
+            else
                 options[field] = number(parser.value(key), key == "gpu-vendor");
         }
         bool valid = false;

@@ -20,13 +20,8 @@ class ReplayMeshView final : public QWidget {
     explicit ReplayMeshView(QWidget *parent = nullptr);
     void setContext(const QString &key, qulonglong event);
     void setWorkerBusy(bool busy);
-    QString backendPath() const { return backendPath_; }
-    void setBackendPath(const QString &path, bool persist = true);
-    void setNativeMode(bool);
-    bool nativeMode() const;
     Json request() const;
     uint64_t requestId() const { return requestId_; }
-    bool finish(uint64_t request, const Json &result, const QString &directory);
     bool finishNative(uint64_t request, const Json &result, std::shared_ptr<NativeReplayMesh> mesh);
     const Json &result() const { return result_; }
     void exportResult(const QString &path) const;
@@ -39,14 +34,14 @@ class ReplayMeshView final : public QWidget {
   private:
     void invalidate();
     void updateActions();
-    QString key_, backendPath_;
+    QString key_;
     qulonglong event_{};
     uint64_t requestId_{};
     bool busy_{};
     Json result_;
     std::shared_ptr<NativeReplayMesh> native_;
     QMap<QString, QByteArray> files_;
-    QAction *read_, *cancel_, *export_, *backend_, *nativeMode_;
+    QAction *read_, *cancel_, *export_;
     QComboBox *stage_, *storage_;
     QLineEdit *instance_;
     QLabel *summary_;

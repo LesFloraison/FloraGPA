@@ -24,8 +24,6 @@
 #include "QuadView.h"
 #include "RasterizerDialog.h"
 #include "NativeCountersView.h"
-#include "NativeExecutionDebugView.h"
-#include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
 #include "ShaderProjectDialog.h"
@@ -38,7 +36,6 @@
 #include "application/ContextInspector.h"
 #include "application/FrameOutput.h"
 #include "application/PredicateInspector.h"
-#include "application/RdcJobs.h"
 #include "application/SessionUi.h"
 #include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
@@ -343,8 +340,7 @@ MainWindow::MainWindow() : loader_(this) {
             if (runningKind_ == "replay-pipeline")
                 replayedState_->finishReplay(runningPipelineRequest_,
                                              {{"error", process_.errorString().toStdString()}});
-            if (runningKind_ == "history" || runningKind_ == "history-capture")
-                finishRdcAnalysis({{"ok", false}, {"error", process_.errorString().toStdString()}});
+
             emit taskFinished(false);
         }
     });
@@ -364,13 +360,10 @@ MainWindow::MainWindow() : loader_(this) {
                 if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
                     throw std::runtime_error("Native history artifact disagrees with the result");
                 accepted = history_->finishNative(nativeRequestId_, outcome.result);
-                statusBar()->showMessage(accepted ? "Event storage history ready" : "Analysis context changed", 3000);
+                statusBar()->showMessage(accepted ? "Pixel history ready" : "Analysis context changed", 3000);
             } else if (runningNativeMesh_) {
                 accepted = replayMesh_->finishNative(nativeRequestId_, outcome.result, outcome.mesh);
                 statusBar()->showMessage(accepted ? "Replay mesh ready" : "Analysis context changed", 3000);
-            } else if (runningNativeDebug_) {
-                accepted = nativeDebug_->finish(nativeRequestId_, outcome.debugSession);
-                statusBar()->showMessage(accepted ? "Native compute trace ready" : "Analysis context changed", 3000);
             } else {
                 const auto report = outcome.artifacts.value("counters.json");
                 if (report.isEmpty() || nlohmann::json::parse(report.toStdString()) != outcome.result.at("data"))
@@ -383,8 +376,6 @@ MainWindow::MainWindow() : loader_(this) {
                 history_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
             else if (runningNativeMesh_)
                 replayMesh_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}}, {});
-            else if (runningNativeDebug_)
-                nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
             else
                 nativeCounters_->finish(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
             if (!outcome.workerLog.isEmpty())
@@ -394,7 +385,6 @@ MainWindow::MainWindow() : loader_(this) {
             else
                 statusBar()->showMessage("Native analysis cancelled", 3000);
         }
-        runningNativeDebug_ = false;
         runningNativeMesh_ = false;
         runningNativeHistory_ = false;
         emit taskFinished(accepted);
@@ -1088,7 +1078,7 @@ void MainWindow::buildUi() {
     replayMesh_ = new ReplayMeshView;
     geometryViews_->addTab(replayMesh_, "Replay Mesh");
     connect(replayMesh_, &ReplayMeshView::readRequested, this,
-            [this] { readRdcAnalysis(nullptr, RdcAnalysis::Mesh); });
+            [this] { readNativeMesh(); });
     connect(replayMesh_, &ReplayMeshView::cancelRequested, this, &MainWindow::cancel);
     connect(replayMesh_, &ReplayMeshView::error, this, &MainWindow::showError);
     centerTabs_->addTab(geometryPane_, "Geometry");
@@ -1187,7 +1177,7 @@ void MainWindow::buildUi() {
     });
     history_ = new PixelHistoryView;
     leftTabs_->insertTab(1, history_, "Pixel History");
-    connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
+    connect(history_, &PixelHistoryView::readRequested, this, [this] { readNativeHistory(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
         if (!busy())
@@ -1213,33 +1203,8 @@ void MainWindow::buildUi() {
                     startWorker(args, false);
                 });
     }
-    const QStringList replayStages{"vs", "ps", "cs"};
-    for (size_t i = 0; i < replayDebug_.size(); ++i) {
-        auto view = replayDebug_[i] = new ReplayDebugView(replayStages[int(i)]);
-        debugTabs->addTab(view, replayStages[int(i)].toUpper());
-        connect(view, &ReplayDebugView::readRequested, this, [this, view] { readRdcAnalysis(view); });
-        connect(view, &ReplayDebugView::cancelRequested, this, &MainWindow::cancel);
-        connect(view, &ReplayDebugView::error, this, &MainWindow::showError);
-    }
-    const QList<QWidget *> stageOrder{replayDebug_[0], checkpoints_[1], checkpoints_[2],
-                                      checkpoints_[0], replayDebug_[1], replayDebug_[2]};
-    for (int i = 0; i < stageOrder.size(); ++i) {
-        const auto index = debugTabs->indexOf(stageOrder[i]);
-        const auto label = debugTabs->tabText(index);
-        debugTabs->removeTab(index);
-        debugTabs->insertTab(i, stageOrder[i], label);
-    }
-    nativeDebug_ = new NativeExecutionDebugView;
-    debugTabs->addTab(nativeDebug_, "Native execution");
-    connect(nativeDebug_, &NativeExecutionDebugView::readRequested, this, &MainWindow::readNativeDebug);
-    connect(nativeDebug_, &NativeExecutionDebugView::cancelRequested, this, &MainWindow::cancel);
-    connect(nativeDebug_, &NativeExecutionDebugView::error, this, &MainWindow::showError);
-    connect(nativeDebug_, &NativeExecutionDebugView::activityChanged, this, [this](bool active) {
-        nativeDebugOperation_ = active;
-        setBusy(busy());
-    });
     debugTabs->setCurrentIndex(0);
-    centerTabs_->addTab(debugTabs, "Shader Debug");
+    centerTabs_->addTab(debugTabs, "Shader Checkpoints");
     auto rightTabs = new QTabWidget;
     rightTabs->setObjectName("inspectorTabs");
     rightTabs->setDocumentMode(true);
@@ -1342,7 +1307,6 @@ void MainWindow::buildUi() {
         const bool nativeVolume = history_->nativeMode() && textureMetadata_["dimension"].toInt() == 4;
         history_->selectPixel(selectedResource_, x, y, preview["mip"].toInt(), nativeVolume ? 0 : layer,
                               sample, nativeVolume ? layer : 0);
-        replayDebug_[1]->selectPixel(x, y, sample);
         statusBar()->showMessage(QString("History pixel %1, %2 · T:%3").arg(x).arg(y).arg(selectedResource_),
                                  4000);
     });
@@ -1441,7 +1405,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || nativeDebugOperation_ || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || nativeAnalysis_.active() || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1454,14 +1418,10 @@ void MainWindow::setBusy(bool busy) {
         history_->setWorkerBusy(busy);
     if (nativeCounters_)
         nativeCounters_->setWorkerBusy(busy);
-    if (nativeDebug_)
-        nativeDebug_->setWorkerBusy(busy);
+
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
-        if (view)
-            view->setWorkerBusy(busy);
-    for (auto view : replayDebug_)
         if (view)
             view->setWorkerBusy(busy);
     // A preview may replace the texture while an independent export is running.
@@ -1519,13 +1479,9 @@ void MainWindow::updateCheckpointContext() {
         history_->setContext(historyContextKey(), selectedEvent_);
     if (nativeCounters_)
         nativeCounters_->setContext(historyContextKey(), selectedEvent_);
-    if (nativeDebug_)
-        nativeDebug_->setContext(historyContextKey(), selectedEvent_);
+
     if (replayMesh_)
         replayMesh_->setContext(historyContextKey(), selectedEvent_);
-    for (auto view : replayDebug_)
-        if (view)
-            view->setContext(historyContextKey(), selectedEvent_);
 }
 QString MainWindow::historyContextKey() const {
     if (!frame_)
@@ -1538,73 +1494,8 @@ QString MainWindow::historyContextKey() const {
     return QString::fromStdString(frame_->sha256()) + ':' + QString::number(adapter_->currentIndex()) + ':' +
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
-bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
-    if (runningAnalysis_ == RdcAnalysis::Mesh)
-        return replayMesh_->finish(historyRequestId_, result,
-                                   jobDir_ ? jobDir_->path() + "/result" : QString());
-    return runningDebug_ ? runningDebug_->finish(historyRequestId_, result)
-                         : history_->finish(historyRequestId_, result);
-}
-void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
-    if (!view && kind == RdcAnalysis::History && history_->nativeMode()) {
-        readNativeHistory();
-        return;
-    }
-    if (kind == RdcAnalysis::Mesh && replayMesh_->nativeMode()) {
-        readNativeMesh();
-        return;
-    }
-    if (busy() || !frame_)
-        return;
-    if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
-        history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
-        emit taskFinished(false);
-        return;
-    }
-    runningDebug_ = view;
-    runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
-    const bool mesh = kind == RdcAnalysis::Mesh;
-    historyRequestId_ = mesh       ? replayMesh_->requestId()
-                        : view     ? view->requestId()
-                                   : history_->requestId();
-    try {
-        historyRequest_ = mesh       ? replayMesh_->request()
-                          : view     ? view->request()
-                                     : history_->request();
-        const auto library = QFileInfo(mesh       ? replayMesh_->backendPath()
-                                       : view     ? view->backendPath()
-                                                  : history_->backendPath())
-                                 .canonicalFilePath();
-        QFile file(library);
-        if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Select an installed RenderDoc 1.45 library");
-        QCryptographicHash digest(QCryptographicHash::Sha256);
-        if (!digest.addData(&file))
-            throw std::runtime_error("Cannot read RenderDoc library identity");
-        historyRequest_["renderdoc"] = library.toStdString();
-        historyKey_ =
-            historyContextKey() + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
-        historyRequest_["experiment_key"] = historyKey_.toStdString();
-        historyRequest_["frame_sha256"] = frame_->sha256();
-        if (const auto it = historyCaptures_.find(historyKey_);
-            it != historyCaptures_.end() && QFileInfo::exists(it->second.path)) {
-            historyRdc_ = it->second.path;
-            historyCacheOrder_.removeAll(historyKey_);
-            historyCacheOrder_.append(historyKey_);
-            startHistoryWorker();
-        } else {
-            startWorker({"replay", capturePath_, "--renderdoc", library}, false);
-            if (process_.state() == QProcess::NotRunning)
-                throw std::runtime_error("Cannot start independent recapture");
-            runningKind_ = "history-capture";
-            statusBar()->showMessage("Capturing analysis frame…");
-        }
-    } catch (const std::exception &e) {
-        finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
-        showError(QString::fromUtf8(e.what()));
-        emit taskFinished(false);
-    }
-}
+
+
 void MainWindow::readNativeHistory() {
     if (busy() || !frame_)
         return;
@@ -1612,7 +1503,6 @@ void MainWindow::readNativeHistory() {
     nativeContextKey_ = historyContextKey();
     runningNativeHistory_ = true;
     runningNativeMesh_ = false;
-    runningNativeDebug_ = false;
     try {
         replayTimer_.stop();
         textureTimer_.stop();
@@ -1626,7 +1516,7 @@ void MainWindow::readNativeHistory() {
         nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
                               "history", options, experiment_ ? experiment_->document() : nlohmann::json());
         setBusy(true);
-        statusBar()->showMessage("Reading event storage history…");
+        statusBar()->showMessage("Reading pixel history…");
     } catch (const std::exception &error) {
         runningNativeHistory_ = false;
         history_->finishNative(nativeRequestId_, {{"ok", false}, {"error", error.what()}});
@@ -1641,7 +1531,6 @@ void MainWindow::readNativeMesh() {
     nativeContextKey_ = historyContextKey();
     runningNativeMesh_ = true;
     runningNativeHistory_ = false;
-    runningNativeDebug_ = false;
     try {
         replayTimer_.stop();
         textureTimer_.stop();
@@ -1667,7 +1556,6 @@ void MainWindow::readNativeCounters() {
     if (busy() || !frame_)
         return;
     nativeRequestId_ = nativeCounters_->requestId();
-    runningNativeDebug_ = false;
     runningNativeHistory_ = false;
     runningNativeMesh_ = false;
     nativeContextKey_ = historyContextKey();
@@ -1690,66 +1578,13 @@ void MainWindow::readNativeCounters() {
         emit taskFinished(false);
     }
 }
-void MainWindow::readNativeDebug() {
-    if (busy() || !frame_)
-        return;
-    nativeRequestId_ = nativeDebug_->requestId();
-    nativeContextKey_ = historyContextKey();
-    runningNativeDebug_ = true;
-    runningNativeHistory_ = false;
-    runningNativeMesh_ = false;
-    try {
-        replayTimer_.stop();
-        textureTimer_.stop();
-        bufferTimer_.stop();
-        auto options = nativeDebug_->request();
-        if (adapter_->currentIndex() == 1)
-            options["warp"] = true;
-        else if (const auto vendor = selectedReplayVendor(*adapter_))
-            options["gpu_vendor"] = *vendor;
-        nativeAnalysis_.start(capturePath_, QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe",
-                              nativeDebug_->action(), options, experiment_ ? experiment_->document() : nlohmann::json());
-        setBusy(true);
-        statusBar()->showMessage("Reading native shader execution…");
-    } catch (const std::exception &error) {
-        runningNativeDebug_ = false;
-        nativeDebug_->finish(nativeRequestId_, {}, QString::fromUtf8(error.what()));
-        showError(QString::fromUtf8(error.what()));
-        emit taskFinished(false);
-    }
-}
-void MainWindow::startHistoryWorker() {
-    replayTimer_.stop();
-    textureTimer_.stop();
-    bufferTimer_.stop();
-    jobDir_ = std::make_unique<QTemporaryDir>(QDir::tempPath() + "/FloraGPA-history-XXXXXX");
-    if (!jobDir_->isValid())
-        throw std::runtime_error("Cannot create history worker directory");
-    auto options = historyRequest_;
-    for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key"})
-        options.erase(key);
-    auto prepared = prepareRdcJob(
-        historyRdc_, historyRequest_.at("action").get<std::string>(), jobDir_->path() + "/result",
-        QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
-    prepared["frame_sha256"] = historyRequest_.at("frame_sha256");
-    prepared["experiment_key"] = historyRequest_.at("experiment_key");
-    historyRequest_ = std::move(prepared);
-    const auto path = jobDir_->path() + "/job.json";
-    writeFile(path, QByteArray::fromStdString(historyRequest_.dump(2)));
-    runningRevision_ = revision_;
-    runningTimings_ = false;
-    runningKind_ = "history";
-    stderrBuffer_.clear();
-    errorText_.clear();
-    workerTimedOut_ = false;
-    setBusy(true);
-    statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
-                             : runningDebug_                             ? "Reading shader trace…"
-                                                                         : "Reading pixel history…");
-    timeout_.start(180000);
-    process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
-}
+
+
 void MainWindow::openCapture(const QString &path) {
+    if (QFileInfo(path).suffix().compare("rdc", Qt::CaseInsensitive) == 0) {
+        showError("RenderDoc captures are no longer supported. Open a GPA .gpa_frame capture.");
+        return;
+    }
     if (projectDirty_) {
         auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
                                             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -1892,7 +1727,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); return; }
         args << "--preview-request" << path;
     }
-    if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
+    if (args.first() == "replay" || args.first() == "texture") invalidateResourceImage();
     args << replayAdapterArguments(*adapter_, args.first());
     runningRevision_ = revision_;
     runningTimings_ = timings;
@@ -1912,8 +1747,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
 }
 void MainWindow::cancel() {
     nativeAnalysis_.cancel();
-    if (nativeDebug_)
-        nativeDebug_->cancelOperation();
+
     if (exportCancel_) {
         exportCancel_->store(true);
         cancelAction_->setEnabled(false);
@@ -1984,8 +1818,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
             runningKind_ == "metric-catalog")
             scheduledMetrics_->finish(runningScheduledRequest_, {{"error", reason}});
-        if (runningKind_ == "history" || runningKind_ == "history-capture")
-            finishRdcAnalysis({{"ok", false}, {"error", reason}});
+
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", reason}});
         if (runningKind_ == "timings")
@@ -2025,25 +1858,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(accepted);
             return;
         }
-        if (runningKind_ == "history") {
-            QFile file(jobDir_->path() + "/result/result.json");
-            if (!file.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Analysis result is missing");
-            const auto bytes = file.readAll();
-            auto result = nlohmann::json::parse(bytes.begin(), bytes.end());
-            result["capture"] = historyRdc_.toStdString();
-            result["frame_sha256"] = historyRequest_.at("frame_sha256");
-            result["experiment_key"] = historyRequest_.at("experiment_key");
-            result["selection"] = historyRequest_;
-            const bool accepted = finishRdcAnalysis(result);
-            statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
-                                                 : runningDebug_ ? "Shader trace ready"
-                                                                 : "Pixel history ready")
-                                              : "Analysis selection changed",
-                                     3000);
-            emit taskFinished(accepted);
-            return;
-        }
+
         loadWorkerReport();
     } catch (const std::exception &e) {
         failWorkerResult(QString::fromUtf8(e.what()));
@@ -2073,18 +1888,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
                                       .arg(experiment["applied_events"].toArray().size())
                                       .arg(experiment["pending_events"].toArray().size()));
         }
-        if (runningKind_ == "history-capture") {
-            historyRdc_ = report_["rdc_capture"].toString();
-            if (historyRdc_.isEmpty() || !QFileInfo::exists(historyRdc_))
-                throw std::runtime_error("Independent RenderDoc capture is missing");
-            historyCaptures_[historyKey_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), historyRdc_};
-            historyCacheOrder_.removeAll(historyKey_);
-            historyCacheOrder_.append(historyKey_);
-            while (historyCacheOrder_.size() > 4)
-                historyCaptures_.erase(historyCacheOrder_.takeFirst());
-            startHistoryWorker();
-            return;
-        }
+
         if (runningKind_ == "shader-checkpoint") {
             if (!runningCheckpoint_)
                 throw std::runtime_error("Missing checkpoint view");
@@ -2294,8 +2098,7 @@ void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
     if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
         runningKind_ == "metric-catalog")
         scheduledMetrics_->finish(runningScheduledRequest_, {{"error", message}});
-    if (runningKind_ == "history" || runningKind_ == "history-capture")
-        finishRdcAnalysis({{"ok", false}, {"error", message}});
+
     if (runningKind_ == "timings")
         gpuProfile_->finish(runningProfileRequest_, {{"error",message}});
     if (runningKind_ == "coverage")
@@ -4272,10 +4075,6 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
                               display.value("sample", nlohmann::json(nullptr)).is_number()
                                   ? display.at("sample").get<int>()
                                   : 0, nativeVolume ? coordinate.get<int>() : 0);
-        replayDebug_[1]->selectPixel(x, y,
-                                     display.value("sample", nlohmann::json(nullptr)).is_number()
-                                         ? display.at("sample").get<int>()
-                                         : 0);
         properties("Output Pixel",
                    {{"Resource", QString::number(resource)},
                     {"Event", event ? QString::number(event) : "—"},
