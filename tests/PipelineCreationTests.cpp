@@ -18,6 +18,87 @@ Raw copy(Bytes bytes) { return Raw(bytes.begin(), bytes.end()); }
 class PipelineCreationTests final : public QObject {
     Q_OBJECT
   private slots:
+    void emptyInputLayout_data() {
+        QTest::addColumn<bool>("creation");
+        QTest::addColumn<bool>("warp");
+        QTest::addColumn<bool>("requiresInput");
+        for (bool creation : {false, true})
+            for (bool warp : {false, true})
+                for (bool requiresInput : {false, true})
+                    QTest::newRow(QString("%1-%2-%3")
+                                      .arg(creation ? "creation" : "snapshot")
+                                      .arg(warp ? "warp" : "hardware")
+                                      .arg(requiresInput ? "missing-position" : "vertex-id")
+                                      .toUtf8().constData())
+                        << creation << warp << requiresInput;
+    }
+    void emptyInputLayout() {
+        QFETCH(bool, creation);
+        QFETCH(bool, warp);
+        QFETCH(bool, requiresInput);
+        auto capture = graphicsCounterCapture(false);
+        const auto shader = std::find_if(capture.entries.begin(), capture.entries.end(),
+                                         [](const Entry &e) { return e.id == 31; });
+        QVERIFY(shader != capture.entries.end());
+        Reader bytes(Bytes(capture.bytes).subspan(size_t(shader->offset), shader->size));
+        const auto code = bytes.take(size_t(bytes.read<uint64_t>()));
+        Com<ID3DBlob> signature, required;
+        if (requiresInput) {
+            const char source[] = "float4 main(float4 p:POSITION):SV_Position{return p;}";
+            check(D3DCompile(source, sizeof(source) - 1, nullptr, nullptr, nullptr, "main", "vs_5_0",
+                             0, 0, &required, nullptr), "Compile required input");
+        }
+        check(D3DGetInputSignatureBlob(required ? required->GetBufferPointer() : code.data(),
+                                      required ? required->GetBufferSize() : code.size(), &signature),
+              "Extract input signature");
+        const auto signatureBytes = Bytes(static_cast<const uint8_t *>(signature->GetBufferPointer()),
+                                          signature->GetBufferSize());
+        auto layout = pack(0u, UINT(signatureBytes.size()));
+        layout.insert(layout.end(), signatureBytes.begin(), signatureBytes.end());
+        capture.add(60, 5, 0x81, Raw(28));
+        capture.add(78, 5, 0x82, pack(Id(0), Id(60), Id(79)));
+        capture.add(79, 9, 0x84, layout);
+        for (const auto &e : capture.entries)
+            if (e.id == 34)
+                put(capture.bytes, size_t(e.offset) + 144, Id(78));
+        if (creation) {
+            auto record = pack(Id(0), Id(60), int32_t(0), 0u, uint8_t(1),
+                               uint64_t(signatureBytes.size()), uint8_t(1));
+            record.insert(record.end(), signatureBytes.begin(), signatureBytes.end());
+            append(record, Id(78));
+            capture.add(180, 7, 0x3580, record);
+        }
+        QTemporaryDir dir;
+        const auto path = dir.filePath("empty-layout.gpa_frame");
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        if (requiresInput) {
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+            return;
+        }
+        try {
+            replay.run();
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+        // Preserve the captured layout object, rather than silently binding null.
+        replay.inspectNativeState([&](ID3D11DeviceContext *context, const auto &objects) {
+            Com<ID3D11InputLayout> bound;
+            context->IAGetInputLayout(&bound);
+            QVERIFY(bound);
+            QVERIFY(objects.contains(78));
+            Com<ID3D11InputLayout> saved;
+            check(objects.at(78).As(&saved), "Captured layout identity");
+            QCOMPARE(bound.Get(), saved.Get());
+        });
+        QVERIFY(replay.readTexture(20) == Raw({255, 0, 0, 255}));
+        QCOMPARE(replay.counts.at("Draw"), uint64_t(1));
+        if (creation)
+            QCOMPARE(replay.counts.at("Device5.CreateInputLayout"), uint64_t(1));
+    }
     void strictRecords() {
         QTemporaryDir dir;
         for (uint16_t t : {uint16_t(0x3580), uint16_t(0x3581), uint16_t(0x3584), uint16_t(0x3587),

@@ -1501,6 +1501,36 @@ class UiTests final : public QObject {
         QVERIFY(label->toolTip().size() < 1024);
         snapshot(window, "msaa-grouped-bf1");
     }
+    void transparentFrameDefaultsToRgb() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::textureEditCapture(28, 1, true);
+        capture.add(95, 7, 0x32,
+                    testing::statePack(Id(0), Id(1), Id(24), uint8_t(1), 1.f, 0.f, 0.f, 0.f));
+        const auto path = dir.filePath("transparent-frame.gpa_frame");
+        capture.save(path);
+        MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto channel = window.findChild<QComboBox *>("outputChannel");
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(channel && output);
+        QCOMPARE(channel->currentText(), QString("RGB"));
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        done.clear();
+        channel->setCurrentText("RGBA");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 0));
+        done.clear();
+        channel->setCurrentText("A");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+    }
     void outputSelectionControls() {
         using namespace flora;
         QTemporaryDir dir;
@@ -1542,7 +1572,7 @@ class UiTests final : public QObject {
         window.openCapture(dir.path() + "/msaa.gpa_frame");
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
-        QCOMPARE(window.findChild<QComboBox *>("outputChannel")->currentText(), QString("RGBA"));
+        QCOMPARE(window.findChild<QComboBox *>("outputChannel")->currentText(), QString("RGB"));
         QCOMPARE(high->text(), QString("1"));
         QCOMPARE(output->image().pixelColor(0, 0), QColor(30, 0, 0, 255));
         auto sample = window.findChild<QSpinBox *>("outputSample");

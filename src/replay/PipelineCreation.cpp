@@ -215,8 +215,10 @@ void Replay::pipelineCreation(const Entry &entry) {
                                 D3D11_INPUT_CLASSIFICATION(v[4]), v[5]});
         }
         Com<ID3D11InputLayout> layout;
-        check(device_->CreateInputLayout(elements.data(), UINT(elements.size()), c.bytecode.data(),
-                                         c.bytecode.size(), &layout),
+        // Keep an actual empty layout object; a null descriptor pointer is rejected even for count 0.
+        const D3D11_INPUT_ELEMENT_DESC empty{};
+        check(device_->CreateInputLayout(elements.empty() ? &empty : elements.data(), UINT(elements.size()),
+                                         c.bytecode.data(), c.bytecode.size(), &layout),
               "Captured input layout creation");
         created = layout;
     } else {

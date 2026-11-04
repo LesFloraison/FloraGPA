@@ -341,7 +341,10 @@ IUnknown *Replay::object(Id id) {
             auto signature = layout.take(layout.read<UINT>());
             layout.end();
             Com<ID3D11InputLayout> obj;
-            check(device_->CreateInputLayout(elements.data(), n, signature.data(), signature.size(), &obj),
+            // D3D11 accepts zero elements but still requires a non-null descriptor pointer.
+            const D3D11_INPUT_ELEMENT_DESC empty{};
+            check(device_->CreateInputLayout(elements.empty() ? &empty : elements.data(), n,
+                                             signature.data(), signature.size(), &obj),
                   "CreateInputLayout");
             result = obj;
         } else if (t == 0x88) {

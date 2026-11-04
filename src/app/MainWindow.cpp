@@ -236,7 +236,8 @@ MainWindow::MainWindow() : loader_(this) {
                 outputTarget_->setCurrentIndex(0);
                 outputLayer_->setValue(-1);
                 outputSample_->setValue(-1);
-                channels_->setCurrentText("RGBA");
+                // Presentable color can have zero alpha; default to the visible RGB image.
+                channels_->setCurrentText("RGB");
                 outputLow_->setText("0");
                 outputHigh_->setText("1");
             }

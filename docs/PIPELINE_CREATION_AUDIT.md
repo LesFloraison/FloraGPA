@@ -137,3 +137,33 @@ adds ordinary GS/HS/DS and GS-with-SO creation, including two output slots and
 VS passthrough. The earlier 32 fixtures remain in its regression matrix.
 Class-linkage creation, broader interface layouts and deferred execution remain
 open; the historical limitations above describe the preceding release.
+
+## Zero-element input layouts (2026-11-04)
+
+The local capture `frame-46751be7-307c-4a5f-97ab-ba1a110bdd9a.gpa_frame`
+(SHA-256 `d0605d21e7084f537807bfccdf34236d9f1769ff99b43c21395276186434236f`)
+failed at DrawInstanced 1186 while restoring input layout 78. Its saved layout
+has zero elements and an SV_VertexID-only input signature. D3D11 accepts this
+layout but rejects a null descriptor pointer even when the element count is zero.
+Both snapshot restoration and captured CreateInputLayout now pass a non-null
+placeholder while preserving count zero, native signature validation and object
+identity. No vertex element or shader input is fabricated.
+
+Eight hardware/WARP cases cover both creation paths, a rendered red pixel and
+bound object identity, and rejection of a signature requiring an absent POSITION.
+All four valid cases failed before the fix; all eight now pass. Six related CTest
+suites pass serially. External-fixture skips remain (66 in pipeline_creation).
+The three targeted UI tests pass, including RGB visibility for zero-alpha output,
+explicit RGBA/alpha inspection, capture reset and project display restoration.
+New captures default to RGB so a final color buffer with zero alpha remains visible;
+captured storage and explicit channel selections are unchanged.
+
+The unmodified capture completes on NVIDIA RTX 5060 Ti and WARP at 1920 x 1080,
+with 241 draws and 46 dispatches. The packaged GUI completes automatic replay
+and displays the frame. Hardware/WARP hashes differ; cross-device pixel parity
+is not claimed. Four existing unsaved query-completion notices remain. BF1's
+normal/negative hashes are unchanged from the preceding package; its documented
+historical golden mismatch remains, and GF2 was unavailable on this host.
+Local logs, images and reports are in `artifacts/frame-46751be7-diagnosis/` and
+`build/empty-layout-*.log`; the package is `out/FloraGPA-dx11-fix-20261104/`.
+This bounded fix does not change module status or establish full capture parity.
