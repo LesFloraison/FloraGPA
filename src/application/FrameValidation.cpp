@@ -512,6 +512,11 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             if (!creation.error.empty())
                                 finding(&e, "error", "texture_creation_rejected", creation.error,
                                         creation.resource);
+                            else if (creation.unsavedSrv)
+                                finding(&e, "info", "unsaved_srv_creation",
+                                        "Unused SRV has no standalone snapshot; replay validates its explicit "
+                                        "creation descriptor on the saved texture. Dependent use is unsupported",
+                                        creation.resource);
                             else if (creation.result == 0 && !creation.hasInitial && !isViewCreation(e.type))
                                 finding(&e, "info", "texture_initial_contents_undefined",
                                         "Creation has no saved initial-data observations; a later first-use "

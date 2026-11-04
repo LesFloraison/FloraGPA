@@ -1,5 +1,6 @@
 #include "TextureCreation.h"
 #include "TextureEdits.h"
+#include "SrvBindings.h"
 namespace flora {
 bool isTextureCreation(uint16_t t) { return t >= 0x3579 && t <= 0x357f; }
 bool isViewCreation(uint16_t t) { return t >= 0x357c && t <= 0x357f; }
@@ -151,6 +152,19 @@ TextureCreationAudit auditTextureCreations(const Frame &frame, const CancelCheck
                 throw std::runtime_error("Repeated creation identity requires resource versioning");
             }
             frame.payload(c.device, 5, 0x81);
+            if (e.type == 0x357c && !frame.entries().contains(c.resource)) {
+                if (!c.hasDescriptor)
+                    throw std::runtime_error("Unsaved SRV requires an explicit creation descriptor");
+                const auto source = frame.resource(c.source);
+                if (source.device != c.device || source.type < 0x84 || source.type > 0x86)
+                    throw std::runtime_error("Unsaved SRV requires a saved texture on the same device");
+                if (!(source.desc.at(source.desc.size() - 3) & 8))
+                    throw std::runtime_error("Unsaved SRV source lacks the shader-resource bind flag");
+                if (!textureSrvDescriptorEqual(c.descriptor, c.descriptor))
+                    throw std::runtime_error("Unsaved SRV descriptor has an unsupported dimension");
+                c.unsavedSrv = true;
+                continue; // Native creation still validates format, dimensions and subresource bounds.
+            }
             const auto resource = frame.resource(c.resource);
             if (isViewCreation(e.type)) {
                 Reader r(frame.capturedPayload(c.resource, 5, viewCreationResourceType(e.type)));
@@ -235,6 +249,49 @@ TextureCreationAudit auditTextureCreations(const Frame &frame, const CancelCheck
             }
         } catch (const std::exception &ex) {
             c.error = ex.what();
+        }
+    }
+    std::map<Id, Id> unsaved;
+    for (const auto &[event, c] : audit.records)
+        if (c.unsavedSrv && c.error.empty())
+            unsaved.emplace(c.resource, event);
+    if (!unsaved.empty()) {
+        const auto requireSnapshot = [&](Id view, Id entry) {
+            if (const auto it = unsaved.find(view); it != unsaved.end()) {
+                auto &error = audit.records.at(it->second).error;
+                if (error.empty())
+                    error = "Unsaved SRV " + std::to_string(view) +
+                            " is required by capture entry " + std::to_string(entry);
+            }
+        };
+        for (const auto &[id, e] : frame.entries()) {
+            checkCancellation(cancelled);
+            try {
+                if (e.category == 3 && e.type == 3) {
+                    const auto state = frame.state(id);
+                    for (const auto &stage : state.stages)
+                        for (Id view : stage.srv)
+                            requireSnapshot(view, id);
+                } else if (e.category == 7 && srvSetterStage(e.type)) {
+                    for (Id view : readSrvCommand(frame.payload(id)).binding.views)
+                        requireSnapshot(view, id);
+                } else if (e.category == 7 && e.type == 0x245) {
+                    Reader r(frame.payload(id));
+                    r.skip(16);
+                    requireSnapshot(r.read<Id>(), id);
+                    r.end();
+                }
+            } catch (const OperationCancelled &) {
+                throw;
+            } catch (const std::exception &error) {
+                for (const auto &[view, event] : unsaved) {
+                    auto &reason = audit.records.at(event).error;
+                    if (reason.empty())
+                        reason = "Cannot prove unsaved SRV is unused at entry " + std::to_string(id) +
+                                 ": " + error.what();
+                }
+                break;
+            }
         }
     }
     return audit;

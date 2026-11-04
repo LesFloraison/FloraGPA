@@ -6,6 +6,8 @@ struct TextureCreationRecord {
     Id link{}, device{}, resource{}, source{}, data{};
     int32_t result{};
     bool hasDescriptor{}, hasInitial{};
+    // Only explicit texture SRVs proven unused may lack a standalone snapshot.
+    bool unsavedSrv{};
     std::vector<uint32_t> descriptor;
     struct Initial {
         Id pointer{};

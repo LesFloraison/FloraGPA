@@ -125,3 +125,45 @@ to the validated typed/raw/structured buffer view paths and explicit Counter/
 Append initialization. Its original fixtures and new-counter provenance checks
 supersede this batch's blanket buffer-source rejection. Frame-before counter
 recovery and other unverified combinations remain open.
+
+## Unsaved, unused texture SRV creation (2026-11-04)
+
+The Helldivers 2 capture `helldivers2_2026_05_11__17_17_05.gpa_frame`
+(SHA-256 `c7ad0853d45fda9b71320c43c25a9b5668dbd9894a84d3a71c328c6c96c651b1`)
+was rejected at event 40: CreateShaderResourceView returns identity 49, but
+the capture contains no standalone entry 49. Its explicit BC3_UNORM_SRGB
+descriptor refers to saved texture 22. The capture's state blocks and recovered
+SRV consumers never use view 49; view 39 is the saved, bound alternative.
+
+The checked audit now accepts this narrow case: an explicit SRV descriptor,
+a saved texture on the same device with the required bind flag, a unique
+creation identity, and no use in any shader-stage SRV snapshot, recovered SRV
+setter or GenerateMips command. Malformed consumer records fail closed.
+Native replay still executes CreateShaderResourceView and compares its active
+descriptor fields; invalid native creation fails. The temporary view is released
+without inventing a saved snapshot or exposing a usable identity. Runtime
+dependent use is explicitly rejected. Missing descriptors, buffer sources and
+other missing view snapshots remain unsupported.
+
+The packaged build `out/FloraGPA-hd2-fix-20261104/` opens the unchanged file
+successfully in the GUI and completes hardware replay on RTX 5060 Ti: 991 draws,
+130 dispatches and 1920x1080 output. Raw RGBA SHA-256 is
+`527dfd98d3e5b608503d7947d051239dece580f91378067827e1d26e6ddb9331`;
+reference pixels are not used. Preflight errors decrease from one to zero;
+19 existing warnings, seven unresolved query-completion observations and the
+MSAA initial-data limitation remain. Full-capture WARP creation fails locally
+with HRESULT `0x887a0004`; software replay of this file is not accepted.
+
+Five relevant CTest suites pass serially: view creation, texture creation,
+buffer view creation, frame validation and input bindings. New checks cover
+valid/invalid native SRV creation on hardware and WARP, 13 dependent-use
+rejections and eight invalid-evidence cases. Missing external original fixtures
+still cause skips (24 in view creation); synthetic coverage does not replace
+the historical corpus. BF1 ordinary and draw-suppression outputs and the prior
+Endfield zero-input-layout capture retain their pre-change hashes. BF1 still
+differs from its historical golden; GF2 is unavailable. This does not establish
+full image parity or change the module's partial status.
+
+Local evidence is retained under `artifacts/hd2-171705-diagnosis/`, including
+the original failure, decoded references, packaged replay reports, GUI screenshot
+and `fix-validation.json`. Captures and generated artifacts remain outside Git.

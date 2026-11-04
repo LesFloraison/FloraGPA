@@ -2,6 +2,7 @@
 #include "application/ApiCommands.h"
 #include "application/FrameValidation.h"
 #include "core/TextureCreation.h"
+#include "core/SrvBindings.h"
 #include <QTemporaryDir>
 #include <QtTest>
 using namespace flora;
@@ -54,6 +55,17 @@ void replace(Capture &c, Id id, Raw b) {
     e.size = uint32_t(b.size());
     c.bytes.insert(c.bytes.end(), b.begin(), b.end());
 }
+Capture unsavedSrvCapture() {
+    Capture c;
+    c.add(1, 5, 0x127, Raw(24));
+    c.add(2, 5, 0x81, Raw(28));
+    c.add(3, 5, 0x85,
+          pack(Id(0), Id(2), std::array<uint32_t, 11>{16, 16, 5, 1, 76, 1, 0, 0, 8, 0, 0}, Id(0)));
+    c.add(100, 7, 0x357c,
+          pack(Id(0), Id(2), int32_t(0), Id(3), uint8_t(1),
+               std::array<uint32_t, 6>{78, 4, 0, 5, 0x40000000, 0x40000000}, Id(4)));
+    return c;
+}
 Raw fileBytes(QString path) {
     QFile f(path);
     if (!f.open(QIODevice::ReadOnly))
@@ -65,6 +77,106 @@ Raw fileBytes(QString path) {
 class ViewCreationTests final : public QObject {
     Q_OBJECT
   private slots:
+    void unsavedSrvCreation_data() {
+        QTest::addColumn<bool>("warp");
+        QTest::addColumn<bool>("invalidFormat");
+        QTest::newRow("hardware") << false << false;
+        QTest::newRow("warp") << true << false;
+        QTest::newRow("invalid-format-hardware") << false << true;
+        QTest::newRow("invalid-format-warp") << true << true;
+    }
+    void unsavedSrvCreation() {
+        QFETCH(bool, warp);
+        QFETCH(bool, invalidFormat);
+        auto c = unsavedSrvCapture();
+        if (invalidFormat) {
+            const auto &e = c.entries.back();
+            put(c.bytes, size_t(e.offset) + 29, 76u); // A typeless format cannot create an SRV.
+        }
+        QTemporaryDir dir;
+        const auto path = dir.filePath("unsaved-srv.gpa_frame");
+        c.save(path);
+        Frame frame(path.toStdWString());
+        const auto audit = auditTextureCreations(frame);
+        QVERIFY2(audit.records.at(100).error.empty(), audit.records.at(100).error.c_str());
+        QCOMPARE(validateFrame(frame.path())["errors"], nlohmann::json(0));
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        try {
+            replay.run();
+            QVERIFY(!invalidFormat);
+            QCOMPARE(replay.counts.at("Device5.CreateShaderResourceView"), uint64_t(1));
+            QCOMPARE(replay.counts.at("unsaved_srv_creations"), uint64_t(1));
+            replay.inspectNativeState([&](auto *, const auto &objects) {
+                QVERIFY(objects.contains(3));
+                QVERIFY(!objects.contains(4)); // No fabricated snapshot or usable view identity.
+            });
+        } catch (const std::exception &error) {
+            QVERIFY2(invalidFormat, error.what());
+            QVERIFY(QString::fromUtf8(error.what()).contains("Captured view creation"));
+        }
+    }
+    void unsavedSrvRequiredUseRejected() {
+        QTemporaryDir dir;
+        for (unsigned mode = 0; mode < 13; ++mode) {
+            auto c = unsavedSrvCapture();
+            if (mode < 6) {
+                State state{};
+                state.stages[mode].srv[127] = 4;
+                c.add(101, 3, 3, snapshot(state));
+            } else if (mode < 12) {
+                c.add(101, 7, srvSetterTypes[mode - 6],
+                      pack(Id(0), Id(1), 127u, 1u, uint8_t(1), Id(4)));
+            } else {
+                c.add(101, 7, 0x245, pack(Id(0), Id(1), Id(4)));
+            }
+            const auto path = dir.filePath("required-srv.gpa_frame");
+            c.save(path);
+            Frame frame(path.toStdWString());
+            const auto audit = auditTextureCreations(frame);
+            QVERIFY2(audit.records.at(100).error.find("101") != std::string::npos,
+                     audit.records.at(100).error.c_str());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireTextureCreation(audit, 100));
+            QVERIFY(validateFrame(frame.path())["errors"].get<unsigned>() > 0);
+            ReplayOptions options;
+            options.warp = true;
+            Replay replay(frame, options);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+        }
+    }
+    void unsavedSrvInvalidEvidenceRejected() {
+        QTemporaryDir dir;
+        for (unsigned mode = 0; mode < 8; ++mode) {
+            auto c = unsavedSrvCapture();
+            if (mode == 0) {
+                replace(c, 100, pack(Id(0), Id(2), int32_t(0), Id(3), uint8_t(0), Id(4)));
+            } else if (mode == 1) {
+                std::erase_if(c.entries, [](const Entry &e) { return e.id == 3; });
+            } else if (mode == 2) {
+                put(c.bytes, size_t(c.entries[2].offset) + 8, Id(99));
+            } else if (mode == 3) {
+                put(c.bytes, size_t(c.entries[2].offset) + 48, 0u); // No SRV bind flag.
+            } else if (mode == 4) {
+                put(c.bytes, size_t(c.entries.back().offset) + 33, 99u); // Invalid view dimension.
+            } else if (mode == 5) {
+                c.add(101, 3, 3, Raw(8));
+            } else if (mode == 6) {
+                const auto e = c.entries.back();
+                c.add(101, 7, e.type, Raw(c.bytes.begin() + ptrdiff_t(e.offset),
+                                         c.bytes.begin() + ptrdiff_t(e.offset + e.size)));
+            } else {
+                c = capture(0x357e);
+                std::erase_if(c.entries, [](const Entry &e) { return e.id == 4; });
+            }
+            const auto path = dir.filePath("invalid-unsaved.gpa_frame");
+            c.save(path);
+            Frame frame(path.toStdWString());
+            const auto audit = auditTextureCreations(frame);
+            QVERIFY2(!audit.records.at(100).error.empty(), qPrintable(QString::number(mode)));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireTextureCreation(audit, 100));
+        }
+    }
     void strictCreationWireAndReferences() {
         QTemporaryDir dir;
         for (uint16_t t : {uint16_t(0x357d), uint16_t(0x357e), uint16_t(0x357f)}) {

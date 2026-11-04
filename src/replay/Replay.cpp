@@ -124,10 +124,14 @@ IUnknown *Replay::object(Id id) {
     if (!textureCreationAudit_)
         textureCreationAudit_ = auditTextureCreations(frame_);
     if (auto it = textureCreationAudit_->creationEvents.find(id);
-        it != textureCreationAudit_->creationEvents.end() && !objects_.contains(id))
+        it != textureCreationAudit_->creationEvents.end() && !objects_.contains(id)) {
+        if (textureCreationAudit_->records.at(it->second).unsavedSrv)
+            throw std::runtime_error("SRV " + std::to_string(id) +
+                                     " has no saved snapshot; dependent use is unsupported");
         throw std::runtime_error("Resource " + std::to_string(id) +
                                  " is not available before texture/view creation event " +
                                  std::to_string(it->second));
+    }
     if (!classCreationAudit_)
         classCreationAudit_ = auditClassCreations(frame_);
     id = canonicalClassLinkage(classCreationAudit_->identities, id);
@@ -1192,6 +1196,14 @@ void Replay::command(const Entry &e) {
                 }
             };
             auto [view, actualWords] = makeView(creation.hasDescriptor ? &creation.descriptor : nullptr);
+            if (creation.unsavedSrv) {
+                if (!createdViewDescriptorEqual(t, creation.descriptor, actualWords))
+                    throw std::runtime_error("Unsaved SRV descriptor was normalized unexpectedly");
+                // Validate the real creation, but do not invent a resource snapshot or expose the view.
+                ++counts["unsaved_srv_creations"];
+                ++counts[commandName(t)];
+                return;
+            }
             auto readWords = [&](Bytes bytes) {
                 Reader r(bytes);
                 r.skip(24);
